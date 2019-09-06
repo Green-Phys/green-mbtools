@@ -2,6 +2,53 @@ import numpy as np
 import scipy.linalg as LA
 import h5py
 
+def iwmesh(iw_list, beta):
+    return 1j*(2*iw_list + 1)*np.pi/beta
+
+# Orthogonalization
+# type = 'g': Green's function and density matrix
+# type = 'f': Fock matrix and self-energy
+def orthogonal(object, S, type):
+    if type != 'g' and type != 'f':
+        raise ValueError("Need to specify transformation type: 'g' or 'f' ")
+    if len(S.shape) == 2:
+        ns = 1
+        ink = 1
+    elif len(S.shape) == 3:
+        ns = 1
+        ink = np.shape(S)[0]
+    elif len(S.shape) == 4:
+        ns  = np.shape(S)[0]
+        ink = np.shape(S)[1]
+    else:
+        raise ValueError("Dims of S are wrong!")
+    nao = np.shape(S)[-1]
+    object = object.reshape(ns*ink,nao,nao)
+    S = S.reshape(ns*ink,nao,nao)
+    object_orth = np.zeros(np.shape(object), dtype=np.complex)
+    for iks in range(ns*ink):
+        S12 = LA.sqrtm(S[iks, :, :])
+        if type == 'g':
+            object_orth[iks] = np.dot(S12, np.dot(object[iks, :, :], S12))
+        elif type == 'f':
+            S12_inv = np.linalg.inv(S12)
+            object_orth[iks] = np.dot(S12_inv, np.dot(object[iks, :, :], S12_inv))
+
+    if len(S.shape) == 2:
+        object = object.reshape(nao, nao)
+        S = S.reshape(nao, nao)
+        object_orth = object_orth.reshape(nao, nao)
+    elif len(S.shape) == 3:
+        object = object.reshape(ink, nao, nao)
+        S = S.reshape(ink, nao, nao)
+        object_orth = object_orth.reshape(ink, nao, nao)
+    elif len(S.shape) == 4:
+        object = object.reshape(ns, ink, nao, nao)
+        S = S.reshape(ns, ink, nao, nao)
+        object_orth = object_orth.reshape(ns, ink, nao, nao)
+
+    return object_orth
+
 ###############
 # Input  - Static object in non-orhtogonal basis (e.g. AO basis). Dim = (nk, nao, nao) or (ns, nk, nao, nao)
 # Input  - Overlap matrix S (nk, nao, nao)
@@ -55,6 +102,103 @@ def get_Cheby(ncheb, tau_mesh):
     return _Ttc
 
 ###############
+# Input - k-resolved object in non-orthogonal/orthogonal basis. object = [nk, nao, nao]
+# Input - List of reduced k-points
+# Input - Corresponding weight
+#
+# Ouput - local object
+###############
+def to_local(object_k, S_k = None, ir_list=None, weight=None, type=None):
+    ink = np.shape(object_k)[0]
+    nao = np.shape(object_k)[1]
+    object_loc = np.zeros((nao,nao))
+    if ir_list is not None and weight is not None:
+        nk = np.shape(weight)[0]
+    else:
+        nk = ink
+        ir_list = np.arange(nk)
+        weight = np.array([1 for i in range(nk)])
+    if S_k is not None:
+        # Orthogonalization first
+        object_k_orth = orthogonal(object_k, S_k, type = type)
+
+    # Sum over k points
+    for ik_ind in range(ink):
+        ik = ir_list[ik_ind]
+        object_loc += weight[ik] * object_k_orth[ik_ind].real
+    object_loc/=nk
+
+    return object_loc
+
+
+def w_to_tau_ir(Sigma_w, ir_path, beta):
+    if len(Sigma_w.shape) == 4:
+        ns = 1
+        nk, nao = Sigma_w.shape[1:3]
+        nw = Sigma_w.shape[0]
+    elif len(Sigma_w.shape) == 5:
+        ns = Sigma_w.shape[1]
+        nk, nao = Sigma_w.shape[2:4]
+        nw = Sigma_w.shape[0]
+    Sigma_w = Sigma_w.reshape(nw, ns*nk, nao, nao)
+    ir_file = h5py.File(ir_path)
+    iw_list = ir_file["/fermi/wsample"][()]
+    txl_tmp = ir_file["/fermi/uxl"][()]
+    txl_one = ir_file["/fermi/ux1l"][()]
+    txl_minone = ir_file["/fermi/ux1l_minus"][()]
+    txl = np.zeros((txl_tmp.shape[0]+2,txl_tmp.shape[1]))
+    txl[1:-1] = txl_tmp
+    txl[0] = txl_minone
+    txl[-1] = txl_one
+    tnl = ir_file["/fermi/uwl"][()].view(np.complex)
+    ir_file.close()
+    nw = iw_list.shape[0]
+    txl *= np.sqrt(2.0 / beta)
+    tnl *= np.sqrt(beta)
+    tln = np.linalg.pinv(tnl)
+    Sigma_c = np.einsum('ij,j...->i...', tln, Sigma_w)
+    Sigma_t = np.einsum('ij,j...->i...', txl, Sigma_c)
+
+    if len(Sigma_w.shape) == 5:
+        Sigma_t = Sigma_t.reshape(txl_tmp.shape[0]+2, ns, nk, nao, nao)
+        Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
+
+    return Sigma_t
+
+
+def tau_to_w_ir(Sigma_tau, ir_path, beta):
+    if len(Sigma_tau.shape) == 4:
+        ns = 1
+        nk, nao = Sigma_tau.shape[1:3]
+        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
+    elif len(Sigma_tau.shape) == 5:
+        ns = Sigma_tau.shape[1]
+        nk, nao = Sigma_tau.shape[2:4]
+        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
+    Sigma_tau = Sigma_tau.reshape(nts, ns*nk, nao, nao)
+    ir_file = h5py.File(ir_path)
+    iw_list = ir_file["/fermi/wsample"][()]
+    txl = ir_file["/fermi/uxl"][()]
+    tnl = ir_file["/fermi/uwl"][()].view(np.complex)
+    ir_file.close()
+    nw = iw_list.shape[0]
+    txl *= np.sqrt(2.0 / beta)
+    tlx = np.linalg.pinv(txl)
+    tnl *= np.sqrt(beta)
+    #Sigma_c = np.zeros((ni, ns*nk, nao, nao))
+    #Sigma_w = np.zeros((nw, ns*nk, nao, nao), dtype=np.complex)
+    Sigma_c = np.einsum('ij,j...->i...',tlx, Sigma_tau[1:nts-1])
+    Sigma_w = np.einsum('ij,j...->i...',tnl, Sigma_c)
+
+    if len(Sigma_tau.shape) == 5:
+        Sigma_tau = Sigma_tau.reshape(nts, ns, nk, nao, nao)
+        Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
+
+    return Sigma_w
+
+
+
+###############
 # Input  - Fermionic object in tau domain (nts, nk, nao, nao)
 #
 # Output - Fermionic object in Matsubara domain (nk, nao, nao)
@@ -62,7 +206,7 @@ def get_Cheby(ncheb, tau_mesh):
 # TODO make beta as a parameter
 # TODO make TNC.h5 path as a parameter and should be initialized at mb class.
 # TODO make it compatible with local object (i.e no k-dependency)
-def sigma_w(Sigma_tau, nw):
+def sigma_w_uniform(Sigma_tau, nw):
     beta = 100
     nk, nao = np.shape(Sigma_tau)[1:3]
     nts, ncheb = np.shape(Sigma_tau)[0], np.shape(Sigma_tau)[0] - 2

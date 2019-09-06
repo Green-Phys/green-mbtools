@@ -9,71 +9,79 @@ import MB_analysis.trans as trans
 # TODO combine sim and inp files together
 class rmb:
   '''Many-body analysis object'''
-  def __init__(self, sim_path=None, inp_path = None):
-    # Read data for analysis
-    if sim_path is not None:
-      sim = h5py.File(sim_path)
-      _iter = sim["iter"][()]
-      self.gtau = sim["/iter"+str(_iter)+"/G_tau/data"][()].view(np.complex)
-      self.sigma = sim["/iter"+str(_iter)+"/Selfenergy/data"][()].view(np.complex)
-      self.fock = sim["/iter"+str(_iter)+"/Fock-k"][()].view(np.complex)
-      self.S = sim["/S-k"][()].view(np.complex)
-      self.dm = -1 * self.gtau[-1]
-      sim.close()
-      # Dims
+  def __init__(self, gtau, sigma, fock, S, ir_list=None, weight=None):
+    self._gtau = gtau
+    self._sigma = sigma
+    self._fock = fock
+    self._S = S
+    self._dm = -2 * gtau[-1]
+    # Dims
+    self._nts = np.shape(self._gtau)[0]
+    self._ink = np.shape(self._gtau)[1]
+    self._nao = np.shape(self._gtau)[2]
 
-      self.nts = np.shape(self.gtau)[0]
-      self.ink = np.shape(self.gtau)[1]
-      self.nao = np.shape(self.gtau)[2]
-      if inp_path is not None:
-        inp = h5py.File(inp_path)
-        self.ir_list = inp["/grid/ir_list"][()]
-        self.weight = inp["/grid/weight"][()]
-        inp.close()
-      else:
-        self.ir_list = np.arange(self.ink)
-        self.weight = np.array([1 for i in range(self.ink)])
+    if ir_list is not None and weight is not None:
+      self._ir_list = ir_list
+      self._weight = weight
+    else:
+      self._ir_list = np.arange(self._ink)
+      self._weight = np.array([1 for i in range(self._ink)])
 
-      rmb.compute_mo(self)
-    elif sim_path is None:
-      if inp_path is not None:
-        inp = h5py.File(inp_path)
-        self.gtau  = None
-        self.sigma = None
-        self.dm    = None
-        self.fock  = inp["/HF/Fock-k"][()].view(np.complex)
-        self.S     = inp["/HF/S-k"][()].view(np.complex)
-        inp.close()
-        # Dims
-        self.nts = None
-        self.ink = np.shape(self.fock)[0]
-        self.nao = np.shape(self.fock)[1]
+    rmb.compute_mo(self)
 
-        rmb.compute_mo(self)
-      else:
-        self.gtau  = None
-        self.sigma = None
-        self.dm    = None
-        self.fock  = None
-        self.S     = None
-        self.nts   = None
-        self.ink   = None
-        self.nao   = None
-        self.mo_energy = None
-        self.mo_coeff  = None
+    # if self.S is not None:
+    #  self.S_inv_12 = np.zeros(np.shape(self.S)[:-1],dtype=complex)
+    #  for ss in range(self.ns):
+    #    for ik in range(self.ink):
+    #      S_12 = LA.sqrtm(self.S[ss,ik])
+    #      self.S_inv_12[ss,ik] = np.linalg.inv(S_12)
 
-  # class variables
+    # class variables
+
+  _gtau = None
+  _sigma = None
+  _dm = None
+  _fock = None
+  _S = None
+  _nts = None
+  _beta = None
+  _ink = None
+  _nao = None
+  _iw_list = None
+  _mo_k_energy = None
+  _mo_k_coeff = None
+  _no = None
+  _no_coeff = None
+  _S_inv_12 = None
+  _ir_list = None
+  _weight = None
 
 
 
   # class functions
-  def get_fock(self):
-    return self.fock[:,:,:,0]
+  def fock(self):
+    return self.fock[:,:,:]
 
   # Get MO energy and orbitals
   def compute_mo(self):
-    self.mo_energy, self.mo_coeff = spec.eig(self.fock[:,:,:,0],self.S[:,:,:,0])
+    self._mo_k_energy = np.zeros(np.shape(self._fock)[:-1])
+    self._mo_k_coeff = np.zeros(np.shape(self._fock), dtype=complex)
+    self._mo_k_energy, self._mo_k_coeff = spec.eig(self._fock[:,:,:],self._S[:,:,:])
 
+  def sigma_w_ir(self, ir_path = None):
+    if self._beta is None:
+      raise ValueError("Define _beta first!")
+    if self._iw_list is None:
+      raise ValueError("Define _iw_list first!")
+    if ir_path is None:
+      raise ValueError("Please specify ir_path!")
+    nw = np.shape(self._iw_list)[0]
+    #sig_w = np.zeros((nw, self._ns, self._ink, self._nao, self._nao), dtype=np.complex)
+    sig_w = trans.tau_to_w_ir(self._sigma, ir_path, self._beta)
+    sig_w = sig_w.reshape(nw, self._ink, self._nao, self._nao)
+    return sig_w
+
+  # TODO Refactor for below are not done yet
   # Get local occupation numbers
   def get_occ(self):
     dm_orth = rmb.g_orthogonal(self, self.dm[:, :, :, 0])
@@ -172,35 +180,6 @@ class rmb:
       #object_mo[ik, :, :] = np.dot(object_mo[ik, :, :], self.mo_coeff[ik, :, :])
       #object_mo[ik, :, :] = np.dot(np.conjugate(np.transpose(self.mo_coeff[ik, :, :])), object_mo[ik, :, :])
     return object_mo
-
-  # Orthogonalization for Green's function and density matrix
-  # object = (nk, nao, nao)
-  def g_orthogonal(self, object):
-    ink = np.shape(object)[0]
-    if self.ink is None:
-      self.ink = ink
-    elif ink != self.ink and self.ink is not None:
-      raise ValueError("Dims of k-points doesn't match S!")
-    object_orth = np.zeros(np.shape(object), dtype=np.complex)
-    for ik in range(self.ink):
-      S12 = LA.sqrtm(self.S[ik, :, :, 0])
-      object_orth[ik] = np.dot(S12, np.dot(object[ik, :, :], S12))
-
-    return object_orth
-
-  # Orthogonalization for Fock matrix and self-energy
-  # object = (nk, nao, nao)
-  def f_orthogonal(self, object):
-    ink = np.shape(object)[0]
-    if ink != self.ink:
-      raise ValueError("Dims of k-points doesn't match S!")
-    object_orth = np.zeros(np.shape(object), dtype=np.complex)
-    for ik in range(self.ink):
-      S12 = LA.sqrtm(self.S[ik, :, :, 0])
-      S12_inv = np.linalg.inv(S12)
-      object_orth[ik] = np.dot(S12_inv, np.dot(object[ik, :, :], S12_inv))
-
-    return object_orth
 
   def get_mo_energy(self):
     mo_energy = np.asarray(self.mo_energy)
