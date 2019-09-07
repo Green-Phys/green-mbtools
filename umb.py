@@ -180,13 +180,13 @@ class umb:
       object_ao_orth[ik] = np.einsum('ji,jk->ik',np.conjugate(no_coeff),object_ao_orth[ik])
     return object_ao_orth
 
-  def get_mo_energy(self):
-    mo_energy = np.asarray(self._mo_energy)
-    return mo_energy
+  def get_mo_k_energy(self):
+    mo_k_energy = np.asarray(self._mo_k_energy)
+    return mo_k_energy
 
-  def get_mo_coeff(self):
-    mo_coeff = np.asarray(self._mo_coeff)
-    return mo_coeff
+  def get_mo_k_coeff(self):
+    mo_k_coeff = np.asarray(self._mo_k_coeff)
+    return mo_k_coeff
 
   def mulliken_charge_gamma(self, orbitals, Z):
     dm = self._dm[:,0,:,:,0].real
