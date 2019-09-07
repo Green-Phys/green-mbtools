@@ -55,8 +55,8 @@ ns = gtau.shape[1]
 nk = gtau.shape[2]
 nao = gtau.shape[3]
 beta = tau_mesh[nts-1]
-S = S.reshape(nk, ns, nao, nao)
-F = F.reshape(nk, ns, nao, nao)
+S = S.reshape(ns, nk, nao, nao)
+F = F.reshape(ns, nk, nao, nao)
 gtau = gtau.reshape(nts, ns, nk, nao, nao)
 sigma = sigma.reshape(nts, ns, nk, nao, nao)
 

@@ -11,13 +11,14 @@ def iwmesh(iw_list, beta):
 def orthogonal(object, S, type):
     if type != 'g' and type != 'f':
         raise ValueError("Need to specify transformation type: 'g' or 'f' ")
-    if len(S.shape) == 2:
+    S_len = len(S.shape)
+    if S_len == 2:
         ns = 1
         ink = 1
-    elif len(S.shape) == 3:
+    elif S_len == 3:
         ns = 1
         ink = np.shape(S)[0]
-    elif len(S.shape) == 4:
+    elif S_len == 4:
         ns  = np.shape(S)[0]
         ink = np.shape(S)[1]
     else:
@@ -34,15 +35,15 @@ def orthogonal(object, S, type):
             S12_inv = np.linalg.inv(S12)
             object_orth[iks] = np.dot(S12_inv, np.dot(object[iks, :, :], S12_inv))
 
-    if len(S.shape) == 2:
+    if S_len == 2:
         object = object.reshape(nao, nao)
         S = S.reshape(nao, nao)
         object_orth = object_orth.reshape(nao, nao)
-    elif len(S.shape) == 3:
+    elif S_len == 3:
         object = object.reshape(ink, nao, nao)
         S = S.reshape(ink, nao, nao)
         object_orth = object_orth.reshape(ink, nao, nao)
-    elif len(S.shape) == 4:
+    elif S_len == 4:
         object = object.reshape(ns, ink, nao, nao)
         S = S.reshape(ns, ink, nao, nao)
         object_orth = object_orth.reshape(ns, ink, nao, nao)
@@ -132,11 +133,12 @@ def to_local(object_k, S_k = None, ir_list=None, weight=None, type=None):
 
 
 def w_to_tau_ir(Sigma_w, ir_path, beta):
-    if len(Sigma_w.shape) == 4:
+    sigma_len = len(Sigma_w.shape)
+    if sigma_len == 4:
         ns = 1
         nk, nao = Sigma_w.shape[1:3]
         nw = Sigma_w.shape[0]
-    elif len(Sigma_w.shape) == 5:
+    elif sigma_len == 5:
         ns = Sigma_w.shape[1]
         nk, nao = Sigma_w.shape[2:4]
         nw = Sigma_w.shape[0]
@@ -159,7 +161,7 @@ def w_to_tau_ir(Sigma_w, ir_path, beta):
     Sigma_c = np.einsum('ij,j...->i...', tln, Sigma_w)
     Sigma_t = np.einsum('ij,j...->i...', txl, Sigma_c)
 
-    if len(Sigma_w.shape) == 5:
+    if sigma_len == 5:
         Sigma_t = Sigma_t.reshape(txl_tmp.shape[0]+2, ns, nk, nao, nao)
         Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
 
@@ -167,11 +169,12 @@ def w_to_tau_ir(Sigma_w, ir_path, beta):
 
 
 def tau_to_w_ir(Sigma_tau, ir_path, beta):
-    if len(Sigma_tau.shape) == 4:
+    sigma_len = len(Sigma_tau.shape)
+    if sigma_len == 4:
         ns = 1
         nk, nao = Sigma_tau.shape[1:3]
         nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
-    elif len(Sigma_tau.shape) == 5:
+    elif sigma_len == 5:
         ns = Sigma_tau.shape[1]
         nk, nao = Sigma_tau.shape[2:4]
         nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
@@ -190,7 +193,7 @@ def tau_to_w_ir(Sigma_tau, ir_path, beta):
     Sigma_c = np.einsum('ij,j...->i...',tlx, Sigma_tau[1:nts-1])
     Sigma_w = np.einsum('ij,j...->i...',tnl, Sigma_c)
 
-    if len(Sigma_tau.shape) == 5:
+    if sigma_len == 5:
         Sigma_tau = Sigma_tau.reshape(nts, ns, nk, nao, nao)
         Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
 
