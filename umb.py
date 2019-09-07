@@ -245,7 +245,7 @@ class umb:
       for ss in range(self._ns):
         for i in orbitals:
           for j in range(self._nao):
-            n_k += self._dm[ss,ik,i,j,0] * self._S[ss,ik,j,i,0]
+            n_k += self._dm[ss,ik,i,j] * self._S[ss,ik,j,i]
       k_ir = self._ir_list[ik]
       e -= self._weight[k_ir] * n_k
     num_k = len(self._weight)
@@ -260,8 +260,8 @@ class umb:
       nb_k = 0.0
       for i in orbitals:
         for j in range(self._nao):
-          na_k += self._dm[0,ik,i,j,0] * self._S[0,ik,j,i,0]
-          nb_k += self._dm[1,ik,i,j,0] * self._S[1,ik,j,i,0]
+          na_k += self._dm[0,ik,i,j] * self._S[0,ik,j,i]
+          nb_k += self._dm[1,ik,i,j] * self._S[1,ik,j,i]
       k_ir = self._ir_list[ik]
       na += self._weight[k_ir] * na_k
       nb += self._weight[k_ir] * nb_k
