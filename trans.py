@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.linalg as LA
+import irbasis
 import h5py
 
 def iwmesh(iw_list, beta):
@@ -135,13 +136,13 @@ def to_local(object_k, S_k = None, ir_list=None, weight=None, type=None):
 def w_to_tau_ir(Sigma_w, ir_path, beta):
     sigma_len = len(Sigma_w.shape)
     if sigma_len == 4:
+        nw = Sigma_w.shape[0]
         ns = 1
         nk, nao = Sigma_w.shape[1:3]
-        nw = Sigma_w.shape[0]
     elif sigma_len == 5:
+        nw = Sigma_w.shape[0]
         ns = Sigma_w.shape[1]
         nk, nao = Sigma_w.shape[2:4]
-        nw = Sigma_w.shape[0]
     Sigma_w = Sigma_w.reshape(nw, ns*nk, nao, nao)
     ir_file = h5py.File(ir_path)
     iw_list = ir_file["/fermi/wsample"][()]
@@ -166,6 +167,36 @@ def w_to_tau_ir(Sigma_w, ir_path, beta):
         Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
 
     return Sigma_t
+
+def tau_to_w_ir_uniform(Sigma_tau, w_list, ir_path, beta, lamb):
+    sigma_len = len(Sigma_tau.shape)
+    if sigma_len == 4:
+        ns = 1
+        nk, nao = Sigma_tau.shape[1:3]
+        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
+    elif sigma_len == 5:
+        ns = Sigma_tau.shape[1]
+        nk, nao = Sigma_tau.shape[2:4]
+        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
+    Sigma_tau = Sigma_tau.reshape(nts, ns * nk, nao, nao)
+    nw = w_list.shape[0]
+    ir_file = h5py.File(str(ir_path))
+    txl = ir_file["/fermi/uxl"][()]
+    ir_file.close()
+    txl *= np.sqrt(2.0 / beta)
+    tlx = np.linalg.pinv(txl)
+    ir = irbasis.load("F", lamb)
+    tnl = ir.compute_unl(w_list)
+    tnl *= np.sqrt(beta)
+
+    Sigma_c = np.einsum('ij,j...->i...', tlx, Sigma_tau[1:nts - 1])
+    Sigma_w = np.einsum('ij,j...->i...', tnl, Sigma_c)
+
+    if sigma_len == 5:
+        Sigma_tau = Sigma_tau.reshape(nts, ns, nk, nao, nao)
+        Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
+
+    return Sigma_w
 
 
 def tau_to_w_ir(Sigma_tau, ir_path, beta):
