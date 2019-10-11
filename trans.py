@@ -113,13 +113,16 @@ def get_Cheby(ncheb, tau_mesh):
 def to_local(object_k, S_k = None, ir_list=None, weight=None, type=None):
     ink = np.shape(object_k)[0]
     nao = np.shape(object_k)[1]
-    object_loc = np.zeros((nao,nao))
+    object_loc = np.zeros((nao,nao), dtype=np.complex)
     if ir_list is not None and weight is not None:
+        sym = True
         nk = np.shape(weight)[0]
     else:
+        sym = False
         nk = ink
         ir_list = np.arange(nk)
         weight = np.array([1 for i in range(nk)])
+    # Transform to orthogonal basis
     if S_k is not None:
         # Orthogonalization first
         object_k_orth = orthogonal(object_k, S_k, type = type)
@@ -127,10 +130,12 @@ def to_local(object_k, S_k = None, ir_list=None, weight=None, type=None):
     # Sum over k points
     for ik_ind in range(ink):
         ik = ir_list[ik_ind]
-        object_loc += weight[ik] * object_k_orth[ik_ind].real
+        object_loc += weight[ik] * object_k_orth[ik_ind]
     object_loc/=nk
-
-    return object_loc
+    if sym is False:
+        return object_loc
+    else:
+        return object_loc.real
 
 
 def w_to_tau_ir(Sigma_w, ir_path, beta):
@@ -168,17 +173,9 @@ def w_to_tau_ir(Sigma_w, ir_path, beta):
 
     return Sigma_t
 
-def tau_to_w_ir_uniform(Sigma_tau, w_list, ir_path, beta, lamb):
+def tau_to_w_ir_uniform(Sigma_tau, w_list, ir_path, beta, lamb, local=False):
     sigma_len = len(Sigma_tau.shape)
-    if sigma_len == 4:
-        ns = 1
-        nk, nao = Sigma_tau.shape[1:3]
-        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
-    elif sigma_len == 5:
-        ns = Sigma_tau.shape[1]
-        nk, nao = Sigma_tau.shape[2:4]
-        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
-    Sigma_tau = Sigma_tau.reshape(nts, ns * nk, nao, nao)
+    nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
     nw = w_list.shape[0]
     ir_file = h5py.File(str(ir_path))
     txl = ir_file["/fermi/uxl"][()]
@@ -191,10 +188,6 @@ def tau_to_w_ir_uniform(Sigma_tau, w_list, ir_path, beta, lamb):
 
     Sigma_c = np.einsum('ij,j...->i...', tlx, Sigma_tau[1:nts - 1])
     Sigma_w = np.einsum('ij,j...->i...', tnl, Sigma_c)
-
-    if sigma_len == 5:
-        Sigma_tau = Sigma_tau.reshape(nts, ns, nk, nao, nao)
-        Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
 
     return Sigma_w
 
