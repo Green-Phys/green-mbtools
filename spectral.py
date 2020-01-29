@@ -46,17 +46,17 @@ def disper(fock, U = False, mo_basis = False):
 
 def eig(fock, S):
   nk, nao = fock.shape[0:2]
-  eig_k = []
+  eiv_k = []
   mo_coeff_k = []
 
   for k in range(nk):
-    eig, mo = LA.eigh(fock[k],S[k])
+    eiv, mo = LA.eigh(fock[k],S[k])
     # Re-order
     idx = np.argmax(abs(mo.real), axis=0)
-    mo[:, mo[idx, np.arange(len(eig))].real < 0] *= -1
-    eig_k.append(eig)
+    mo[:, mo[idx, np.arange(len(eiv))].real < 0] *= -1
+    eiv_k.append(eiv)
     mo_coeff_k.append(mo)
-  eig_k = np.asarray(eig_k)
+  eig_k = np.asarray(eiv_k)
   mo_coeff_k = np.asarray(mo_coeff_k)
 
-  return eig_k, mo_coeff_k
+  return eiv_k, mo_coeff_k

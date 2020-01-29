@@ -6,6 +6,51 @@ import h5py
 def iwmesh(iw_list, beta):
     return 1j*(2*iw_list + 1)*np.pi/beta
 
+def orthogonal_canonical(object, S, type):
+    if type != 'g' and type != 'f':
+        raise ValueError("Need to specify transformation type: 'g' or 'f' ")
+    S_len = len(S.shape)
+    if S_len == 2:
+        ns = 1
+        ink = 1
+    elif S_len == 3:
+        ns = 1
+        ink = np.shape(S)[0]
+    elif S_len == 4:
+        ns  = np.shape(S)[0]
+        ink = np.shape(S)[1]
+    else:
+        raise ValueError("Dims of S are wrong!")
+    nao = np.shape(S)[-1]
+    object = object.reshape(ns*ink,nao,nao)
+    S = S.reshape(ns*ink,nao,nao)
+    object_orth = np.zeros(np.shape(object), dtype=np.complex)
+
+    for iks in range(ink*ns):
+        s_ev, s_eb = np.linalg.eigh(S[iks])
+        s_sqrtev = np.sqrt(s_ev[:])
+        x_pinv = s_eb[:, :] * s_sqrtev
+        x = (s_eb[:, :].conj() * 1 / s_sqrtev).T
+        if type == 'g':
+            object_orth[iks] = np.dot(x_pinv.conj().T, np.dot(object[iks, :, :], x_pinv))
+        elif type == 'f':
+            object_orth[iks] = np.dot(x.conj().T, np.dot(object[iks, :, :], x))
+    if S_len == 2:
+        object = object.reshape(nao, nao)
+        S = S.reshape(nao, nao)
+        object_orth = object_orth.reshape(nao, nao)
+    elif S_len == 3:
+        object = object.reshape(ink, nao, nao)
+        S = S.reshape(ink, nao, nao)
+        object_orth = object_orth.reshape(ink, nao, nao)
+    elif S_len == 4:
+        object = object.reshape(ns, ink, nao, nao)
+        S = S.reshape(ns, ink, nao, nao)
+        object_orth = object_orth.reshape(ns, ink, nao, nao)
+
+    return object_orth
+
+
 # Orthogonalization
 # type = 'g': Green's function and density matrix
 # type = 'f': Fock matrix and self-energy
@@ -166,6 +211,9 @@ def w_to_tau_ir(Sigma_w, ir_path, beta):
     tln = np.linalg.pinv(tnl)
     Sigma_c = np.einsum('ij,j...->i...', tln, Sigma_w)
     Sigma_t = np.einsum('ij,j...->i...', txl, Sigma_c)
+    coeff_last = np.max(abs(Sigma_c[-1]))
+    coeff_first = np.max(abs(Sigma_c[0]))
+    print("Leakage: ", coeff_last/coeff_first)
 
     if sigma_len == 5:
         Sigma_t = Sigma_t.reshape(txl_tmp.shape[0]+2, ns, nk, nao, nao)

@@ -69,20 +69,6 @@ class umb:
     for ss in range(self._ns):
       self._mo_k_energy[ss], self._mo_k_coeff[ss] = spec.eig(self._fock[ss,:,:,:], self._S[ss,:,:,:])
 
-  # Local occupation numbers and natural orbitals
-  def get_no(self):
-    dm_orth = trans.orthogonal(self._dm, self._S, 'g')
-    local_dm = np.zeros((self._ns,self._nao,self._nao))
-    occ      = np.zeros((self._ns, self._nao))
-    no_coeff = np.zeros((self._ns, self._nao, self._nao))
-    for ss in range(self._ns):
-      local_dm[ss] = util.to_local(dm_orth[ss], self._ir_list, self._weight)
-      # By default, the eigenvalues are in ascending order
-      occ[ss], no_coeff[ss] = np.linalg.eigh(local_dm[ss])
-    occ = occ[:,::-1]
-    no_coeff = no_coeff[:,:,::-1]
-    return occ, no_coeff
-
   # k-dependence natural orbitals
   def get_no_k(self):
     dm_orth = trans.orthogonal(self._dm, self._S, 'g')
@@ -93,6 +79,23 @@ class umb:
         occ[ss,ik], no_coeff[ss,ik] = np.linalg.eigh(dm_orth[ss,ik])
 
     occ, no_coeff = occ[:, :, ::-1], no_coeff[:, :, :, ::-1]
+    return occ, no_coeff
+
+  # k-dependence spin-averaged natural orbitals
+  def get_no_k_spinaveg(self, orth_type):
+    dm_spinaveg = (self._dm[0] + self._dm[1])
+    if orth_type == 'sym':
+      dm_orth = trans.orthogonal(dm_spinaveg, self._S[0], 'g')
+    elif orth_type == 'canonical':
+      dm_orth = trans.orthogonal_canonical(dm_spinaveg, self._S[0], 'g')
+    else:
+      raise ValueError("Need to specify types of orthogonalization!")
+    occ = np.zeros((self._ink, self._nao))
+    no_coeff = np.zeros((self._ink, self._nao, self._nao), dtype=complex)
+    for ik in range(self._ink):
+      occ[ik], no_coeff[ik] = np.linalg.eigh(dm_orth[ik])
+    # occ = occ(nk, nao), no_coeff = (nk, nao, nao) and no_coeff[ik, :, i] is the i-th natural orbital for ik k-point
+    occ, no_coeff = occ[:, ::-1], no_coeff[:, :, ::-1]
     return occ, no_coeff
 
   def sigma_w_ir(self, ir_path = None):
@@ -189,8 +192,8 @@ class umb:
     return mo_k_coeff
 
   def mulliken_charge_gamma(self, orbitals, Z):
-    dm = self._dm[:,0,:,:,0].real
-    S  = self._S[:,0,:,:,0].real
+    dm = self._dm[:,0,:,:].real
+    S  = self._S[:,0,:,:].real
 
     e = 0.0
     for ss in range(self._ns):
@@ -201,8 +204,8 @@ class umb:
     return Z + e
 
   def mulliken_magnetic_moment_gamma(self, orbitals):
-    dm = self._dm[:,0,:,:,0].real
-    S  = self._S[:,0,:,:,0].real
+    dm = self._dm[:,0,:,:].real
+    S  = self._S[:,0,:,:].real
 
     n_a = 0.0
     n_b = 0.0
@@ -271,3 +274,19 @@ class umb:
     mu = na.real - nb.real
 
     return mu
+
+  def orbital_analys(self):
+    occ = np.zeros((self._ns, self._nao))
+    num_k = len(self._weight)
+    for ik in range(self._ink):
+      for i in range(self._nao):
+        na_k = 0.0
+        nb_k = 0.0
+        for j in range(self._nao):
+          na_k += self._dm[0,ik,i,j] * self._S[0,ik,j,i]
+          nb_k += self._dm[1,ik,i,j] * self._S[1,ik,j,i]
+        k_ir = self._ir_list[ik]
+        occ[0,i] += na_k.real * self._weight[k_ir]
+        occ[1,i] += nb_k.real * self._weight[k_ir]
+    occ /= num_k
+    return occ
