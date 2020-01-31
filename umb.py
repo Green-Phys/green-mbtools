@@ -8,6 +8,7 @@ import MB_analysis.trans as trans
 
 
 # TODO combine sim and inp files together
+# TODO initialization of beta
 class umb:
   '''Many-body analysis object'''
   def __init__(self, gtau, sigma, fock, S, ir_list=None, weight=None):
