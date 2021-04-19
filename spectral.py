@@ -37,26 +37,28 @@ def disper(fock, U = False, mo_basis = False):
 
 #################
 # Solve the generalized eigen problem: FC = SCE
-# Input - Fock matrix in non-orthogonal basis. Dim = (nk, nao, nao)
+# Input - Fock matrix. Dim = (ns, nk, nao, nao)
 # Input - Overlap matrix. Dim = (nk, nao, nao)
 #
 # Output - One particles energies: E
 # Output - Molecular orbital coefficients: C
 #################
+def eig(fock, S=None):
+  ns, nk, nao = fock.shape[0:3]
+  eiv_sk = []
+  mo_coeff_sk = []
+  if S is None:
+    S = np.array([[np.eye(nao)]*nk]*ns)
+  for ss in range(ns):
+    for k in range(nk):
+      eiv, mo = LA.eigh(fock[ss,k],S[ss,k])
+      # Re-order
+      idx = np.argmax(abs(mo.real), axis=0)
+      mo[:, mo[idx, np.arange(len(eiv))].real < 0] *= -1
+      eiv_sk.append(eiv)
+      mo_coeff_sk.append(mo)
 
-def eig(fock, S):
-  nk, nao = fock.shape[0:2]
-  eiv_k = []
-  mo_coeff_k = []
-
-  for k in range(nk):
-    eiv, mo = LA.eigh(fock[k],S[k])
-    # Re-order
-    idx = np.argmax(abs(mo.real), axis=0)
-    mo[:, mo[idx, np.arange(len(eiv))].real < 0] *= -1
-    eiv_k.append(eiv)
-    mo_coeff_k.append(mo)
-  eig_k = np.asarray(eiv_k)
-  mo_coeff_k = np.asarray(mo_coeff_k)
+  eig_k = np.asarray(eiv_k).reshape(ns, nk, nao)
+  mo_coeff_k = np.asarray(mo_coeff_k).reshape(ns, nk, nao, nao)
 
   return eiv_k, mo_coeff_k

@@ -8,17 +8,33 @@ import MB_analysis.trans as trans
 
 # TODO combine sim and inp files together
 class rmb:
-  '''Many-body analysis object'''
-  def __init__(self, gtau, sigma, fock, S, ir_list=None, weight=None):
-    self._gtau = gtau
-    self._sigma = sigma
-    self._fock = fock
-    self._S = S
+  '''Many-body analysis class'''
+  def __init__(self, fock, sigma=None, gtau=None, S=None, ir_list=None, weight=None):
+    # TODO Sigma is optional
+    if sigma.ndim == 5 and sigma.shape[1] == 2 and fock.ndim == 4 and fock.shape[0] == 2:
+      self._ns = 2
+    elif sigma.ndim == 4 and fock.ndim == 3:
+      self._ns = 1
+      gtau  = gtau.reshape((gtau.shape[0], 1) + gtau.shape[1:])
+      sigma = sigma.reshape((sigma.shape[0], 1) + sigma.shape[1:])
+      fock  = fock.reshape((1) + fock.shape)
+      if S is not None:
+        S   = S.reshape((1) + S.shape)
+    else:
+      raise ValueError('Incorrect dimensions of self-energy or Fock. '
+                       'Accetable shapes are (nts, ns, nk, nao, nao) or (nts, nk, nao, nao) for self-energy and '
+                       '(ns, nk, nao, nao) or (nk, nao, nao) for Fock matrix.')
+
+    self._gtau = gtau.copy()
+    self._sigma = sigma.copy()
+    self._fock = fock.copy()
+    if S is not None:
+      self._S = S
     self._dm = -2 * gtau[-1]
     # Dims
-    self._nts = np.shape(self._gtau)[0]
-    self._ink = np.shape(self._gtau)[1]
-    self._nao = np.shape(self._gtau)[2]
+    self._nts = self._gtau.shape[0]
+    self._ink = self._gtau.shape[2]
+    self._nao = self._gtau.shape[3]
 
     if ir_list is not None and weight is not None:
       self._ir_list = ir_list
@@ -27,7 +43,7 @@ class rmb:
       self._ir_list = np.arange(self._ink)
       self._weight = np.array([1 for i in range(self._ink)])
 
-    rmb.compute_mo(self)
+    #rmb.compute_mo(self)
 
     # if self.S is not None:
     #  self.S_inv_12 = np.zeros(np.shape(self.S)[:-1],dtype=complex)
@@ -36,39 +52,87 @@ class rmb:
     #      S_12 = LA.sqrtm(self.S[ss,ik])
     #      self.S_inv_12[ss,ik] = np.linalg.inv(S_12)
 
-    # class variables
-
-  _gtau = None
+  # Private class variables
+  _gtau  = None
   _sigma = None
-  _dm = None
-  _fock = None
-  _S = None
-  _nts = None
-  _beta = None
-  _ink = None
-  _nao = None
+  _dm    = None
+  _fock  = None
+  _S     = None
+  _S_inv_12 = None
+
+  _nts  = None
+  _ns   = None
+  _ink  = None
+  _nao  = None
+
+  _mo_sk_energy = None
+  _mo_sk_coeff = None
+
   _iw_list = None
-  _mo_k_energy = None
-  _mo_k_coeff = None
   _no = None
   _no_coeff = None
-  _S_inv_12 = None
+
   _ir_list = None
   _weight = None
 
-
+  # Public class variables
+  beta = None
+  mo_energy = None
+  mo_coeff = None
 
   # class functions
   def fock(self):
     return self.fock[:,:,:]
 
-  # Get MO energy and orbitals
+  # TODO move out of mb class
   def compute_mo(self):
-    self._mo_k_energy = np.zeros(np.shape(self._fock)[:-1])
-    self._mo_k_coeff = np.zeros(np.shape(self._fock), dtype=complex)
-    self._mo_k_energy, self._mo_k_coeff = spec.eig(self._fock[:,:,:],self._S[:,:,:])
+    '''
+    Compute molecular orbital energy by solving FC=SCE
+    :return:
+    '''
+    self.mo_energy = np.zeros(np.shape(self._fock)[:-1])
+    self.mo_coeff = np.zeros(np.shape(self._fock), dtype=complex)
+    #self._mo_k_energy, self._mo_k_coeff = spec.eig(self._fock[:,:,:],self._S[:,:,:])
+    self.mo_energy, self.mo_coeff = spec.eig(self._fock, self._S)
 
-  def sigma_w_ir(self, ir_path = None):
+    return self.mo_energy, self.mo_coeff
+
+  # TODO move out of mb class
+  def compute_no(self):
+    '''
+    Compute natural orbitals by diagonalizing density matrix
+    :return:
+    '''
+    dm_orth = trans.orthogonal(self._dm, self._S, 'g')
+    occ = np.zeros((self._ns, self._ink, self._nao))
+    no_coeff = np.zeros((self._ns, self._ink, self._nao, self._nao), dtype=complex)
+    for ss in range(self._ns):
+      for ik in range(self._ink):
+        occ[ss,ik], no_coeff[ss,ik] = np.linalg.eigh(dm_orth[ss,ik])
+
+    occ, no_coeff = occ[:, :, ::-1], no_coeff[:, :, :, ::-1]
+    return occ, no_coeff
+
+  # TODO Refactor for below are not done yet
+  def sigma_w_ir(self, beta=None, iw_list=None, ir_path = None):
+    if beta is not None:
+      self.beta = beta
+    if iw_list is not None:
+      self.iw_list = iw_list
+
+    if self.beta is None:
+      raise ValueError("Define beta first!")
+    if self.iw_list is None:
+      raise ValueError("Define iw_list first!")
+    if ir_path is None:
+      raise ValueError("Please specify ir_path!")
+    nw = np.shape(self._iw_list)[0]
+    #sig_w = np.zeros((nw, self._ns, self._ink, self._nao, self._nao), dtype=np.complex)
+    sig_w = trans.tau_to_w_ir(self._sigma, ir_path, self.beta)
+    sig_w = sig_w.reshape(nw, self._ink, self._nao, self._nao)
+    return sig_w
+
+  def g_w_ir(self, ir_path = None):
     if self._beta is None:
       raise ValueError("Define _beta first!")
     if self._iw_list is None:
@@ -77,37 +141,9 @@ class rmb:
       raise ValueError("Please specify ir_path!")
     nw = np.shape(self._iw_list)[0]
     #sig_w = np.zeros((nw, self._ns, self._ink, self._nao, self._nao), dtype=np.complex)
-    sig_w = trans.tau_to_w_ir(self._sigma, ir_path, self._beta)
-    sig_w = sig_w.reshape(nw, self._ink, self._nao, self._nao)
-    return sig_w
-
-  # TODO Refactor for below are not done yet
-  # Get local occupation numbers
-  def get_occ(self):
-    dm_orth = rmb.g_orthogonal(self, self.dm[:, :, :, 0])
-    local_dm = util.loc_dens(dm_orth, self.ir_list, self.weight)
-    # By default, the eigenvalues are in ascending order
-    occ = np.linalg.eigvalsh(local_dm)
-    occ = occ[::-1]
-    return occ
-
-  # Natural orbitals information
-  def get_no(self):
-    dm_orth = rmb.g_orthogonal(self, self.dm[:, :, :, 0])
-    local_dm = util.loc_dens(dm_orth, self.ir_list, self.weight)
-    occ, no_coeff = np.linalg.eigh(local_dm)
-    occ = occ[::-1]
-    no_coeff = no_coeff[:,::-1]
-    return occ, no_coeff
-
-  def get_kno(self):
-    S_inv = np.zeros(np.shape(self.S[:, :, :, 0]), dtype=np.complex)
-    for ik in range(self.ink):
-      S_inv[ik] = np.linalg.inv(self.S[ik, :, :, 0])
-
-    occ, no_coeff = spec.eig(self.dm[:, :, :, 0], S_inv[:, :, :])
-    occ, no_coeff = occ[:, ::-1], no_coeff[:, :, ::-1]
-    return occ, no_coeff
+    g_w = trans.tau_to_w_ir(self._gtau, ir_path, self._beta)
+    g_w = g_w.reshape(nw, self._ns, self._ink, self._nao, self._nao)
+    return g_w
 
   # Get Fermionic Green's function in Matsubara axis with  n = 0 (AO basis)
   def get_g_w0(self):
@@ -181,10 +217,5 @@ class rmb:
       #object_mo[ik, :, :] = np.dot(np.conjugate(np.transpose(self.mo_coeff[ik, :, :])), object_mo[ik, :, :])
     return object_mo
 
-  def get_mo_energy(self):
-    mo_energy = np.asarray(self.mo_energy)
-    return mo_energy
-
-  def get_mo_coeff(self):
-    mo_coeff = np.asarray(self.mo_coeff)
-    return mo_coeff
+if __name__ == '__main__':
+  # TODO Examples and tests needed.

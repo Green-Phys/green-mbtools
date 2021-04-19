@@ -56,7 +56,7 @@ def orthogonal_canonical(object, S, type):
 # type = 'f': Fock matrix and self-energy
 def orthogonal(object, S, type):
     if type != 'g' and type != 'f':
-        raise ValueError("Need to specify transformation type: 'g' or 'f' ")
+        raise ValueError("Valid transformation types are 'g' for density, 'f' for Fock.")
     S_len = len(S.shape)
     if S_len == 2:
         ns = 1
@@ -181,97 +181,6 @@ def to_local(object_k, S_k = None, ir_list=None, weight=None, type=None):
         return object_loc
     else:
         return object_loc.real
-
-
-def w_to_tau_ir(Sigma_w, ir_path, beta):
-    sigma_len = len(Sigma_w.shape)
-    if sigma_len == 4:
-        nw = Sigma_w.shape[0]
-        ns = 1
-        nk, nao = Sigma_w.shape[1:3]
-    elif sigma_len == 5:
-        nw = Sigma_w.shape[0]
-        ns = Sigma_w.shape[1]
-        nk, nao = Sigma_w.shape[2:4]
-    Sigma_w = Sigma_w.reshape(nw, ns*nk, nao, nao)
-    ir_file = h5py.File(ir_path)
-    iw_list = ir_file["/fermi/wsample"][()]
-    txl_tmp = ir_file["/fermi/uxl"][()]
-    txl_one = ir_file["/fermi/ux1l"][()]
-    txl_minone = ir_file["/fermi/ux1l_minus"][()]
-    txl = np.zeros((txl_tmp.shape[0]+2,txl_tmp.shape[1]))
-    txl[1:-1] = txl_tmp
-    txl[0] = txl_minone
-    txl[-1] = txl_one
-    tnl = ir_file["/fermi/uwl"][()].view(np.complex)
-    ir_file.close()
-    nw = iw_list.shape[0]
-    txl *= np.sqrt(2.0 / beta)
-    tnl *= np.sqrt(beta)
-    tln = np.linalg.pinv(tnl)
-    Sigma_c = np.einsum('ij,j...->i...', tln, Sigma_w)
-    Sigma_t = np.einsum('ij,j...->i...', txl, Sigma_c)
-    coeff_last = np.max(abs(Sigma_c[-1]))
-    coeff_first = np.max(abs(Sigma_c[0]))
-    print("Leakage: ", coeff_last/coeff_first)
-
-    if sigma_len == 5:
-        Sigma_t = Sigma_t.reshape(txl_tmp.shape[0]+2, ns, nk, nao, nao)
-        Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
-
-    return Sigma_t
-
-def tau_to_w_ir_uniform(Sigma_tau, w_list, ir_path, beta, lamb, local=False):
-    sigma_len = len(Sigma_tau.shape)
-    nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
-    nw = w_list.shape[0]
-    ir_file = h5py.File(str(ir_path))
-    txl = ir_file["/fermi/uxl"][()]
-    ir_file.close()
-    txl *= np.sqrt(2.0 / beta)
-    tlx = np.linalg.pinv(txl)
-    ir = irbasis.load("F", lamb)
-    tnl = ir.compute_unl(w_list)
-    tnl *= np.sqrt(beta)
-
-    Sigma_c = np.einsum('ij,j...->i...', tlx, Sigma_tau[1:nts - 1])
-    Sigma_w = np.einsum('ij,j...->i...', tnl, Sigma_c)
-
-    return Sigma_w
-
-
-def tau_to_w_ir(Sigma_tau, ir_path, beta):
-    sigma_len = len(Sigma_tau.shape)
-    if sigma_len == 4:
-        ns = 1
-        nk, nao = Sigma_tau.shape[1:3]
-        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
-    elif sigma_len == 5:
-        ns = Sigma_tau.shape[1]
-        nk, nao = Sigma_tau.shape[2:4]
-        nts, ni = Sigma_tau.shape[0], Sigma_tau.shape[0] - 2
-    Sigma_tau = Sigma_tau.reshape(nts, ns*nk, nao, nao)
-    ir_file = h5py.File(ir_path)
-    iw_list = ir_file["/fermi/wsample"][()]
-    txl = ir_file["/fermi/uxl"][()]
-    tnl = ir_file["/fermi/uwl"][()].view(np.complex)
-    ir_file.close()
-    nw = iw_list.shape[0]
-    txl *= np.sqrt(2.0 / beta)
-    tlx = np.linalg.pinv(txl)
-    tnl *= np.sqrt(beta)
-    #Sigma_c = np.zeros((ni, ns*nk, nao, nao))
-    #Sigma_w = np.zeros((nw, ns*nk, nao, nao), dtype=np.complex)
-    Sigma_c = np.einsum('ij,j...->i...',tlx, Sigma_tau[1:nts-1])
-    Sigma_w = np.einsum('ij,j...->i...',tnl, Sigma_c)
-
-    if sigma_len == 5:
-        Sigma_tau = Sigma_tau.reshape(nts, ns, nk, nao, nao)
-        Sigma_w = Sigma_w.reshape(nw, ns, nk, nao, nao)
-
-    return Sigma_w
-
-
 
 ###############
 # Input  - Fermionic object in tau domain (nts, nk, nao, nao)
