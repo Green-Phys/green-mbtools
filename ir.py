@@ -6,11 +6,10 @@ import h5py
 Fourier transform between imaginary time and Matsubara frequency using intermediate representation (IR)
 '''
 
-class IR:
+class IR(object):
   def __init__(self, beta, lamb):
     self.beta = beta
     self.lamb = lamb
-
     self.tau_mesh, self.wsample, self.Ttc, self.Tcn, self.Tnc, self.Tct = read_IR_matrices(self._ir_dict[lamb], self.beta)
     self.nts = self.tau_mesh.shape[0]
     self.nw  = self.wsample.shape[0]

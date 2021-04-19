@@ -1,7 +1,7 @@
 mb_analysis
 ===================
 
-2021-04-17
+2021-04-18
 
 mb_analysis provides functions for post processing of Green's-function-based many-body calculations. 
 * The main classe is the mb class for both spin-unpolarized and spin-polarized calculations. 
@@ -16,6 +16,5 @@ Features
 
 To-Do-List
 -----------
-* Merge rmb and umb together
 * Wannier interpolation
 * Analytical Continuation that use external library such as Maxent and Nevanlinna.

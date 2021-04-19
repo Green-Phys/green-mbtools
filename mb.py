@@ -5,6 +5,7 @@ import h5py
 import MB_analysis.spectral as spec
 import MB_analysis.trans as trans
 import MB_analysis.ir as ir
+import MB_analysis.dyson as dyson
 
 
 def compute_mo(fock, S=None):
@@ -22,7 +23,7 @@ def compute_no(dm, S):
   :return:
   '''
   ns, ink, nao = dm.shape[0], dm.shape[1], dm.shape[2]
-  dm_orth = trans.orthogonal(dm, S, 'g')
+  dm_orth = trans.orth(dm, S, 'g')
   occ = np.zeros(np.shape(dm)[:-1])
   no_coeff = np.zeros(np.shape(dm), dtype=np.complex)
   for ss in range(ns):
@@ -33,7 +34,7 @@ def compute_no(dm, S):
   return occ, no_coeff
 
 
-class mb:
+class mb(object):
   '''Many-body analysis class'''
   def __init__(self, fock, sigma=None, mu=None, gtau=None, S=None,
                ir_list=None, weight=None, beta=None, lamb=None):
@@ -41,21 +42,28 @@ class mb:
       self._ns = 2
     elif fock.ndim == 3:
       self._ns = 1
+      fock = fock.reshape((1,) + fock.shape)
       if gtau is not None: gtau  = gtau.reshape((gtau.shape[0], 1) + gtau.shape[1:])
       if sigma is not None: sigma = sigma.reshape((sigma.shape[0], 1) + sigma.shape[1:])
-      fock  = fock.reshape((1) + fock.shape)
       if S is not None: S   = S.reshape((1,) + S.shape)
     else:
       raise ValueError('Incorrect dimensions of self-energy or Fock. '
                        'Accetable shapes are (nts, ns, nk, nao, nao) or (nts, nk, nao, nao) for self-energy and '
                        '(ns, nk, nao, nao) or (nk, nao, nao) for Fock matrix.')
 
+    if ir_list is not None and weight is not None:
+      self._ir_list = ir_list
+      self._weight = weight[ir_list]
+    else:
+      self._ir_list = np.arange(self._ink)
+      self._weight = np.array([1 for i in range(self._ink)])
+
     if beta is None:
       print("Warning: Inverse temperature is set to the default value 1000 a.u.^{-1}.")
     else:
       self.beta = beta
     if lamb is None:
-      print("Warning: Lambda is set to the default value 1e6.")
+      print("Warning: Lambda is set to the default '1e6'.")
     else:
       self.lamb = lamb
     self._ir = ir.IR(self.beta, self.lamb)
@@ -64,31 +72,23 @@ class mb:
     self._ink = fock.shape[1]
     self._nao = fock.shape[2]
 
-
-    if sigma is not None: self._sigma = sigma.copy()
-    self._fock = fock.copy()
-    if S is not None: self._S = S.copy()
+    self.fock = fock.copy()
+    if sigma is not None: self.sigma = sigma.copy()
+    if S is not None: self.S = S.copy()
     if mu is not None: self.mu = mu
 
     if gtau is not None:
-      self._gtau = gtau.copy()
-      self._dm = self._gtau[-1]
+      self.gtau = gtau.copy()
+      self.dm = -1.0 * self.gtau[-1]
     else:
       self.solve_dyson()
 
-    if ir_list is not None and weight is not None:
-      self._ir_list = ir_list
-      self._weight = weight
-    else:
-      self._ir_list = np.arange(self._ink)
-      self._weight = np.array([1 for i in range(self._ink)])
-
   # Private class variables
-  _gtau  = None
-  _sigma = None
-  _dm    = None
-  _fock  = None
-  _S     = None
+  gtau  = None
+  sigma = None
+  dm    = None
+  fock  = None
+  S     = None
   _S_inv_12 = None
 
   _nts  = None
@@ -111,38 +111,23 @@ class mb:
   # Public class variables
   mu = 0.0
   beta = 1000
-  lamb = 1e6
+  lamb = '1e6'
   mo_energy = None
   mo_coeff = None
 
   def solve_dyson(self):
     '''
-    Compute Green's function through Dyson's equation and update self._gtau and self._dm.
+    Compute Green's function through Dyson's equation and update self.gtau and self.dm.
     :return:
     '''
-    sigma_w = None
-    if self._sigma is not None:
-      sigma_w = self._ir.tau_to_w(self._sigma)
-
-    G_w = np.zeros((self._ir.nw, self._ns, self._ink, self._nao, self._nao), dtype=np.complex)
-    for n in range(self._ir.nw):
-      for s in range(self._ns):
-        for k in range(self._ink):
-          if sigma_w is None:
-            tmp = (1j*self._ir.wsample[n] + self.mu) * self._S[s, k] - self._fock[s, k]
-          else:
-            tmp = (1j * self._ir.wsample[n] + self.mu) * self._S[s, k] - self._fock[s, k] - self._sigma[n, s, k]
-          G_w[n, s, k] = np.linalg.inv(tmp)
-
-    self._gtau = self._ir.w_to_tau(G_w)
-    self._dm = self._gtau[-1]
+    self.gtau, self.dm = dyson.solve_dyson(self.fock, self.S, self.sigma, self.mu, self._ir)
 
   def get_mo(self):
     '''
     Compute molecular orbital energy by solving FC=SCE
     :return:
     '''
-    self.mo_energy, self.mo_coeff = compute_mo(self._fock, self._S)
+    self.mo_energy, self.mo_coeff = compute_mo(self.fock, self.S)
     return self.mo_energy, self.mo_coeff
 
   def get_no(self):
@@ -150,21 +135,21 @@ class mb:
     Compute natural orbitals by diagonalizing density matrix
     :return:
     '''
-    occ, no_coeff = compute_no(self._dm, self._S)
+    occ, no_coeff = compute_no(self.dm, self.S)
     return occ, no_coeff
 
   def mulliken_analysis(self, orbitals=None):
     if orbitals is None:
       orbitals = np.arange(self._nao)
-    occupations = np.zeros((self._ns, orbitals.shape[0]))
+    occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=np.complex)
     for ss in range(self._ns):
       for ik in range(self._ink):
-        n_k = np.zeros(orbitals.shape[0])
+        n_k = np.zeros(orbitals.shape[0], dtype=np.complex)
         for i in orbitals:
           for j in range(self._nao):
-            n_k[i] += self._dm[ss,ik,i,j] * self._S[ss,ik,j,i]
-        k_ir = self._ir_list[ik]
-        occupations[s] += self._weight[k_ir] * n_k
+            n_k[i] += self.dm[ss,ik,i,j] * self.S[ss,ik,j,i]
+        #k_ir = self._ir_list[ik]
+        occupations[ss] += self._weight[ik] * n_k
     num_k = len(self._weight)
     occupations /= num_k
 
@@ -182,7 +167,14 @@ if __name__ == '__main__':
   F = F.reshape(F.shape[:-1])
   Sigma = f["iter14/Selfenergy/data"][()].view(np.complex)
   Sigma = Sigma.reshape(Sigma.shape[:-1])
+  G = f["iter14/G_tau/data"][()].view(np.complex)
+  G = G.reshape(G.shape[:-1])
   mu = f["iter14/mu"][()]
+  f.close()
+
+  f = h5py.File("data/H2_GW/input.h5", 'r')
+  ir_list = f["/grid/ir_list"][()]
+  weight = f["/grid/weight"][()]
   f.close()
 
   '''
@@ -196,6 +188,25 @@ if __name__ == '__main__':
   Results from correlated methods
   '''
   # Standard way to initialize
-  #manybody = mb(fock=fock, sigma=sigma, gtau=gtau, S=S, beta=1000, lamb='1e4')
+  manybody = mb(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, ir_list=ir_list, weight=weight, beta=1000, lamb='1e4')
+  G = manybody.gtau
   # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
-  manybody = mb(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
+  manybody = mb(fock=F, sigma=Sigma, mu=mu, S=S, ir_list=ir_list, weight=weight, beta=1000, lamb='1e4')
+  G2 = manybody.gtau
+
+  diff = G - G2
+  print("Maximum G difference = ", np.max(np.abs(diff)))
+
+  '''
+  Mulliken analysis
+  '''
+  occs = manybody.mulliken_analysis()
+  print("Spin up:", occs[0])
+  print("Spin donw:", occs[1])
+
+  '''
+  Natural orbitals
+  '''
+  occ, no_coeff = manybody.get_no()
+  print(occ[0,0])
+  print(occ[1,0])
