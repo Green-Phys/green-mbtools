@@ -100,8 +100,8 @@ class MB_post(object):
     if gtau is not None:
       self.gtau = gtau.copy()
       self.dm = -1.0 * self.gtau[-1]
-    else:
-      self.solve_dyson()
+    #else:
+    #  self.solve_dyson()
 
     self.input_summary()
 
@@ -114,7 +114,7 @@ class MB_post(object):
     print("mu     =", self.mu)
     print("beta   =", self.beta)
     print("lambda =", self.lamb)
-    print("########################################")
+    print("#######################################")
 
   def solve_dyson(self):
     '''
@@ -136,10 +136,14 @@ class MB_post(object):
     Compute natural orbitals by diagonalizing density matrix
     :return:
     '''
+    if self.dm is None:
+      self.solve_dyson()
     occ, no_coeff = compute_no(self.dm, self.S)
     return occ, no_coeff
 
   def mulliken_analysis(self, orbitals=None):
+    if self.dm is None:
+      self.solve_dyson()
     if orbitals is None:
       orbitals = np.arange(self._nao)
     occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=np.complex)
@@ -159,7 +163,7 @@ class MB_post(object):
 
     return occupations.real
 
-  def wannier_interpolation(self, kpts_int, hermi=False, debug=False):
+  def wannier_interpolation(self, kpts_inter, hermi=False, debug=False):
     '''
     Wannier interpolation
     :param kpts_int: Target k grid
@@ -227,13 +231,14 @@ if __name__ == '__main__':
   ''' Results from correlated methods '''
   # Standard way to initialize
   manybody = MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
-  #G = manybody.gtau
+  G = manybody.gtau
   # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
   manybody = MB_post(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
+  manybody.solve_dyson()
   G2 = manybody.gtau
 
   diff = G - G2
-  print("Maximum G difference = ", np.max(np.abs(diff)))
+  #print("Maximum G difference = ", np.max(np.abs(diff)))
 
   ''' Mulliken analysis '''
   print("Mullinken analysis: ")

@@ -16,7 +16,6 @@ def interpolate(obj_k, kmesh, kpts_inter, hermi=False, debug=False):
   rmesh = ft.construct_rmesh(nk, nk, nk)
   fkr, frk = ft.compute_fourier_coefficients(kmesh, rmesh)
   weights = [1] * kmesh.shape[0]
-  #obj_i = ft.k_to_real(frk, obj_k, [1]*kmesh.shape[0])
   obj_i = np.array([ft.k_to_real(frk, obj_k[s], weights) for s in range(ns)])
   if debug:
     center = (nk-1)//2
@@ -27,7 +26,6 @@ def interpolate(obj_k, kmesh, kpts_inter, hermi=False, debug=False):
     obj_i = obj_i.reshape(ns, nk_cube, nao, nao)
 
   fkr_int, frk_int = ft.compute_fourier_coefficients(kpts_inter, rmesh)
-  #obj_k_int = ft.real_to_k(fkr_int, obj_i)
   obj_k_int = np.array([ft.real_to_k(fkr_int, obj_i[s]) for s in range(ns)])
 
   if hermi:
@@ -56,28 +54,28 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, hermi=False, debug=False):
   fkr, frk = ft.compute_fourier_coefficients(kmesh, rmesh)
   weights = [1]*kmesh.shape[0]
   obj_ti = np.array([ft.k_to_real(frk, obj_tk[it, s], weights) for it in range(nts) for s in range(ns)])
-  
+
   if debug:
     center = (nk-1)//2
     obj_ti = obj_ti.reshape(nts*ns, nk, nk, nk, nao, nao)
     for i in range(nk):
       print("obj_i[",i-center,", 0, 0] = ")
       print(np.diag(obj_ti[0, i,center,center].real))
-    obj_ti = obj_ti.reshape(nts, ns, nk_cube, nao, nao)
+    obj_ti = obj_ti.reshape(nts*ns, nk_cube, nao, nao)
 
   fkr_int, frk_int = ft.compute_fourier_coefficients(kpts_inter, rmesh)
-  obj_tk_int = np.array([ft.real_to_k(fkr_int, obj_ti[it, s]) for it in range(nts) for s in range(ns)])
+  obj_tk_int = np.array([ft.real_to_k(fkr_int, obj_ti[its]) for its in range(nts*ns)])
 
   if hermi:
     error = 0.0
-    for it in range(nts):
-      for s in range(ns):
-        for ik in range(kpts_inter.shape[0]):
-          obj = obj_tk_int[it, s, ik]
-          obj_sym = 0.5 * (obj + obj.conj().T)
-          error = max(error, np.max(np.abs(obj_sym - obj)))
-          obj_tk_int[it, s, ik] = obj_sym
+    for its in range(nts*ns):
+      for ik in range(kpts_inter.shape[0]):
+        obj = obj_tk_int[its, ik]
+        obj_sym = 0.5 * (obj + obj.conj().T)
+        error = max(error, np.max(np.abs(obj_sym - obj)))
+        obj_tk_int[its, ik] = obj_sym
     print("The largest Hermitization error = ", error)
+  obj_tk_int = obj_tk_int.reshape(nts, ns, kpts_inter.shape[0], nao, nao)
 
   return obj_tk_int
 
@@ -93,7 +91,7 @@ def interpolate_G(Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, hermi=False, debu
   if Sigma_tk is not None:
     assert nts == Sigma_tk.shape[0], "Number of imaginary time points mismatches."
 
-  if Sk is None:
+  if Sk is not None:
     print("Interpolating overlap...")
     Sk_int = interpolate(Sk, kmesh, kpts_inter, hermi, debug)
   else:
