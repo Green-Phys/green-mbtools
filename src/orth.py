@@ -14,7 +14,6 @@ def sao_orth(X, S, type=None):
     nao = S.shape[2]
     original_shape = X.shape
     X = X.reshape(-1, ns, nk, nao, nao)
-    print("Shape of X = ", X.shape)
     X_orth = np.zeros(X.shape, dtype=X.dtype)
     for d in range(X.shape[0]):
         for s in range(ns):

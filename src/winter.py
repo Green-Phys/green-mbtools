@@ -116,12 +116,14 @@ def interpolate_G(Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, hermi=False, debu
   return Gtk_int, Sigma_tk_int, Fk_int, Sk_int
 
 if __name__ == '__main__':
-  Sk10 = np.load("../data/winter/Sk10.npy")
+  import MB_analysis
+  MB_path = MB_analysis.__path__[0]
+  Sk10 = np.load(MB_path + '/data/winter/Sk10.npy')
   Sk10 = Sk10.reshape((1,) + Sk10.shape)
-  kmesh_scaled_nk10 = np.load("../data/winter/kmesh_k10.npy")
-  Sk  = np.load("../data/winter/Sk6.npy")
+  kmesh_scaled_nk10 = np.load(MB_path + '/data/winter/kmesh_k10.npy')
+  Sk  = np.load(MB_path + '/data/winter/Sk6.npy')
   Sk  = Sk.reshape((1,) + Sk.shape)
-  kmesh_scaled  = np.load("../data/winter/kmesh_k6.npy")
+  kmesh_scaled  = np.load(MB_path + '/data/winter/kmesh_k6.npy')
   ns = Sk.shape[0]
   nk_cube = Sk.shape[1]
   nk = int(np.cbrt(nk_cube))

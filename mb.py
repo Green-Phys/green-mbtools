@@ -4,7 +4,7 @@ import h5py
 
 import MB_analysis.src.spectral as spec
 import MB_analysis.src.orth as orth
-import MB_analysis.src.ir as ir
+from MB_analysis.src.ir import IR_factory
 import MB_analysis.src.dyson as dyson
 import MB_analysis.src.winter as winter
 
@@ -35,9 +35,31 @@ def compute_no(dm, S):
   return occ, no_coeff
 
 
-class mb(object):
+class MB(object):
   '''Many-body analysis class'''
   def __init__(self, fock, sigma=None, mu=None, gtau=None, S=None, beta=None, lamb=None):
+    ''' Initialization '''
+    # Public instance variables
+    self.gtau = None
+    self.sigma = None
+    self.dm = None
+    self.fock = None
+    self.S = None
+    self.mu = 0.0
+    self.beta = 1000
+    self.lamb = '1e6'
+
+    # Private instance variables
+    self._S_inv_12 = None
+    self._nts = None
+    self._ns = None
+    self._ink = None
+    self._nao = None
+    self._ir_list = None
+    self._weight = None
+    self._ir = None
+
+    '''Setup'''
     if fock.ndim == 4 and fock.shape[0] == 2:
       self._ns = 2
     elif fock.ndim == 3:
@@ -51,6 +73,10 @@ class mb(object):
                        'Accetable shapes are (nts, ns, nk, nao, nao) or (nts, nk, nao, nao) for self-energy and '
                        '(ns, nk, nao, nao) or (nk, nao, nao) for Fock matrix.')
 
+    if mu is None:
+      print("Warning: Default chemical potential, mu = 0.0, is used.")
+    else:
+      self.mu = mu
     if beta is None:
       print("Warning: Inverse temperature is set to the default value 1000 a.u.^{-1}.")
     else:
@@ -59,7 +85,7 @@ class mb(object):
       print("Warning: Lambda is set to the default '1e6'.")
     else:
       self.lamb = lamb
-    self._ir = ir.IR_factory(self.beta, self.lamb)
+    self._ir = IR_factory(self.beta, self.lamb)
     self._nts = self._ir.nts
     self._ink = fock.shape[1]
     self._nao = fock.shape[2]
@@ -69,45 +95,12 @@ class mb(object):
     self.fock = fock.copy()
     if sigma is not None: self.sigma = sigma.copy()
     if S is not None: self.S = S.copy()
-    if mu is not None: self.mu = mu
 
     if gtau is not None:
       self.gtau = gtau.copy()
       self.dm = -1.0 * self.gtau[-1]
     else:
       self.solve_dyson()
-
-  # Private class variables
-  gtau  = None
-  sigma = None
-  dm    = None
-  fock  = None
-  S     = None
-  _S_inv_12 = None
-
-  _nts  = None
-  _ns   = None
-  _ink  = None
-  _nao  = None
-
-  _mo_sk_energy = None
-  _mo_sk_coeff = None
-
-  _iw_list = None
-  _no = None
-  _no_coeff = None
-
-  _ir_list = None
-  _weight = None
-
-  _ir = None
-
-  # Public class variables
-  mu = 0.0
-  beta = 1000
-  lamb = '1e6'
-  mo_energy = None
-  mo_coeff = None
 
   def solve_dyson(self):
     '''
@@ -121,8 +114,8 @@ class mb(object):
     Compute molecular orbital energy by solving FC=SCE
     :return:
     '''
-    self.mo_energy, self.mo_coeff = compute_mo(self.fock, self.S)
-    return self.mo_energy, self.mo_coeff
+    mo_energy, mo_coeff = compute_mo(self.fock, self.S)
+    return mo_energy, mo_coeff
 
   def get_no(self):
     '''
@@ -181,7 +174,9 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
   return Y
 
 if __name__ == '__main__':
-  f = h5py.File("data/H2_GW/sim.h5", 'r')
+  import MB_analysis
+  MB_path = MB_analysis.__path__[0]
+  f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
   Sr = f["S-k"][()].view(np.complex)
   Sr = Sr.reshape(Sr.shape[:-1])
   Fr = f["iter14/Fock-k"][()].view(np.complex)
@@ -193,7 +188,7 @@ if __name__ == '__main__':
   mu = f["iter14/mu"][()]
   f.close()
 
-  f = h5py.File("data/H2_GW/input.h5", 'r')
+  f = h5py.File(MB_path + '/data/H2_GW/input.h5', 'r')
   ir_list = f["/grid/ir_list"][()]
   weight = f["/grid/weight"][()]
   index = f["/grid/index"][()]
@@ -213,16 +208,16 @@ if __name__ == '__main__':
   '''
   # Standard way to initialize
   # density and non-interacting Green's function are computed internally
-  manybody = mb(F, S=S, beta=1000, lamb='1e4')
+  manybody = MB(F, S=S, beta=1000, lamb='1e4')
 
   '''
   Results from correlated methods
   '''
   # Standard way to initialize
-  manybody = mb(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
-  G = manybody.gtau
+  manybody = MB(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
+  #G = manybody.gtau
   # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
-  manybody = mb(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
+  manybody = MB(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
   G2 = manybody.gtau
 
   diff = G - G2

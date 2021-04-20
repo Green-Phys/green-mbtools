@@ -1,6 +1,7 @@
 from functools import reduce
 import numpy as np
 import h5py
+import os
 
 '''
 Fourier transform between imaginary time and Matsubara frequency using intermediate representation (IR)
@@ -8,25 +9,19 @@ Fourier transform between imaginary time and Matsubara frequency using intermedi
 
 class IR_factory(object):
   def __init__(self, beta, lamb):
+
+    self._ir_dict = {'1e3': '/data/ir_grid/1e3_72.h5', '1e4': '/data/ir_grid/1e4_104.h5', '1e5': '/data/ir_grid/1e5_136.h5',
+                '1e6': '/data/ir_grid/1e6_168.h5', '1e7': '/data/ir_grid/1e7_202.h5'}
+    import MB_analysis
+    self._MB_path = MB_analysis.__path__[0]
+    for l in self._ir_dict:
+      self._ir_dict[l] = self._MB_path + self._ir_dict[l]
+
     self.beta = beta
     self.lamb = lamb
-    self.tau_mesh, self.wsample, self.Ttc, self.Tcn, self.Tnc, self.Tct = read_IR_matrices(self._ir_dict[lamb], self.beta)
+    self.tau_mesh, self.wsample, self.Ttc, self.Tcn, self.Tnc, self.Tct = read_IR_matrices(os.path.abspath(self._ir_dict[lamb]), self.beta)
     self.nts = self.tau_mesh.shape[0]
     self.nw  = self.wsample.shape[0]
-  # FIXME Need to make this absolute path
-  _ir_dict = {'1e3': 'data/ir_grid/1e3_72.h5', '1e4': 'data/ir_grid/1e4_104.h5', '1e5': 'data/ir_grid/1e5_136.h5',
-              '1e6': 'data/ir_grid/1e6_168.h5', '1e7': 'data/ir_grid/1e7_202.h5'}
-
-  beta = None
-  lamb = None
-  tau_mesh = None
-  wsample = None
-  nts = None
-  nw  = None
-  Ttc = None
-  Tcn = None
-  Tnc = None
-  Tct = None
 
   def update(self, beta=None, lamb=None):
     if lamb is not None: self.lamb = lamb
@@ -96,7 +91,7 @@ def read_IR_matrices(ir_path, beta):
 
 
 if __name__ == "__main__":
-  ir = IR(1000, '1e4')
+  ir = IR_factory(1000, '1e4')
   print(ir.nts)
   ir.update(1000, '1e5')
   print(ir.nts)
