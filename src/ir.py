@@ -13,7 +13,7 @@ class IR_factory(object):
     self.tau_mesh, self.wsample, self.Ttc, self.Tcn, self.Tnc, self.Tct = read_IR_matrices(self._ir_dict[lamb], self.beta)
     self.nts = self.tau_mesh.shape[0]
     self.nw  = self.wsample.shape[0]
-
+  # FIXME Need to make this absolute path
   _ir_dict = {'1e3': 'data/ir_grid/1e3_72.h5', '1e4': 'data/ir_grid/1e4_104.h5', '1e5': 'data/ir_grid/1e5_136.h5',
               '1e6': 'data/ir_grid/1e6_168.h5', '1e7': 'data/ir_grid/1e7_202.h5'}
 

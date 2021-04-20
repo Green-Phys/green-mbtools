@@ -1,9 +1,8 @@
 from functools import reduce
 import numpy as np
 
-from MB_analysis import ft
-#from MB_analysis import ir
-from MB_analysis import dyson
+from MB_analysis.src import ft
+from MB_analysis.src import dyson
 
 # Only work for full_bz object
 def interpolate(obj_k, kmesh, kpts_inter, hermi=False, debug=False):
@@ -26,8 +25,8 @@ def interpolate(obj_k, kmesh, kpts_inter, hermi=False, debug=False):
       print("obj_i[",i-center,", 0, 0] = ")
       print(np.diag(obj_i[0,i,center,center].real))
     obj_i = obj_i.reshape(ns, nk_cube, nao, nao)
-  
-  fkr_int, frk_int = ft.compute_fourier_coefficients(kpts_inter, rmesh) 
+
+  fkr_int, frk_int = ft.compute_fourier_coefficients(kpts_inter, rmesh)
   #obj_k_int = ft.real_to_k(fkr_int, obj_i)
   obj_k_int = np.array([ft.real_to_k(fkr_int, obj_i[s]) for s in range(ns)])
 
@@ -40,7 +39,7 @@ def interpolate(obj_k, kmesh, kpts_inter, hermi=False, debug=False):
         error = max(error, np.max(np.abs(obj_sym - obj)))
         obj_k_int[s, ik] = obj_sym
     print("The largest Hermitization error = ", error)
-  
+
   return obj_k_int
 
 # Only work for full_bz object
@@ -117,12 +116,12 @@ def interpolate_G(Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, hermi=False, debu
   return Gtk_int, Sigma_tk_int, Fk_int, Sk_int
 
 if __name__ == '__main__':
-  Sk10 = np.load("data/winter/Sk10.npy")
+  Sk10 = np.load("../data/winter/Sk10.npy")
   Sk10 = Sk10.reshape((1,) + Sk10.shape)
-  kmesh_scaled_nk10 = np.load("data/winter/kmesh_k10.npy")
-  Sk  = np.load("data/winter/Sk6.npy")
+  kmesh_scaled_nk10 = np.load("../data/winter/kmesh_k10.npy")
+  Sk  = np.load("../data/winter/Sk6.npy")
   Sk  = Sk.reshape((1,) + Sk.shape)
-  kmesh_scaled  = np.load("data/winter/kmesh_k6.npy")
+  kmesh_scaled  = np.load("../data/winter/kmesh_k6.npy")
   ns = Sk.shape[0]
   nk_cube = Sk.shape[1]
   nk = int(np.cbrt(nk_cube))

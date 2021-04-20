@@ -2,11 +2,11 @@ import numpy as np
 import scipy.linalg as LA
 import h5py
 
-import MB_analysis.spectral as spec
-import MB_analysis.orth as orth
-import MB_analysis.ir as ir
-import MB_analysis.dyson as dyson
-import MB_analysis.winter as winter
+import MB_analysis.src.spectral as spec
+import MB_analysis.src.orth as orth
+import MB_analysis.src.ir as ir
+import MB_analysis.src.dyson as dyson
+import MB_analysis.src.winter as winter
 
 
 def compute_mo(fock, S=None):
