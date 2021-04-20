@@ -3,7 +3,7 @@ import scipy.linalg as LA
 import h5py
 
 import MB_analysis.spectral as spec
-import MB_analysis.trans as trans
+import MB_analysis.orth as orth
 import MB_analysis.ir as ir
 import MB_analysis.dyson as dyson
 
@@ -23,7 +23,7 @@ def compute_no(dm, S):
   :return:
   '''
   ns, ink, nao = dm.shape[0], dm.shape[1], dm.shape[2]
-  dm_orth = trans.orth(dm, S, 'g')
+  dm_orth = orth.sao_orth(dm, S, 'g')
   occ = np.zeros(np.shape(dm)[:-1])
   no_coeff = np.zeros(np.shape(dm), dtype=np.complex)
   for ss in range(ns):
