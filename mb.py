@@ -6,6 +6,7 @@ import MB_analysis.spectral as spec
 import MB_analysis.orth as orth
 import MB_analysis.ir as ir
 import MB_analysis.dyson as dyson
+import MB_analysis.winter as winter
 
 
 def compute_mo(fock, S=None):
@@ -36,8 +37,7 @@ def compute_no(dm, S):
 
 class mb(object):
   '''Many-body analysis class'''
-  def __init__(self, fock, sigma=None, mu=None, gtau=None, S=None,
-               ir_list=None, weight=None, beta=None, lamb=None):
+  def __init__(self, fock, sigma=None, mu=None, gtau=None, S=None, beta=None, lamb=None):
     if fock.ndim == 4 and fock.shape[0] == 2:
       self._ns = 2
     elif fock.ndim == 3:
@@ -51,13 +51,6 @@ class mb(object):
                        'Accetable shapes are (nts, ns, nk, nao, nao) or (nts, nk, nao, nao) for self-energy and '
                        '(ns, nk, nao, nao) or (nk, nao, nao) for Fock matrix.')
 
-    if ir_list is not None and weight is not None:
-      self._ir_list = ir_list
-      self._weight = weight[ir_list]
-    else:
-      self._ir_list = np.arange(self._ink)
-      self._weight = np.array([1 for i in range(self._ink)])
-
     if beta is None:
       print("Warning: Inverse temperature is set to the default value 1000 a.u.^{-1}.")
     else:
@@ -66,11 +59,12 @@ class mb(object):
       print("Warning: Lambda is set to the default '1e6'.")
     else:
       self.lamb = lamb
-    self._ir = ir.IR(self.beta, self.lamb)
-    # Dims
+    self._ir = ir.IR_factory(self.beta, self.lamb)
     self._nts = self._ir.nts
     self._ink = fock.shape[1]
     self._nao = fock.shape[2]
+    self._ir_list = np.arange(self._ink)
+    self._weight = np.array([1 for i in range(self._ink)])
 
     self.fock = fock.copy()
     if sigma is not None: self.sigma = sigma.copy()
@@ -148,7 +142,6 @@ class mb(object):
         for i in orbitals:
           for j in range(self._nao):
             n_k[i] += self.dm[ss,ik,i,j] * self.S[ss,ik,j,i]
-        #k_ir = self._ir_list[ik]
         occupations[ss] += self._weight[ik] * n_k
     num_k = len(self._weight)
     occupations /= num_k
@@ -159,39 +152,77 @@ class mb(object):
 
     return occupations.real
 
+  def wannier_interpolation(self, kpts_int, hermi=False, debug=False):
+    '''
+    Wannier interpolation
+    :param kpts_int: Target k grid
+    :return:
+    '''
+    Gtk_int, Sigma_tk_int, Fk_int, Sk_int = winter.interpolate_G(self.fock, self.sigma, self.mu, self.S,
+                                                                 self.kmesh, kpts_inter, self._ir, hermi=hermi, debug=debug)
+    return Gtk_int, Sigma_tk_int, Fk_int, Sk_int
+
+def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
+  index_list = np.zeros(bz_index.shape, dtype=int)
+  for i, irn in enumerate(ir_list):
+    index_list[irn] = i
+  old_shape = X.shape
+  new_shape = np.copy(old_shape)
+  new_shape[k_ind] = conj_list.shape[0]
+  Y = np.zeros(new_shape, dtype=X.dtype)
+  for ik, kk in enumerate(bz_index):
+    k = index_list[kk]
+    if k_ind == 0:
+      Y[ik, ::] = X[k, ::].conj() if conj_list[ik] else X[k, ::]
+    elif k_ind == 1:
+      Y[:, ik, ::] = X[:, k, ::].conj() if conj_list[ik] else X[:, k, ::]
+    elif k_ind == 2:
+      Y[:, :, ik, ::] = X[:, :, k, ::].conj() if conj_list[ik] else X[:, :, k, ::]
+  return Y
+
 if __name__ == '__main__':
   f = h5py.File("data/H2_GW/sim.h5", 'r')
-  S = f["S-k"][()].view(np.complex)
-  S = S.reshape(S.shape[:-1])
-  F = f["iter14/Fock-k"][()].view(np.complex)
-  F = F.reshape(F.shape[:-1])
-  Sigma = f["iter14/Selfenergy/data"][()].view(np.complex)
-  Sigma = Sigma.reshape(Sigma.shape[:-1])
-  G = f["iter14/G_tau/data"][()].view(np.complex)
-  G = G.reshape(G.shape[:-1])
+  Sr = f["S-k"][()].view(np.complex)
+  Sr = Sr.reshape(Sr.shape[:-1])
+  Fr = f["iter14/Fock-k"][()].view(np.complex)
+  Fr = Fr.reshape(Fr.shape[:-1])
+  Sigmar = f["iter14/Selfenergy/data"][()].view(np.complex)
+  Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
+  Gr = f["iter14/G_tau/data"][()].view(np.complex)
+  Gr = Gr.reshape(Gr.shape[:-1])
   mu = f["iter14/mu"][()]
   f.close()
 
   f = h5py.File("data/H2_GW/input.h5", 'r')
   ir_list = f["/grid/ir_list"][()]
   weight = f["/grid/weight"][()]
+  index = f["/grid/index"][()]
+  conj_list = f["grid/conj_list"][()]
   f.close()
+
+  '''
+  All k-dependent matrices should lie on a full Monkhorst-Pack grid. 
+  '''
+  F = to_full_bz(Fr, conj_list, ir_list, index, 1)
+  S = to_full_bz(Sr, conj_list, ir_list, index, 1)
+  Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
+  G = to_full_bz(Gr, conj_list, ir_list, index, 2)
 
   '''
   Results from mean-field calculations
   '''
   # Standard way to initialize
   # density and non-interacting Green's function are computed internally
-  #manybody = mb(fock, S=S, beta=1000, lamb='1e4')
+  manybody = mb(F, S=S, beta=1000, lamb='1e4')
 
   '''
   Results from correlated methods
   '''
   # Standard way to initialize
-  manybody = mb(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, ir_list=ir_list, weight=weight, beta=1000, lamb='1e4')
+  manybody = mb(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
   G = manybody.gtau
   # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
-  manybody = mb(fock=F, sigma=Sigma, mu=mu, S=S, ir_list=ir_list, weight=weight, beta=1000, lamb='1e4')
+  manybody = mb(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
   G2 = manybody.gtau
 
   diff = G - G2
@@ -200,6 +231,7 @@ if __name__ == '__main__':
   '''
   Mulliken analysis
   '''
+  print("Mullinken analysis: ")
   occs = manybody.mulliken_analysis()
   print("Spin up:", occs[0])
   print("Spin donw:", occs[1])
@@ -207,6 +239,7 @@ if __name__ == '__main__':
   '''
   Natural orbitals
   '''
+  print("Natural orbitals: ")
   occ, no_coeff = manybody.get_no()
   print(occ[0,0])
   print(occ[1,0])
