@@ -113,7 +113,7 @@ def interpolate_G(Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, hermi=False, debu
   # Solve Dyson
   Gtk_int, dm_int = dyson.solve_dyson(Fk_int, Sk_int, Sigma_tk_int, mu, ir)
 
-  return Gtk_int, Sigma_tk_int, Fk_int, Sk_int
+  return Gtk_int, Sigma_tk_int, ir.tau_mesh, Fk_int, Sk_int
 
 if __name__ == '__main__':
   import MB_analysis

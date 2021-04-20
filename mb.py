@@ -34,9 +34,9 @@ def compute_no(dm, S):
   return occ, no_coeff
 
 
-class MB(object):
+class MB_post(object):
   '''Many-body analysis class'''
-  def __init__(self, fock, sigma=None, mu=None, gtau=None, S=None, beta=None, lamb=None):
+  def __init__(self, fock, sigma=None, mu=None, gtau=None, S=None, kmesh=None, beta=None, lamb=None):
     ''' Initialization '''
     # Public instance variables
     self.gtau = None
@@ -45,6 +45,7 @@ class MB(object):
     self.fock = None
     self.S = None
     self.mu = 0.0
+    self.kmesh = None
     self.beta = 1000
     self.lamb = '1e6'
 
@@ -94,12 +95,26 @@ class MB(object):
     self.fock = fock.copy()
     if sigma is not None: self.sigma = sigma.copy()
     if S is not None: self.S = S.copy()
+    if kmesh is not None: self.kmesh = kmesh.copy()
 
     if gtau is not None:
       self.gtau = gtau.copy()
       self.dm = -1.0 * self.gtau[-1]
     else:
       self.solve_dyson()
+
+    self.input_summary()
+
+  def input_summary(self):
+    print("######### MBPT analysis class #########")
+    print("nts    =", self._nts)
+    print("ns     =", self._ns)
+    print("nk     =", self._ink)
+    print("nao    =", self._nao)
+    print("mu     =", self.mu)
+    print("beta   =", self.beta)
+    print("lambda =", self.lamb)
+    print("########################################")
 
   def solve_dyson(self):
     '''
@@ -150,9 +165,11 @@ class MB(object):
     :param kpts_int: Target k grid
     :return:
     '''
-    Gtk_int, Sigma_tk_int, Fk_int, Sk_int = winter.interpolate_G(self.fock, self.sigma, self.mu, self.S,
+    if self.kmesh is None:
+      raise ValueError("kmesh of input data is unknown. Please provide it.")
+    Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = winter.interpolate_G(self.fock, self.sigma, self.mu, self.S,
                                                                  self.kmesh, kpts_inter, self._ir, hermi=hermi, debug=debug)
-    return Gtk_int, Sigma_tk_int, Fk_int, Sk_int
+    return Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int
 
 def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
   index_list = np.zeros(bz_index.shape, dtype=int)
@@ -205,14 +222,14 @@ if __name__ == '__main__':
   ''' Results from mean-field calculations '''
   # Standard way to initialize
   # density and non-interacting Green's function are computed internally
-  manybody = MB(F, S=S, beta=1000, lamb='1e4')
+  manybody = MB_post(F, S=S, beta=1000, lamb='1e4')
 
   ''' Results from correlated methods '''
   # Standard way to initialize
-  manybody = MB(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
+  manybody = MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
   #G = manybody.gtau
   # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
-  manybody = MB(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
+  manybody = MB_post(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
   G2 = manybody.gtau
 
   diff = G - G2
@@ -221,8 +238,8 @@ if __name__ == '__main__':
   ''' Mulliken analysis '''
   print("Mullinken analysis: ")
   occs = manybody.mulliken_analysis()
-  print("Spin up:", occs[0])
-  print("Spin donw:", occs[1])
+  print("Spin up:", occs[0], ", Spin down:", occs[1])
+  print("References: [0.5 0.5] and [0.5 0.5]")
 
   ''' Natural orbitals '''
   print("Natural orbitals: ")
