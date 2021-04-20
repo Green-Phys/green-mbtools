@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.linalg as LA
-import h5py
 
 import MB_analysis.src.spectral as spec
 import MB_analysis.src.orth as orth
@@ -174,7 +173,9 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
   return Y
 
 if __name__ == '__main__':
+  import h5py
   import MB_analysis
+
   MB_path = MB_analysis.__path__[0]
   f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
   Sr = f["S-k"][()].view(np.complex)
@@ -195,24 +196,18 @@ if __name__ == '__main__':
   conj_list = f["grid/conj_list"][()]
   f.close()
 
-  '''
-  All k-dependent matrices should lie on a full Monkhorst-Pack grid. 
-  '''
+  ''' All k-dependent matrices should lie on a full Monkhorst-Pack grid. '''
   F = to_full_bz(Fr, conj_list, ir_list, index, 1)
   S = to_full_bz(Sr, conj_list, ir_list, index, 1)
   Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
   G = to_full_bz(Gr, conj_list, ir_list, index, 2)
 
-  '''
-  Results from mean-field calculations
-  '''
+  ''' Results from mean-field calculations '''
   # Standard way to initialize
   # density and non-interacting Green's function are computed internally
   manybody = MB(F, S=S, beta=1000, lamb='1e4')
 
-  '''
-  Results from correlated methods
-  '''
+  ''' Results from correlated methods '''
   # Standard way to initialize
   manybody = MB(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
   #G = manybody.gtau
@@ -223,17 +218,13 @@ if __name__ == '__main__':
   diff = G - G2
   print("Maximum G difference = ", np.max(np.abs(diff)))
 
-  '''
-  Mulliken analysis
-  '''
+  ''' Mulliken analysis '''
   print("Mullinken analysis: ")
   occs = manybody.mulliken_analysis()
   print("Spin up:", occs[0])
   print("Spin donw:", occs[1])
 
-  '''
-  Natural orbitals
-  '''
+  ''' Natural orbitals '''
   print("Natural orbitals: ")
   occ, no_coeff = manybody.get_no()
   print(occ[0,0])
