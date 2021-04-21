@@ -152,8 +152,11 @@ class MB_post(object):
       for ik in range(self._ink):
         n_k = np.zeros(orbitals.shape[0], dtype=np.complex)
         for i in orbitals:
-          for j in range(self._nao):
-            n_k[i] += self.dm[ss,ik,i,j] * self.S[ss,ik,j,i]
+          if self.S is None:
+            n_k[i] += self.dm[ss, ik, i, i]
+          else:
+            for j in range(self._nao):
+              n_k[i] += self.dm[ss,ik,i,j] * self.S[ss,ik,j,i]
         occupations[ss] += self._weight[ik] * n_k
     num_k = len(self._weight)
     occupations /= num_k
@@ -245,11 +248,6 @@ if __name__ == '__main__':
   Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
   G = to_full_bz(Gr, conj_list, ir_list, index, 2)
 
-  ''' Results from mean-field calculations '''
-  # Standard way to initialize
-  # density and non-interacting Green's function are computed internally
-  manybody = MB_post(F, S=S, beta=1000, lamb='1e4')
-
   ''' Results from correlated methods '''
   # Standard way to initialize
   manybody = MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4')
@@ -260,7 +258,7 @@ if __name__ == '__main__':
   G2 = manybody.gtau
 
   diff = G - G2
-  #print("Maximum G difference = ", np.max(np.abs(diff)))
+  print("Maximum G difference = ", np.max(np.abs(diff)))
 
   ''' Mulliken analysis '''
   print("Mullinken analysis: ")
@@ -274,8 +272,24 @@ if __name__ == '__main__':
   print(occ[0,0])
   print(occ[1,0])
 
-  ''' Maxent '''
+  #''' Maxent '''
   # Run Maxent for given Green's function, G_MoSum
   #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent', gtau=G_MoSum)
   # By default, run Maxent for manybody.gtau
   #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent')
+
+  ''' Orthogonal input '''
+  F_orth = orth.sao_orth(F, S, type='f')
+  Sigma_orth = orth.sao_orth(Sigma, S, type='f')
+  manybody = MB_post(fock=F_orth, sigma=Sigma_orth, mu=mu, beta=1000, lamb='1e4')
+
+  print("Mullinken analysis: ")
+  occs = manybody.mulliken_analysis()
+  print("Spin up:", occs[0], ", Spin down:", occs[1])
+  print("References: [0.5 0.5] and [0.5 0.5]")
+
+  print("Natural orbitals: ")
+  occ, no_coeff = manybody.get_no()
+  print(occ[0, 0])
+  print(occ[1, 0])
+

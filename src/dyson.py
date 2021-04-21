@@ -1,12 +1,13 @@
 import numpy as np
 
-def solve_dyson(fock, S, sigma=None, mu=0, ir=None):
+def solve_dyson(fock, S=None, sigma=None, mu=0, ir=None):
   '''
   Compute Green's function through Dyson's equation.
   :return:
   '''
   nts, nw = ir.nts, ir.nw
   ns, nk, nao = fock.shape[0], fock.shape[1], fock.shape[2]
+  if S is None: S = np.array([[np.eye(nao)]*nk]*ns)
 
   gtau = np.zeros((nts, ns, nk, nao, nao), dtype=np.complex)
   Gw = np.zeros((nw, nao, nao), dtype=np.complex)
