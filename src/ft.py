@@ -19,6 +19,21 @@ def construct_rmesh(nkx, nky, nkz):
   
   return rmesh
 
+
+def construct_symmetric_rmesh(nkx, nky, nkz):
+  Lx, Ly, Lz = (nkx - 1) // 2, (nky - 1) // 2, (nkz - 1) // 2  # nk=6, L=2
+  leftx, lefty, leftz = (nkx - 1) % 2, (nky - 1) % 2, (nkz - 1) % 2  # left = 1
+
+  rx = np.linspace(-Lx, Lx + leftx, nkx, endpoint=True)  # -2,-1,0,1,2,3
+  ry = np.linspace(-Ly, Ly + lefty, nky, endpoint=True)
+  rz = np.linspace(-Lz, Lz + leftz, nkz, endpoint=True)
+  RX, RY, RZ = np.meshgrid(rx, ry, rz)
+  rmesh = np.array([RX.flatten(), RY.flatten(), RZ.flatten()]).T
+  pm_rmesh = np.append(rmesh, -rmesh, axis=0)
+  rmesh = np.unique(pm_rmesh, axis=0)
+
+  return rmesh
+
 def compute_fourier_coefficients(kmesh, rmesh):
   '''
   Compute Fourier coefficients for direct and inverse Fourier transform
@@ -34,6 +49,9 @@ def compute_fourier_coefficients(kmesh, rmesh):
       frk[ir, ik] = np.exp(dp)
 
   return fkr, frk
+
+#def winter_fkr(kmesh, rmesh):
+
 
 def k_to_real(frk, obj_k, weights):
   '''

@@ -13,17 +13,15 @@ def interpolate(obj_k, kmesh, kpts_inter, hermi=False, debug=False):
   nk_cube = obj_k.shape[1]
   nk = int(np.cbrt(nk_cube))
   nao = obj_k.shape[-1]
-  rmesh = ft.construct_rmesh(nk, nk, nk)
+  rmesh = ft.construct_symmetric_rmesh(nk, nk, nk)
   fkr, frk = ft.compute_fourier_coefficients(kmesh, rmesh)
   weights = [1] * kmesh.shape[0]
   obj_i = np.array([ft.k_to_real(frk, obj_k[s], weights) for s in range(ns)])
   if debug:
-    center = (nk-1)//2
-    obj_i = obj_i.reshape(ns, nk, nk, nk, nao, nao)
+    center = np.where(np.all(rmesh==(0., 0., 0.), axis=1))[0][0]
     for i in range(nk):
-      print("obj_i[",i-center,", 0, 0] = ")
-      print(np.diag(obj_i[0,i,center,center].real))
-    obj_i = obj_i.reshape(ns, nk_cube, nao, nao)
+      print("obj_i[",i-nk//2,", 0, 0] = ")
+      print(np.diag(obj_i[0,center-nk//2+i].real))
 
   fkr_int, frk_int = ft.compute_fourier_coefficients(kpts_inter, rmesh)
   obj_k_int = np.array([ft.real_to_k(fkr_int, obj_i[s]) for s in range(ns)])
@@ -131,6 +129,6 @@ if __name__ == '__main__':
   Sk10_inter = interpolate(Sk, kmesh_scaled, kmesh_scaled_nk10, hermi=True, debug=True)
   diff = Sk10_inter - Sk10
   print("Largest difference between the exact and the interpolated one: ", np.max(np.abs(diff))) 
-  print("Reference value is ", 0.000385692904592791)
+  print("Reference value is ", 0.0004336543171273369)
   
   # TODO Examples for interpolate_G

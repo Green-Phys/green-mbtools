@@ -18,4 +18,4 @@ Features
 
 To-Do-List
 -----------
-* Analytical Continuation that use external library such as Maxent and Nevanlinna.
+* Interface for Nevanlinna analytical Continuation c++ library.
