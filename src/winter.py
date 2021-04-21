@@ -41,6 +41,7 @@ def interpolate(obj_k, kmesh, kpts_inter, hermi=False, debug=False):
   return obj_k_int
 
 # Only work for full_bz object
+# TODO merge interpolate_tk_object and interpolate
 def interpolate_tk_object(obj_tk, kmesh, kpts_inter, hermi=False, debug=False):
   '''
   Interpolate dynamic obj_k[nts, ns, nk, nao, nao] from kmesh to kpts_inter using Wannier interpolation

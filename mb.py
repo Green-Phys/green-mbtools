@@ -6,6 +6,7 @@ import MB_analysis.src.orth as orth
 from MB_analysis.src.ir import IR_factory
 import MB_analysis.src.dyson as dyson
 import MB_analysis.src.winter as winter
+import MB_analysis.src.maxent as maxent
 
 
 def compute_mo(fock, S=None):
@@ -17,13 +18,13 @@ def compute_mo(fock, S=None):
 
   return mo_energy, mo_coeff
 
-def compute_no(dm, S):
+def compute_no(dm, S=None):
   '''
   Compute natural orbitals by diagonalizing density matrix
   :return:
   '''
   ns, ink, nao = dm.shape[0], dm.shape[1], dm.shape[2]
-  dm_orth = orth.sao_orth(dm, S, 'g')
+  dm_orth = orth.sao_orth(dm, S, 'g') if S is not None else dm.copy()
   occ = np.zeros(np.shape(dm)[:-1])
   no_coeff = np.zeros(np.shape(dm), dtype=np.complex)
   for ss in range(ns):
@@ -175,6 +176,24 @@ class MB_post(object):
                                                                  self.kmesh, kpts_inter, self._ir, hermi=hermi, debug=debug)
     return Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int
 
+  def analyt_cont(self, error=5e-3, maxent_exe, params='green.param', outdir='Maxent', gtau_orth=None):
+    '''
+    Analytical continuation using Maxent
+    :param error:
+    :param maxent_exe:
+    :param params:
+    :param outdir:
+    :param gtau:
+    :return:
+    '''
+    if gtau_orth is None:
+      gtau_orth = orth.sao_orth(self.gtau, self.S) if self.S is not None else self.gtau
+    tau_mesh = self._ir.tau_mesh
+
+    maxent.run(gtau_orth, tau_mesh, error, params, maxent_exe, outdir)
+
+
+
 def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
   index_list = np.zeros(bz_index.shape, dtype=int)
   for i, irn in enumerate(ir_list):
@@ -251,3 +270,9 @@ if __name__ == '__main__':
   occ, no_coeff = manybody.get_no()
   print(occ[0,0])
   print(occ[1,0])
+
+  ''' Maxent '''
+  # Run Maxent for given Green's function, G_MoSum
+  #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.params', wkdir='Maxent', gtau=G_MoSum)
+  # By default, run Maxent for manybody.gtau
+  #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.params', wkdir='Maxent')
