@@ -176,7 +176,7 @@ class MB_post(object):
                                                                  self.kmesh, kpts_inter, self._ir, hermi=hermi, debug=debug)
     return Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int
 
-  def analyt_cont(self, error=5e-3, maxent_exe, params='green.param', outdir='Maxent', gtau_orth=None):
+  def analyt_cont(self, error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent', gtau_orth=None):
     '''
     Analytical continuation using Maxent
     :param error:
@@ -187,10 +187,13 @@ class MB_post(object):
     :return:
     '''
     if gtau_orth is None:
-      gtau_orth = orth.sao_orth(self.gtau, self.S) if self.S is not None else self.gtau
+      gtau_orth = orth.sao_orth(self.gtau, self.S, type='g') if self.S is not None else self.gtau
+      gtau_inp = np.einsum("...ii->...i", gtau_orth)
+    else:
+      gtau_inp = gtau_orth
     tau_mesh = self._ir.tau_mesh
 
-    maxent.run(gtau_orth, tau_mesh, error, params, maxent_exe, outdir)
+    maxent.run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
 
 
@@ -273,6 +276,6 @@ if __name__ == '__main__':
 
   ''' Maxent '''
   # Run Maxent for given Green's function, G_MoSum
-  #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.params', wkdir='Maxent', gtau=G_MoSum)
+  #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent', gtau=G_MoSum)
   # By default, run Maxent for manybody.gtau
-  #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.params', wkdir='Maxent')
+  #manybody.analyt_cont(error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent')

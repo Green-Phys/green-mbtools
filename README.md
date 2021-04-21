@@ -1,7 +1,7 @@
 mb_analysis
 ===================
 
-2021-04-19
+2021-04-20
 
 mb_analysis provides functions for post processing of Green's-function-based many-body calculations. 
 * The main classe is the mb class for both spin-unpolarized and spin-polarized calculations. 
@@ -14,6 +14,7 @@ Features
 * Fourier transformation between real and reciprocal space.
 * Fourier transformation between imaginary-time and Matsuabara frequency domain.
 * Wannier interpolation
+* Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 
 To-Do-List
 -----------

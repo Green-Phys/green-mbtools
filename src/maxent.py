@@ -3,7 +3,7 @@ import subprocess
 import shutil
 import numpy as np
 
-def run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path, outdir="Maxent"):
+def run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxent', outdir="Maxent"):
   '''
   Run dim0 times maxent for gtau
   :param gtau: (nts, dim1), dim1 = (ns, nk, nao), (ns, nk), (ns) ... etc
@@ -17,11 +17,10 @@ def run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path, outdir="Maxe
   print("Maxent output:", os.path.abspath(wkdir+'/'+outdir))
 
   beta = tau_mesh[-1]
+  nts  = tau_mesh.shape[0]
   ndim = len(gtau.shape)
   g_shape = gtau.shape
-  nts  = gtau.shape[0]
   assert nts == gtau.shape[0], "Number of imaginary time points mismatches."
-  original_shape = gtau.shape
   gtau = gtau.reshape(nts, -1)
   dim1 = gtau.shape[1]
 
@@ -29,12 +28,12 @@ def run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path, outdir="Maxe
     os.mkdir(outdir)
   os.chdir(outdir)
   # Save dim1 for better understanding of output
-  np.savetxt("dimensions.txt", original_shape[1:])
+  np.savetxt("dimensions.txt", np.asarray(g_shape[1:], dtype=int))
   # FIXME Can we have multiple layers of folders so that one can separate the whole job into chunks?
   for d1 in range(dim1):
     if not os.path.exists(str(d1)):
       os.mkdir(str(d1))
-    np.savetxt("{}/G_tau.txt".format(d1), np.column_stack((tau_mesh, gtau[:, d1], np.array([error] * nts))))
+    np.savetxt("{}/G_tau.txt".format(d1), np.column_stack((tau_mesh, gtau[:, d1].real, np.array([error] * nts))))
   ## Start analytical continuation
   processes = []
   pp = 0
@@ -42,7 +41,7 @@ def run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path, outdir="Maxe
     os.chdir(str(d1))
     shutil.copy(wkdir+"/green.param", "./")
     with open("log.txt", "w") as log:
-      p = subprocess.Popen([MAXENT, "./"+str(params), "--DATA=G_tau.txt", "--BETA=" + str(beta), "--NDAT=" + str(nts)], stdout=log,
+      p = subprocess.Popen([exe_path, "./"+str(params), "--DATA=G_tau.txt", "--BETA=" + str(beta), "--NDAT=" + str(nts)], stdout=log,
             stderr=log)
       processes.append(p)
     pp += 1
@@ -55,4 +54,4 @@ def run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path, outdir="Maxe
   for p in processes:
     p.wait()
   os.chdir("..")
-  gtau = gtau.reshape(original_shape)
+  gtau = gtau.reshape(g_shape)
