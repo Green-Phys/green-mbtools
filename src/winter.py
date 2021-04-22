@@ -94,7 +94,7 @@ def interpolate_G(Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, hermi=False, debu
     print("Interpolating overlap...")
     Sk_int = interpolate(Sk, kmesh, kpts_inter, hermi, debug)
   else:
-    Sk_int = np.array([[np.eye(nao)] * kpts_inter.shape[0]]*ns)
+    Sk_int = None
 
   print("Interpolating Fock...")
   Fk_int = interpolate(Fk, kmesh, kpts_inter, hermi, debug)

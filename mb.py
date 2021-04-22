@@ -61,8 +61,8 @@ class MB_post(object):
     self._ir = None
 
     '''Setup'''
-    if fock.ndim == 4 and fock.shape[0] == 2:
-      self._ns = 2
+    if fock.ndim == 4:
+      self._ns = fock.shape[0]
     elif fock.ndim == 3:
       self._ns = 1
       fock = fock.reshape((1,) + fock.shape)
