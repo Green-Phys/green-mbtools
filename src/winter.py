@@ -60,7 +60,7 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, hermi=False, debug=False):
     center = np.where(np.all(rmesh == (0., 0., 0.), axis=1))[0][0]
     for i in range(nk):
       print("obj_i[",i-nk//2,", 0, 0] = ")
-      print(np.diag(obj_i[0, center-nk//2+i].real))
+      print(np.diag(obj_ti[0, center-nk//2+i].real))
 
   fkr_int, frk_int = ft.compute_fourier_coefficients(kpts_inter, rmesh)
   obj_tk_int = np.array([ft.real_to_k(fkr_int, obj_ti[its]) for its in range(nts*ns)])
