@@ -45,10 +45,7 @@ class MB_post(object):
     self.dm = None
     self.fock = None
     self.S = None
-    self.mu = 0.0
     self.kmesh = None
-    self.beta = 1000
-    self.lamb = '1e6'
 
     # Private instance variables
     self._S_inv_12 = None
@@ -59,6 +56,9 @@ class MB_post(object):
     self._ir_list = None
     self._weight = None
     self._ir = None
+    self._lamb = None
+    self._beta = None
+    self._mu = None
 
     '''Setup'''
     if fock.ndim == 4:
@@ -76,18 +76,20 @@ class MB_post(object):
 
     if mu is None:
       print("Warning: Default chemical potential, mu = 0.0, is used.")
+      self._mu = 0.0
     else:
-      self.mu = mu
+      self._mu = mu
     if beta is None:
       print("Warning: Inverse temperature is set to the default value 1000 a.u.^{-1}.")
+      self._beta = 1000
     else:
-      self.beta = beta
+      self._beta = beta
     if lamb is None:
       print("Warning: Lambda is set to the default '1e6'.")
+      self.lamb = '1e6'
     else:
       self.lamb = lamb
-    self._ir = IR_factory(self.beta, self.lamb)
-    self._nts = self._ir.nts
+
     self._ink = fock.shape[1]
     self._nao = fock.shape[2]
     self._ir_list = np.arange(self._ink)
@@ -106,6 +108,54 @@ class MB_post(object):
 
     self.input_summary()
 
+  @property
+  def beta(self):
+    return self._beta
+  @beta.setter
+  def beta(self, value):
+    '''
+    Changing beta will automatically update self._ir for consistency
+    '''
+    print("Updated beta = {}".format(value))
+    self._beta = value
+    if self._ir is None:
+      self._ir = IR_factory(self.beta, self.lamb)
+    else:
+      self._ir.update(self.beta, self.lamb)
+
+  @property
+  def lamb(self):
+    return self._lamb
+  @lamb.setter
+  def lamb(self, value):
+    '''
+    Changing lamb will automatically update both self._nts and self._ir for consistency.
+    :param value: Dimensionless parameter, lambda, used in IR representation.
+    :return:
+    '''
+    print("Setting up IR grid with lambda {}".format(value))
+    self._lamb = value
+    if self._ir is None:
+      self._ir = IR_factory(self.beta, self.lamb)
+    else:
+      self._ir.update(self.beta, self.lamb)
+    self._nts = self._ir.nts
+
+  @property
+  def mu(self):
+    return self._mu
+  @mu.setter
+  def mu(self, value):
+    '''
+    Updating chemical potential implicitly implies updating Green's function and density matrix.
+    :param value:
+    :return:
+    '''
+    print("Updated mu = {}".format(value))
+    self._mu = value
+    if self.gtau is not None or self.dm is not None:
+      self.solve_dyson()
+
   def input_summary(self):
     print("######### MBPT analysis class #########")
     print("nts    =", self._nts)
@@ -114,7 +164,6 @@ class MB_post(object):
     print("nao    =", self._nao)
     print("mu     =", self.mu)
     print("beta   =", self.beta)
-    print("lambda =", self.lamb)
     print("#######################################")
 
   def solve_dyson(self):
@@ -292,4 +341,3 @@ if __name__ == '__main__':
   occ, no_coeff = manybody.get_no()
   print(occ[0, 0])
   print(occ[1, 0])
-

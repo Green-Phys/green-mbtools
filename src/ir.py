@@ -12,6 +12,9 @@ class IR_factory(object):
 
     self._ir_dict = {'1e3': '/data/ir_grid/1e3_72.h5', '1e4': '/data/ir_grid/1e4_104.h5', '1e5': '/data/ir_grid/1e5_136.h5',
                 '1e6': '/data/ir_grid/1e6_168.h5', '1e7': '/data/ir_grid/1e7_202.h5'}
+    if lamb not in self._ir_dict.keys():
+      raise ValueError("{} is not an acceptable lambda value.".format(lamb)
+                       + " Acceptable lambdas are " + str(self._ir_dict.keys()))
     import MB_analysis
     self._MB_path = MB_analysis.__path__[0]
     for l in self._ir_dict:
@@ -24,6 +27,9 @@ class IR_factory(object):
     self.nw  = self.wsample.shape[0]
 
   def update(self, beta=None, lamb=None):
+    if lamb not in self._ir_dict.keys():
+      raise ValueError("{} is not an acceptable lambda value.".format(lamb)
+                       + " Acceptable lambdas are " + str(self._ir_dict.keys()))
     if lamb is not None: self.lamb = lamb
     if beta is not None: self.beta = beta
     self.tau_mesh, self.wsample, self.Ttc, self.Tcn, self.Tnc, self.Tct = read_IR_matrices(self._ir_dict[self.lamb], self.beta)
