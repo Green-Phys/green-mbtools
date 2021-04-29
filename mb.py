@@ -55,7 +55,7 @@ class MB_post(object):
     self._nao = None
     self._ir_list = None
     self._weight = None
-    self._ir = None
+    self.ir = None
     self._lamb = None
     self._beta = None
     self._mu = None
@@ -114,14 +114,14 @@ class MB_post(object):
   @beta.setter
   def beta(self, value):
     '''
-    Changing beta will automatically update self._ir for consistency
+    Changing beta will automatically update self.ir for consistency
     '''
     print("Updated beta = {}".format(value))
     self._beta = value
-    if self._ir is None:
-      self._ir = IR_factory(self.beta, self.lamb)
+    if self.ir is None:
+      self.ir = IR_factory(self.beta, self.lamb)
     else:
-      self._ir.update(self.beta, self.lamb)
+      self.ir.update(self.beta, self.lamb)
 
   @property
   def lamb(self):
@@ -129,17 +129,17 @@ class MB_post(object):
   @lamb.setter
   def lamb(self, value):
     '''
-    Changing lamb will automatically update both self._nts and self._ir for consistency.
+    Changing lamb will automatically update both self._nts and self.ir for consistency.
     :param value: Dimensionless parameter, lambda, used in IR representation.
     :return:
     '''
     print("Setting up IR grid with lambda {}".format(value))
     self._lamb = value
-    if self._ir is None:
-      self._ir = IR_factory(self.beta, self.lamb)
+    if self.ir is None:
+      self.ir = IR_factory(self.beta, self.lamb)
     else:
-      self._ir.update(self.beta, self.lamb)
-    self._nts = self._ir.nts
+      self.ir.update(self.beta, self.lamb)
+    self._nts = self.ir.nts
 
   @property
   def mu(self):
@@ -171,7 +171,7 @@ class MB_post(object):
     Compute Green's function through Dyson's equation and update self.gtau and self.dm.
     :return:
     '''
-    self.gtau, self.dm = dyson.solve_dyson(self.fock, self.S, self.sigma, self.mu, self._ir)
+    self.gtau, self.dm = dyson.solve_dyson(self.fock, self.S, self.sigma, self.mu, self.ir)
 
   def get_mo(self):
     '''
@@ -225,7 +225,7 @@ class MB_post(object):
     if self.kmesh is None:
       raise ValueError("kmesh of input data is unknown. Please provide it.")
     Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = winter.interpolate_G(self.fock, self.sigma, self.mu, self.S,
-                                                                 self.kmesh, kpts_inter, self._ir, hermi=hermi, debug=debug)
+                                                                 self.kmesh, kpts_inter, self.ir, hermi=hermi, debug=debug)
     return Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int
 
   def analyt_cont(self, error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent', gtau_orth=None):
@@ -243,7 +243,7 @@ class MB_post(object):
       gtau_inp = np.einsum("...ii->...i", gtau_orth)
     else:
       gtau_inp = gtau_orth
-    tau_mesh = self._ir.tau_mesh
+    tau_mesh = self.ir.tau_mesh
 
     maxent.run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
