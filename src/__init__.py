@@ -5,4 +5,4 @@ from MB_analysis.src import ir
 from MB_analysis.src import dyson
 from MB_analysis.src import ft
 from MB_analysis.src import winter
-from MB_analysis.src import maxent
+from MB_analysis.src import analyt_cont

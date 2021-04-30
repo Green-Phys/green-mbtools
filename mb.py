@@ -6,7 +6,7 @@ import MB_analysis.src.orth as orth
 from MB_analysis.src.ir import IR_factory
 import MB_analysis.src.dyson as dyson
 import MB_analysis.src.winter as winter
-import MB_analysis.src.maxent as maxent
+import MB_analysis.src.analyt_cont as AC
 
 
 def compute_mo(fock, S=None):
@@ -151,6 +151,7 @@ class MB_post(object):
     self._mu = value
     if self._gtau is not None:# or self.dm is not None:
       self.solve_dyson()
+
   @property
   def gtau(self):
     if self._gtau is None:
@@ -253,8 +254,18 @@ class MB_post(object):
       gtau_inp = gtau_orth
     tau_mesh = self.ir.tau_mesh
 
-    maxent.run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
+    AC.maxent_run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
+  def AC_nevanlinna(self, nevan_exe="nevanlinna", outdir="Nevanlinna"):
+    nw = self.ir.wsample.shape[0]
+    Gw = self.ir.tau_to_w(MB.gtau)[nw//2:]
+    Gw_sao = orth.sao_orth(Gw, MB.S, type='g')
+    Gw_inp = np.einsum("...ii->...i", Gw_sao)
+    del Gw, Gw_sao
+
+    wsample = self.ir.wsample[nw//2]
+    input_parser = 'G_w.txt ' + str(nw//2) + ' A_w.txt coeff'
+    AC.nevan_run(Gw_inp, wsample, input_parser, nevan_exe, outdir)
 
 
 def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
