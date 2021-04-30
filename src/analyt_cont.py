@@ -83,7 +83,6 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
   pp = 0
   for d1 in range(dim1):
     os.chdir(str(d1))
-    shutil.copy(wkdir + "/coeff", "./")
     with open("log.txt", "w") as log:
       p = subprocess.Popen([nevan_exe], stdin=subprocess.PIPE, stdout=log, stderr=log)
       p.stdin.write(str.encode(input_parser))
