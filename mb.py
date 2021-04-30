@@ -40,14 +40,13 @@ class MB_post(object):
   def __init__(self, fock, sigma=None, mu=None, gtau=None, S=None, kmesh=None, beta=None, lamb=None):
     ''' Initialization '''
     # Public instance variables
-    self.gtau = None
     self.sigma = None
-    self.dm = None
     self.fock = None
     self.S = None
     self.kmesh = None
 
     # Private instance variables
+    self._gtau = None
     self._S_inv_12 = None
     self._nts = None
     self._ns = None
@@ -102,9 +101,6 @@ class MB_post(object):
 
     if gtau is not None:
       self.gtau = gtau.copy()
-      self.dm = -1.0 * self.gtau[-1]
-    #else:
-    #  self.solve_dyson()
 
     self.input_summary()
 
@@ -153,8 +149,24 @@ class MB_post(object):
     '''
     print("Updated mu = {}".format(value))
     self._mu = value
-    if self.gtau is not None or self.dm is not None:
+    if self._gtau is not None:# or self.dm is not None:
       self.solve_dyson()
+  @property
+  def gtau(self):
+    if self._gtau is None:
+      self.solve_dyson()
+    return self._gtau
+  @gtau.setter
+  def gtau(self, G):
+    '''
+    Updating gtau will implicitly update density matrix (dm).
+    :param G:
+    :return:
+    '''
+    self._gtau = G
+  @property
+  def dm(self):
+    return -1.0 * self.gtau[-1]
 
   def input_summary(self):
     print("######### MBPT analysis class #########")
@@ -171,7 +183,7 @@ class MB_post(object):
     Compute Green's function through Dyson's equation and update self.gtau and self.dm.
     :return:
     '''
-    self.gtau, self.dm = dyson.solve_dyson(self.fock, self.S, self.sigma, self.mu, self.ir)
+    self.gtau = dyson.solve_dyson(self.fock, self.S, self.sigma, self.mu, self.ir)
 
   def get_mo(self):
     '''
@@ -186,14 +198,10 @@ class MB_post(object):
     Compute natural orbitals by diagonalizing density matrix
     :return:
     '''
-    if self.dm is None:
-      self.solve_dyson()
     occ, no_coeff = compute_no(self.dm, self.S)
     return occ, no_coeff
 
   def mulliken_analysis(self, orbitals=None):
-    if self.dm is None:
-      self.solve_dyson()
     if orbitals is None:
       orbitals = np.arange(self._nao)
     occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=np.complex)
@@ -303,7 +311,6 @@ if __name__ == '__main__':
   G = manybody.gtau
   # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
   manybody = MB_post(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
-  manybody.solve_dyson()
   G2 = manybody.gtau
 
   diff = G - G2

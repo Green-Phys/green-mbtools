@@ -23,6 +23,5 @@ def solve_dyson(fock, S=None, sigma=None, mu=0, ir=None):
         Gw[n] = np.linalg.inv(tmp)
       gtau[:, s, k] = ir.w_to_tau(Gw)
 
-  dm = -1.0 * gtau[-1]
-  return gtau, dm
+  return gtau
 
