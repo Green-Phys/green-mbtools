@@ -62,7 +62,7 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
   print("Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
 
   nw   = wsample.shape[0]
-  asset nw == Gw.shape[0], "Number of imaginary frequency points mismatches."
+  assert nw == Gw.shape[0], "Number of imaginary frequency points mismatches."
   ndim = len(Gw.shape)
   g_shape = Gw.shape
   Gw = Gw.reshape(nw, -1)

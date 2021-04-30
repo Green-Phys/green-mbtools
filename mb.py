@@ -237,7 +237,7 @@ class MB_post(object):
                                                                  self.kmesh, kpts_inter, self.ir, hermi=hermi, debug=debug)
     return Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int
 
-  def analyt_cont(self, error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent', gtau_orth=None):
+  def AC_maxent(self, error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent', gtau_orth=None):
     '''
     Analytical continuation using Maxent
     :param error:
@@ -256,14 +256,21 @@ class MB_post(object):
 
     AC.maxent_run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
-  def AC_nevanlinna(self, nevan_exe="nevanlinna", outdir="Nevanlinna"):
+  def AC_nevanlinna(self, nevan_exe="nevanlinna", outdir="Nevanlinna", gtau_orth=None):
+    '''
+    Analytical continuation using Nevanlinna interpolation
+    :param nevan_exe:
+    :param outdir:
+    :return:
+    '''
+    if gtau_orth is None:
+      gtau_orth = orth.sao_orth(self.gtau, self.S, type='g') if self.S is not None else self.gtau
     nw = self.ir.wsample.shape[0]
-    Gw = self.ir.tau_to_w(MB.gtau)[nw//2:]
-    Gw_sao = orth.sao_orth(Gw, MB.S, type='g')
-    Gw_inp = np.einsum("...ii->...i", Gw_sao)
-    del Gw, Gw_sao
+    Gw = self.ir.tau_to_w(gtau_orth)[nw//2:]
+    Gw_inp = np.einsum("...ii->...i", Gw)
+    del Gw
 
-    wsample = self.ir.wsample[nw//2]
+    wsample = self.ir.wsample[nw//2:]
     input_parser = 'G_w.txt ' + str(nw//2) + ' A_w.txt coeff'
     AC.nevan_run(Gw_inp, wsample, input_parser, nevan_exe, outdir)
 
