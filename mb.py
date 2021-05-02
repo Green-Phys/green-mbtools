@@ -265,10 +265,9 @@ class MB_post(object):
     '''
     if gtau_orth is None:
       gtau_orth = orth.sao_orth(self.gtau, self.S, type='g') if self.S is not None else self.gtau
+      gtau_orth = np.einsum("...ii->...i", gtau_orth)
     nw = self.ir.wsample.shape[0]
-    Gw = self.ir.tau_to_w(gtau_orth)[nw//2:]
-    Gw_inp = np.einsum("...ii->...i", Gw)
-    del Gw
+    Gw_inp = self.ir.tau_to_w(gtau_orth)[nw//2:]
 
     wsample = self.ir.wsample[nw//2:]
     input_parser = 'G_w.txt ' + str(nw//2) + ' A_w.txt coeff'
