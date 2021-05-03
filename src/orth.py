@@ -15,15 +15,20 @@ def sao_orth(X, S, type=None):
     original_shape = X.shape
     X = X.reshape(-1, ns, nk, nao, nao)
     X_orth = np.zeros(X.shape, dtype=X.dtype)
+    S12 = np.zeros(S.shape, dtype=S.dtype)
+    for s in range(ns):
+        for ik in range(nk):
+            if type =='g':
+                S12[s,ik] = LA.sqrtm(S[s,ik])
+            elif type == 'f':
+                S12[s,ik] = np.linalg.inv(LA.sqrtm(S[s,ik]))
     for d in range(X.shape[0]):
         for s in range(ns):
             for ik in range(nk):
-                S12 = LA.sqrtm(S[s,ik])
                 if type == 'g':
-                    X_orth[d,s,ik] = reduce(np.dot, (S12, X[d,s,ik], S12))
+                    X_orth[d,s,ik] = reduce(np.dot, (S12[s,ik], X[d,s,ik], S12[s,ik]))
                 elif type == 'f':
-                    S12_inv = np.linalg.inv(S12)
-                    X_orth[d,s,ik] = reduce(np.dot, (S12_inv, X[d,s,ik], S12_inv))
+                    X_orth[d,s,ik] = reduce(np.dot, (S12[s,ik], X[d,s,ik], S12[s,ik]))
     X_orth = X_orth.reshape(original_shape)
     return X_orth
 
