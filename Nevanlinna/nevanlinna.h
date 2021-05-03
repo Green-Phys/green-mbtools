@@ -71,7 +71,7 @@ private:
 public:
     //calculate and store real frequencies (at omega+i*eta), uniform grid
     //***change N_real_, omega_min, omega_max and eta as needed***
-    real_domain_data (std::string ofile) : ofs(ofile), N_real_(6000), omega_min(-15), omega_max(0), eta(0.01) {
+    real_domain_data (std::string ofile) : ofs(ofile), N_real_(10000), omega_min(-15), omega_max(15), eta(0.01) {
         val_.resize(N_real_);
         freq_.resize(N_real_);
         nev_real inter = (omega_max - omega_min) / (N_real_ - 1);
