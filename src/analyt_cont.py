@@ -59,7 +59,7 @@ def maxent_run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxen
   dump_A = False
   for d1 in range(dim1):
     try:
-      freqs = np.np.loadtxt("{}/green.out.maxspec.dat".format(d1))[:,0]
+      freqs = np.loadtxt("{}/green.out.maxspec.dat".format(d1))[:,0]
     except IOError:
       pass
     else:
@@ -72,7 +72,7 @@ def maxent_run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxen
         Aw[:,d1] = np.loadtxt("{}/green.out.maxspec.dat".format(d1))[:,1]
       except IOError:
         print("green.out.maxspec.dat is missing in {} folder. Possibly analytical continuation fails at that point.".format(d1))
-    Aw = Aw.reshape((freqs.shape[0],) + g_shpae[1:])
+    Aw = Aw.reshape((freqs.shape[0],) + g_shape[1:])
     gtau = gtau.reshape(g_shape)
     f = h5py.File("DOS.h5", 'w')
     f["freqs"] = freqs
@@ -130,7 +130,7 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
   dump_A = False
   for d1 in range(dim1):
     try:
-      freqs = np.np.loadtxt("{}/A_w.txt".format(d1))[:, 0]
+      freqs = np.loadtxt("{}/A_w.txt".format(d1))[:, 0]
     except IOError:
       pass
     else:
@@ -143,7 +143,7 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
         Aw[:,d1] = np.loadtxt("{}/A_w.txt".format(d1))[:,1]
       except IOError:
         print("A_w.txt is missing in {} folder. Possibly analytical continuation fails at that point.".format(d1))
-    Aw = Aw.reshape((freqs.shape[0],) + g_shpae[1:])
+    Aw = Aw.reshape((freqs.shape[0],) + g_shape[1:])
     Gw = Gw.reshape(g_shape)
     f = h5py.File("DOS.h5", 'w')
     f["freqs"] = freqs
