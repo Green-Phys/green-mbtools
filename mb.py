@@ -102,7 +102,7 @@ class MB_post(object):
     if gtau is not None:
       self.gtau = gtau.copy()
 
-    self.input_summary()
+    print(self)
 
   @property
   def beta(self):
@@ -169,15 +169,15 @@ class MB_post(object):
   def dm(self):
     return -1.0 * self.gtau[-1]
 
-  def input_summary(self):
-    print("######### MBPT analysis class #########")
-    print("nts    =", self._nts)
-    print("ns     =", self._ns)
-    print("nk     =", self._ink)
-    print("nao    =", self._nao)
-    print("mu     =", self.mu)
-    print("beta   =", self.beta)
-    print("#######################################")
+  def __str__(self):
+    return "######### MBPT analysis class #########\n" \
+           "nts    = {} \n" \
+           "ns     = {}\n" \
+           "nk     = {}\n" \
+           "nao    = {}\n" \
+           "mu     = {}\n" \
+           "beta   = {}\n" \
+           "#######################################".format(self._nts, self._ns, self._ink, self._nao, self.mu, self.beta)
 
   def solve_dyson(self):
     '''
@@ -365,3 +365,5 @@ if __name__ == '__main__':
   occ, no_coeff = manybody.get_no()
   print(occ[0, 0])
   print(occ[1, 0])
+
+  print(manybody)
