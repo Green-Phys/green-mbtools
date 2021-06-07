@@ -206,16 +206,10 @@ class MB_post(object):
     if orbitals is None:
       orbitals = np.arange(self._nao)
     occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=np.complex)
-    for ss in range(self._ns):
-      for ik in range(self._ink):
-        n_k = np.zeros(orbitals.shape[0], dtype=np.complex)
-        for i in orbitals:
-          if self.S is None:
-            n_k[i] += self.dm[ss, ik, i, i]
-          else:
-            for j in range(self._nao):
-              n_k[i] += self.dm[ss,ik,i,j] * self.S[ss,ik,j,i]
-        occupations[ss] += self._weight[ik] * n_k
+    if self.S is not None:
+      occupations = np.einsum('k,skij,skji->si', self._weight, self.dm, self.S)
+    else:
+      occupations = np.einsum('k,skii->si', self._weight, self.dm)
     num_k = len(self._weight)
     occupations /= num_k
 
