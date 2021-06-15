@@ -40,7 +40,10 @@ def maxent_run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxen
   pp = 0
   for d1 in range(dim1):
     os.chdir(str(d1))
-    shutil.copy(str(params), "./green.param")
+    try:
+      shutil.copy(str(params), "./green.param")
+    except:
+      shutil.copy(os.path.abspath(wkdir+'/'+params), "./green.param")
     with open("log.txt", "w") as log:
       p = subprocess.Popen([exe_path, "./green.param", "--DATA=G_tau.txt", "--BETA=" + str(beta), "--NDAT=" + str(nts)], stdout=log,
             stderr=log)
