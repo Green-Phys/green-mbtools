@@ -6,7 +6,7 @@ import h5py
 
 def maxent_run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxent', outdir="Maxent"):
   '''
-  Run dim0 times maxent for gtau
+  Run dim0 times maxent continuation for gtau
   :param gtau: (nts, dim1), dim1 = (ns, nk, nao), (ns, nk), (ns) ... etc
   :param tau_mesh:
   :param exe_path: Maxent executable path
@@ -90,11 +90,23 @@ def maxent_run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxen
   os.chdir("..")
 
 def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanlinna"):
+  '''
+   Run dim0 times Nevanlinna continuation for Gw. Note that Gw should only lie on positive Matsubara frequency axis.
+   :param Gw: (nw, dim1), dim1 = (ns, nk, nao), (ns, nk), (ns) ... etc
+   :param wsample: Matsubara frequency samplings
+   :param input_parser[string]: "Giw_file_to_dump number_of_sampling Gw_file_to_dump coeff" each term is separated by whitespace.
+   :param exe_path: Nevanlinna executable path
+   :param outdir: output directory w.r.t. the current working directory
+   :return:
+   '''
   wkdir = os.path.abspath(os.getcwd())
   print("Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
 
-  nw   = wsample.shape[0]
-  assert nw == Gw.shape[0], "Number of imaginary frequency points mismatches."
+  args = input_parser.split()
+  X_iw_path, nw, X_w_path = args[0], int(args[1]), args[2]
+  print("Will dump input to {} and output to {}".format(X_iw_path, X_w_path))
+  assert nw == wsample.shape[0], "Number of imaginary frequency points mismatches between \"input_parser\" and wsample."
+  assert nw == Gw.shape[0], "Number of imaginary frequency points mismatches between \"input_parser\" and Gw."
   ndim = len(Gw.shape)
   g_shape = Gw.shape
   Gw = Gw.reshape(nw, -1)
@@ -109,7 +121,7 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
   for d1 in range(dim1):
     if not os.path.exists(str(d1)):
       os.mkdir(str(d1))
-    np.savetxt("{}/G_w.txt".format(d1), np.column_stack((wsample, Gw[:,d1].real, Gw[:,d1].imag)))
+    np.savetxt("{}/{}".format(d1, X_iw_path), np.column_stack((wsample, Gw[:,d1].real, Gw[:,d1].imag)))
   ## Start analytical continuation
   processes = []
   pp = 0
@@ -133,7 +145,7 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
   dump_A = False
   for d1 in range(dim1):
     try:
-      freqs = np.loadtxt("{}/A_w.txt".format(d1))[:, 0]
+      freqs = np.loadtxt("{}/{}".format(d1, X_w_path))[:, 0]
     except IOError:
       pass
     else:
@@ -143,9 +155,9 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
     Aw = np.zeros((freqs.shape[0], dim1), dtype=float)
     for d1 in range(dim1):
       try:
-        Aw[:,d1] = np.loadtxt("{}/A_w.txt".format(d1))[:,1]
+        Aw[:,d1] = np.loadtxt("{}/{}".format(d1, X_w_path))[:,1]
       except IOError:
-        print("A_w.txt is missing in {} folder. Possibly analytical continuation fails at that point.".format(d1))
+        print("{} is missing in {} folder. Possibly analytical continuation fails at that point.".format(X_w_path, d1))
     Aw = Aw.reshape((freqs.shape[0],) + g_shape[1:])
     Gw = Gw.reshape(g_shape)
     f = h5py.File("DOS.h5", 'w')
