@@ -145,17 +145,23 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
   dump_A = False
   for d1 in range(dim1):
     try:
-      freqs = np.loadtxt("{}/{}".format(d1, X_w_path))[:, 0]
+      X_w = np.loadtxt("{}/{}".format(d1, X_w_path))
+      dtype = complex if X_w.shape[1] == 3 else float
+      freqs = X_w[:, 0]
     except IOError:
       pass
     else:
       dump_A = True
       break
   if dump_A:
-    Aw = np.zeros((freqs.shape[0], dim1), dtype=float)
+    Aw = np.zeros((freqs.shape[0], dim1), dtype=dtype)
     for d1 in range(dim1):
       try:
-        Aw[:,d1] = np.loadtxt("{}/{}".format(d1, X_w_path))[:,1]
+        X_w = np.loadtxt("{}/{}".format(d1, X_w_path))
+        if dtype == complex:
+          Aw[:,d1].real, Aw[:,d1].imag = X_w[:,1], X_w[:,2]
+        else:
+          Aw[:,d1] = X_w[:,1]
       except IOError:
         print("{} is missing in {} folder. Possibly analytical continuation fails at that point.".format(X_w_path, d1))
     Aw = Aw.reshape((freqs.shape[0],) + g_shape[1:])
