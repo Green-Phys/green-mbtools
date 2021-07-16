@@ -11,7 +11,7 @@ from MB_analysis.src import orth
 #
 ##################
 
-MB_path = MB_analysis.__path__[0]
+MB_path = MB_analysis.__path__[0] + '/../'
 f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
 Sr = f["S-k"][()].view(np.complex)
 Sr = Sr.reshape(Sr.shape[:-1])

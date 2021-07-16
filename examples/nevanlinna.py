@@ -15,7 +15,7 @@ T_inv = 1000
 debug = True
 
 # Input files
-MB_path = MB_analysis.__path__[0]
+MB_path = MB_analysis.__path__[0] + '/../'
 input_path = MB_path + '/data/H2_GW/input.h5'
 sim_path = MB_path + '/data/H2_GW/sim.h5'
 lamb = '1e4'

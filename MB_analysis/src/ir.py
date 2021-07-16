@@ -10,8 +10,8 @@ Fourier transform between imaginary time and Matsubara frequency using intermedi
 class IR_factory(object):
   def __init__(self, beta, lamb):
 
-    self._ir_dict = {'1e3': '/data/ir_grid/1e3_72.h5', '1e4': '/data/ir_grid/1e4_104.h5', '1e5': '/data/ir_grid/1e5_136.h5',
-                '1e6': '/data/ir_grid/1e6_168.h5', '1e7': '/data/ir_grid/1e7_202.h5'}
+    self._ir_dict = {'1e3': '/../data/ir_grid/1e3_72.h5', '1e4': '/../data/ir_grid/1e4_104.h5', '1e5': '/../data/ir_grid/1e5_136.h5',
+                '1e6': '/../data/ir_grid/1e6_168.h5', '1e7': '/../data/ir_grid/1e7_202.h5'}
     if lamb not in self._ir_dict.keys():
       raise ValueError("{} is not an acceptable lambda value.".format(lamb)
                        + " Acceptable lambdas are " + str(self._ir_dict.keys()))
