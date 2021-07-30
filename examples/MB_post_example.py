@@ -65,9 +65,21 @@ occ, no_coeff = MB.get_no()
 print(occ[0,0])
 print(occ[1,0])
 
+''' Molecular energies from different orthogonalization '''
+print("Molecular energies: ")
+# Standard way to solve FC = SCE by calling scipy.linalg.eigh()
+mo_sao, c_sao = MB.get_mo()
+print(mo_sao[0,0])
+print("Molecular energies from cacnonical orthogonalization: ")
+#  Lowdin canonical orthogonalization with threshold = 1e-7
+mo_can, c_can = MB.get_mo(canonical=True, thr=1e-7)
+print(mo_can[0,0])
+# Note that c_sao and c_can will differ by a phase factor!
+
+
 ##################
 #
-# Initialize MB_post with orthogonal basis 
+# Initialize MB_post with SAO basis
 #
 ##################
 

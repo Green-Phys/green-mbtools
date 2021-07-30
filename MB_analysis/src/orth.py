@@ -6,6 +6,40 @@ import scipy.linalg as LA
 Orthogonalization utilities
 '''
 
+def canonical_matrices(S, thr=1e-7):
+    '''Löwdin's canonical orthogonalization'''
+    # Form vectors for normalized overlap matrix
+    Sval, Svec = LA.eigh(S)
+    X = Svec[:,Sval>=thr] / np.sqrt(Sval[Sval>=thr])
+    return X
+
+def canonical_orth(H, S, thr=1e-7, type='f'):
+    '''Löwdin's canonical orthogonalization'''
+    if type != 'f':
+        raise ValueError("Invalid transformation type. Only 'f' type for Fock is supported currently.")
+    print("Canonical orthogonalization with threshold = {}.".format(thr))
+    ns = S.shape[0]
+    nk = S.shape[1]
+    nao = S.shape[2]
+    original_shape = H.shape
+    H = H.reshape(-1, ns, nk, nao, nao)
+    H_orth = np.zeros(H.shape, dtype=H.dtype)
+    X = np.zeros(S.shape, dtype=S.dtype)
+    for s in range(ns):
+        for ik in range(nk):
+            cond = np.linalg.cond(S[s,ik])
+            if cond > 1e7:
+                print("Warning: Condition number is {} are larger than 1e7.".format(cond))
+            X[s, ik] = canonical_matrices(S[s, ik], thr)
+
+    for d in range(H.shape[0]):
+        for s in range(ns):
+            for ik in range(nk):
+                H_orth[d, s, ik] = reduce(np.dot, (X[s, ik].T.conj(), H[d, s, ik], X[s, ik]))
+    H_orth = H_orth.reshape(original_shape)
+    return H_orth
+
+
 def sao_orth(X, S, type=None):
     if type != 'g' and type != 'f':
         raise ValueError("Valid transformation types are 'g' for density, 'f' for Fock")
@@ -18,6 +52,10 @@ def sao_orth(X, S, type=None):
     S12 = np.zeros(S.shape, dtype=S.dtype)
     for s in range(ns):
         for ik in range(nk):
+            cond = np.linalg.cond(S[s,ik])
+            if cond > 1e7:
+                print("Warning: Condition number, {}, is larger than 1e7. Possible numerical instability could appear. \n"
+                      "Consider to use the canonical orthogonalization instead.".format(cond))
             if type =='g':
                 S12[s,ik] = LA.sqrtm(S[s,ik])
             elif type == 'f':

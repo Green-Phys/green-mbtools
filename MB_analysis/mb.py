@@ -1,3 +1,4 @@
+from functools import reduce
 import numpy as np
 import scipy.linalg as LA
 
@@ -7,16 +8,6 @@ from MB_analysis.src.ir import IR_factory
 import MB_analysis.src.dyson as dyson
 import MB_analysis.src.winter as winter
 import MB_analysis.src.analyt_cont as AC
-
-
-def compute_mo(fock, S=None):
-  '''
-  Compute molecular orbital energy by solving FC=SCE
-  :return:
-  '''
-  mo_energy, mo_coeff = spec.eig(fock, S)
-
-  return mo_energy, mo_coeff
 
 def compute_no(dm, S=None):
   '''
@@ -186,12 +177,27 @@ class MB_post(object):
     '''
     self.gtau = dyson.solve_dyson(self.fock, self.S, self.sigma, self.mu, self.ir)
 
-  def get_mo(self):
+  def eigh(self, F, S, thr=1e-7):
+    return LA.eigh(F, S)
+  # FIXME c here is differ with the c from eigh() by a phase factor. Fix it or leave it like this?
+  def eigh_canonical(self, F, S, thr=1e-7):
+    x = orth.canonical_matrices(S, thr)
+    xFx = reduce(np.dot, (x.T.conj(), F, x))
+    e, c = LA.eigh(xFx)
+    c = np.dot(x, c)
+
+    return e, c
+
+  def get_mo(self, canonical=False, thr=1e-7):
     '''
     Compute molecular orbital energy by solving FC=SCE
     :return:
     '''
-    mo_energy, mo_coeff = compute_mo(self.fock, self.S)
+    if not canonical:
+      eigh = self.eigh
+    else:
+      eigh = self.eigh_canonical
+    mo_energy, mo_coeff = spec.compute_mo(self.fock, self.S, eigh, thr)
     return mo_energy, mo_coeff
 
   def get_no(self):
