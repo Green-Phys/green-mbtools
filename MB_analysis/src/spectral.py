@@ -49,8 +49,10 @@ def compute_mo(F, S, eigh_solver=LA.eigh, thr=1e-7):
   mo_coeff_k: molecular orbital coefficient in AO basis
   '''
   ns, nk, nao = F.shape[0:3]
-  eiv_sk = []
-  mo_coeff_sk = []
+  eiv_sk = np.zeros((ns, nk, nao))
+  mo_coeff_sk = np.zeros((ns, nk, nao, nao), dtype=F.dtype)
+  #eiv_sk = []
+  #mo_coeff_sk = []
   if S is None:
     S = np.array([[np.eye(nao)]*nk]*ns)
   for ss in range(ns):
@@ -59,10 +61,13 @@ def compute_mo(F, S, eigh_solver=LA.eigh, thr=1e-7):
       # Re-order
       idx = np.argmax(abs(mo.real), axis=0)
       mo[:, mo[idx, np.arange(len(eiv))].real < 0] *= -1
-      eiv_sk.append(eiv)
-      mo_coeff_sk.append(mo)
+      nbands = eiv.shape[0]
+      eiv_sk[ss, k, :nbands] = eiv
+      mo_coeff_sk[ss, k, :, :nbands] = mo
+      #eiv_sk.append(eiv)
+      #mo_coeff_sk.append(mo)
 
-  eig_sk = np.asarray(eiv_sk).reshape(ns, nk, nao)
-  mo_coeff_sk = np.asarray(mo_coeff_sk).reshape(ns, nk, nao, nao)
+  #eig_sk = np.asarray(eiv_sk).reshape(ns, nk, nao)
+  #mo_coeff_sk = np.asarray(mo_coeff_sk).reshape(ns, nk, nao, nao)
 
-  return eig_sk, mo_coeff_sk
+  return eiv_sk, mo_coeff_sk

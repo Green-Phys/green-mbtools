@@ -6,17 +6,23 @@ import scipy.linalg as LA
 Orthogonalization utilities
 '''
 
-def canonical_matrices(S, thr=1e-7):
+def canonical_matrices(S, thr=1e-7, type='f'):
     '''Löwdin's canonical orthogonalization'''
     # Form vectors for normalized overlap matrix
     Sval, Svec = LA.eigh(S)
     X = Svec[:,Sval>=thr] / np.sqrt(Sval[Sval>=thr])
-    return X
+    if type == 'f':
+        return X
+    elif type == 'g':
+        X = LA.pinv(X)
+        return X.T.conj()
+    else:
+        raise ValueError("Invalid transofrmation type. Only 'f'/'g' type for Fock/Green's function only.")
 
 def canonical_orth(H, S, thr=1e-7, type='f'):
     '''Löwdin's canonical orthogonalization'''
-    if type != 'f':
-        raise ValueError("Invalid transformation type. Only 'f' type for Fock is supported currently.")
+    #if type != 'f':
+    #    raise ValueError("Invalid transformation type. Only 'f' type for Fock is supported currently.")
     print("Canonical orthogonalization with threshold = {}.".format(thr))
     ns = S.shape[0]
     nk = S.shape[1]
@@ -24,19 +30,24 @@ def canonical_orth(H, S, thr=1e-7, type='f'):
     original_shape = H.shape
     H = H.reshape(-1, ns, nk, nao, nao)
     H_orth = np.zeros(H.shape, dtype=H.dtype)
-    X = np.zeros(S.shape, dtype=S.dtype)
+    #X = np.zeros(S.shape, dtype=S.dtype)
     for s in range(ns):
         for ik in range(nk):
             cond = np.linalg.cond(S[s,ik])
             if cond > 1e7:
-                print("Warning: Condition number is {} are larger than 1e7.".format(cond))
-            X[s, ik] = canonical_matrices(S[s, ik], thr)
-
-    for d in range(H.shape[0]):
-        for s in range(ns):
-            for ik in range(nk):
-                H_orth[d, s, ik] = reduce(np.dot, (X[s, ik].T.conj(), H[d, s, ik], X[s, ik]))
+                print("Warning: Condition number = {} is larger than 1e7.".format(cond))
+            #X[s, ik] = canonical_matrices(S[s, ik], thr, type)
+            X = canonical_matrices(S[s, ik], thr, type)
+            nbands = X.shape[1]
+            for d in range(H.shape[0]):
+                H_orth[d, s, ik, :nbands, :nbands] = reduce(np.dot, (X.T.conj(), H[d, s, ik], X))
     H_orth = H_orth.reshape(original_shape)
+
+    #for d in range(H.shape[0]):
+    #    for s in range(ns):
+    #        for ik in range(nk):
+    #            H_orth[d, s, ik] = reduce(np.dot, (X[s, ik].T.conj(), H[d, s, ik], X[s, ik]))
+    #H_orth = H_orth.reshape(original_shape)
     return H_orth
 
 

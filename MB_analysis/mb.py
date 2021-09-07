@@ -181,7 +181,8 @@ class MB_post(object):
     return LA.eigh(F, S)
   # FIXME c here is differ with the c from eigh() by a phase factor. Fix it or leave it like this?
   def eigh_canonical(self, F, S, thr=1e-7):
-    x = orth.canonical_matrices(S, thr)
+    # S: m*m, x =: m*n, xFx: n*n, c: n*n, e: n, xc: m*n
+    x = orth.canonical_matrices(S, thr, 'f')
     xFx = reduce(np.dot, (x.T.conj(), F, x))
     e, c = LA.eigh(xFx)
     c = np.dot(x, c)
