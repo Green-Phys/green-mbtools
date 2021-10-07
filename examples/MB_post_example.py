@@ -13,13 +13,13 @@ from MB_analysis.src import orth
 
 MB_path = MB_analysis.__path__[0] + '/../'
 f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
-Sr = f["S-k"][()].view(np.complex)
+Sr = f["S-k"][()].view(complex)
 Sr = Sr.reshape(Sr.shape[:-1])
-Fr = f["iter14/Fock-k"][()].view(np.complex)
+Fr = f["iter14/Fock-k"][()].view(complex)
 Fr = Fr.reshape(Fr.shape[:-1])
-Sigmar = f["iter14/Selfenergy/data"][()].view(np.complex)
+Sigmar = f["iter14/Selfenergy/data"][()].view(complex)
 Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
-Gr = f["iter14/G_tau/data"][()].view(np.complex)
+Gr = f["iter14/G_tau/data"][()].view(complex)
 Gr = Gr.reshape(Gr.shape[:-1])
 mu = f["iter14/mu"][()]
 f.close()

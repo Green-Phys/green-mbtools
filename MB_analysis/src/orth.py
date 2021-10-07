@@ -30,24 +30,18 @@ def canonical_orth(H, S, thr=1e-7, type='f'):
     original_shape = H.shape
     H = H.reshape(-1, ns, nk, nao, nao)
     H_orth = np.zeros(H.shape, dtype=H.dtype)
-    #X = np.zeros(S.shape, dtype=S.dtype)
     for s in range(ns):
         for ik in range(nk):
             cond = np.linalg.cond(S[s,ik])
             if cond > 1e7:
                 print("Warning: Condition number = {} is larger than 1e7.".format(cond))
-            #X[s, ik] = canonical_matrices(S[s, ik], thr, type)
             X = canonical_matrices(S[s, ik], thr, type)
+            # nbands <= nao due to linear dependency
             nbands = X.shape[1]
             for d in range(H.shape[0]):
                 H_orth[d, s, ik, :nbands, :nbands] = reduce(np.dot, (X.T.conj(), H[d, s, ik], X))
     H_orth = H_orth.reshape(original_shape)
 
-    #for d in range(H.shape[0]):
-    #    for s in range(ns):
-    #        for ik in range(nk):
-    #            H_orth[d, s, ik] = reduce(np.dot, (X[s, ik].T.conj(), H[d, s, ik], X[s, ik]))
-    #H_orth = H_orth.reshape(original_shape)
     return H_orth
 
 
@@ -116,7 +110,7 @@ def transform(Z, X, X_inv):
     :param X_inv: Inverse transformation matrix
     :return: Z in new basis
     '''
-    Z_X = np.zeros(Z.shape, dtype=np.complex)
+    Z_X = np.zeros(Z.shape, dtype=complex)
     for ik in range(Z.shape[0]):
         Z_X[ik] = transform_per_k(Z[ik, :], X[ik], X_inv[ik])
 

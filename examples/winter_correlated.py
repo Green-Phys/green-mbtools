@@ -61,10 +61,10 @@ f.close()
 
 f = h5py.File(GW_path, 'r')
 it = f["iter"][()]
-rSk = f["/S-k"][()].view(np.complex)
-rFk = f["iter"+str(it)+"/Fock-k"][()].view(np.complex)
-rGk = f["iter"+str(it)+"/G_tau/data"][()].view(np.complex)
-rSigmak = f["iter"+str(it)+"/Selfenergy/data"][()].view(np.complex)
+rSk = f["/S-k"][()].view(complex)
+rFk = f["iter"+str(it)+"/Fock-k"][()].view(complex)
+rGk = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
+rSigmak = f["iter"+str(it)+"/Selfenergy/data"][()].view(complex)
 tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
 mu = f["iter"+str(it)+"/mu"][()]
 rFk = rFk.reshape(rFk.shape[:-1])

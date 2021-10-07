@@ -25,7 +25,7 @@ def disper(fock, U = False, mo_basis = False):
     return eps_k
   else:
     eps_k = np.zeros((fock.shape[:2]))
-    mo_coeff = np.zeros((fock.shape), dtype=np.complex)
+    mo_coeff = np.zeros((fock.shape), dtype=complex)
     for iks in range(fock.shape[0]):
       eps_k[iks], mo_coeff[iks] = np.linalg.eigh(fock[iks])
 

@@ -38,8 +38,8 @@ def compute_fourier_coefficients(kmesh, rmesh):
   '''
   Compute Fourier coefficients for direct and inverse Fourier transform
   ''' 
-  fkr = np.zeros((kmesh.shape[0], rmesh.shape[0]), dtype=np.complex)
-  frk = np.zeros((rmesh.shape[0], kmesh.shape[0]), dtype=np.complex)
+  fkr = np.zeros((kmesh.shape[0], rmesh.shape[0]), dtype=complex)
+  frk = np.zeros((rmesh.shape[0], kmesh.shape[0]), dtype=complex)
   for ik, k in enumerate(kmesh):
     for ir, r in enumerate(rmesh):
       dp = 2.j*np.pi*np.dot(k,r)
@@ -73,7 +73,9 @@ def real_to_k(fkr, obj_i):
 
   return obj_k - Fourier transform of obj_i
   '''
-  obj_k = np.einsum('i...,ik->k...', obj_i, fkr.conj().T)
+  original_shape = obj_i.shape
+  obj_k = np.dot(fkr.conj(), obj_i.reshape(obj_i.shape[0],-1))
+  obj_k = obj_k.reshape((obj_k.shape[0],) + obj_i.shape[1:])
   return obj_k
 
 if __name__ == '__main__':

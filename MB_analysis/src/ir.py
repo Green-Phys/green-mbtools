@@ -37,7 +37,7 @@ class IR_factory(object):
     self.nw = self.wsample.shape[0]
 
   def tau_to_w(self, X_t):
-    X_w = np.zeros((self.nw,) + X_t.shape[1:], dtype=np.complex)
+    X_w = np.zeros((self.nw,) + X_t.shape[1:], dtype=complex)
     original_shape = X_w.shape
 
     X_w, X_t = X_w.reshape(self.nw, -1), X_t.reshape(self.nts, -1)
@@ -46,7 +46,7 @@ class IR_factory(object):
     return X_w
 
   def w_to_tau(self, X_w):
-    X_t = np.zeros((self.nts,) + X_w.shape[1:], dtype=np.complex)
+    X_t = np.zeros((self.nts,) + X_w.shape[1:], dtype=complex)
     original_shape = X_t.shape
 
     X_w, X_t = X_w.reshape(self.nw, -1), X_t.reshape(self.nts, -1)
@@ -57,7 +57,7 @@ class IR_factory(object):
   # TODO Specify the version of irbasis.
   def tau_to_w_other(self, X_t, wsample):
     nw = wsample.shape[0]
-    X_w = np.zeros((nw,)+X_t.shape[1:], dtype=np.complex)
+    X_w = np.zeros((nw,)+X_t.shape[1:], dtype=complex)
     original_shape = X_w.shape
 
     ir_factory = irbasis.load("F", float(self.lamb))

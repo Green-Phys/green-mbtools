@@ -9,8 +9,8 @@ def solve_dyson(fock, S=None, sigma=None, mu=0, ir=None):
   ns, nk, nao = fock.shape[0], fock.shape[1], fock.shape[2]
   if S is None: S = np.array([[np.eye(nao)]*nk]*ns)
 
-  gtau = np.zeros((nts, ns, nk, nao, nao), dtype=np.complex)
-  Gw = np.zeros((nw, nao, nao), dtype=np.complex)
+  gtau = np.zeros((nts, ns, nk, nao, nao), dtype=complex)
+  Gw = np.zeros((nw, nao, nao), dtype=complex)
   for s in range(ns):
     for k in range(nk):
       if sigma is not None:
