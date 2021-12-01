@@ -274,6 +274,33 @@ class MB_post(object):
     input_parser = 'G_w.txt ' + str(nw//2) + ' A_w.txt coeff'
     AC.nevan_run(Gw_inp, wsample, input_parser, nevan_exe, outdir)
 
+def minus_k_to_k_TRsym(X):
+  nso = X.shape[-1]
+  nao = nso // 2
+  Y = np.zeros(X.shape, dtype=X.dtype)
+  Y[:nao, :nao] = X[nao:, nao:].conj()
+  Y[nao:, nao:] = X[:nao, :nao].conj()
+  Y[:nao, nao:] = -1.0 * X[nao:, :nao].conj()
+  Y[nao:, :nao] = Y[:nao, nao:].conj().transpose()
+  return Y
+
+def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
+  index_list = np.zeros(bz_index.shape, dtype=int)
+  for i, irn in enumerate(ir_list):
+    index_list[irn] = i
+  old_shape = X.shape
+  new_shape = np.copy(old_shape)
+  new_shape[k_ind] = conj_list.shape[0]
+  Y = np.zeros(new_shape, dtype=X.dtype)
+  for ik, kk in enumerate(bz_index):
+    k = index_list[kk]
+    Y = Y.reshape((-1,) + Y.shape[k_ind:])
+    X = X.reshape((-1,) + X.shape[k_ind:])
+    for i in range(Y.shape[0]):
+      Y[i, ik] = minus_k_to_k_TRsym(X[i, k]) if conj_list[ik] else X[i, k]
+    Y = Y.reshape(new_shape)
+    X = X.reshape(old_shape)
+  return Y
 
 def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
   index_list = np.zeros(bz_index.shape, dtype=int)
