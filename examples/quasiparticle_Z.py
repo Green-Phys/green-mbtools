@@ -18,4 +18,5 @@ Sigma_sao = manybody.ir.tau_to_w(Sigma_sao[:, :, 0])
 MB_path = MB_analysis.__path__[0] + '/../'
 nevan_sigma_exe = MB_path + '/Nevanlinna/nevanlinna_sigma'
 Zs = qs.Z_factor(F_sao, Sigma_sao, manybody.ir.wsample, nevan_sigma_exe, 'nevan_sigma')
+# Z = 0.98563148 from Nevanlinna AC with eta = 0.005 Ha
 print("Quasiparticle renormalization factor: {}", Zs)

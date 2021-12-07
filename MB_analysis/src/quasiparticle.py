@@ -28,8 +28,6 @@ def Z_factor(F, Sigma_iw, iwsample, nevan_sigma_exe, outdir='sigma_nevan'):
   f = h5py.File(outdir+"/Sigma_w.h5", 'r')
   # Only diagonal terms are analytically continued. Sigma_w = (freqs, ns, nao)
   Sigma_w = f["Sigma_w"][()].view(complex)
-  # Due to the notation in Nevanlinna
-  #Sigma_w *= -1
   freqs = f["freqs"][()]
   f.close()
 
@@ -47,7 +45,6 @@ def Z_factor(F, Sigma_iw, iwsample, nevan_sigma_exe, outdir='sigma_nevan'):
       Z = 1 - np.gradient(Sigma_w[:, s, i].real, dw)
       Z = 1 / Z
       Zs[s,i] = Z[idx]
-      print("Quasiparticle weight = {}".format(Z[idx]))
 
   return Zs
 
