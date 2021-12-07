@@ -320,6 +320,37 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
       Y[:, :, ik, ::] = X[:, :, k, ::].conj() if conj_list[ik] else X[:, :, k, ::]
   return Y
 
+def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
+  f = h5py.File(sim_path, 'r')
+  it = f["iter"][()]
+  Sr = f["S-k"][()].view(complex)
+  Sr = Sr.reshape(Sr.shape[:-1])
+  Fr = f["iter"+str(it)+"/Fock-k"][()].view(complex)
+  Fr = Fr.reshape(Fr.shape[:-1])
+  Sigmar = f["iter"+str(it)+"/Selfenergy/data"][()].view(complex)
+  Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
+  Gr = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
+  Gr = Gr.reshape(Gr.shape[:-1])
+  mu = f["iter"+str(it)+"/mu"][()]
+  f.close()
+
+  f = h5py.File(input_path, 'r')
+  ir_list = f["/grid/ir_list"][()]
+  weight = f["/grid/weight"][()]
+  index = f["/grid/index"][()]
+  conj_list = f["grid/conj_list"][()]
+  f.close()
+
+  ''' All k-dependent matrices should lie on a full Monkhorst-Pack grid. '''
+  F = to_full_bz(Fr, conj_list, ir_list, index, 1)
+  S = to_full_bz(Sr, conj_list, ir_list, index, 1)
+  Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
+  G = to_full_bz(Gr, conj_list, ir_list, index, 2)
+
+  ''' Results from correlated methods '''
+  # Standard way to initialize
+  return MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb=lamb)
+
 if __name__ == '__main__':
   import h5py
   import MB_analysis
@@ -394,4 +425,7 @@ if __name__ == '__main__':
   print(occ[0, 0])
   print(occ[1, 0])
 
-  print(manybody)
+  ''' Lastly, one could use this wrapper function to construct MB_post in a more compact way '''
+  sim_path = MB_analysis.__path__[0] + '/../data/H2_GW/sim.h5'
+  input_path = MB_analysis.__path__[0] + '/../data/H2_GW/input.h5'
+  manybody = initialize_MB_post(sim_path, input_path, '1e4')

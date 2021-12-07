@@ -7,6 +7,9 @@ from MB_analysis.src import ir
 Fourier transform between real and reciprocal space
 '''
 
+'''
+rmesh is constructed using the translational vectors as the basis. 
+'''
 def construct_rmesh(nkx, nky, nkz):
   Lx, Ly, Lz = (nkx-1)//2, (nky-1)//2, (nkz-1)//2 # nk=6, L=2
   leftx, lefty, leftz = (nkx-1)%2, (nky-1)%2, (nkz-1)%2 # left = 1
