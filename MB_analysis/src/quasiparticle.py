@@ -46,8 +46,8 @@ def Z_factor(F, Sigma_iw, iwsample, nevan_sigma_exe, outdir='sigma_nevan'):
       # Z^{-1} >= 1
       Z = 1 - np.gradient(Sigma_w[:, s, i].real, dw)
       Z = 1 / Z
-      Zs[s,i] = Z[idx].real
-      print("Quasiparticle weight = {}".format(Z[idx].real))
+      Zs[s,i] = Z[idx]
+      print("Quasiparticle weight = {}".format(Z[idx]))
 
   return Zs
 
@@ -76,6 +76,6 @@ if __name__ == "__main__":
   Sigma_sao = manybody.ir.tau_to_w(Sigma_sao[:, :, 0])
 
   MB_path = MB_analysis.__path__[0] + '/../'
-  nevan_sigma_exe = MB_path + '/Nevanlinna/nevanlinna'
+  nevan_sigma_exe = MB_path + '/Nevanlinna/nevanlinna_sigma'
   Zs = Z_factor(F_sao, Sigma_sao, manybody.ir.wsample, nevan_sigma_exe, 'nevan_sigma')
   print("Quasiparticle renormalization factor: {}", Zs)
