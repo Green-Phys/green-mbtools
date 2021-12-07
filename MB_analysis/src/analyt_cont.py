@@ -143,16 +143,14 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
 
   # Combine output
   dump_A = False
-  for d1 in range(dim1):
-    try:
-      X_w = np.loadtxt("{}/{}".format(d1, X_w_path))
-      dtype = complex if X_w.shape[1] == 3 else float
-      freqs = X_w[:, 0]
-    except IOError:
-      pass
-    else:
-      dump_A = True
-      break
+  try:
+    X_w = np.loadtxt("0/{}".format(X_w_path))
+    dtype = complex if X_w.shape[1] == 3 else float
+    freqs = X_w[:, 0]
+  except IOError:
+    pass
+  else:
+    dump_A = True
   if dump_A:
     Aw = np.zeros((freqs.shape[0], dim1), dtype=dtype)
     for d1 in range(dim1):
@@ -232,16 +230,14 @@ def nevan_run_selfenergy(Sigma_iw, wsample, input_parser, nevan_exe="nevanlinna"
 
   # Combine output
   dump_A = False
-  for d1 in range(dim1):
-    try:
-      X_w = np.loadtxt("{}/{}".format(d1, X_w_path))
-      dtype = complex if X_w.shape[1] == 3 else float
-      freqs = X_w[:, 0]
-    except IOError:
-      pass
-    else:
-      dump_A = True
-      break
+  try:
+    X_w = np.loadtxt("0/{}".format(X_w_path))
+    dtype = complex if X_w.shape[1] == 3 else float
+    freqs = X_w[:, 0]
+  except IOError:
+    pass
+  else:
+    dump_A = True
   if dump_A:
     Sigma_w = np.zeros((freqs.shape[0], dim1), dtype=dtype)
     for d1 in range(dim1):

@@ -1,3 +1,5 @@
+import os
+import h5py
 import numpy as np
 import MB_analysis.src.analyt_cont as ac
 
@@ -16,9 +18,9 @@ def Z_factor(F, Sigma_iw, iwsample, nevan_sigma_exe, outdir='sigma_nevan'):
   Sigma_iw_diag = np.einsum('wsii->wsi', Sigma_iw)
   print("Sigma_iw_diag shape = {}".format(Sigma_iw_diag.shape))
   nw = iwsample.shape[0]
-  iwsample_pos = iwsample[nw // 2:]
+  iwsample_pos = iwsample[nw//2:]
   Sigma_iw_diag = Sigma_iw_diag[nw//2:]
-  input_parser = 'Sigma_iw.txt ' + str(nw // 2) + ' Sigma_w.txt coeff'
+  input_parser = 'Sigma_iw.txt ' + str(nw//2) + ' Sigma_w.txt coeff'
   ac.nevan_run_selfenergy(Sigma_iw_diag, iwsample_pos, input_parser, nevan_sigma_exe, outdir)
 
   if not os.path.exists(outdir):
@@ -62,15 +64,18 @@ def find_nearest(array,value):
 if __name__ == "__main__":
   import h5py
   import MB_analysis
+  import MB_analysis.src.orth as orth
 
   sim_path = MB_analysis.__path__[0] + '/../data/H2_GW/sim.h5'
   input_path = MB_analysis.__path__[0] + '/../data/H2_GW/input.h5'
   manybody = MB_analysis.mb.initialize_MB_post(sim_path, input_path, '1e4')
 
-  F_sao = orth.sao_orth(manybody.F, manybody.S, type='f')
-  Sigma_sao = orth.sao_orth(manybody.Sigma, manybody.S, type='f')
-  Sigma_sao = manybody.ir.tau_to_w(Sigma_sao[:, s, k])
+  F_sao = orth.sao_orth(manybody.fock, manybody.S, type='f')
+  F_sao = F_sao[:,0]
+  Sigma_sao = orth.sao_orth(manybody.sigma, manybody.S, type='f')
+  Sigma_sao = manybody.ir.tau_to_w(Sigma_sao[:, :, 0])
 
   MB_path = MB_analysis.__path__[0] + '/../'
   nevan_sigma_exe = MB_path + '/Nevanlinna/nevanlinna'
-  Z_factor(F_sao, Sigma_sao, manybody.ir.wsample, nevan_sigma_exe, 'nevan_sigma')
+  Zs = Z_factor(F_sao, Sigma_sao, manybody.ir.wsample, nevan_sigma_exe, 'nevan_sigma')
+  print("Quasiparticle renormalization factor: {}", Zs)

@@ -321,6 +321,7 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
   return Y
 
 def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
+  import h5py
   f = h5py.File(sim_path, 'r')
   it = f["iter"][()]
   Sr = f["S-k"][()].view(complex)
