@@ -45,13 +45,17 @@ class IR_factory(object):
     X_w = X_w.reshape(original_shape)
     return X_w
 
-  def w_to_tau(self, X_w):
+  def w_to_tau(self, X_w, debug=False):
     X_t = np.zeros((self.nts,) + X_w.shape[1:], dtype=complex)
     original_shape = X_t.shape
 
     X_w, X_t = X_w.reshape(self.nw, -1), X_t.reshape(self.nts, -1)
     X_t = reduce(np.dot, (self.Ttc, self.Tcn, X_w))
     X_t = X_t.reshape(original_shape)
+    if debug:
+      # Check the imaginary parts
+      print("The largest imaginary parts in X_t is {}".format(np.max(np.abs(X_t.imag))))
+      print("Please double check whether this is consistent to your expectations...")
     return X_t
 
   # TODO Specify the version of irbasis.
