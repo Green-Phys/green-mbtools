@@ -332,6 +332,8 @@ def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
   Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
   Gr = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
   Gr = Gr.reshape(Gr.shape[:-1])
+  tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
+  beta = tau_mesh[-1]
   mu = f["iter"+str(it)+"/mu"][()]
   f.close()
 
@@ -350,7 +352,7 @@ def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
 
   ''' Results from correlated methods '''
   # Standard way to initialize
-  return MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb=lamb)
+  return MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, lamb=lamb)
 
 if __name__ == '__main__':
   import h5py

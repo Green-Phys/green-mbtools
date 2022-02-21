@@ -31,10 +31,8 @@ def Z_factor(F, Sigma_iw, iwsample, nevan_sigma_exe, outdir='sigma_nevan'):
   freqs = f["freqs"][()]
   f.close()
 
-  # H0_diag = (ns, nno)
+  # F_diag = (ns, nno)
   F_diag = np.array([np.diag(f) for f in F])
-  Fqs = F.copy()
-  #delta_qs = delta.copy() if delta is not None else None
   dw = freqs[1] - freqs[0]
   Zs = np.zeros((ns, nao))
   for s in range(ns):
