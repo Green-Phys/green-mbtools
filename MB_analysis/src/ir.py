@@ -54,8 +54,8 @@ class IR_factory(object):
     X_t = X_t.reshape(original_shape)
     if debug:
       # Check the imaginary parts
-      print("The largest imaginary parts in X_t is {}".format(np.max(np.abs(X_t.imag))))
-      print("Please double check whether this is consistent to your expectations...")
+      print("The largest imaginary parts in X_t is {}. Please double check whether this is consistent to "
+            "your expectation!".format(np.max(np.abs(X_t.imag))))
     return X_t
 
   # TODO Specify the version of irbasis.
