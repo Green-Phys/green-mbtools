@@ -61,12 +61,20 @@ Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
 ##################
 
 # Construct MB_post class
-MB = mb.MB_post(fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv, lamb=lamb)
+MB = mb.MB_post(
+    fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv, lamb=lamb
+)
 
-# By default, running Nevanlinna for all diagonal elements of MB.gtau in SAO basis
-MB.AC_nevanlinna(nevan_exe=nevan_exe, outdir='Nevanlinna')
+# By default, running Nevanlinna for all diagonal elements of MB.gtau
+# in SAO basis
+
+MB.AC_nevanlinna(
+    nevan_exe=nevan_exe, outdir='Nevanlinna'
+)
 
 # Running Nevanlinna for given G(t) in whatever orthogonal basis
 Gt_sao = orth.sao_orth(MB.gtau, MB.S, type='g')
 Gt_orbsum = np.einsum("tskii->tsk", Gt_sao)
-MB.AC_nevanlinna(nevan_exe=nevan_exe, outdir='Nevanlinna_orbsum', gtau_orth=Gt_orbsum)
+MB.AC_nevanlinna(
+    nevan_exe=nevan_exe, outdir='Nevanlinna_orbsum', gtau_orth=Gt_orbsum
+)
