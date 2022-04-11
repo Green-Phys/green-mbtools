@@ -1,6 +1,6 @@
 import numpy as np
 
-from MB_analysis.src import ir
+from mbanalysis.src import ir
 
 
 '''
@@ -82,8 +82,8 @@ def real_to_k(fkr, obj_i):
   return obj_k
 
 if __name__ == '__main__':
-  import MB_analysis
-  MB_path = MB_analysis.__path__[0]
+  import mbanalysis
+  MB_path = mbanalysis.__path__[0]
   Sk10 = np.load(MB_path + '/data/winter/Sk10.npy')
   kmesh_scaled_nk10 = np.load(MB_path + '/data/winter/kmesh_k10.npy')
   Sk  = np.load(MB_path + '/data/winter/Sk6.npy')

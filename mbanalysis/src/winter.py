@@ -1,8 +1,8 @@
 from functools import reduce
 import numpy as np
 
-from MB_analysis.src import ft
-from MB_analysis.src import dyson
+from mbanalysis.src import ft
+from mbanalysis.src import dyson
 
 # Only work for full_bz object
 def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
@@ -125,8 +125,8 @@ def interpolate_G(Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, dim=3, hermi=Fals
   return Gtk_int, Sigma_tk_int, ir.tau_mesh, Fk_int, Sk_int
 
 if __name__ == '__main__':
-  import MB_analysis
-  MB_path = MB_analysis.__path__[0]
+  import mbanalysis
+  MB_path = mbanalysis.__path__[0]
   Sk10 = np.load(MB_path + '/../data/winter/Sk10.npy')
   Sk10 = Sk10.reshape((1,) + Sk10.shape)
   kmesh_scaled_nk10 = np.load(MB_path + '/../data/winter/kmesh_k10.npy')

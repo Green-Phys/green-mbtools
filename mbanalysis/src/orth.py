@@ -2,22 +2,27 @@ from functools import reduce
 import numpy as np
 import scipy.linalg as LA
 
-'''
+"""
 Orthogonalization utilities
-'''
+"""
+
 
 def canonical_matrices(S, thr=1e-7, type='f'):
     '''Löwdin's canonical orthogonalization'''
     # Form vectors for normalized overlap matrix
     Sval, Svec = LA.eigh(S)
-    X = Svec[:,Sval>=thr] / np.sqrt(Sval[Sval>=thr])
+    X = Svec[:, Sval >= thr] / np.sqrt(Sval[Sval >= thr])
     if type == 'f':
         return X
     elif type == 'g':
         X = LA.pinv(X)
         return X.T.conj()
     else:
-        raise ValueError("Invalid transofrmation type. Only 'f'/'g' type for Fock/Green's function only.")
+        raise ValueError(
+            "Invalid transofrmation type. Only 'f'/'g' type for \
+            Fock/Green's function only."
+        )
+
 
 def canonical_orth(H, S, thr=1e-7, type='f'):
     '''Löwdin's canonical orthogonalization'''

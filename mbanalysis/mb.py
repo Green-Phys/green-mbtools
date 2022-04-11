@@ -408,9 +408,9 @@ def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
 
 if __name__ == '__main__':
     import h5py
-    import MB_analysis
+    import mbanalysis
 
-    MB_path = MB_analysis.__path__[0] + '/../'
+    MB_path = mbanalysis.__path__[0] + '/../'
     f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
     Sr = f["S-k"][()].view(complex)
     Sr = Sr.reshape(Sr.shape[:-1])
@@ -492,6 +492,6 @@ if __name__ == '__main__':
 
     # Lastly, one could use this wrapper function to construct MB_post in a
     # more compact way
-    sim_path = MB_analysis.__path__[0] + '/../data/H2_GW/sim.h5'
-    input_path = MB_analysis.__path__[0] + '/../data/H2_GW/input.h5'
+    sim_path = mbanalysis.__path__[0] + '/../data/H2_GW/sim.h5'
+    input_path = mbanalysis.__path__[0] + '/../data/H2_GW/input.h5'
     manybody = initialize_MB_post(sim_path, input_path, '1e4')
