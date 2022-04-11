@@ -1,9 +1,9 @@
 import numpy as np
 import h5py
 
-import MB_analysis
-from MB_analysis import mb
-from MB_analysis.src import orth
+import os
+from mbanalysis import mb
+from mbanalysis.src import orth
 
 ##################
 #
@@ -15,7 +15,7 @@ T_inv = 1000
 debug = True
 
 # Input files
-MB_path = MB_analysis.__path__[0] + '/../'
+MB_path = os.path.join('./', '../')
 input_path = MB_path + '/data/H2_GW/input.h5'
 sim_path = MB_path + '/data/H2_GW/sim.h5'
 lamb = '1e4'

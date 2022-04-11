@@ -1,6 +1,6 @@
 import h5py
 import numpy as np
-from MB_analysis.src import ir
+from mbanalysis.src import ir
 
 f = h5py.File("../data/H2_GW/sim.h5", 'r')
 it = f["iter"][()]

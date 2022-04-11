@@ -4,7 +4,7 @@ import h5py
 
 from ase.spacegroup import crystal
 from ase.spacegroup import Spacegroup
-from MB_analysis import mb
+from mbanalysis import mb
 
 ##################
 #
