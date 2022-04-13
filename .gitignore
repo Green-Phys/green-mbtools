@@ -1,3 +1,6 @@
+# Output of Nevanlinna analytical continuation examples
+examples/Nevanlinna*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
