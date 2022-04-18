@@ -1,6 +1,7 @@
 from functools import reduce
 import numpy as np
 import scipy.linalg as LA
+from numba import jit
 
 from .src import spectral as spec
 from .src import orth as orth
@@ -55,8 +56,15 @@ class MB_post(object):
 
         """Setup"""
         if fock.ndim == 4:
+            # For UHF data
             self._ns = fock.shape[0]
         elif fock.ndim == 3:
+            # For RHF data, reshape matrices are originally in the shape:
+            #   self_energy / gtau  :   (ntau, nk, nao, nao)
+            #   fock                :   (nk, nao, nao)
+            # To make RHF/UHF analysis easier, we transform the dimensions to:
+            #   self_energy / gtau  :   (ntau, ns=1, nk, nao, nao)
+            #   fock                :   (ns=1, nk, nao, nao)
             self._ns = 1
             fock = fock.reshape((1,) + fock.shape)
             if gtau is not None:
@@ -78,12 +86,14 @@ class MB_post(object):
             self._mu = 0.0
         else:
             self._mu = mu
+
         if beta is None:
             print("Warning: Inverse temperature is set to the default value\
                 1000 a.u.^{-1}.")
             self._beta = 1000
         else:
             self._beta = beta
+
         if lamb is None:
             print("Warning: Lambda is set to the default '1e6'.")
             self.lamb = '1e6'
@@ -102,7 +112,6 @@ class MB_post(object):
             self.S = S.copy()
         if kmesh is not None:
             self.kmesh = kmesh.copy()
-
         if gtau is not None:
             self.gtau = gtau.copy()
 
@@ -327,6 +336,7 @@ def minus_k_to_k_TRsym(X):
     return Y
 
 
+@jit(nopython=True)
 def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
     index_list = np.zeros(bz_index.shape, dtype=int)
     for i, irn in enumerate(ir_list):
@@ -349,7 +359,11 @@ def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
     return Y
 
 
+@jit(nopython=True)
 def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
+    """Transform input quantity from irreducible number of k-points
+    to the entire Brillouin Zone.
+    """
     index_list = np.zeros(bz_index.shape, dtype=int)
     for i, irn in enumerate(ir_list):
         index_list[irn] = i
@@ -362,9 +376,11 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
         if k_ind == 0:
             Y[ik, ::] = X[k, ::].conj() if conj_list[ik] else X[k, ::]
         elif k_ind == 1:
-            Y[:, ik, ::] = X[:, k, ::].conj() if conj_list[ik] else X[:, k, ::]
+            Y[:, ik, ::] = X[:, k, ::].conj() \
+                if conj_list[ik] else X[:, k, ::]
         elif k_ind == 2:
-            Y[:, :, ik, ::] = X[:, :, k, ::].conj() if conj_list[ik] else X[:, :, k, ::]
+            Y[:, :, ik, ::] = X[:, :, k, ::].conj() \
+                if conj_list[ik] else X[:, :, k, ::]
     return Y
 
 
@@ -387,7 +403,6 @@ def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
 
     f = h5py.File(input_path, 'r')
     ir_list = f["/grid/ir_list"][()]
-    weight = f["/grid/weight"][()]
     index = f["/grid/index"][()]
     conj_list = f["grid/conj_list"][()]
     f.close()
