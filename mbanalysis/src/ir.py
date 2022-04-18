@@ -1,4 +1,5 @@
 from functools import reduce
+from mbanalysis.data import ir_1e3, ir_1e4, ir_1e5, ir_1e6, ir_1e7
 import numpy as np
 import h5py
 import os
@@ -13,33 +14,41 @@ class IR_factory(object):
     def __init__(self, beta, lamb):
 
         self._ir_dict = {
-            '1e3': '/../data/ir_grid/1e3_72.h5',
-            '1e4': '/../data/ir_grid/1e4_104.h5',
-            '1e5': '/../data/ir_grid/1e5_136.h5',
-            '1e6': '/../data/ir_grid/1e6_168.h5',
-            '1e7': '/../data/ir_grid/1e7_202.h5'
+            '1e3': ir_1e3,
+            '1e4': ir_1e4,
+            '1e5': ir_1e5,
+            '1e6': ir_1e6,
+            '1e7': ir_1e7
         }
         if lamb not in self._ir_dict.keys():
-            raise ValueError("{} is not an acceptable lambda value.".format(lamb)
-                                             + " Acceptable lambdas are " + str(self._ir_dict.keys()))
-        import mbanalysis
-        self._MB_path = mbanalysis.__path__[0]
-        for l in self._ir_dict:
-            self._ir_dict[l] = self._MB_path + self._ir_dict[l]
+            raise ValueError(
+                "{} is not an acceptable lambda value.".format(lamb)
+                + " Acceptable lambdas are " + str(self._ir_dict.keys())
+            )
 
         self.beta = beta
         self.lamb = lamb
-        self.tau_mesh, self.wsample, self.Ttc, self.Tcn, self.Tnc, self.Tct = read_IR_matrices(os.path.abspath(self._ir_dict[lamb]), self.beta)
+        self.tau_mesh, self.wsample, self.Ttc, self.Tcn, \
+            self.Tnc, self.Tct = read_IR_matrices(
+                os.path.abspath(self._ir_dict[lamb]), self.beta
+            )
         self.nts = self.tau_mesh.shape[0]
-        self.nw    = self.wsample.shape[0]
+        self.nw = self.wsample.shape[0]
 
     def update(self, beta=None, lamb=None):
         if lamb not in self._ir_dict.keys():
-            raise ValueError("{} is not an acceptable lambda value.".format(lamb)
-                                             + " Acceptable lambdas are " + str(self._ir_dict.keys()))
-        if lamb is not None: self.lamb = lamb
-        if beta is not None: self.beta = beta
-        self.tau_mesh, self.wsample, self.Ttc, self.Tcn, self.Tnc, self.Tct = read_IR_matrices(self._ir_dict[self.lamb], self.beta)
+            raise ValueError(
+                "{} is not an acceptable lambda value.".format(lamb)
+                + " Acceptable lambdas are " + str(self._ir_dict.keys())
+            )
+        if lamb is not None:
+            self.lamb = lamb
+        if beta is not None:
+            self.beta = beta
+        self.tau_mesh, self.wsample, self.Ttc, self.Tcn, \
+            self.Tnc, self.Tct = read_IR_matrices(
+                self._ir_dict[self.lamb], self.beta
+            )
         self.nts = self.tau_mesh.shape[0]
         self.nw = self.wsample.shape[0]
 
@@ -61,8 +70,12 @@ class IR_factory(object):
         X_t = X_t.reshape(original_shape)
         if debug:
             # Check the imaginary parts
-            print("The largest imaginary parts in X_t is {}. Please double check whether this is consistent to "
-                        "your expectation!".format(np.max(np.abs(X_t.imag))))
+            print(
+                "The largest imaginary parts in X_t is {}. Please double check \
+                whether this is consistent to your expectation!".format(
+                    np.max(np.abs(X_t.imag))
+                )
+            )
         return X_t
 
     # TODO Specify the version of irbasis.
@@ -80,8 +93,9 @@ class IR_factory(object):
         X_w = X_w.reshape(original_shape)
         return X_w
 
+
 def read_IR_matrices(ir_path, beta):
-    ir = h5py.File(ir_path,'r')
+    ir = h5py.File(ir_path, 'r')
     wsample = ir["fermi/wsample"][()]
     xsample = ir["fermi/xsample"][()]
 
