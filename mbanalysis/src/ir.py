@@ -1,6 +1,7 @@
 from functools import reduce
 from mbanalysis.data import ir_1e3, ir_1e4, ir_1e5, ir_1e6, ir_1e7
 import numpy as np
+import irbasis
 import h5py
 import os
 
