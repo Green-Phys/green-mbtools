@@ -136,7 +136,6 @@ def nevan_run(
         mismatches between \"input_parser\" and wsample."
     assert nw == Gw.shape[0], "Number of imaginary frequency points mismatches \
         between \"input_parser\" and Gw."
-    ndim = len(Gw.shape)
     g_shape = Gw.shape
     Gw = Gw.reshape(nw, -1)
     dim1 = Gw.shape[1]
@@ -144,6 +143,7 @@ def nevan_run(
     if not os.path.exists(outdir):
         os.mkdir(outdir)
     os.chdir(outdir)
+
     # Save dim1 for better understanding of output
     np.savetxt("dimensions.txt", np.asarray(g_shape[1:], dtype=int))
 
@@ -167,12 +167,14 @@ def nevan_run(
             p.stdin.write(str.encode(input_parser))
             processes.append(p)
         pp += 1
+        print('Process number: ', pp)
         if pp % 64 == 0:
             for p in processes:
                 p.communicate()
             processes = []
         os.chdir("..")
 
+    # Wait for remaining processes to end
     for p in processes:
         p.communicate()
 

@@ -122,8 +122,8 @@ def read_IR_matrices(ir_path, beta):
     return tau_mesh, wsample, Ttc, Tcn, Tnc, Tct
 
 
-if __name__ == "__main__":
-    ir = IR_factory(1000, '1e4')
-    print(ir.nts)
-    ir.update(1000, '1e5')
-    print(ir.nts)
+# if __name__ == "__main__":
+#     ir = IR_factory(1000, '1e4')
+#     print(ir.nts)
+#     ir.update(1000, '1e5')
+#     print(ir.nts)
