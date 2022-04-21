@@ -1,7 +1,6 @@
 from functools import reduce
 import numpy as np
 import scipy.linalg as LA
-from numba import jit
 
 from .src import spectral as spec
 from .src import orth as orth
@@ -336,7 +335,6 @@ def minus_k_to_k_TRsym(X):
     return Y
 
 
-@jit(nopython=True)
 def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
     index_list = np.zeros(bz_index.shape, dtype=int)
     for i, irn in enumerate(ir_list):
@@ -359,7 +357,6 @@ def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
     return Y
 
 
-@jit(nopython=True)
 def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
     """Transform input quantity from irreducible number of k-points
     to the entire Brillouin Zone.
