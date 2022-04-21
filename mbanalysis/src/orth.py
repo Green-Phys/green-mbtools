@@ -61,7 +61,7 @@ def canonical_orth(H, S, thr=1e-7, type='f'):
 def sao_orth(X, S, type=None):
     """Symmetrized AO basis.
     """
-    if type != 'g' or type != 'f':
+    if not(type == 'g' or type == 'f'):
         raise ValueError(
             "Valid transformation types are 'g' for density, 'f' for Fock"
         )
