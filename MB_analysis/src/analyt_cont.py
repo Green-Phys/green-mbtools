@@ -130,16 +130,17 @@ def nevan_run(Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanli
     with open("log.txt", "w") as log:
       p = subprocess.Popen([nevan_exe], stdin=subprocess.PIPE, stdout=log, stderr=log)
       p.stdin.write(str.encode(input_parser))
+      p.stdin.close()
       processes.append(p)
     pp += 1
     if pp % 64 == 0:
       for p in processes:
-        p.communicate()
+        p.wait()
       processes = []
     os.chdir("..")
 
   for p in processes:
-    p.communicate()
+    p.wait()
 
   # Combine output
   dump_A = False
@@ -217,16 +218,17 @@ def nevan_run_selfenergy(Sigma_iw, wsample, input_parser, nevan_exe="nevanlinna"
     with open("log.txt", "w") as log:
       p = subprocess.Popen([nevan_exe], stdin=subprocess.PIPE, stdout=log, stderr=log)
       p.stdin.write(str.encode(input_parser))
+      p.stdin.close()
       processes.append(p)
     pp += 1
-    if pp % 1 == 0:
+    if pp % 64 == 0:
       for p in processes:
-        p.communicate()
+        p.wait()
       processes = []
     os.chdir("..")
 
-  #for p in processes:
-  #  p.communicate()
+  for p in processes:
+    p.wait()
 
   # Combine output
   dump_A = False
