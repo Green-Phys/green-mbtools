@@ -8,7 +8,8 @@ G_tau = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
 tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
 f.close()
 
-# Lambda is determined by the tau_mesh you use. Here the H2 GW simulation uses lambda = 1e4
+# Lambda is determined by the tau_mesh you use.
+# Here the H2 GW simulation uses lambda = 1e4
 lamb = '1e4'
 beta = tau_mesh[-1]
 nts = tau_mesh.shape[0]
