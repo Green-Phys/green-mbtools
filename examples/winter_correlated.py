@@ -1,9 +1,5 @@
-import numpy as np
-import scipy.linalg as LA
 import h5py
-
 from ase.spacegroup import crystal
-from ase.spacegroup import Spacegroup
 from mbanalysis import mb
 
 ##################
@@ -43,7 +39,7 @@ GW_path = "/pauli-storage/cnyeh/Si/nk6/GW_1000_104/sim_last.h5"
 lamb = '1e4'
 
 # Output file
-output = "test.h5"  #"666Si_GW_WGXWLF.h5"
+output = "test.h5"  # "666Si_GW_WGXWLF.h5"
 
 ##################
 #
@@ -53,7 +49,7 @@ output = "test.h5"  #"666Si_GW_WGXWLF.h5"
 
 f = h5py.File(input_path, 'r')
 kmesh_scaled = f["/grid/k_mesh_scaled"][()]
-index   = f["grid/index"][()]
+index = f["grid/index"][()]
 ir_list = f["/grid/ir_list"][()]
 conj_list = f["grid/conj_list"][()]
 reduced_kmesh_scaled = kmesh_scaled[ir_list]
@@ -80,7 +76,7 @@ f.close()
 Fk = mb.to_full_bz(rFk, conj_list, ir_list, index, 1)
 Sk = mb.to_full_bz(rSk, conj_list, ir_list, index, 1)
 Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
-del rFk, rSk, rSigmak 
+del rFk, rSk, rSigmak
 
 ##################
 #
@@ -88,12 +84,19 @@ del rFk, rSk, rSigmak
 #
 ##################
 
-# MB_post class. (i) Input data e.g. fock, sigma, gtau, S have to be in full BZ.
-MB = mb.MB_post(fock=Fk, sigma=Sigma_tk, mu=mu, S=Sk, kmesh=kmesh_scaled, beta=T_inv, lamb=lamb)
-# Wannier interpolation for basis defined by MB_post.S. Emperically, AO basis seems to be much more localized than SAO. 
-G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(kpts_inter, hermi=True, debug=debug)
+# MB_post class.
+# (i) Input data e.g. fock, sigma, gtau, S have to be in full BZ.
+MB = mb.MB_post(
+    fock=Fk, sigma=Sigma_tk, mu=mu, S=Sk, kmesh=kmesh_scaled,
+    beta=T_inv, lamb=lamb
+)
+# Wannier interpolation for basis defined by MB_post.S.
+# Emperically, AO basis seems to be much more localized than SAO. 
+G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(
+    kpts_inter, hermi=True, debug=debug
+)
 
-f = h5py.File(output,'w')
+f = h5py.File(output, 'w')
 f["S-k"] = Sk_int
 f["kpts_interpolate"] = kpts_inter
 f["iter"] = it
