@@ -1,9 +1,9 @@
 import h5py
 import numpy as np
 
-import MB_analysis
-from MB_analysis import mb
-from MB_analysis.src import orth
+import mbanalysis
+from mbanalysis import mb
+from mbanalysis.src import orth
 
 ##################
 #
@@ -11,7 +11,7 @@ from MB_analysis.src import orth
 #
 ##################
 
-MB_path = MB_analysis.__path__[0] + '/../'
+MB_path = mbanalysis.__path__[0] + '/../'
 f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
 Sr = f["S-k"][()].view(complex)
 Sr = Sr.reshape(Sr.shape[:-1])
