@@ -3,6 +3,21 @@ import subprocess
 import shutil
 import numpy as np
 import h5py
+from multiprocessing import cpu_count
+
+
+# Find the number of cpus to use for parallelization of analtyic continuation
+slurm_ncpu = os.environ['SLURM_JOB_CPUS_PER_NODE']
+phys_ncpu = cpu_count()
+
+if slurm_ncpu is not None:
+    _ncpu = int(slurm_ncpu)
+else:
+    print(
+        "Variable SLURM_JOB_CPUS_PER_NODE not found. "
+        + "Using half of the physical number of threads available."
+    )
+    _ncpu = int(phys_ncpu // 2)
 
 
 def maxent_run(
@@ -23,7 +38,6 @@ def maxent_run(
 
     beta = tau_mesh[-1]
     nts = tau_mesh.shape[0]
-    ndim = len(gtau.shape)
     g_shape = gtau.shape
     assert nts == gtau.shape[0], "Number of imaginary time points mismatches."
     gtau = gtau.reshape(nts, -1)
@@ -67,7 +81,7 @@ def maxent_run(
             )
             processes.append(p)
         pp += 1
-        if pp % 64 == 0:
+        if pp % _ncpu == 0:
             for p in processes:
                 p.communicate()
             processes = []
@@ -165,18 +179,19 @@ def nevan_run(
                 [nevan_exe], stdin=subprocess.PIPE, stdout=log, stderr=log
             )
             p.stdin.write(str.encode(input_parser))
+            p.stdin.close()
             processes.append(p)
         pp += 1
         print('Process number: ', pp)
-        if pp % 64 == 0:
+        if pp % _ncpu == 0:
             for p in processes:
-                p.communicate()
+                p.wait()
             processes = []
         os.chdir("..")
 
     # Wait for remaining processes to end
     for p in processes:
-        p.communicate()
+        p.wait()
 
     # Combine output
     dump_A = False
@@ -274,16 +289,17 @@ def nevan_run_selfenergy(
                 [nevan_exe], stdin=subprocess.PIPE, stdout=log, stderr=log
             )
             p.stdin.write(str.encode(input_parser))
+            p.stdin.close()
             processes.append(p)
         pp += 1
-        if pp % 1 == 0:
+        if pp % _ncpu == 0:
             for p in processes:
-                p.communicate()
+                p.wait()
             processes = []
         os.chdir("..")
 
-    # for p in processes:
-    #     p.communicate()
+    for p in processes:
+        p.wait()
 
     # Combine output
     dump_A = False
