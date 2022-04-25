@@ -26,3 +26,4 @@ Features
 To-Do-List
 -----------
 * Compile Nevanlinna C++ module during the setup.py installation. Right now this module sits wherever the `mbanalysis` repo is cloned.
+* Add test functions
