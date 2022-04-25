@@ -53,8 +53,8 @@ output = "666Si_LDA_WGXWLG.h5"
 f = h5py.File(input_path, 'r')
 kmesh_scaled = f["/grid/k_mesh_scaled"][()]
 nk = f["HF/nk"][()]
-Fk = f ["HF/Fock-k"][()].view(complex)
-Sk = f ["HF/S-k"][()].view(complex)
+Fk = f["HF/Fock-k"][()].view(complex)
+Sk = f["HF/S-k"][()].view(complex)
 Fk = Fk.reshape(Fk.shape[:-1])
 Sk = Sk.reshape(Sk.shape[:-1])
 nao = Fk.shape[-1]
@@ -66,9 +66,14 @@ f.close()
 #
 ##################
 
-# MB_post class. ***Input data e.g. fock, sigma, gtau, S have to be in full BZ.*** 
-MB = mb.MB_post(fock=Fk, sigma=None, mu=mu, S=Sk, kmesh=kmesh_scaled, beta=T_inv, lamb=lamb)
-# Wannier interpolation for basis defined by MB_post.S. Emperically, AO basis seems to be much more localized than SAO. 
+# MB_post class.
+# Input data e.g. fock, sigma, gtau, S have to be in full BZ.
+MB = mb.MB_post(
+    fock=Fk, sigma=None, mu=mu, S=Sk, kmesh=kmesh_scaled,
+    beta=T_inv, lamb=lamb
+)
+# Wannier interpolation for basis defined by MB_post.S.
+# Emperically, AO basis seems to be much more localized than SAO.
 G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(
     kpts_inter, hermi=True, debug=debug
 )
@@ -85,7 +90,7 @@ for s in range(ns):
 np.save(bands_output, evals)
 
 
-f = h5py.File(output,'w')
+f = h5py.File(output, 'w')
 it = 0
 f["S-k"] = Sk_int
 f["kpts_interpolate"] = kpts_inter
