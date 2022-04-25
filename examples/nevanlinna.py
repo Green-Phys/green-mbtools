@@ -98,4 +98,4 @@ MB.AC_nevanlinna(
     nevan_exe=nevan_exe, outdir='Nevanlinna_orbsum', gtau_orth=Gt_orbsum
 )
 t6 = time.time()
-print("Time required for Nevanlinna AC in orthogonal  basis: ", t6 - t5)
+print("Time required for Nevanlinna AC in orthogonal basis: ", t6 - t5)

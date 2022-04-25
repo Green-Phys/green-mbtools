@@ -3,7 +3,6 @@ import scipy.linalg as LA
 import h5py
 
 from ase.spacegroup import crystal
-from ase.spacegroup import Spacegroup
 from mbanalysis import mb
 
 ##################
@@ -27,10 +26,12 @@ a, b, c = 5.43, 5.43, 5.43
 alpha, beta, gamma = 90, 90, 90
 group = 227
 
-cc = crystal(symbols=['Si'], 
-             basis=[(0.0, 0.0, 0.0)], 
-             spacegroup=group, 
-             cellpar=[a, b, c, alpha, beta, gamma], primitive_cell=True)
+cc = crystal(
+    symbols=['Si'],
+    basis=[(0.0, 0.0, 0.0)],
+    spacegroup=group,
+    cellpar=[a, b, c, alpha, beta, gamma], primitive_cell=True
+)
 
 path = cc.cell.bandpath('WGXWLG', npoints=100)
 kpts_inter = path.kpts
@@ -41,7 +42,7 @@ lamb = '1e4'
 
 # Output file
 bands_output = "bands.npy"
-output = "666Si_LDA_WGXWLG.h5" 
+output = "666Si_LDA_WGXWLG.h5"
 
 ##################
 #
@@ -68,7 +69,9 @@ f.close()
 # MB_post class. ***Input data e.g. fock, sigma, gtau, S have to be in full BZ.*** 
 MB = mb.MB_post(fock=Fk, sigma=None, mu=mu, S=Sk, kmesh=kmesh_scaled, beta=T_inv, lamb=lamb)
 # Wannier interpolation for basis defined by MB_post.S. Emperically, AO basis seems to be much more localized than SAO. 
-G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(kpts_inter, hermi=True, debug=debug)
+G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(
+    kpts_inter, hermi=True, debug=debug
+)
 
 # Overlap 0.00041291502948366776
 # Fock 0.0003271901185318618
@@ -77,8 +80,8 @@ G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(kpts
 ns = Fk_int.shape[0]
 evals = np.zeros((ns, kpts_inter.shape[0], nao))
 for s in range(ns):
-  for ik in range(kpts_inter.shape[0]):
-    evals[s, ik] = LA.eigvalsh(Fk_int[s, ik], Sk_int[s, ik])
+    for ik in range(kpts_inter.shape[0]):
+        evals[s, ik] = LA.eigvalsh(Fk_int[s, ik], Sk_int[s, ik])
 np.save(bands_output, evals)
 
 

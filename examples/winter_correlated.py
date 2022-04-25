@@ -27,10 +27,12 @@ a, b, c = 5.43, 5.43, 5.43
 alpha, beta, gamma = 90, 90, 90
 group = 227
 
-cc = crystal(symbols=['Si'], 
-             basis=[(0.0, 0.0, 0.0)], 
-             spacegroup=group, 
-             cellpar=[a, b, c, alpha, beta, gamma], primitive_cell=True)
+cc = crystal(
+    symbols=['Si'],
+    basis=[(0.0, 0.0, 0.0)],
+    spacegroup=group,
+    cellpar=[a, b, c, alpha, beta, gamma], primitive_cell=True
+)
 
 path = cc.cell.bandpath('WGXWLG', npoints=100)
 kpts_inter = path.kpts
@@ -41,7 +43,7 @@ GW_path = "/pauli-storage/cnyeh/Si/nk6/GW_1000_104/sim_last.h5"
 lamb = '1e4'
 
 # Output file
-output = "test.h5" #"666Si_GW_WGXWLF.h5"
+output = "test.h5"  #"666Si_GW_WGXWLF.h5"
 
 ##################
 #
@@ -75,9 +77,9 @@ nao = rFk.shape[-1]
 nts = rSigmak.shape[0]
 f.close()
 
-Fk = mb.to_full_bz(rFk, conj_list, ir_list, index, 0)
-Sk = mb.to_full_bz(rSk, conj_list, ir_list, index, 0)
-Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 1)
+Fk = mb.to_full_bz(rFk, conj_list, ir_list, index, 1)
+Sk = mb.to_full_bz(rSk, conj_list, ir_list, index, 1)
+Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
 del rFk, rSk, rSigmak 
 
 ##################
