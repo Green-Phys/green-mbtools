@@ -7,11 +7,13 @@ from multiprocessing import cpu_count
 
 
 # Find the number of cpus to use for parallelization of analtyic continuation
-slurm_ncpu = os.environ['SLURM_JOB_CPUS_PER_NODE']
+slurm_env_var = 'SLURM_JOB_CPUS_PER_NODE'
 phys_ncpu = cpu_count()
 
-if slurm_ncpu is not None:
-    _ncpu = int(slurm_ncpu)
+if slurm_env_var in os.environ:
+    _ncpu = int(
+        os.environ['SLURM_JOB_CPUS_PER_NODE']
+    )
 else:
     print(
         "Variable SLURM_JOB_CPUS_PER_NODE not found. "
