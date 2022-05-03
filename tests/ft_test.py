@@ -9,12 +9,12 @@ def test_fourier_transform():
     """
 
     # Read test overlap matrices
-    Sk10 = np.load('/data/Sk10.npy')
-    Sk6 = np.load('/data/Sk6.npy')
+    Sk10 = np.load('test_data/Sk10.npy')
+    Sk6 = np.load('test_data/Sk6.npy')
 
     # Get k-mesh
-    kmesh_scaled_nk10 = np.load('/data/kmesh_k10.npy')
-    kmesh_scaled_nk6 = np.load('/data/kmesh_k6.npy')
+    kmesh_scaled_nk10 = np.load('test_data/kmesh_k10.npy')
+    kmesh_scaled_nk6 = np.load('test_data/kmesh_k6.npy')
 
     # Get number of k-points
     nk6 = int(np.cbrt(Sk6.shape[0]))
