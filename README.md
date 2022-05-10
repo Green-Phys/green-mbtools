@@ -1,9 +1,7 @@
 mbanalysis
 ===================
 
-2021-05-03
-
-mbanalysis provides functions for post processing of Green's-function-based many-body calculations. 
+Python package for post processing of Green's-function-based many-body calculations. 
 * The main classe is the mb_post class for both spin-unpolarized and spin-polarized calculations. 
 * Check `examples` for examples to start. 
   
@@ -27,3 +25,4 @@ To-Do-List
 -----------
 * Compile Nevanlinna C++ module during the setup.py installation. Right now this module sits wherever the `mbanalysis` repo is cloned.
 * Add test functions
+* Problems with `example/quasiparticle.py`: First, it needs `nevan_sigma`, which needs to be added to the repository. Second, there is 
