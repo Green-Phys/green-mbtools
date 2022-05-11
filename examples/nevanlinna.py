@@ -21,6 +21,7 @@ input_path = data_path + '/H2_GW/input.h5'
 sim_path = data_path + '/H2_GW/sim.h5'
 lamb = '1e4'
 
+# Compiled Nevanlinna file
 nevan_exe = abspath('../Nevanlinna/nevanlinna')
 
 ##################
@@ -47,6 +48,7 @@ print("Completed reading simulation data.")
 # Read data about grids
 print("Reading mean-field data")
 f = h5py.File(input_path, 'r')
+mo_coeff = f["/HF/mo_coeff"][()]
 ir_list = f["/grid/ir_list"][()]
 weight = f["/grid/weight"][()]
 index = f["/grid/index"][()]
@@ -56,14 +58,12 @@ print("Completed reading mean-field data.")
 
 # All k-dependent matrices should lie on a full Monkhorst-Pack grid.
 # Transform from reduced BZ to full BZ
-
 print("Transforming data from reduced BZ to full BZ.")
 Fk = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
 Sk = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
 Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
 Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
 print('Pre analysis complete')
-
 
 ##################
 #
@@ -92,6 +92,7 @@ print("TIme required for Nevanlinna AC: ", t4 - t3)
 
 # Running Nevanlinna for given G(t) in whatever orthogonal basis
 t5 = time.time()
+Gt_canonical = orth.canonical_orth(MB.gtau, MB.S, type='g')
 Gt_sao = orth.sao_orth(MB.gtau, MB.S, type='g')
 Gt_orbsum = np.einsum("tskii->tsk", Gt_sao)
 MB.AC_nevanlinna(

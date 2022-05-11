@@ -7,11 +7,13 @@ from multiprocessing import cpu_count
 
 
 # Find the number of cpus to use for parallelization of analtyic continuation
-slurm_ncpu = os.environ['SLURM_JOB_CPUS_PER_NODE']
+slurm_env_var = 'SLURM_JOB_CPUS_PER_NODE'
 phys_ncpu = cpu_count()
 
-if slurm_ncpu is not None:
-    _ncpu = int(slurm_ncpu)
+if slurm_env_var in os.environ:
+    _ncpu = int(
+        os.environ['SLURM_JOB_CPUS_PER_NODE']
+    )
 else:
     print(
         "Variable SLURM_JOB_CPUS_PER_NODE not found. "
@@ -166,7 +168,7 @@ def nevan_run(
             os.mkdir(str(d1))
         np.savetxt(
             "{}/{}".format(d1, X_iw_path),
-            np.column_stack((wsample, Gw[:,d1].real, Gw[:,d1].imag))
+            np.column_stack((wsample, Gw[:, d1].real, Gw[:, d1].imag))
         )
 
     # Start analytical continuation
@@ -182,7 +184,6 @@ def nevan_run(
             p.stdin.close()
             processes.append(p)
         pp += 1
-        print('Process number: ', pp)
         if pp % _ncpu == 0:
             for p in processes:
                 p.wait()
@@ -257,7 +258,6 @@ def nevan_run_selfenergy(
         mismatches between \"input_parser\" and wsample."
     assert nw == Sigma_iw.shape[0], "Number of imaginary frequency points \
         mismatches between \"input_parser\" and Gw."
-    ndim = len(Sigma_iw.shape)
     Sigma_iw_shape = Sigma_iw.shape
     Sigma_iw = Sigma_iw.reshape(nw, -1)
     dim1 = Sigma_iw.shape[1]

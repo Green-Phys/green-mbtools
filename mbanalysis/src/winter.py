@@ -144,30 +144,3 @@ def interpolate_G(
     Gtk_int = dyson.solve_dyson(Fk_int, Sk_int, Sigma_tk_int, mu, ir)
 
     return Gtk_int, Sigma_tk_int, ir.tau_mesh, Fk_int, Sk_int
-
-
-# if __name__ == '__main__':
-#     import mbanalysis
-#     MB_path = mbanalysis.__path__[0]
-#     Sk10 = np.load(MB_path + '/../data/winter/Sk10.npy')
-#     Sk10 = Sk10.reshape((1,) + Sk10.shape)
-#     kmesh_scaled_nk10 = np.load(MB_path + '/../data/winter/kmesh_k10.npy')
-#     Sk = np.load(MB_path + '/../data/winter/Sk6.npy')
-#     Sk = Sk.reshape((1,) + Sk.shape)
-#     kmesh_scaled = np.load(MB_path + '/../data/winter/kmesh_k6.npy')
-#     ns = Sk.shape[0]
-#     nk_cube = Sk.shape[1]
-#     nk = int(np.cbrt(nk_cube))
-
-#     # Wannier interpolation
-#     Sk10_inter = interpolate(
-#         Sk, kmesh_scaled, kmesh_scaled_nk10, hermi=True, debug=True
-#     )
-#     diff = Sk10_inter - Sk10
-#     print(
-#         "Largest difference between the exact and the interpolated one: ",
-#         np.max(np.abs(diff))
-#     )
-#     print("Reference value is ", 0.00038569290459276347)
-
-#     # TODO Examples for interpolate_G
