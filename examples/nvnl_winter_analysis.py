@@ -211,7 +211,7 @@ Gt_sao = orth.sao_orth(G_tk_int, Sk_int, type='g')
 print("Starting Nevanlinna")
 t3 = time.time()
 mbo.AC_nevanlinna(
-    nevan_exe=nevan_exe, outdir=nev_outdir
+    nevan_exe=nevan_exe, outdir=nev_outdir, gtau_orth=Gt_sao
 )
 t4 = time.time()
 print("TIme required for Nevanlinna AC: ", t4 - t3)
