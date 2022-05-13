@@ -2,10 +2,27 @@ import h5py
 import time
 import argparse
 import numpy as np
+import os
 from ase.dft.kpoints import sc_special_points, get_bandpath
 from pyscf.pbc import gto
 from mbanalysis import mb
 from mbanalysis.src import orth
+
+
+#
+# Useful function
+#
+
+def parse_geometry(g):
+    """Function to read .dat files for atoms and geometries.
+    """
+    res = ""
+    if os.path.exists(g):
+        with open(g) as gf:
+            res = gf.read()
+    else:
+        res = g
+    return res
 
 
 #
@@ -74,6 +91,10 @@ parser.add_argument(
     "--nevan_exe", type=str, default=None,
     help="Path to compiled Nevanlinna program"
 )
+parser.add_argument(
+    "--nev_outdir", type=str, default="./Nevanlinna/",
+    help="Directory to dump output from Nevanlinna analytic continuation"
+)
 args = parser.parse_args()
 
 #
@@ -84,12 +105,12 @@ args = parser.parse_args()
 T_inv = args.beta
 debug = args.debug
 mu = args.mu
-a = args.a
-atoms = args.atoms
+a = parse_geometry(args.a)
+atoms = parse_geometry(args.atoms)
 basis = args.basis
 celltype = args.celltype
-bandpath_str = args.bandpath
-bandpts = args.bandpts.replace(' ', '')  # clean up spaces
+bandpath_str = args.bandpath.replace(' ', '')  # clean up spaces
+bandpts = args.bandpts
 input_path = args.input
 sim_path = args.sim
 lamb = args.lamb
@@ -97,6 +118,7 @@ output = args.out
 nevan_exe = args.nevan_exe
 if nevan_exe is None:
     ValueError('nevan_exe cannot be None')
+nev_outdir = args.nev_outdir
 
 # Pyscf object to generate k points
 mycell = gto.M(a=a, atom=atoms, unit='A', basis=basis, verbose=0, spin=0)
@@ -189,7 +211,7 @@ Gt_sao = orth.sao_orth(G_tk_int, Sk_int, type='g')
 print("Starting Nevanlinna")
 t3 = time.time()
 mbo.AC_nevanlinna(
-    nevan_exe=nevan_exe, outdir='Nevanlinna'
+    nevan_exe=nevan_exe, outdir=nev_outdir
 )
 t4 = time.time()
 print("TIme required for Nevanlinna AC: ", t4 - t3)
