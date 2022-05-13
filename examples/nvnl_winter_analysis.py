@@ -207,11 +207,12 @@ print("Time required for Wannier interpolation: ", t2 - t1)
 
 print("Transforming interpolated Gtau to SAO basis")
 Gt_sao = orth.sao_orth(G_tk_int, Sk_int, type='g')
+Gt_sao_diag = np.einsum('tskii -> tski', Gt_sao)
 
 print("Starting Nevanlinna")
 t3 = time.time()
 mbo.AC_nevanlinna(
-    nevan_exe=nevan_exe, outdir=nev_outdir, gtau_orth=Gt_sao
+    nevan_exe=nevan_exe, outdir=nev_outdir, gtau_orth=Gt_sao_diag
 )
 t4 = time.time()
 print("TIme required for Nevanlinna AC: ", t4 - t3)
