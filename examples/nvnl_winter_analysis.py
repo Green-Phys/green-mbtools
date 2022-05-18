@@ -78,6 +78,10 @@ parser.add_argument(
     "--sim", type=str, default="sim.h5",
     help="Output of UGF2 code, i.e., sim.h5"
 )
+parser.add_argument(
+    "--iter", type=int, default=-1,
+    help="Iteration number of the scGW cycle to use for continuation"
+)
 # TODO: Replace lambda functionality to IR-grid file
 parser.add_argument(
     "--lamb", type=str, default='1e4',
@@ -113,6 +117,7 @@ bandpath_str = args.bandpath.replace(' ', '')  # clean up spaces
 bandpts = args.bandpts
 input_path = args.input
 sim_path = args.sim
+it = args.iter
 lamb = args.lamb
 output = args.out
 nevan_exe = args.nevan_exe
@@ -152,7 +157,8 @@ f.close()
 
 print("Reading sim file")
 f = h5py.File(sim_path, 'r')
-it = f["iter"][()]
+if it == -1:
+    it = f["iter"][()]
 rSk = f["/S-k"][()].view(complex)
 rFk = f["iter" + str(it) + "/Fock-k"][()].view(complex)
 rGk = f["iter" + str(it) + "/G_tau/data"][()].view(complex)
