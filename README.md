@@ -26,3 +26,4 @@ To-Do-List
 * Compile Nevanlinna C++ module during the setup.py installation. Right now this module sits wherever the `mbanalysis` repo is cloned.
 * Add test functions
 * Problems with `example/quasiparticle.py`: First, it needs `nevan_sigma`, which needs to be added to the repository. Second, there is 
+* Fix `examples/winter*.py`: The original example for Silicon has been modified to Hydrogen (for which test data is available). The high-symmetry points in the interpolation need to be readjusted accordingly.
