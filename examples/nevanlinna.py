@@ -16,10 +16,10 @@ T_inv = 1000
 debug = True
 
 # Input files
-data_path = abspath('../data')
+data_path = abspath('../tests/test_data')
 input_path = data_path + '/H2_GW/input.h5'
 sim_path = data_path + '/H2_GW/sim.h5'
-lamb = '1e4'
+ir_file = data_path + '/ir_grid/1e4_104.h5'
 
 # Compiled Nevanlinna file
 nevan_exe = abspath('../Nevanlinna/nevanlinna')
@@ -75,7 +75,7 @@ print('Pre analysis complete')
 print("Setting up mbanalysis post processing object.")
 t1 = time.time()
 MB = mb.MB_post(
-    fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv, lamb=lamb
+    fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv, ir_file=ir_file
 )
 t2 = time.time()
 print("Time required to set up post processing: ", t2 - t1)

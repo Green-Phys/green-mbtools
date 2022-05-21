@@ -1,5 +1,4 @@
 from functools import reduce
-from mbanalysis.data import ir_1e3, ir_1e4, ir_1e5, ir_1e6, ir_1e7
 import numpy as np
 import irbasis
 import h5py
@@ -12,48 +11,38 @@ the intermediate representation (IR)
 
 
 class IR_factory(object):
-    def __init__(self, beta, lamb):
+    def __init__(self, beta, ir_file=None):
 
-        self._ir_dict = {
-            '1e3': ir_1e3,
-            '1e4': ir_1e4,
-            '1e5': ir_1e5,
-            '1e6': ir_1e6,
-            '1e7': ir_1e7
-        }
-        if lamb not in self._ir_dict.keys():
+        if ir_file is None:
             raise ValueError(
-                "{} is not an acceptable lambda value.".format(lamb)
-                + " Acceptable lambdas are " + str(self._ir_dict.keys())
+                "{} is not an acceptable IR-grid file.".format(ir_file)
+                + " Provide a valid hdf5 IR-grid file."
             )
 
         self.beta = beta
-        self.lamb = lamb
+        self.ir_file = ir_file
         self.tau_mesh, self.wsample, self.Ttc, self.Tcn, \
             self.Tnc, self.Tct = read_IR_matrices(
-                os.path.abspath(self._ir_dict[lamb]), self.beta
+                os.path.abspath(ir_file), self.beta
             )
         self.nts = self.tau_mesh.shape[0]
         self.nw = self.wsample.shape[0]
 
-    def update(self, beta=None, lamb=None):
-        if lamb not in self._ir_dict.keys():
-            raise ValueError(
-                "{} is not an acceptable lambda value.".format(lamb)
-                + " Acceptable lambdas are " + str(self._ir_dict.keys())
-            )
-        if lamb is not None:
-            self.lamb = lamb
+    def update(self, beta=None, ir_file=None):
+        """Update IR grid information in run-time.
+        """
+        if ir_file is not None:
+            self.ir_file = ir_file
         if beta is not None:
             self.beta = beta
         self.tau_mesh, self.wsample, self.Ttc, self.Tcn, \
-            self.Tnc, self.Tct = read_IR_matrices(
-                self._ir_dict[self.lamb], self.beta
-            )
+            self.Tnc, self.Tct = read_IR_matrices(self.ir_file, self.beta)
         self.nts = self.tau_mesh.shape[0]
         self.nw = self.wsample.shape[0]
 
     def tau_to_w(self, X_t):
+        """Transform `X_t` from tau to imaginary frequency representation.
+        """
         X_w = np.zeros((self.nw,) + X_t.shape[1:], dtype=complex)
         original_shape = X_w.shape
 
@@ -63,6 +52,8 @@ class IR_factory(object):
         return X_w
 
     def w_to_tau(self, X_w, debug=False):
+        """Transform `X_w` from imaginary frequency to tau representation.
+        """
         X_t = np.zeros((self.nts,) + X_w.shape[1:], dtype=complex)
         original_shape = X_t.shape
 
@@ -81,11 +72,15 @@ class IR_factory(object):
 
     # TODO Specify the version of irbasis.
     def tau_to_w_other(self, X_t, wsample):
+        """Use IR basis python package to intrinsically transform other type of
+        quantities from tau to imaginary frequency basis.
+        XXX: What are these "other" quantities?
+        """
         nw = wsample.shape[0]
         X_w = np.zeros((nw,)+X_t.shape[1:], dtype=complex)
         original_shape = X_w.shape
 
-        ir_factory = irbasis.load("F", float(self.lamb))
+        ir_factory = irbasis.load("F", float(self.ir_file))
         tnc = ir_factory.compute_unl(wsample)
         tnc *= np.sqrt(self.beta)
 

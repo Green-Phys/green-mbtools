@@ -30,7 +30,7 @@ class MB_post(object):
     """Many-body analysis class"""
     def __init__(
         self, fock, sigma=None, mu=None, gtau=None, S=None, kmesh=None,
-        beta=None, lamb=None
+        beta=None, ir_file=None
     ):
         """ Initialization """
         # Public instance variables
@@ -49,7 +49,7 @@ class MB_post(object):
         self._ir_list = None
         self._weight = None
         self.ir = None
-        self._lamb = None
+        self._ir_file = None
         self._beta = None
         self._mu = None
 
@@ -93,11 +93,13 @@ class MB_post(object):
         else:
             self._beta = beta
 
-        if lamb is None:
-            print("Warning: Lambda is set to the default '1e6'.")
-            self.lamb = '1e6'
+        if ir_file is None:
+            raise ValueError(
+                "{} is not an acceptable IR-grid file.".format(ir_file)
+                + " Provide a valid hdf5 IR-grid file."
+            )
         else:
-            self.lamb = lamb
+            self.ir_file = ir_file
 
         self._ink = fock.shape[1]
         self._nao = fock.shape[2]
@@ -128,28 +130,27 @@ class MB_post(object):
         print("Updated beta = {}".format(value))
         self._beta = value
         if self.ir is None:
-            self.ir = IR_factory(self.beta, self.lamb)
+            self.ir = IR_factory(self.beta, self.ir_file)
         else:
-            self.ir.update(self.beta, self.lamb)
+            self.ir.update(self.beta, self.ir_file)
 
     @property
-    def lamb(self):
-        return self._lamb
+    def ir_file(self):
+        return self._ir_file
 
-    @lamb.setter
-    def lamb(self, value):
-        """Changing lamb will automatically update both self._nts
+    @ir_file.setter
+    def ir_file(self, value):
+        """Changing ir_file will automatically update both self._nts
         and self.ir for consistency.
-        :param value: Dimensionless parameter, lambda, used in
-        IR representation.
+        :param value: Path to the IR grid HDF5 file.
         :return:
         """
-        print("Setting up IR grid with lambda {}".format(value))
-        self._lamb = value
+        print("Setting up IR grid for {}".format(value))
+        self._ir_file = value
         if self.ir is None:
-            self.ir = IR_factory(self.beta, self.lamb)
+            self.ir = IR_factory(self.beta, self.ir_file)
         else:
-            self.ir.update(self.beta, self.lamb)
+            self.ir.update(self.beta, self.ir_file)
         self._nts = self.ir.nts
 
     @property
@@ -381,7 +382,7 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
     return Y
 
 
-def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
+def initialize_MB_post(sim_path=None, input_path=None, ir_file=None):
     import h5py
     f = h5py.File(sim_path, 'r')
     it = f["iter"][()]
@@ -414,96 +415,5 @@ def initialize_MB_post(sim_path=None, input_path=None, lamb=1e4):
 
     # Standard way to initialize
     return MB_post(
-        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, lamb=lamb
+        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, ir_file=ir_file
     )
-
-
-if __name__ == '__main__':
-    import h5py
-    import mbanalysis
-
-    MB_path = mbanalysis.__path__[0] + '/../'
-    f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
-    Sr = f["S-k"][()].view(complex)
-    Sr = Sr.reshape(Sr.shape[:-1])
-    Fr = f["iter14/Fock-k"][()].view(complex)
-    Fr = Fr.reshape(Fr.shape[:-1])
-    Sigmar = f["iter14/Selfenergy/data"][()].view(complex)
-    Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
-    Gr = f["iter14/G_tau/data"][()].view(complex)
-    Gr = Gr.reshape(Gr.shape[:-1])
-    mu = f["iter14/mu"][()]
-    f.close()
-
-    f = h5py.File(MB_path + '/data/H2_GW/input.h5', 'r')
-    ir_list = f["/grid/ir_list"][()]
-    weight = f["/grid/weight"][()]
-    index = f["/grid/index"][()]
-    conj_list = f["grid/conj_list"][()]
-    f.close()
-
-    """ All k-dependent matrices should lie on a full Monkhorst-Pack grid. """
-    F = to_full_bz(Fr, conj_list, ir_list, index, 1)
-    S = to_full_bz(Sr, conj_list, ir_list, index, 1)
-    Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-    G = to_full_bz(Gr, conj_list, ir_list, index, 2)
-
-    """ Results from correlated methods """
-    # Standard way to initialize
-    manybody = MB_post(
-        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, lamb='1e4'
-    )
-    G = manybody.gtau
-    # If G(t) is not known, Dyson euqation can be solved on
-    # given beta and ir grid.
-    manybody = MB_post(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, lamb='1e4')
-    G2 = manybody.gtau
-
-    diff = G - G2
-    print("Maximum G difference = ", np.max(np.abs(diff)))
-
-    """ Mulliken analysis """
-    print("Mullinken analysis: ")
-    occs = manybody.mulliken_analysis()
-    print("Spin up:", occs[0], ", Spin down:", occs[1])
-    print("References: [0.5 0.5] and [0.5 0.5]")
-
-    """ Natural orbitals """
-    print("Natural orbitals: ")
-    occ, no_coeff = manybody.get_no()
-    print(occ[0, 0])
-    print(occ[1, 0])
-
-    # Maxent
-    # Run Maxent for given Green's function, G_MoSum
-    # manybody.analyt_cont(
-    #   error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent',
-    #   gtau=G_MoSum
-    # )
-    # By default, run Maxent for manybody.gtau
-    # manybody.analyt_cont(
-    #   error=5e-3, maxent_exe='maxent', params='green.param', outdir='Maxent'
-    # )
-
-    """ Orthogonal input """
-    F_orth = orth.sao_orth(F, S, type='f')
-    Sigma_orth = orth.sao_orth(Sigma, S, type='f')
-    manybody = MB_post(
-        fock=F_orth, sigma=Sigma_orth, mu=mu, beta=1000, lamb='1e4'
-    )
-
-    print("Mullinken analysis: ")
-    occs = manybody.mulliken_analysis()
-    print("Spin up:", occs[0], ", Spin down:", occs[1])
-    print("References: [0.5 0.5] and [0.5 0.5]")
-
-    print("Natural orbitals: ")
-    occ, no_coeff = manybody.get_no()
-    print(occ[0, 0])
-    print(occ[1, 0])
-
-    # Lastly, one could use this wrapper function to construct MB_post in a
-    # more compact way
-    sim_path = mbanalysis.__path__[0] + '/../data/H2_GW/sim.h5'
-    input_path = mbanalysis.__path__[0] + '/../data/H2_GW/input.h5'
-    manybody = initialize_MB_post(sim_path, input_path, '1e4')

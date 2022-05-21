@@ -1,20 +1,22 @@
 from mbanalysis.src.ft import construct_rmesh,\
     compute_fourier_coefficients, k_to_real, real_to_k
 import numpy as np
+import pytest
 
 
-def test_fourier_transform():
+def test_fourier_transform(data_path):
     """Test function for Fourier Transform functions.
     FT between real and reciprocal space.
     """
+    data_dir = pytest.test_data_dir
 
     # Read test overlap matrices
-    Sk10 = np.load('test_data/Sk10.npy')
-    Sk6 = np.load('test_data/Sk6.npy')
+    Sk10 = np.load(data_dir + '/winter/Sk10.npy')
+    Sk6 = np.load(data_dir + '/winter/Sk6.npy')
 
     # Get k-mesh
-    kmesh_scaled_nk10 = np.load('test_data/kmesh_k10.npy')
-    kmesh_scaled_nk6 = np.load('test_data/kmesh_k6.npy')
+    kmesh_scaled_nk10 = np.load(data_dir + '/winter/kmesh_k10.npy')
+    kmesh_scaled_nk6 = np.load(data_dir + '/winter/kmesh_k6.npy')
 
     # Get number of k-points
     nk6 = int(np.cbrt(Sk6.shape[0]))

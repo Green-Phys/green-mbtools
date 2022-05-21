@@ -1,8 +1,5 @@
-from functools import reduce
 import h5py
 import numpy as np
-
-import mbanalysis
 from mbanalysis import mb
 from mbanalysis.src import orth
 
@@ -12,15 +9,15 @@ from mbanalysis.src import orth
 #
 ##################
 
-MB_path = mbanalysis.__path__[0] + '/../'
-f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
+data_dir = '../tests/test_data'
+f = h5py.File(data_dir + '/H2_GW/sim.h5', 'r')
 Sr = f["S-k"][()].view(complex)
 Sr = Sr.reshape(Sr.shape[:-1])
 Fr = f["iter14/Fock-k"][()].view(complex)
 Fr = Fr.reshape(Fr.shape[:-1])
 f.close()
 
-f = h5py.File(MB_path + '/data/H2_GW/input.h5', 'r')
+f = h5py.File(data_dir + '/H2_GW/input.h5', 'r')
 ir_list = f["/grid/ir_list"][()]
 weight = f["/grid/weight"][()]
 index = f["/grid/index"][()]
