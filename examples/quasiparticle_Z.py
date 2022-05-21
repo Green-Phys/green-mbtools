@@ -11,9 +11,11 @@ from os.path import abspath
 # Initialize the mbanalysis object
 #
 
-sim_path = 'data/H2_GW/sim.h5'
-input_path = 'data/H2_GW/input.h5'
-manybody = initialize_MB_post(sim_path, input_path, '1e4')
+data_dir = '../tests/test_data'
+sim_path = data_dir + '/H2_GW/sim.h5'
+input_path = data_dir + '/H2_GW/input.h5'
+ir_file = data_dir + '/ir_grids/1e4_104.h5'
+manybody = initialize_MB_post(sim_path, input_path, ir_file)
 nts, ns, nk, nao = manybody.sigma.shape[:4]
 nw = manybody.ir.nw
 
@@ -44,7 +46,7 @@ print("Quasiparticle renormalization factor: {}".format(Zs))
 ''' Z in one-electron basis of the Fock matrix '''
 Sigma = manybody.ir.tau_to_w(manybody.sigma[:, 0, 0])
 # U^{\dag}*S*U = I and U^{\dag}*F*U = evals
-e,  U = LA.eigh(manybody.fock[0, 0], manybody.S[0, 0])
+e, U = LA.eigh(manybody.fock[0, 0], manybody.S[0, 0])
 Sigma_w_mo = np.array(
     [reduce(np.dot, (U.conj().T, sigma_w, U)) for sigma_w in Sigma]
 )

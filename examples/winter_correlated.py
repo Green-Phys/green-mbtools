@@ -34,9 +34,10 @@ path = cc.cell.bandpath('WGXWLG', npoints=100)
 kpts_inter = path.kpts
 
 # Input files
-input_path = "/pauli-storage/cnyeh/Si/nk6/LDA/input.h5"
-GW_path = "/pauli-storage/cnyeh/Si/nk6/GW_1000_104/sim_last.h5"
-lamb = '1e4'
+data_dir = '../tests/test_data'
+input_path = data_dir + '/H2_GW/input.h5'
+GW_path = data_dir + '/H2_GW/sim.h5'
+ir_file = data_dir + '/ir_grids/1e4_105.h5'
 
 # Output file
 output = "test.h5"  # "666Si_GW_WGXWLF.h5"
@@ -60,11 +61,11 @@ f.close()
 f = h5py.File(GW_path, 'r')
 it = f["iter"][()]
 rSk = f["/S-k"][()].view(complex)
-rFk = f["iter"+str(it)+"/Fock-k"][()].view(complex)
-rGk = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
-rSigmak = f["iter"+str(it)+"/Selfenergy/data"][()].view(complex)
-tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
-mu = f["iter"+str(it)+"/mu"][()]
+rFk = f["iter" + str(it) + "/Fock-k"][()].view(complex)
+rGk = f["iter" + str(it) + "/G_tau/data"][()].view(complex)
+rSigmak = f["iter" + str(it) + "/Selfenergy/data"][()].view(complex)
+tau_mesh = f["iter" + str(it) + "/G_tau/mesh"][()]
+mu = f["iter" + str(it) + "/mu"][()]
 rFk = rFk.reshape(rFk.shape[:-1])
 rGk = rGk.reshape(rGk.shape[:-1])
 rSigmak = rSigmak.reshape(rSigmak.shape[:-1])
@@ -88,10 +89,10 @@ del rFk, rSk, rSigmak
 # (i) Input data e.g. fock, sigma, gtau, S have to be in full BZ.
 MB = mb.MB_post(
     fock=Fk, sigma=Sigma_tk, mu=mu, S=Sk, kmesh=kmesh_scaled,
-    beta=T_inv, lamb=lamb
+    beta=T_inv, ir_file=ir_file
 )
 # Wannier interpolation for basis defined by MB_post.S.
-# Emperically, AO basis seems to be much more localized than SAO. 
+# Emperically, AO basis seems to be much more localized than SAO.
 G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(
     kpts_inter, hermi=True, debug=debug
 )

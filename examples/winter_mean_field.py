@@ -37,12 +37,14 @@ path = cc.cell.bandpath('WGXWLG', npoints=100)
 kpts_inter = path.kpts
 
 # Input files
+data_dir = '../tests/test_data'
+input_path = data_dir + '/H2_GW/input.h5'
+ir_file = data_dir + '/ir_grids/1e4_105.h5'
 input_path = "/pauli-storage/cnyeh/Si/nk6/LDA/input.h5"
-lamb = '1e4'
 
 # Output file
 bands_output = "bands.npy"
-output = "666Si_LDA_WGXWLG.h5"
+output = "H2_LDA_WGXWLG.h5"
 
 ##################
 #
@@ -70,7 +72,7 @@ f.close()
 # Input data e.g. fock, sigma, gtau, S have to be in full BZ.
 MB = mb.MB_post(
     fock=Fk, sigma=None, mu=mu, S=Sk, kmesh=kmesh_scaled,
-    beta=T_inv, lamb=lamb
+    beta=T_inv, ir_file=ir_file
 )
 # Wannier interpolation for basis defined by MB_post.S.
 # Emperically, AO basis seems to be much more localized than SAO.
