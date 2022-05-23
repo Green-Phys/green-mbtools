@@ -14,7 +14,7 @@ from os.path import abspath
 data_dir = '../tests/test_data'
 sim_path = data_dir + '/H2_GW/sim.h5'
 input_path = data_dir + '/H2_GW/input.h5'
-ir_file = data_dir + '/ir_grids/1e4_104.h5'
+ir_file = data_dir + '/ir_grid/1e4_104.h5'
 manybody = initialize_MB_post(sim_path, input_path, ir_file)
 nts, ns, nk, nao = manybody.sigma.shape[:4]
 nw = manybody.ir.nw
@@ -22,6 +22,7 @@ nw = manybody.ir.nw
 
 #
 # Quasiparticles have to be defined in an orthogonal orbitals basis.
+# Note: this example only calculates Z at gamma point.
 #
 
 ''' Z in SAO basis '''

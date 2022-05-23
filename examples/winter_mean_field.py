@@ -39,7 +39,7 @@ kpts_inter = path.kpts
 # Input files
 data_dir = '../tests/test_data'
 input_path = data_dir + '/H2_GW/input.h5'
-ir_file = data_dir + '/ir_grids/1e4_105.h5'
+ir_file = data_dir + '/ir_grid/1e4_105.h5'
 input_path = "/pauli-storage/cnyeh/Si/nk6/LDA/input.h5"
 
 # Output file

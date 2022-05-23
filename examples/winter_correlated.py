@@ -37,7 +37,7 @@ kpts_inter = path.kpts
 data_dir = '../tests/test_data'
 input_path = data_dir + '/H2_GW/input.h5'
 GW_path = data_dir + '/H2_GW/sim.h5'
-ir_file = data_dir + '/ir_grids/1e4_105.h5'
+ir_file = data_dir + '/ir_grid/1e4_105.h5'
 
 # Output file
 output = "test.h5"  # "666Si_GW_WGXWLF.h5"
