@@ -94,7 +94,7 @@ public:
             ofs << std::fixed << std::setprecision(15);
             ofs << freq_[i].real() << " " << 1 / M_PI * val_[i].imag() <<std::endl;
             //***If continuing Self-energy, comment line 95 and uncomment line 97***
-            // ofs << freq_[i].real() << " " << -1.0 * val_[i].real() << " " << -1.0*val_[i].imag() << std:endl;
+            // ofs << freq_[i].real() << " " << -1.0 * val_[i].real() << " " << -1.0*val_[i].imag() << std::endl;
         }
     }
 private:
