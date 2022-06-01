@@ -82,10 +82,9 @@ parser.add_argument(
     "--iter", type=int, default=-1,
     help="Iteration number of the scGW cycle to use for continuation"
 )
-# TODO: Replace lambda functionality to IR-grid file
 parser.add_argument(
-    "--lamb", type=str, default='1e4',
-    help="Lambda used in the IR grid."
+    "--ir_file", type=str, default=None,
+    help="HDF5 file that contains information about the IR grid."
 )
 parser.add_argument(
     "--out", type=str, default='winter_out.h5',
@@ -118,7 +117,7 @@ bandpts = args.bandpts
 input_path = args.input
 sim_path = args.sim
 it = args.iter
-lamb = args.lamb
+ir_file = args.ir_file
 output = args.out
 nevan_exe = args.nevan_exe
 if nevan_exe is None:
@@ -194,7 +193,7 @@ del rFk, rSk, rSigmak
 # Initialize mbanalysis post processing
 mbo = mb.MB_post(
     fock=Fk, sigma=Sigma_tk, mu=mu, S=Sk, kmesh=kmesh_scaled,
-    beta=T_inv, lamb=lamb
+    beta=T_inv, ir_file=ir_file
 )
 
 # Wannier interpolation
