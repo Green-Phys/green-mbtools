@@ -1,5 +1,6 @@
 # Output of Nevanlinna analytical continuation examples
 examples/Nevanlinna*
+tests/*Nevan*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

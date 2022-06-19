@@ -3,7 +3,9 @@ import subprocess
 import shutil
 import numpy as np
 import h5py
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, Process
+import mbanalysis.nevanlinna as nevan_exe
+# from mbanalysis.nevanlinna import nevanlinna
 
 
 # Find the number of cpus to use for parallelization of analtyic continuation
@@ -130,31 +132,29 @@ def maxent_run(
 
 
 def nevan_run(
-    Gw, wsample, input_parser, nevan_exe="nevanlinna", outdir="Nevanlinna"
+    Xiw, wsample, outdir='Nevanlinna', ifile='G_iw.txt', ofile='A_w.txt',
+    coefile='coeff', n_real=10001, w_min=-10, w_max=10, eta=0.01, spectral=1
 ):
-    """Run dim0 times Nevanlinna continuation for Gw. Note that Gw should only
+    """Run times Nevanlinna continuation for Gw. Note that Gw should only
     lie on positive Matsubara frequency axis.
     :param Gw: (nw, dim1), dim1 = (ns, nk, nao), (ns, nk), (ns) ... etc
     :param wsample: Matsubara frequency samplings
     :param input_parser[string]: "Giw_file_to_dump number_of_sampling \
         Gw_file_to_dump coeff" each term is separated by whitespace.
-    :param exe_path: Nevanlinna executable path
     :param outdir: output directory w.r.t. the current working directory
     :return:
     """
     wkdir = os.path.abspath(os.getcwd())
     print("Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
+    print("Will dump input to {} and output to {}".format(ifile, ofile))
 
-    args = input_parser.split()
-    X_iw_path, nw, X_w_path = args[0], int(args[1]), args[2]
-    print("Will dump input to {} and output to {}".format(X_iw_path, X_w_path))
-    assert nw == wsample.shape[0], "Number of imaginary frequency points \
-        mismatches between \"input_parser\" and wsample."
-    assert nw == Gw.shape[0], "Number of imaginary frequency points mismatches \
+    nw = wsample.shape[0]
+    assert nw == Xiw.shape[0], "Number of imaginary frequency points mismatches \
         between \"input_parser\" and Gw."
-    g_shape = Gw.shape
-    Gw = Gw.reshape(nw, -1)
-    dim1 = Gw.shape[1]
+
+    g_shape = Xiw.shape
+    Xiw = Xiw.reshape(nw, -1)
+    dim1 = Xiw.shape[1]
 
     if not os.path.exists(outdir):
         os.mkdir(outdir)
@@ -167,37 +167,39 @@ def nevan_run(
         if not os.path.exists(str(d1)):
             os.mkdir(str(d1))
         np.savetxt(
-            "{}/{}".format(d1, X_iw_path),
-            np.column_stack((wsample, Gw[:, d1].real, Gw[:, d1].imag))
+            "{}/{}".format(d1, ifile),
+            np.column_stack((wsample, Xiw[:, d1].real, Xiw[:, d1].imag))
         )
 
+    # Template function to run nevanlinna
+    def template_nevan_func(input):
+        return nevan_exe.nevanlinna(
+            input, nw, ofile, coefile, spectral, n_real, w_min, w_max, eta
+        )
+        
     # Start analytical continuation
     processes = []
     pp = 0
     for d1 in range(dim1):
         os.chdir(str(d1))
-        with open("log.txt", "w") as log:
-            p = subprocess.Popen(
-                [nevan_exe], stdin=subprocess.PIPE, stdout=log, stderr=log
-            )
-            p.stdin.write(str.encode(input_parser))
-            p.stdin.close()
-            processes.append(p)
+        p = Process(target=template_nevan_func, args=(ifile, ))
+        p.start()
+        processes.append(p)
         pp += 1
         if pp % _ncpu == 0:
             for p in processes:
-                p.wait()
+                p.join()
             processes = []
         os.chdir("..")
 
     # Wait for remaining processes to end
     for p in processes:
-        p.wait()
+        p.join()
 
     # Combine output
     dump_A = False
     try:
-        X_w = np.loadtxt("0/{}".format(X_w_path))
+        X_w = np.loadtxt("0/{}".format(ofile))
         dtype = complex if X_w.shape[1] == 3 else float
         freqs = X_w[:, 0]
     except IOError:
@@ -208,7 +210,7 @@ def nevan_run(
         Aw = np.zeros((freqs.shape[0], dim1), dtype=dtype)
         for d1 in range(dim1):
             try:
-                X_w = np.loadtxt("{}/{}".format(d1, X_w_path))
+                X_w = np.loadtxt("{}/{}".format(d1, ofile))
                 if dtype == complex:
                     Aw[:, d1].real,  Aw[:, d1].imag = X_w[:, 1],  X_w[:, 2]
                 else:
@@ -216,26 +218,27 @@ def nevan_run(
             except IOError:
                 print(
                     "{} is missing in {} folder. Possibly analytical \
-                    continuation fails at that point.".format(X_w_path, d1)
+                    continuation fails at that point.".format(ofile, d1)
                 )
         Aw = Aw.reshape((freqs.shape[0],) + g_shape[1:])
-        Gw = Gw.reshape(g_shape)
+        Xiw = Xiw.reshape(g_shape)
         f = h5py.File("DOS.h5", 'w')
         f["freqs"] = freqs
         f["DOS"] = Aw
         f["iwsample"] = wsample
-        f["Giw"] = Gw
+        f["Giw"] = Xiw
         f.close()
     else:
         print("All AC fails. Will not dump to DOS.h5")
-        Gw = Gw.reshape(g_shape)
+        Xiw = Xiw.reshape(g_shape)
 
     os.chdir("..")
 
 
 def nevan_run_selfenergy(
-    Sigma_iw, wsample, input_parser,
-    nevan_exe="nevanlinna", outdir="nevanlinna"
+    Sigma_iw, wsample, outdir="nevanlinna", ifile='Sigma_iw.txt',
+    ofile='Sigma_w.txt', coefile='coeff', n_real=10000, w_min=-10,
+    w_max=10, eta=0.01
 ):
     """
     Run dim0 times Nevanlinna continuation for Sigma(iw). Note that Sigma(iw)
@@ -244,23 +247,23 @@ def nevan_run_selfenergy(
     :param wsample: Matsubara frequency samplings
     :param input_parser[string]: "Sigma_iw_file_to_dump number_of_sampling \
         Sigma_w_file_to_dump coeff" each term is separated by whitespace.
-    :param exe_path: Nevanlinna executable path
     :param outdir: output directory w.r.t. the current working directory
     :return:
     """
     wkdir = os.path.abspath(os.getcwd())
     print("Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
+    print("Will dump input to {} and output to {}".format(ifile, ofile))
 
-    args = input_parser.split()
-    X_iw_path, nw, X_w_path = args[0], int(args[1]), args[2]
-    print("Will dump input to {} and output to {}".format(X_iw_path, X_w_path))
-    assert nw == wsample.shape[0], "Number of imaginary frequency points \
-        mismatches between \"input_parser\" and wsample."
+    nw = wsample.shape[0]
     assert nw == Sigma_iw.shape[0], "Number of imaginary frequency points \
         mismatches between \"input_parser\" and Gw."
     Sigma_iw_shape = Sigma_iw.shape
     Sigma_iw = Sigma_iw.reshape(nw, -1)
     dim1 = Sigma_iw.shape[1]
+
+    # For self-energy, we want both the real and imag data,
+    # not just the spectral function
+    spectral = 0
 
     if not os.path.exists(outdir):
         os.mkdir(outdir)
@@ -273,10 +276,16 @@ def nevan_run_selfenergy(
         if not os.path.exists(str(d1)):
             os.mkdir(str(d1))
         np.savetxt(
-            "{}/{}".format(d1, X_iw_path),
+            "{}/{}".format(d1, ifile),
             np.column_stack(
                 (wsample, Sigma_iw[:, d1].real, Sigma_iw[:, d1].imag)
             )
+        )
+
+    # Template function to run nevanlinna
+    def template_nevan_func(input):
+        return nevan_exe.nevanlinna(
+            input, nw, ofile, coefile, spectral, n_real, w_min, w_max, eta
         )
 
     # Start analytical continuation
@@ -284,27 +293,23 @@ def nevan_run_selfenergy(
     pp = 0
     for d1 in range(dim1):
         os.chdir(str(d1))
-        with open("log.txt", "w") as log:
-            p = subprocess.Popen(
-                [nevan_exe], stdin=subprocess.PIPE, stdout=log, stderr=log
-            )
-            p.stdin.write(str.encode(input_parser))
-            p.stdin.close()
-            processes.append(p)
+        p = Process(target=template_nevan_func, args=(ifile,))
+        p.start()
+        processes.append(p)
         pp += 1
         if pp % _ncpu == 0:
             for p in processes:
-                p.wait()
+                p.join()
             processes = []
         os.chdir("..")
 
     for p in processes:
-        p.wait()
+        p.join()
 
     # Combine output
     dump_A = False
     try:
-        X_w = np.loadtxt("0/{}".format(X_w_path))
+        X_w = np.loadtxt("0/{}".format(ofile))
         dtype = complex if X_w.shape[1] == 3 else float
         freqs = X_w[:, 0]
     except IOError:
@@ -315,7 +320,7 @@ def nevan_run_selfenergy(
         Sigma_w = np.zeros((freqs.shape[0], dim1), dtype=dtype)
         for d1 in range(dim1):
             try:
-                X_w = np.loadtxt("{}/{}".format(d1, X_w_path))
+                X_w = np.loadtxt("{}/{}".format(d1, ofile))
                 if dtype == complex:
                     Sigma_w[:, d1].real = X_w[:, 1]
                     Sigma_w[:, d1].imag = X_w[:, 2]
@@ -324,7 +329,7 @@ def nevan_run_selfenergy(
             except IOError:
                 print(
                     "{} is missing in {} folder. Possibly analytical \
-                    continuation fails at that point.".format(X_w_path, d1)
+                    continuation fails at that point.".format(ofile, d1)
                 )
         Sigma_w = Sigma_w.reshape((freqs.shape[0],) + Sigma_iw_shape[1:])
         Sigma_iw = Sigma_iw.reshape(Sigma_iw_shape)

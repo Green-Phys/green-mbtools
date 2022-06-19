@@ -20,9 +20,12 @@ private:
     using typename precision_<T>::nev_complex_matrix_vector;
 public:
     //check Nevanlinna/contractive interpolant existence condition
-    Schur (std::string ifile, int imag_num, std::string ofile);
+    Schur (
+        std::string ifile, int imag_num, std::string ofile, int n_real,
+        double w_min, double w_max, double eta
+    );
     //evaluation with 0 parametric function 
-    void evaluation (std::string cofile);
+    void evaluation (std::string cofile, int spectral);
 private:
     int M; //number of Matsubara points
     imag_domain_data <T> imag; //theta values at Matsubara points (G -> NG -> theta)
@@ -35,7 +38,10 @@ private:
 
 
 template <class T>
-Schur<T>::Schur (std::string ifile, int imag_num, std::string ofile) : imag(ifile, imag_num), real(ofile)  {
+Schur<T>::Schur (
+    std::string ifile, int imag_num, std::string ofile,
+    int n_real, double w_min, double w_max, double eta
+) : imag(ifile, imag_num), real(ofile, n_real, w_min, w_max, eta)  {
     M = imag_num;
     //fill the Pick matrix
     nev_complex_matrix Pick (M, M);
@@ -52,9 +58,14 @@ Schur<T>::Schur (std::string ifile, int imag_num, std::string ofile) : imag(ifil
     }
     //check the positive semi-definiteness of the Pick matrix using Cholesky decomposition
     Eigen::LLT<nev_complex_matrix> lltOfPick(Pick + nev_complex_matrix::Identity(M, M) * 1e-250);
+
+    //Write the output of check to logfile
+    std::ofstream logfile;
+    logfile.open("log.txt");
     if(lltOfPick.info() == Eigen::NumericalIssue) 
-        std::cerr << "Pick matrix is non positive semi-definite matrix in Schur method." << std::endl;
-    else std::cerr << "Pick matrix is positive semi-definite." << std::endl;
+        logfile << "Pick matrix is non positive semi-definite matrix in Schur method." << std::endl;
+    else logfile << "Pick matrix is positive semi-definite." << std::endl;
+    logfile.close();
 }
 
 
@@ -81,7 +92,7 @@ void Schur<T>::core() {
 
 
 template <class T>
-void Schur<T>::evaluation (std::string cofile) {
+void Schur<T>::evaluation (std::string cofile, int spectral) {
     core();
     nev_complex I {0., 1.};
     nev_complex One {1., 0.};
@@ -108,5 +119,5 @@ void Schur<T>::evaluation (std::string cofile) {
                 << to_string_p(std::real(result(1, 1))) << " " << to_string_p(std::imag(result(1, 1))) << std::endl;
         real.val()[i] = I * (One + theta) / (One - theta); //inverse Mobius transform from theta to NG
     }
-    real.write();
+    real.write(spectral);
 }
