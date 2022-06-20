@@ -26,9 +26,10 @@ def Z_factor(
     nw = iwsample.shape[0]
     iwsample_pos = iwsample[nw//2:]
     Sigma_iw_diag = Sigma_iw_diag[nw//2:]
-    ac.nevan_run_selfenergy(
+    ac.nevan_run(
         Sigma_iw_diag, iwsample_pos, outdir=outdir, ifile=ifile, ofile=ofile,
-        coefile=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta
+        coefile=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
+        green=False
     )
 
     if not os.path.exists(outdir):

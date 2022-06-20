@@ -1,5 +1,4 @@
-# from mbanalysis.src.analyt_cont import nevan_run_selfenergy
-from mbanalysis.src.analyt_cont import nevan_run, nevan_run_selfenergy
+from mbanalysis.src.analyt_cont import nevan_run
 from h5py import File
 import numpy as np
 
@@ -30,7 +29,7 @@ def test_nevan_exe_on_dirac_delta_spectrum():
 
     nevan_run(
         G_iw, iw_vals, outdir=outdir, n_real=n_real,
-        w_min=w_min, w_max=w_max, eta=eta
+        w_min=w_min, w_max=w_max, eta=eta, green=True
     )
 
     fdos = File(outdir + '/DOS.h5', 'r')
@@ -57,7 +56,7 @@ def test_nevan_exe_on_dirac_delta_spectrum():
 
     nevan_run(
         G_iw, iw_vals, outdir=outdir, n_real=n_real,
-        w_min=w_min, w_max=w_max, eta=eta
+        w_min=w_min, w_max=w_max, eta=eta, green=True
     )
 
     fdos = File(outdir + '/DOS.h5', 'r')
@@ -85,9 +84,9 @@ def test_nevan_exe_on_selfenergy():
     w_max = 1.5
     eta = 1.
 
-    nevan_run_selfenergy(
+    nevan_run(
         Sigma_iw, iw_vals, outdir=outdir, n_real=n_real,
-        w_min=w_min, w_max=w_max, eta=eta
+        w_min=w_min, w_max=w_max, eta=eta, green=False
     )
 
     # Check the output data

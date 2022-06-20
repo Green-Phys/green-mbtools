@@ -325,7 +325,8 @@ class MB_post(object):
         wsample = self.ir.wsample[nw//2:]
         AC.nevan_run(
             Gw_inp, wsample, outdir=outdir, ifile=ifile, ofile=ofile,
-            coefile=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta
+            coefile=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
+            green=True
         )
 
 
