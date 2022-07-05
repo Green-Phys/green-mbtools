@@ -304,7 +304,9 @@ class MB_post(object):
         AC.maxent_run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
     def AC_nevanlinna(
-        self, nevan_exe="nevanlinna", outdir="Nevanlinna", gtau_orth=None
+        self, outdir="Nevanlinna", gtau_orth=None,
+        ifile='G_iw.txt', ofile='A_w.txt', coefile='coeff',
+        n_real=10001, w_min=-10, w_max=10, eta=0.01
     ):
         """
         Analytical continuation using Nevanlinna interpolation
@@ -321,8 +323,11 @@ class MB_post(object):
         Gw_inp = self.ir.tau_to_w(gtau_orth)[nw//2:]
 
         wsample = self.ir.wsample[nw//2:]
-        input_parser = 'G_w.txt ' + str(nw//2) + ' A_w.txt coeff'
-        AC.nevan_run(Gw_inp, wsample, input_parser, nevan_exe, outdir)
+        AC.nevan_run(
+            Gw_inp, wsample, outdir=outdir, ifile=ifile, ofile=ofile,
+            coefile=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
+            green=True
+        )
 
 
 def minus_k_to_k_TRsym(X):

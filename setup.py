@@ -1,5 +1,19 @@
-from numpy.distutils.core import setup
+from numpy.distutils.core import setup, Extension
 
+
+# Build Nevanlinna extension
+src = 'Nevanlinna'
+files = ['nevanlinna.cpp']
+sources = []
+for fi in files:
+    sources.append(src + '/' + fi)
+
+nevanlinna = Extension(
+    'mbanalysis.nevanlinna',
+    sources=sources,
+    include_dirs=['/usr/include/eigen3', ],
+    libraries=['gmp', 'gmpxx']
+)
 
 setup(
    name='mbanalysis',
@@ -7,7 +21,5 @@ setup(
    description="A package for post processing of finite-temperature \
        Green's function and self-energy data",
    packages=['mbanalysis', 'mbanalysis.src'],
-   package_data={
-       "mbanalysis.data": ["*.h5", "*.npy"]
-   }
+   ext_modules=[nevanlinna, ]
 )

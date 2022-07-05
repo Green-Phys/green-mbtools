@@ -71,7 +71,9 @@ private:
 public:
     //calculate and store real frequencies (at omega+i*eta), uniform grid
     //***change N_real_, omega_min, omega_max and eta as needed***
-    real_domain_data (std::string ofile) : ofs(ofile), N_real_(10000), omega_min(-15), omega_max(15), eta(0.01) {
+    real_domain_data (
+        std::string ofile, int n_real, double w_min, double w_max, double et
+    ) : ofs(ofile), N_real_(n_real), omega_min(w_min), omega_max(w_max), eta(et) {
         val_.resize(N_real_);
         freq_.resize(N_real_);
         nev_real inter = (omega_max - omega_min) / (N_real_ - 1);
@@ -89,12 +91,22 @@ public:
     //real frequencies
     const nev_complex_vector &freq() const { return freq_; }
     //write real frequencies and spectral function A(omega) values to the output file
-    void write () {
-        for(int i = 0;i < N_real_; i++){
-            ofs << std::fixed << std::setprecision(15);
-            ofs << freq_[i].real() << " " << 1 / M_PI * val_[i].imag() <<std::endl;
-            //***If continuing Self-energy, comment line 95 and uncomment line 97***
-            // ofs << freq_[i].real() << " " << -1.0 * val_[i].real() << " " << -1.0*val_[i].imag() << std::endl;
+    void write (bool spectral=true) {
+
+        if (spectral) {
+            //Save data for spectral function: A(w) (-1 / pi) Im G_ii (w)
+            for(int i = 0;i < N_real_; i++){
+                ofs << std::fixed << std::setprecision(15);
+                ofs << freq_[i].real() << " " << 1 / M_PI * val_[i].imag() <<std::endl;
+            }
+        }
+        else {
+            //For any quantity other than the spectral function, store both real and imaginary
+            //parts of the analytically continued quantity
+            for(int i = 0;i < N_real_; i++){
+                ofs << std::fixed << std::setprecision(15);
+                ofs << freq_[i].real() << " " << -1.0 * val_[i].real() << " " << -1.0*val_[i].imag() << std::endl;
+            }
         }
     }
 private:
