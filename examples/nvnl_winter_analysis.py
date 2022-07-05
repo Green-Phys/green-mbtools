@@ -91,10 +91,6 @@ parser.add_argument(
     help="Name for output file (should be .h5 format)"
 )
 parser.add_argument(
-    "--nevan_exe", type=str, default=None,
-    help="Path to compiled Nevanlinna program"
-)
-parser.add_argument(
     "--nev_outdir", type=str, default="./Nevanlinna/",
     help="Directory to dump output from Nevanlinna analytic continuation"
 )
@@ -119,9 +115,6 @@ sim_path = args.sim
 it = args.iter
 ir_file = args.ir_file
 output = args.out
-nevan_exe = args.nevan_exe
-if nevan_exe is None:
-    ValueError('nevan_exe cannot be None')
 nev_outdir = args.nev_outdir
 
 # Pyscf object to generate k points
@@ -217,7 +210,7 @@ Gt_sao_diag = np.einsum('tskii -> tski', Gt_sao)
 print("Starting Nevanlinna")
 t3 = time.time()
 mbo.AC_nevanlinna(
-    nevan_exe=nevan_exe, outdir=nev_outdir, gtau_orth=Gt_sao_diag
+    outdir=nev_outdir, gtau_orth=Gt_sao_diag
 )
 t4 = time.time()
 print("TIme required for Nevanlinna AC: ", t4 - t3)

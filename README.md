@@ -9,7 +9,7 @@ Installation
 ----------
 This package requires two levels of installation:
 * The python package can be installed using `python setup.py install`.
-* The Nevanlinna analytic continuation is set up as a C++ module. To build this module, run `cd Nevanlinna && make`.
+* The Nevanlinna analytic continuation is set up as a C++ extension module. In the new version of this package, no additional installation is required for the Nevanlinna module.
 
 Features
 ----------
@@ -23,7 +23,8 @@ Features
 
 To-Do-List
 -----------
-* Compile Nevanlinna C++ module during the setup.py installation. Right now this module sits wherever the `mbanalysis` repo is cloned.
-* Add test functions
-* Problems with `example/quasiparticle.py`: First, it needs `nevan_sigma`, which needs to be added to the repository. Second, there is 
+* There are two separate functions for Nevanlinna analytical continuation: `analyt_cont/nevan_run` and `analyt_cont/nevan_run_selfenergy`. Only difference now is the value of the parameter `spectral` (1 for Green's function continuation, and 0 for self-energy) and the final HDF5 output file. Remove this redundancy and merge into one code.
+
+* Hardy optimization: Read the `coeff` file and optimize `theta[M+1] (z)` within the python package itself. I believe that we shouldn't need more than `np.complex128` precision to implement this.
+
 * Fix `examples/winter*.py`: The original example for Silicon has been modified to Hydrogen (for which test data is available). The high-symmetry points in the interpolation need to be readjusted accordingly.
