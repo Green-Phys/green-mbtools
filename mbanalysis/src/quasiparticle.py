@@ -1,5 +1,3 @@
-import os
-import h5py
 import numpy as np
 import mbanalysis.src.analyt_cont as ac
 
