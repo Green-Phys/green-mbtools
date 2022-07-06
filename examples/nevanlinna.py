@@ -89,7 +89,7 @@ freqs, A_w = MB.AC_nevanlinna(
 )
 t4 = time.time()
 print("TIme required for Nevanlinna AC: ", t4 - t3)
-f1 = h5py.File('dos_sao.h5', 'r')
+f1 = h5py.File('dos_sao.h5', 'w')
 f1['freqs'] = freqs
 f1['A_w'] = A_w
 f1.close()
@@ -104,7 +104,7 @@ freqs, A_w = MB.AC_nevanlinna(
 )
 t6 = time.time()
 print("Time required for Nevanlinna AC in orthogonal basis: ", t6 - t5)
-f2 = h5py.File('dos_canonical.h5', 'r')
+f2 = h5py.File('dos_canonical.h5', 'w')
 f2['freqs'] = freqs
 f2['dos'] = A_w
 f2.close()
