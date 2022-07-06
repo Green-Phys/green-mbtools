@@ -31,14 +31,7 @@ F_sao = F_sao[:, 0]
 Sigma_sao = orth.sao_orth(manybody.sigma, manybody.S, type='f')
 Sigma_sao = manybody.ir.tau_to_w(Sigma_sao[:, :, 0])
 
-nevan_sigma_exe = abspath('../Nevanlinna/nevanlinna')
-# or path to compiled C++ Nevanlinna script
-# TODO (by GH): I believe `nevan_sigma` refers to nevanlinna analytic
-# TODO          continuation binary for self-energy, not the Gtau version.
-# That is why there is no point debugging this for the time being.
-Zs = qs.Z_factor(
-    F_sao, Sigma_sao, manybody.ir.wsample, nevan_sigma_exe, 'nevan_sigma'
-)
+Zs = qs.Z_factor(F_sao, Sigma_sao, manybody.ir.wsample)
 # Z = 0.98563148 from Nevanlinna AC with eta = 0.005 Ha
 print('In SAO basis:')
 print("Quasiparticle renormalization factor: {}".format(Zs))
@@ -53,8 +46,6 @@ Sigma_w_mo = np.array(
 )
 F_mo = np.diag(e).reshape(1, nao, nao)
 Sigma_w_mo = Sigma_w_mo.reshape(nw, 1, nao, nao)
-Zs = qs.Z_factor(
-    F_mo, Sigma_w_mo, manybody.ir.wsample, nevan_sigma_exe, 'nevan_sigma'
-)
+Zs = qs.Z_factor(F_mo, Sigma_w_mo, manybody.ir.wsample)
 print('In MO basis:')
 print("Quasiparticle renormalization factor: {}".format(Zs))
