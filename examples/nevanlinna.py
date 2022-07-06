@@ -85,7 +85,7 @@ print("Time required to set up post processing: ", t2 - t1)
 
 t3 = time.time()
 MB.AC_nevanlinna(
-    nevan_exe=nevan_exe, outdir='Nevanlinna'
+    outdir='Nevanlinna'
 )
 t4 = time.time()
 print("TIme required for Nevanlinna AC: ", t4 - t3)
@@ -96,7 +96,7 @@ Gt_canonical = orth.canonical_orth(MB.gtau, MB.S, type='g')
 Gt_sao = orth.sao_orth(MB.gtau, MB.S, type='g')
 Gt_orbsum = np.einsum("tskii->tsk", Gt_sao)
 MB.AC_nevanlinna(
-    nevan_exe=nevan_exe, outdir='Nevanlinna_orbsum', gtau_orth=Gt_orbsum
+    outdir='Nevanlinna_orbsum', gtau_orth=Gt_orbsum
 )
 t6 = time.time()
 print("Time required for Nevanlinna AC in orthogonal basis: ", t6 - t5)
