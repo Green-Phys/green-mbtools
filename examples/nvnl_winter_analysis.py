@@ -207,13 +207,17 @@ print("Transforming interpolated Gtau to SAO basis")
 Gt_sao = orth.sao_orth(G_tk_int, Sk_int, type='g')
 Gt_sao_diag = np.einsum('tskii -> tski', Gt_sao)
 
+
+# NOTE: The user can now control parameters that go into analytic continuation
+#       such as no. of real freqs (n_real), w_min, w_max, and eta.
 print("Starting Nevanlinna")
 t3 = time.time()
 mbo.AC_nevanlinna(
-    outdir=nev_outdir, gtau_orth=Gt_sao_diag
+    outdir=nev_outdir, gtau_orth=Gt_sao_diag,
+    n_real=10001, w_min=-10, w_max=10, eta=0.01
 )
 t4 = time.time()
-print("TIme required for Nevanlinna AC: ", t4 - t3)
+print("Time required for Nevanlinna AC: ", t4 - t3)
 
 # Save interpolated data to HDF5
 # This file contains the Green's function, Fock matrix, etc. at the k-points
