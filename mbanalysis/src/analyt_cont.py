@@ -215,7 +215,6 @@ def nevan_run(
         for d1 in range(dim1):
             # Read X_w data
             try:
-                X_w = np.loadtxt("{}/{}".format(d1, ofile))
                 X_wk = np.loadtxt("{}/{}".format(d1, ofile))
                 if dtype == complex:
                     X_w[:, d1].real = X_wk[:, 1]
