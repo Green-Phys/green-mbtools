@@ -248,17 +248,10 @@ def nevan_run(
 
         coeff_w = coeff_w.reshape((freqs.shape[0],) + X_iw.shape[1:] + (4, ))
 
-        if green:
-            fname = 'dos.h5'
-            dname = 'dos'
-        else:
-            fname = 'sigma_w.h5'
-            dname = 'sigma'
-        f = h5py.File(fname, 'w')
+        # XXX: Still storing the coeff data in a separate file
+        f = h5py.File('coeff.h5', 'w')
         f["freqs"] = freqs
         f["iwsample"] = wsample
-        f[dname + "_w"] = X_w
-        f[dname + "_iw"] = X_iw
         f['coeff'] = coeff_w
         f.close()
     else:
@@ -267,4 +260,4 @@ def nevan_run(
 
     os.chdir("..")
 
-    return
+    return freqs, X_w

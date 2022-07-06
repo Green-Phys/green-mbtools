@@ -212,7 +212,7 @@ Gt_sao_diag = np.einsum('tskii -> tski', Gt_sao)
 #       such as no. of real freqs (n_real), w_min, w_max, and eta.
 print("Starting Nevanlinna")
 t3 = time.time()
-mbo.AC_nevanlinna(
+freqs, A_w = mbo.AC_nevanlinna(
     outdir=nev_outdir, gtau_orth=Gt_sao_diag,
     n_real=10001, w_min=-10, w_max=10, eta=0.01
 )
@@ -232,4 +232,6 @@ f["iter"+str(it)+"/Selfenergy/mesh"] = tau_mesh
 f["iter"+str(it)+"/G_tau/data"] = G_tk_int
 f["iter"+str(it)+"/G_tau/mesh"] = tau_mesh
 f["iter"+str(it)+"/mu"] = mu
+f["nevanlinna/freqs"] = freqs
+f["nevanlinna/dos"] = A_w
 f.close()

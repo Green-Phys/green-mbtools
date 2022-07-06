@@ -323,11 +323,13 @@ class MB_post(object):
         Gw_inp = self.ir.tau_to_w(gtau_orth)[nw//2:]
 
         wsample = self.ir.wsample[nw//2:]
-        AC.nevan_run(
+        freqs, A_w = AC.nevan_run(
             Gw_inp, wsample, outdir=outdir, ifile=ifile, ofile=ofile,
             coefile=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
             green=True
         )
+
+        return freqs, A_w
 
 
 def minus_k_to_k_TRsym(X):

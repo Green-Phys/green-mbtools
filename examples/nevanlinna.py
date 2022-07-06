@@ -84,19 +84,27 @@ print("Time required to set up post processing: ", t2 - t1)
 # in SAO basis
 
 t3 = time.time()
-MB.AC_nevanlinna(
+freqs, A_w = MB.AC_nevanlinna(
     outdir='Nevanlinna'
 )
 t4 = time.time()
 print("TIme required for Nevanlinna AC: ", t4 - t3)
+f1 = h5py.File('dos_sao.h5', 'r')
+f1['freqs'] = freqs
+f1['A_w'] = A_w
+f1.close()
 
 # Running Nevanlinna for given G(t) in whatever orthogonal basis
 t5 = time.time()
 Gt_canonical = orth.canonical_orth(MB.gtau, MB.S, type='g')
 Gt_sao = orth.sao_orth(MB.gtau, MB.S, type='g')
 Gt_orbsum = np.einsum("tskii->tsk", Gt_sao)
-MB.AC_nevanlinna(
+freqs, A_w = MB.AC_nevanlinna(
     outdir='Nevanlinna_orbsum', gtau_orth=Gt_orbsum
 )
 t6 = time.time()
 print("Time required for Nevanlinna AC in orthogonal basis: ", t6 - t5)
+f2 = h5py.File('dos_canonical.h5', 'r')
+f2['freqs'] = freqs
+f2['dos'] = A_w
+f2.close()

@@ -1,5 +1,4 @@
 from mbanalysis.src.analyt_cont import nevan_run
-from h5py import File
 import numpy as np
 
 #
@@ -27,15 +26,11 @@ def test_nevan_exe_on_dirac_delta_spectrum():
     w_max = 0.1
     eta = 0.01
 
-    nevan_run(
+    freqs, A_w = nevan_run(
         G_iw, iw_vals, outdir=outdir, n_real=n_real,
         w_min=w_min, w_max=w_max, eta=eta, green=True
     )
 
-    fdos = File(outdir + '/dos.h5', 'r')
-    freqs = fdos['freqs'][()]
-    A_w = fdos['dos_w'][()]
-    fdos.close()
     f_max = freqs[np.argmax(A_w)]
     assert f_max == 0
 
@@ -54,15 +49,11 @@ def test_nevan_exe_on_dirac_delta_spectrum():
     w_max = 1.5
     eta = 0.01
 
-    nevan_run(
+    freqs, A_w = nevan_run(
         G_iw, iw_vals, outdir=outdir, n_real=n_real,
         w_min=w_min, w_max=w_max, eta=eta, green=True
     )
 
-    fdos = File(outdir + '/dos.h5', 'r')
-    freqs = fdos['freqs'][()]
-    A_w = fdos['dos_w'][()]
-    fdos.close()
     f_max = freqs[np.argmax(A_w)]
     assert f_max == 1.
 
@@ -84,16 +75,10 @@ def test_nevan_exe_on_selfenergy():
     w_max = 1.5
     eta = 1.
 
-    nevan_run(
+    freqs, Sigma_w = nevan_run(
         Sigma_iw, iw_vals, outdir=outdir, n_real=n_real,
         w_min=w_min, w_max=w_max, eta=eta, green=False
     )
-
-    # Check the output data
-    fsig = File(outdir + '/sigma_w.h5', 'r')
-    freqs = fsig['freqs'][()]
-    Sigma_w = fsig['sigma_w'][()]
-    fsig.close()
 
     # check that Sigma_w is complex number
     assert Sigma_w.dtype == complex
