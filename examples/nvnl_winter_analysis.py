@@ -56,6 +56,9 @@ parser.add_argument(
     "--atoms", type=str, default=atoms, help="Positions of atoms in unit cell"
 )
 parser.add_argument(
+    "--wannier", type=int, default=1, help="Toggle Wannier interpolation"
+)
+parser.add_argument(
     "--celltype", type=str, default="cubic",
     help="Type of lattice: cubic, diamond, etc."
 )
@@ -94,6 +97,10 @@ parser.add_argument(
     "--nev_outdir", type=str, default="./Nevanlinna/",
     help="Directory to dump output from Nevanlinna analytic continuation"
 )
+parser.add_argument(
+    "--orth", type=str, default='sao',
+    help="Choice of orthonormal basis (sao or co)"
+)
 args = parser.parse_args()
 
 #
@@ -107,6 +114,7 @@ mu = args.mu
 a = parse_geometry(args.a)
 atoms = parse_geometry(args.atoms)
 basis = args.basis
+wannier = args.wannier
 celltype = args.celltype
 bandpath_str = args.bandpath.replace(' ', '')  # clean up spaces
 bandpts = args.bandpts
@@ -116,6 +124,7 @@ it = args.iter
 ir_file = args.ir_file
 output = args.out
 nev_outdir = args.nev_outdir
+orth_ao = args.orth
 
 # Pyscf object to generate k points
 mycell = gto.M(a=a, atom=atoms, unit='A', basis=basis, verbose=0, spin=0)
@@ -172,6 +181,7 @@ print(rSigmak.shape)
 print("Transfrom quantities to full BZ")
 Fk = mb.to_full_bz(rFk, conj_list, ir_list, index, 1)
 Sk = mb.to_full_bz(rSk, conj_list, ir_list, index, 1)
+G_tk = mb.to_full_bz(rGk, conj_list, ir_list, index, 2)
 Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
 print(Fk.shape)
 print(Sk.shape)
@@ -185,27 +195,39 @@ del rFk, rSk, rSigmak
 
 # Initialize mbanalysis post processing
 mbo = mb.MB_post(
-    fock=Fk, sigma=Sigma_tk, mu=mu, S=Sk, kmesh=kmesh_scaled,
+    fock=Fk, gtau=G_tk, sigma=Sigma_tk, mu=mu, S=Sk, kmesh=kmesh_scaled,
     beta=T_inv, ir_file=ir_file
 )
 
 # Wannier interpolation
-print("Starting interpolation")
-t1 = time.time()
-G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = mbo.wannier_interpolation(
-    band_kpts, hermi=True, debug=debug
-)
-t2 = time.time()
-print("Time required for Wannier interpolation: ", t2 - t1)
+if wannier:
+    print("Starting interpolation")
+    t1 = time.time()
+    G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = \
+        mbo.wannier_interpolation(
+            band_kpts, hermi=True, debug=debug
+        )
+    t2 = time.time()
+    print("Time required for Wannier interpolation: ", t2 - t1)
+else:
+    G_tk_int = mbo.gtau
+    Sigma_tk_int = mbo.sigma
+    Fk_int = mbo.fock
+    Sk_int = mbo.S
 
 
 #
 # Orthogonalization and Nevanlinna
 #
 
-print("Transforming interpolated Gtau to SAO basis")
-Gt_sao = orth.sao_orth(G_tk_int, Sk_int, type='g')
-Gt_sao_diag = np.einsum('tskii -> tski', Gt_sao)
+if orth_ao == 'sao':
+    print("Transforming interpolated Gtau to SAO basis")
+    Gt_ortho = orth.sao_orth(G_tk_int, Sk_int, type='g')
+elif orth_ao == 'co':
+    print("Transforming interpolated Gtau to Canonical basis")
+    Gt_ortho = orth.canonical_orth(G_tk_int, Sk_int, type='g')
+
+Gt_ortho_diag = np.einsum('tskii -> tski', Gt_ortho)
 
 
 # NOTE: The user can now control parameters that go into analytic continuation
@@ -213,7 +235,7 @@ Gt_sao_diag = np.einsum('tskii -> tski', Gt_sao)
 print("Starting Nevanlinna")
 t3 = time.time()
 freqs, A_w = mbo.AC_nevanlinna(
-    outdir=nev_outdir, gtau_orth=Gt_sao_diag,
+    outdir=nev_outdir, gtau_orth=Gt_ortho_diag,
     n_real=10001, w_min=-10, w_max=10, eta=0.01
 )
 t4 = time.time()
