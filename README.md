@@ -9,9 +9,17 @@ Python package for post processing of Green's-function-based many-body calculati
   
 Installation
 ----------
-This package requires two levels of installation:
-* The python package can be installed using `python setup.py install`.
-* The Nevanlinna analytic continuation is set up as a C++ extension module. In the new version of this package, no additional installation is required for the Nevanlinna module.
+The `mbanalysis` package can be installed by simply executing:
+```bash
+python setup.py install
+```
+This will automatically build the Nevanlinna and Caratheodory extensions, which are written in C++.
+
+**Dependencies:**
+1. Python packages: `numpy`, `scipy`, `h5py`, and `irbasis`
+2. C++ libraries: `Eigen`, `GMP`, `MPFR`, and `MPFR-C++` ([GitHub link for MPFR-C++](https://github.com/advanpix/mpreal))
+3. `pytest` for testing
+4. Maxent external C++ library (https://github.com/CQMP/Maxent) needs to be built separately to run analytic continuation tasks using the maxent method.
 
 Features
 ----------
@@ -21,12 +29,10 @@ Features
 * Fourier transformation between imaginary-time and Matsuabara frequency domain.
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
-* Nevanlinna analytical continuation (External C++ library in `Nevanlinna`, authored by Jiani Fei [Phys. Rev. Lett. 126, 056402 (2021)].
+* Nevanlinna analytical continuation (External C++ library in `Nevanlinna`, authored by Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
+* Caratheodory analytical continuation for complex valued matrices (External C++ library in `Caratheodory`, authored by Fei et.al. [Phys. Rev. B 104, 165111 (2021)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111).
 
 To-Do-List
 -----------
-* There are two separate functions for Nevanlinna analytical continuation: `analyt_cont/nevan_run` and `analyt_cont/nevan_run_selfenergy`. Only difference now is the value of the parameter `spectral` (1 for Green's function continuation, and 0 for self-energy) and the final HDF5 output file. Remove this redundancy and merge into one code.
-
-* Hardy optimization: Read the `coeff` file and optimize `theta[M+1] (z)` within the python package itself. I believe that we shouldn't need more than `np.complex128` precision to implement this.
-
+* Implement (or incorporate) Hardy optimization in Nevanlinna analytic continuation: read the `coeff` file and optimize `theta[M+1] (z)` within the python package itself. I believe that we shouldn't need more than `np.complex128` precision to implement this.
 * Fix `examples/winter*.py`: The original example for Silicon has been modified to Hydrogen (for which test data is available). The high-symmetry points in the interpolation need to be readjusted accordingly.
