@@ -49,23 +49,12 @@ template <class T>
 Cara<T>::Cara (int imag_num, int dim, std::string ifile) : 
                imag(imag_num, dim, ifile), dim_(dim) {
 
-    // Print statements for debugging
-    std::cout << "Inside Cara constructor method." << std::endl;
-    std::cout << "imag_num = " << imag_num << std::endl;
-    std::cout << "dim = " << dim << std::endl;
-    std::cout << "ifile = " << ifile << std::endl;
-
     //reshape intermediate vectors
     Ws.resize(imag_num);
-    std::cout << "Ws resize complete." << std::endl;
     Vs.resize(imag_num);
-    std::cout << "Vs resize complete." << std::endl;
     Fs.resize(imag_num);
-    std::cout << "Fs resize complete." << std::endl;
     sqrt_one.resize(imag_num);
-    std::cout << "sqrt_one resize complete." << std::endl;
     sqrt_two.resize(imag_num);
-    std::cout << "sqrt_two resize complete." << std::endl;
     core();
 }
 
@@ -77,9 +66,6 @@ void Cara<T>::core () {
     id.setIdentity();
     for (int i = 0; i < imag.N_imag(); i++)
         Ws[i] = imag.val()[i];
-    // Debugging
-    std::cout << "core(): setting values for Ws complete." << std::endl;
-    std::cout << "core(): Number of imag points: " << imag.N_imag() << std::endl;
     for (int i = imag.N_imag() - 1; i > 0; i--) {
         ca_complex zi = imag.freq()[i];
         ca_complex_matrix Wi = Ws[i];
@@ -99,8 +85,6 @@ void Cara<T>::core () {
     }
     sqrt_one[0] = sqrt_m(id - Ws[0] * Ws[0].adjoint());
     sqrt_two[0] = sqrt_m(id - Ws[0].adjoint() * Ws[0]).inverse();
-    // Debugging
-    std::cout << "core(): evaluation of sqrt_one and sqrt_two complete." << std::endl;
 }
 
 

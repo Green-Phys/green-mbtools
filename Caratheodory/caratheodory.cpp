@@ -57,9 +57,6 @@ static PyObject* method_caratheodory (PyObject *self, PyObject *args, PyObject *
     double w_max = 5.;
     double eta = 0.01;
 
-    // Print statement for debugging
-    std::cout << "Initialized input arguments" << std::endl;
-
     // Define keywords dictionary
     static char* kwlist[] = {
         "ifile", "n_imag", "dim", "compfile", "kresfile", "use_custom_real_grid",
@@ -78,20 +75,11 @@ static PyObject* method_caratheodory (PyObject *self, PyObject *args, PyObject *
         return NULL;
     }
 
-    // Print statement for debugging
-    std::cout << "Parsed input arguments." << std::endl;
-
     mpreal::set_default_prec(1024);
     real_domain_data<mpreal> real(
         n_real, dim, use_custom_real_grid, grid_file, w_min, w_max, eta
     );
 
-    // Print statement for debugging
-    std::cout << "Initialized the real_domain_data object successfully." << std::endl;
-    std::cout << "Check real_domain_data parameters" << std::endl;
-    std::cout << "n_real = " << real.N_real() << std::endl;
-    std::cout << "n_imag = " << n_imag << std::endl;
-    std::cout << "n_dim = " << dim << std::endl;
     for (int i = 0; i < n_real; i++) {
         std::cout << "freq[" << i << "] = " << real.freq()[i] << std::endl;
     }
