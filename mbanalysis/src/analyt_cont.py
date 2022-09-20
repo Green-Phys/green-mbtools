@@ -5,6 +5,7 @@ import numpy as np
 import h5py
 from multiprocessing import cpu_count, Process
 import mbanalysis.nevanlinna as nevan_exe
+import mbanalysis.caratheodory as carath_exe
 
 
 # Find the number of cpus to use for parallelization of analtyic continuation
@@ -261,3 +262,221 @@ def nevan_run(
     os.chdir("..")
 
     return freqs, X_w
+
+
+def caratheodory_run(
+    X_iw, wsample, outdir='Caratheodory', ifile='X_iw.txt',
+    matrix_ofile='X_c.txt', spectral_ofile='X_A.txt', custom_freqs=None,
+    n_real=2001, w_min=-10, w_max=10, eta=0.01,
+):
+    """Function to perform Caratheodory analytic continuation for any quantity.
+    Input parameters:
+        X_iw            - contains matrix valued data on imaginary freq. points
+                        shape of X_iw should be: (nw, ns, nk, nao, nao)
+        wsample         - value of imaginary frequencies
+        outdir          - output directory in which data will be stored
+        ifile           - intermediate input file name
+        matrix_ofile    - output file name for matrix valued data on real w
+        spectral_ofile  - output file name for spectral function data on real w
+        custom_freqs    - custom freq points on which to perform carath. AC
+        n_real          - number of real frequency points
+                        (used if custom_freqs = None)
+        w_min           - minimum value of real frequency range
+                        (used if custom_freqs = None)
+        w_max           - maximum value of real frequency range
+                        (used if custom_freqs = None)
+        eta             - broadening parameter
+    """
+
+    wkdir = os.path.abspath(os.getcwd())
+    print("Caratheodory output:", os.path.abspath(wkdir + '/' + outdir))
+    print("Dumping input to: ", ifile)
+    print("Dumping Caratheodory matrix output to: ", matrix_ofile)
+    print("Dumping Caratheodory spectral output to: ", spectral_ofile)
+
+    nw = wsample.shape[0]
+    assert nw == X_iw.shape[0], "Number of imaginary frequency points \
+        mismatches between \"input_parser\" and Gw."
+
+    # whether or not to use custom grid for continuation
+    use_custom_real_grid = 0  # False
+    grid_file = 'grid_file.txt'
+    if custom_freqs is not None:
+        use_custom_real_grid = 1  # True
+        np.savetxt(grid_file, custom_freqs)
+
+    # assuming that the input
+    X_iw_shape = X_iw.shape
+    _, ns, nk, nao = X_iw_shape[:4]
+
+    # Build and move to working directory
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
+    os.chdir(outdir)
+
+    # Dump input data to files for caratheodory
+    dump_input_caratheodory_data(wsample, X_iw, ifile)
+
+    # Template function to run nevanlinna
+    def template_carath_func(ifl):
+        return carath_exe.caratheodory(
+            ifl, nw, nao, matrix_ofile, spectral_ofile, use_custom_real_grid,
+            grid_file, n_real, w_min, w_max, eta
+        )
+
+    # Start analytical continuation
+    processes = []
+    pp = 0
+    dim1 = ns * nk
+    for d1 in range(dim1):
+        os.chdir(str(d1))
+        p = Process(target=template_carath_func, args=(ifile,))
+        p.start()
+        processes.append(p)
+        pp += 1
+        if pp % _ncpu == 0:
+            for p in processes:
+                p.join()
+            processes = []
+        os.chdir("..")
+
+    for p in processes:
+        p.join()
+
+    # Combine output
+    freqs, Xc_w, XA_w = load_caratheodory_data(
+        matrix_ofile, spectral_ofile, X_iw_shape
+    )
+
+    # Get out of working directory
+    os.chdir('..')
+
+    return freqs, Xc_w, XA_w
+
+
+def dump_input_caratheodory_data(wsample, X_iw, ifile):
+    """Function to dump input data to files for caratheodory
+    analytic continuation.
+
+    Caratheodory requires input data file to be in the following format:
+        iw_1 iw_2 iw_3 ... iw_n
+
+        Real X(iw_1) Matrix
+
+        Imag X(iw_1) Matrix
+
+        Real X(iw_2) Matrix
+
+        Imag X(iw_2) Matrix
+
+        ... and so on.
+    """
+
+    nw, ns, nk, nao = X_iw.shape[:4]
+
+    # Save dim1 for better understanding of output
+    np.savetxt("dimensions.txt", np.asarray(X_iw.shape[1:3], dtype=int))
+
+    # Dump input data to file
+    dim = 0
+    for js in range(ns):
+        for jk in range(nk):
+            # make the directory for given (js, jk) point
+            if not os.path.exists(str(dim)):
+                os.mkdir(str(dim))
+            # Write the input data to file
+            output_fname = str(dim) + '/' + ifile
+            with open(output_fname, 'w') as fs:
+                # write frequencies in the first line
+                for w_j in wsample:
+                    fs.write(str(w_j) + '\t')
+                fs.write('\n\n')
+                for jw in range(nw):
+                    # Real part for jw-th frequency
+                    for p in range(nao):
+                        for q in range(nao):
+                            fs.write(str(X_iw[jw, js, jk, p, q].real) + '\t')
+                        fs.write('\n')
+                    fs.write('\n')
+                    # Imag part for jw-th frequency
+                    for p in range(nao):
+                        for q in range(nao):
+                            fs.write(str(X_iw[jw, js, jk, p, q].imag) + '\t')
+                        fs.write('\n')
+                    fs.write('\n')
+            dim += 1
+
+    return None
+
+
+def load_caratheodory_data(matrix_file, spectral_file, X_dims):
+    """Load output data from caratheodory analytic continuation.
+    The spectral function output file has the format:
+        w1 XA(w1 + i eta)
+        w2 XA(w2 + i eta)
+        ... and so on.
+    And the complex matrix output file has the format:
+        w1 Re.Xc[11](w1 + i eta) Im.Xc[11](w1 + i eta) Re.Xc[12](w1 + i eta)
+        w2 Re.Xc[11](w2 + i eta) Im.Xc[11](w2 + i eta) Re.Xc[12](w2 + i eta)
+        ... and so on.
+    """
+
+    # Dimensions
+    _, ns, nk, nao = X_dims[:4]
+    dim1 = ns * nk
+
+    # Load the spectral function data
+    dump_A = False
+    try:
+        XA_w = np.loadtxt("0/{}".format(spectral_file))
+        freqs = XA_w[:, 0]
+    except IOError:
+        pass
+    else:
+        dump_A = True
+
+    if dump_A:
+        XA_w = np.zeros((freqs.shape[0], dim1))
+        for d1 in range(dim1):
+            # Read X_w data
+            try:
+                X_wsk = np.loadtxt("{}/{}".format(d1, spectral_file))
+                XA_w[:, d1] = X_wsk[:, 1]
+            except IOError:
+                print(
+                    "{} is missing in {} folder. Analytical continuation \
+                    may have failed at that point.".format(spectral_file, d1)
+                )
+        # reshape the spectral data
+        XA_w = XA_w.reshape((freqs.shape[0],) + (ns, nk))
+    else:
+        print("All AC fails. Will not dump to DOS.h5")
+
+    # Load the complex matrix data
+    dump_c = False
+    try:
+        Xc_w = np.loadtxt("0/{}".format(matrix_file))
+    except IOError:
+        pass
+    else:
+        dump_c = True
+
+    if dump_c:
+        Xc_w = np.zeros((freqs.shape[0], dim1, nao, nao), dtype=complex)
+        for d1 in range(dim1):
+            # Read X_c data
+            try:
+                X_wsk = np.loadtxt("{}/{}".format(d1, matrix_file))
+                for jw in range(len(freqs)):
+                    # need to convert the real + imag data into complex type
+                    Xc_imtd = X_wsk[jw, 1:].view(complex)
+                    Xc_w[jw, d1, :, :] = Xc_imtd.reshape((nao, nao))
+            except IOError:
+                print(
+                    "{} is missing in {} folder. Analytical continuation \
+                    may have failed at that point.".format(spectral_file, d1)
+                )
+        # reshape the complex matrix data
+        Xc_w = Xc_w.reshape((freqs.shape[0],) + (ns, nk, nao, nao))
+
+    return freqs, Xc_w, XA_w
