@@ -1,6 +1,5 @@
 #include <Python.h>
 #include <typeinfo>
-#include <mpreal.h>
 #include "schur.h"
 
 using namespace mpfr;
