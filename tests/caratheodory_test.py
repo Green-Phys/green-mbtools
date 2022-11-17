@@ -131,3 +131,45 @@ def test_carath_exe_on_matrix(data_path):
     assert len(freqs) == n_real
     assert gf_c_test.all() == gf_c_ref.all()
     assert gf_a_test.all() == gf_a_ref.all()
+
+
+def test_caratheodory_custom_freqs(data_path):
+    """Test custom frequency functionality for Caratheodory, where the analytic
+    continuation is performed on user specified frequencies.
+    """
+
+    # data directory
+    data_dir = pytest.test_data_dir + '/caratheodory'
+
+    # Test case: Dirac delta centered at w = 0
+    # Generate imaginary axis data for f(z) = 1 / z
+    iw_vals = np.linspace(0.1, 10, 100)
+    G_iw = 1 / (1j * iw_vals)
+    G_iw = G_iw.reshape((G_iw.shape[0], 1, 1, 1, 1))
+
+    # Parameters for Caratheodory analytic continuation
+    outdir = data_dir + '/DiracCarath'
+    n_real = 101
+    w_min = -0.1
+    w_max = 0.1
+    eta = 0.01
+    real_freqs = np.linspace(w_min, w_max, n_real)
+
+    freqs, G_w, A_w = caratheodory_run(
+        G_iw, iw_vals, outdir=outdir, custom_freqs=real_freqs, eta=eta
+    )
+
+    # check the output freqs against input
+    assert np.allclose(freqs, real_freqs, rtol=1e-10)
+
+    # Generate referencec data
+    f_max = freqs[np.argmax(A_w)]
+    G_w_ref = 1 / (freqs + 1j * eta)
+    A_w_ref = -np.imag(G_w_ref) / np.pi
+    G_w_ref = G_w_ref.reshape(G_w.shape)
+    A_w_ref = A_w_ref.reshape(A_w.shape)
+
+    assert f_max == 0
+    assert np.linalg.norm(G_w - G_w_ref) < 1e-5
+    # Spectral func relation
+    assert np.linalg.norm(A_w - A_w_ref) < 1e-5
