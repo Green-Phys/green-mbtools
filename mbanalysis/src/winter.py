@@ -7,7 +7,9 @@ from . import dyson
 # Only work for full_bz object
 def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
     """Interpolate obj_k[ns, nk, nao, nao] from kmesh to kpts_inter
-    using Wannier interpolation
+    using Wannier interpolation.
+
+    NOTE: all the k-points are in scaled units.
     """
     ns, Nk, nao = obj_k.shape[:3]
     if dim == 3:

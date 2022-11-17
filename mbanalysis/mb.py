@@ -266,7 +266,7 @@ class MB_post(object):
     def wannier_interpolation(self, kpts_inter, hermi=False, debug=False):
         """
         Wannier interpolation
-        :param kpts_int: Target k grid
+        :param kpts_int: Scaled k-points for the target k grid
         :return:
         """
         if self.kmesh is None:
