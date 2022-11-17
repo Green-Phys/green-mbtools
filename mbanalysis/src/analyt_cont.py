@@ -134,7 +134,7 @@ def maxent_run(
 def nevan_run(
     X_iw, wsample, outdir='Nevanlinna', ifile='X_iw.txt', ofile='X_w.txt',
     coefile='coeff.txt', n_real=10000, w_min=-10, w_max=10, eta=0.01,
-    green=True
+    green=True, prec=128
 ):
     """Function to perform Nevanlinna analytic continuation for any quantity.
     TODO: Provide a description about the input
@@ -172,19 +172,16 @@ def nevan_run(
             )
         )
 
-    # Template function to run nevanlinna
-    def template_nevan_func(input):
-        return nevan_exe.nevanlinna(
-            input, nw, ofile, coefile, spectral, n_real,
-            w_min, w_max, eta
-        )
-
     # Start analytical continuation
     processes = []
     pp = 0
     for d1 in range(dim1):
         os.chdir(str(d1))
-        p = Process(target=template_nevan_func, args=(ifile,))
+        # arg_ls = (ifile, nw, ofile, coefile, spectral, prec, n_real, w_min, w_max, eta)
+        p = Process(
+            target=nevan_exe.nevanlinna,
+            args=(ifile, nw, ofile, coefile, prec, spectral, n_real, w_min, w_max, eta)
+        )
         p.start()
         processes.append(p)
         pp += 1
@@ -303,7 +300,7 @@ def caratheodory_run(
     grid_file = 'grid_file.txt'
     if custom_freqs is not None:
         use_custom_real_grid = 1  # True
-        np.savetxt(grid_file, custom_freqs)
+        n_real = custom_freqs.shape[0]
 
     # assuming that the input
     X_iw_shape = X_iw.shape
@@ -317,20 +314,21 @@ def caratheodory_run(
     # Dump input data to files for caratheodory
     dump_input_caratheodory_data(wsample, X_iw, ifile)
 
-    # Template function to run nevanlinna
-    def template_carath_func(ifl):
-        return carath_exe.caratheodory(
-            ifl, nw, nao, matrix_ofile, spectral_ofile, use_custom_real_grid,
-            grid_file, n_real, w_min, w_max, eta
-        )
-
     # Start analytical continuation
     processes = []
     pp = 0
     dim1 = ns * nk
     for d1 in range(dim1):
         os.chdir(str(d1))
-        p = Process(target=template_carath_func, args=(ifile,))
+        if custom_freqs is not None:
+            np.savetxt(grid_file, custom_freqs)
+        p = Process(
+            target=carath_exe.caratheodory,
+            args=(
+                ifile, nw, nao, matrix_ofile, spectral_ofile,
+                use_custom_real_grid, grid_file, n_real, w_min, w_max, eta
+            )
+        )
         p.start()
         processes.append(p)
         pp += 1
@@ -480,3 +478,4 @@ def load_caratheodory_data(matrix_file, spectral_file, X_dims):
         Xc_w = Xc_w.reshape((freqs.shape[0],) + (ns, nk, nao, nao))
 
     return freqs, Xc_w, XA_w
+
