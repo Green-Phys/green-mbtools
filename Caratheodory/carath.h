@@ -17,7 +17,7 @@ Citation of the paper is encouraged.
 #include <algorithm>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MPRealSupport>
-#include <mpfr.h>
+#include "mpfr.h"
 
 
 //precision class is used to define typenames
