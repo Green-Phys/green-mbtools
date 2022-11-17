@@ -2,27 +2,10 @@ import h5py
 import time
 import argparse
 import numpy as np
-import os
 from ase.dft.kpoints import sc_special_points, get_bandpath
-from pyscf.pbc import gto
+from pyscf.pbc import gto, dft
 from mbanalysis import mb
-from mbanalysis.src import orth
-
-
-#
-# Useful function
-#
-
-def parse_geometry(g):
-    """Function to read .dat files for atoms and geometries.
-    """
-    res = ""
-    if os.path.exists(g):
-        with open(g) as gf:
-            res = gf.read()
-    else:
-        res = g
-    return res
+from mbanalysis.src import orth, winter, dyson
 
 
 #
@@ -30,13 +13,6 @@ def parse_geometry(g):
 #
 
 # Default parameters
-a = """4.0655,    0.0,    0.0
-    0.0,    4.0655,    0.0
-    0.0,    0.0,    4.0655"""
-atoms = """H -0.25 -0.25 -0.25
-    H  0.25  0.25  0.25"""
-basis = 'sto-3g'
-
 parser = argparse.ArgumentParser(
     description="Wannier interpolaotion and Nevanlinna analytic continuation"
 )
@@ -48,12 +24,6 @@ parser.add_argument(
 )
 parser.add_argument(
     "--mu", type=float, default=0, help="Chemical potential"
-)
-parser.add_argument(
-    "--a", type=str, default=a, help="Lattice geometry"
-)
-parser.add_argument(
-    "--atoms", type=str, default=atoms, help="Positions of atoms in unit cell"
 )
 parser.add_argument(
     "--wannier", type=int, default=1, help="Toggle Wannier interpolation"
@@ -69,9 +39,6 @@ parser.add_argument(
 parser.add_argument(
     "--bandpts", type=int, default=50,
     help="Number of k-points used in the band path"
-)
-parser.add_argument(
-    "--basis", type=str, default=basis, help="Atomic basis set used"
 )
 parser.add_argument(
     "--input", type=str, default="input.h5",
@@ -111,9 +78,6 @@ args = parser.parse_args()
 T_inv = args.beta
 debug = args.debug
 mu = args.mu
-a = parse_geometry(args.a)
-atoms = parse_geometry(args.atoms)
-basis = args.basis
 wannier = args.wannier
 celltype = args.celltype
 bandpath_str = args.bandpath.replace(' ', '')  # clean up spaces
@@ -126,20 +90,6 @@ output = args.out
 nev_outdir = args.nev_outdir
 orth_ao = args.orth
 
-# Pyscf object to generate k points
-mycell = gto.M(a=a, atom=atoms, unit='A', basis=basis, verbose=0, spin=0)
-
-# Use ase to generate the kpath
-a_vecs = np.genfromtxt(a.replace(',', ' ').splitlines(), dtype=float)
-points = sc_special_points[celltype]
-kptlist = []
-for kchar in bandpath_str:
-    kptlist.append(points[kchar])
-band_kpts, kpath, sp_points = get_bandpath(kptlist, a_vecs, npoints=bandpts)
-
-# ASE will give scaled band_kpts. We need to transform them to absolute values
-# using mycell.get_abs_kpts
-band_kpts = mycell.get_abs_kpts(band_kpts)
 
 #
 # Read Input
@@ -147,6 +97,8 @@ band_kpts = mycell.get_abs_kpts(band_kpts)
 
 print("Reading input file")
 f = h5py.File(input_path, 'r')
+cell = f["Cell"][()]
+kmesh_abs = f["/grid/k_mesh"][()]
 kmesh_scaled = f["/grid/k_mesh_scaled"][()]
 index = f["/grid/index"][()]
 ir_list = f["/grid/ir_list"][()]
@@ -155,6 +107,22 @@ reduced_kmesh_scaled = kmesh_scaled[ir_list]
 nk = index.shape[0]
 ink = ir_list.shape[0]
 f.close()
+
+# Pyscf object to generate k points
+mycell = gto.loads(cell)
+
+# Use ase to generate the kpath
+if wannier:
+    a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
+    points = sc_special_points[celltype]
+    kptlist = []
+    for kchar in bandpath_str:
+        kptlist.append(points[kchar])
+    band_kpts, kpath, sp_points = get_bandpath(kptlist, a_vecs, npoints=bandpts)
+
+    # ASE will give scaled band_kpts. We need to transform them to absolute values
+    # using mycell.get_abs_kpts
+    band_kpts_abs = mycell.get_abs_kpts(band_kpts)
 
 print("Reading sim file")
 f = h5py.File(sim_path, 'r')
@@ -203,10 +171,20 @@ mbo = mb.MB_post(
 if wannier:
     print("Starting interpolation")
     t1 = time.time()
-    G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = \
-        mbo.wannier_interpolation(
-            band_kpts, hermi=True, debug=debug
-        )
+    # interpolate Sk
+    kmf = dft.KUKS(mycell, kmesh_abs)
+    Sk_int =kmf.get_ovlp(kpt=band_kpts_abs)
+    # interpolate Fk and Sigma_tk
+    Fk_int = winter.interpolate(
+        Fk, kmesh_scaled, band_kpts, dim=3, hermi=True, debug=debug
+    )
+    Sigma_tk_int = winter.interpolate_tk_object(
+        Sigma_tk, kmesh_scaled, band_kpts, dim=3, hermi=True, debug=debug
+    )
+    # form G_tk by solving dyson
+    G_tk_int = dyson.solve_dyson(
+        Fk_int, Sk_int, Sigma_tk_int, mu, mbo.ir
+    )
     t2 = time.time()
     print("Time required for Wannier interpolation: ", t2 - t1)
 else:
@@ -242,18 +220,11 @@ t4 = time.time()
 print("Time required for Nevanlinna AC: ", t4 - t3)
 
 # Save interpolated data to HDF5
-# This file contains the Green's function, Fock matrix, etc. at the k-points
-# along the selected path
 f = h5py.File(output, 'w')
-f["S-k"] = Sk_int
 f["kpts_interpolate"] = band_kpts
-f["iter"] = it
-f["iter"+str(it)+"/Fock-k"] = Fk_int
-f["iter"+str(it)+"/Selfenergy/data"] = Sigma_tk_int
-f["iter"+str(it)+"/Selfenergy/mesh"] = tau_mesh
-f["iter"+str(it)+"/G_tau/data"] = G_tk_int
-f["iter"+str(it)+"/G_tau/mesh"] = tau_mesh
-f["iter"+str(it)+"/mu"] = mu
+f["kpath"] = kpath
+f["sp_points"] = sp_points
+f["mu"] = mu
 f["nevanlinna/freqs"] = freqs
 f["nevanlinna/dos"] = A_w
 f.close()
