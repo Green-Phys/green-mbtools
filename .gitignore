@@ -1,6 +1,10 @@
 # Output of Nevanlinna analytical continuation examples
 examples/Nevanlinna*
 tests/*Nevan*
+tests/test_data/caratheodory/Dirac*
+tests/test_data/caratheodory/ShiftDiracCarath
+tests/test_data/caratheodory/SigmaNevan
+tests/test_data/caratheodory/*_test
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
