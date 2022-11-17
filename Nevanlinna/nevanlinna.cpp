@@ -1,14 +1,16 @@
 #include <Python.h>
 #include <typeinfo>
+#include <mpreal.h>
 #include "schur.h"
 
+using namespace mpfr;
 
 void runNevanlinna (
-    std::string ifile, int n_imag, std::string ofile, std::string coefile,
+    std::string ifile, int n_imag, std::string ofile, std::string coefile, int prec=128,
     bool spectral=false, int n_real=10000, double w_min=-10., double w_max=10., double eta=0.01
 ) {
-    mpf_set_default_prec(128);
-    Schur<mpf_class> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
+    mpreal::set_default_prec(prec);
+    Schur<mpreal> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
     std::cout << "Schur class initialized";
     NG.evaluation(coefile, spectral);
 
@@ -22,6 +24,7 @@ static PyObject* method_nevanlinna (PyObject *self, PyObject *args, PyObject *kw
     int n_imag = 1;
 
     //Optional parameters with some default values for Nevanlinna
+    int prec = 128;
     int spectral = 0;
     int n_real = 10000;
     double w_min = -15.;
@@ -30,14 +33,14 @@ static PyObject* method_nevanlinna (PyObject *self, PyObject *args, PyObject *kw
 
     //Define keywords dictionary
     static char* kwlist[] = {
-        "ifile", "n_imag", "ofile", "coefile", "spectral", "n_real", "w_min", "w_max", "eta", NULL
+        "ifile", "n_imag", "ofile", "coefile", "prec", "spectral", "n_real", "w_min", "w_max", "eta", NULL
     };
 
     // Parse arguments
     if (
         !PyArg_ParseTupleAndKeywords(
-            args, kwargs, "siss|iiddd", kwlist,
-            &ifile, &n_imag, &ofile, &coefile, &spectral, &n_real, &w_min, &w_max, &eta
+            args, kwargs, "siss|iiiddd", kwlist,
+            &ifile, &n_imag, &ofile, &coefile, &prec, &spectral, &n_real, &w_min, &w_max, &eta
         )
     ) {
         std::cout << "Couldn't parse the input properly." << std::endl;
@@ -45,8 +48,8 @@ static PyObject* method_nevanlinna (PyObject *self, PyObject *args, PyObject *kw
     }
 
     // Perform the Nevanlinna analytic continuation for the given files and parameters
-    mpf_set_default_prec(128);
-    Schur<mpf_class> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
+    mpreal::set_default_prec(prec);
+    Schur<mpreal> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
     NG.evaluation(coefile, spectral);
 
     Py_RETURN_NONE;

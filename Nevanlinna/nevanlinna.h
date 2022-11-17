@@ -3,7 +3,6 @@
 #include <complex>
 #include <vector>
 #include <fstream>
-#include <gmpxx.h>
 #include <cmath>
 #include <algorithm>
 #include <Eigen/Dense>
