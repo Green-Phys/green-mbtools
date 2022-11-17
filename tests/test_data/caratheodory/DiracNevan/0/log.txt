@@ -1,1 +1,0 @@
-Pick matrix is non positive semi-definite matrix in Schur method.
