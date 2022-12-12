@@ -70,6 +70,54 @@ class IR_factory(object):
             )
         return X_t
 
+    def tauf_to_wb(self, X_t):
+        """Transform quantity from fermionic tau-grid to bosonic frequency grid.
+        E.g., P0(tau) -> P0(i Omega).
+        """
+
+        _, wsample_bose, Ttc_b, _, Tnc_b, Tct_b = read_IR_matrices(
+                os.path.abspath(self.ir_file), self.beta, ptype='bose'
+            )
+        fir = h5py.File(self.ir_file, 'r')
+        Ttc_other_tmp = fir['fermi/other_uxl'][()]
+        nx_b = fir['fermi/nx_b'][()]
+        fir.close()
+        Ttc_other = Ttc_b @ Tct_b @ Ttc_other_tmp
+        Tnt_bf = Tnc_b @ Tct_b @ Ttc_other[1:1 + nx_b, :] @ self.Tct
+
+        nw = wsample_bose.shape[0]
+        X_wb = np.zeros((nw,)+X_t.shape[1:], dtype=complex)
+        original_shape = X_wb.shape
+
+        X_wb, X_t = X_wb.reshape(nw, -1), X_t.reshape(self.nts, -1)
+        X_wb = reduce(np.dot, (Tnt_bf, X_t[1:-1]))
+        X_wb = X_wb.reshape(original_shape)
+
+        return X_wb
+    
+    def wb_to_tau_f(self, X_wb):
+        """Transform quantity from bosonic frequency grid to fermionic tau grid.
+        e.g., P0(i Omega) -> P0(tau)
+        """
+        _, wsample_bose, _, Tcn_b, _, _ = read_IR_matrices(
+                os.path.abspath(self.ir_file), self.beta, ptype='bose'
+            )
+        nw_b = len(wsample_bose)
+        fir = h5py.File(self.ir_file, 'r')
+        Ttc_b_other_tmp = fir['bose/other_uxl'][()]
+        fir.close()
+        Ttc_b_other = self.Ttc @ self.Tct @ Ttc_b_other_tmp
+        Ttn_fb = Ttc_b_other @ Tcn_b
+
+        X_t = np.zeros((self.nts,) + X_w.shape[1:], dtype=complex)
+        original_shape = X_t.shape
+
+        X_w, X_t = X_w.reshape(nw_b, -1), X_t.reshape(self.nts, -1)
+        X_t = reduce(np.dot, (Ttn_fb, X_w))
+        X_t = X_t.reshape(original_shape)
+
+        return X_t
+
     # TODO Specify the version of irbasis.
     def tau_to_w_other(self, X_t, wsample):
         """Use IR basis python package to intrinsically transform other type of
@@ -90,22 +138,26 @@ class IR_factory(object):
         return X_w
 
 
-def read_IR_matrices(ir_path, beta):
+def read_IR_matrices(ir_path, beta, ptype='fermi'):
     ir = h5py.File(ir_path, 'r')
-    wsample = ir["fermi/wsample"][()]
-    xsample = ir["fermi/xsample"][()]
+    wsample = ir[ptype + "/wsample"][()]
+    xsample = ir[ptype + "/xsample"][()]
 
-    Ttc_minus1 = ir["/fermi/ux1l_minus"][()]
-    Ttc_tmp = ir["/fermi/uxl"][()]
-    Ttc_1 = ir["fermi/ux1l"][()]
+    Ttc_minus1 = ir[ptype + "/ux1l_minus"][()]
+    Ttc_tmp = ir[ptype + "/uxl"][()]
+    Ttc_1 = ir[ptype + "/ux1l"][()]
     Ttc = np.zeros((Ttc_tmp.shape[0]+2, Ttc_tmp.shape[1]))
     Ttc[0], Ttc[1:-1], Ttc[-1] = Ttc_minus1, Ttc_tmp, Ttc_1
-    Tnc_re = ir["/fermi/uwl_re"][()]
-    Tnc_im = ir["/fermi/uwl_im"][()]
+    Tnc_re = ir[ptype + "/uwl_re"][()]
+    Tnc_im = ir[ptype + "/uwl_im"][()]
     Tnc = Tnc_re + 1j*Tnc_im
     ir.close()
 
-    wsample = (2*wsample+1)*np.pi/beta
+    if ptype == 'fermi':
+        zeta = 1
+    else:
+        zeta = 0
+    wsample = (2*wsample + zeta) * np.pi / beta
     tau_mesh = np.zeros(xsample.shape[0]+2)
     tau_mesh[0], tau_mesh[1:-1], tau_mesh[-1] = 0, (xsample+1)*beta/2.0, beta
 

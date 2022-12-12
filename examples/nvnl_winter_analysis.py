@@ -173,7 +173,7 @@ if wannier:
     t1 = time.time()
     # interpolate Sk
     kmf = dft.KUKS(mycell, kmesh_abs)
-    Sk_int =kmf.get_ovlp(kpt=band_kpts_abs)
+    Sk_int = kmf.get_ovlp(kpt=band_kpts_abs)
     # interpolate Fk and Sigma_tk
     Fk_int = winter.interpolate(
         Fk, kmesh_scaled, band_kpts, dim=3, hermi=True, debug=debug
