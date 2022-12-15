@@ -80,9 +80,10 @@ class IR_factory(object):
             )
         fir = h5py.File(self.ir_file, 'r')
         Ttc_other_tmp = fir['fermi/other_uxl'][()]
-        nx_b = fir['fermi/nx_b'][()]
+        nx_b = fir['bose/nx'][()]
         fir.close()
         Ttc_other = Ttc_b @ Tct_b @ Ttc_other_tmp
+        Ttc_other *= np.sqrt(2.0 / self.beta)
         Tnt_bf = Tnc_b @ Tct_b @ Ttc_other[1:1 + nx_b, :] @ self.Tct
 
         nw = wsample_bose.shape[0]
@@ -95,7 +96,7 @@ class IR_factory(object):
 
         return X_wb
     
-    def wb_to_tau_f(self, X_wb):
+    def wb_to_tauf(self, X_wb):
         """Transform quantity from bosonic frequency grid to fermionic tau grid.
         e.g., P0(i Omega) -> P0(tau)
         """
@@ -107,12 +108,13 @@ class IR_factory(object):
         Ttc_b_other_tmp = fir['bose/other_uxl'][()]
         fir.close()
         Ttc_b_other = self.Ttc @ self.Tct @ Ttc_b_other_tmp
+        Ttc_b_other *= np.sqrt(2.0 / self.beta)
         Ttn_fb = Ttc_b_other @ Tcn_b
 
-        X_t = np.zeros((self.nts,) + X_w.shape[1:], dtype=complex)
+        X_t = np.zeros((self.nts,) + X_wb.shape[1:], dtype=complex)
         original_shape = X_t.shape
 
-        X_w, X_t = X_w.reshape(nw_b, -1), X_t.reshape(self.nts, -1)
+        X_w, X_t = X_wb.reshape(nw_b, -1), X_t.reshape(self.nts, -1)
         X_t = reduce(np.dot, (Ttn_fb, X_w))
         X_t = X_t.reshape(original_shape)
 
