@@ -27,7 +27,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest numpy scipy h5py irbasis
-        sudo apt install libeigen3-dev libgmp-dev libmpfr-dev
+        sudo apt install libeigen3-dev libgmp-dev libmpfr-dev libfftw3-dev
         git clone https://github.com/advanpix/mpreal
         sudo cp mpreal/mpreal.h /usr/include
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
