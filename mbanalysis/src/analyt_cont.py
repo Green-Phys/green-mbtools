@@ -256,7 +256,7 @@ def nevan_run(
         print("All AC fails. Will not dump to DOS.h5")
         X_iw = X_iw.reshape(X_iw_shape)
 
-    os.chdir("..")
+    os.chdir(wkdir)
 
     return freqs, X_w
 
@@ -347,7 +347,7 @@ def caratheodory_run(
     )
 
     # Get out of working directory
-    os.chdir('..')
+    os.chdir(wkdir)
 
     return freqs, Xc_w, XA_w
 
