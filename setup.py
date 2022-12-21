@@ -17,11 +17,18 @@ caratheodory = Extension(
     libraries=['gmp', 'gmpxx', 'mpfr'],
 )
 
+# Build Sobolev extension for Hardy optimization
+sobolev = Extension(
+    'mbanalysis.sobolev',
+    sources=['Nevanlinna/sobolev.cpp', ],
+    libraries=['fftw3', 'm']
+)
+
 setup(
    name='mbanalysis',
-   version='1.2.1',
+   version='1.2.2',
    description="A package for post processing of finite-temperature \
        Green's function and self-energy data",
    packages=['mbanalysis', 'mbanalysis.src'],
-   ext_modules=[nevanlinna, caratheodory]
+   ext_modules=[nevanlinna, caratheodory, sobolev]
 )
