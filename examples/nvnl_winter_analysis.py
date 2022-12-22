@@ -236,6 +236,8 @@ if hardy:
         nevanlinna_dir=nev_outdir, n_real=len(freqs),
         w_min=freqs[0], w_max=freqs[1], eta=0.01
     )
+    t5 = time.time()
+    print("Time required for Hardy optimization: ", t5 - t4)
 
 # Save interpolated data to HDF5
 f = h5py.File(output, 'w')
