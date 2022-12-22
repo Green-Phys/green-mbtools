@@ -133,7 +133,7 @@ def maxent_run(
 
 def nevan_run(
     X_iw, wsample, outdir='Nevanlinna', ifile='X_iw.txt', ofile='X_w.txt',
-    coefile='coeff.txt', n_real=10000, w_min=-10, w_max=10, eta=0.01,
+    coeff_file='coeff.txt', n_real=10000, w_min=-10, w_max=10, eta=0.01,
     green=True, prec=128
 ):
     """Function to perform Nevanlinna analytic continuation for any quantity.
@@ -177,10 +177,14 @@ def nevan_run(
     pp = 0
     for d1 in range(dim1):
         os.chdir(str(d1))
-        # arg_ls = (ifile, nw, ofile, coefile, spectral, prec, n_real, w_min, w_max, eta)
+        # arg_ls = (ifile, nw, ofile, coeff_file, spectral,
+        #   prec, n_real, w_min, w_max, eta)
         p = Process(
             target=nevan_exe.nevanlinna,
-            args=(ifile, nw, ofile, coefile, prec, spectral, n_real, w_min, w_max, eta)
+            args=(
+                ifile, nw, ofile, coeff_file, prec, spectral,
+                n_real, w_min, w_max, eta
+            )
         )
         p.start()
         processes.append(p)
@@ -209,7 +213,6 @@ def nevan_run(
         dump_A = True
     if dump_A:
         X_w = np.zeros((freqs.shape[0], dim1), dtype=dtype)
-        coeff_w = np.zeros((freqs.shape[0], dim1, 4), dtype=np.complex128)
         for d1 in range(dim1):
             # Read X_w data
             try:
@@ -224,34 +227,8 @@ def nevan_run(
                     "{} is missing in {} folder. Possibly analytical \
                     continuation fails at that point.".format(ofile, d1)
                 )
-            # Read coeff_w data
-            try:
-                coeff_wk = np.loadtxt("{}/{}".format(d1, coefile))
-                coeff_w[:, d1, 0].real = coeff_wk[:, 1]
-                coeff_w[:, d1, 0].imag = coeff_wk[:, 2]
-                coeff_w[:, d1, 1].real = coeff_wk[:, 3]
-                coeff_w[:, d1, 1].imag = coeff_wk[:, 4]
-                coeff_w[:, d1, 2].real = coeff_wk[:, 5]
-                coeff_w[:, d1, 2].imag = coeff_wk[:, 6]
-                coeff_w[:, d1, 3].real = coeff_wk[:, 7]
-                coeff_w[:, d1, 3].imag = coeff_wk[:, 8]
-            except IOError:
-                print(
-                    "{} is missing in {} folder. Possibly analytical \
-                    continuation fails at that point.".format(ofile, d1)
-                )
-
         X_w = X_w.reshape((freqs.shape[0],) + X_iw_shape[1:])
         X_iw = X_iw.reshape(X_iw_shape)
-
-        coeff_w = coeff_w.reshape((freqs.shape[0],) + X_iw.shape[1:] + (4, ))
-
-        # XXX: Still storing the coeff data in a separate file
-        f = h5py.File('coeff.h5', 'w')
-        f["freqs"] = freqs
-        f["iwsample"] = wsample
-        f['coeff'] = coeff_w
-        f.close()
     else:
         print("All AC fails. Will not dump to DOS.h5")
         X_iw = X_iw.reshape(X_iw_shape)
@@ -478,4 +455,3 @@ def load_caratheodory_data(matrix_file, spectral_file, X_dims):
         Xc_w = Xc_w.reshape((freqs.shape[0],) + (ns, nk, nao, nao))
 
     return freqs, Xc_w, XA_w
-
