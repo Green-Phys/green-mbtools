@@ -115,7 +115,8 @@ freqs, A_w = MB.AC_nevanlinna(
 t7 = time.time()
 print("Time required for Nevanlinna AC in orthogonal basis: ", t7 - t6)
 freqs, A_w_opt = hardy_optimization(
-    tol=1e-6, nevanlinna_dir='Nevanlinna_orbsum', coeff_file='coeff.txt'
+    tol=1e-6, nevanlinna_dir='Nevanlinna_orbsum', coeff_file='coeff.txt',
+    lagr=1e-3
 )
 t8 = time.time()
 print("Time required for Hardy: ", t8 - t7)

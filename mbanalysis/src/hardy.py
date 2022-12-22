@@ -66,7 +66,7 @@ def optimize(
             n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
             spectral_file=spectral_file, lagr=lagr
         ), params_in, method='Nelder-Mead', tol=tol,
-        options={'maxiter': max_iter, 'disp': True}
+        options={'maxiter': max_iter, 'disp': True, 'adaptive': True}
     )
     print("Optimization result: ", res.success)
 
