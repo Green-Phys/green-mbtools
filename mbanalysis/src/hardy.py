@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, Process
 import mbanalysis.sobolev as sobolev_exe
 from scipy.optimize import minimize
 
@@ -33,7 +33,7 @@ def sobolev_wrapper(
         for i in range(len(hardy_params)):
             fp.write(str(hardy_params[i].real) + '\n')
             fp.write(str(hardy_params[i].imag) + '\n')
-    
+
     # run the sobolev
     norm = sobolev_exe.sobolev(
         coeff_file, n_params, n_real, w_min, w_max, eta,
@@ -48,9 +48,9 @@ def optimize(
     spectral_file='A_new.txt', n_real=100001, w_min=-10., w_max=10.,
     eta=0.01, lagr=1e-5
 ):
-    """Nevanlinna analytic continuation is performed separately for each k-point,
-    spin-index and generally also each AO (or SAO).
-    This function performs Hardy optimization for one such k, spin and AO index.
+    """Nevanlinna analytic continuation is performed separately for each
+    k-point, spin-index and generally also each AO (or SAO).
+    This function performs Hardy optimization for one k, spin and AO index.
     NOTE: here, we assume we are already in the working directory.
     """
     # params_out = fmin_cg(
@@ -71,7 +71,6 @@ def optimize(
     print("Optimization result: ", res.success)
 
     return res.x
-
 
 
 def hardy_optimization(
@@ -96,30 +95,53 @@ def hardy_optimization(
     # Change working directory
     wkdir = os.path.abspath(os.getcwd())
     os.chdir(nevanlinna_dir)
-    
+
     # info about dimensions
     dims = np.loadtxt('dimensions.txt').astype(int)
     num_points = int(np.prod(dims))
     params = np.zeros((4 * n_basis), dtype=np.float64)
     A_w = np.zeros((n_real, num_points))
 
-    # NOTE: initial version is not parallel. But eventually, we need to use
-    #       multiprocessing package.
     # loop over each folder
+    processes = []
+    p_num = 0
     for i in range(num_points):
         # change working directory
         os.chdir(str(i))
-        params_i = optimize(
-            params, tol=tol, max_iter=max_iter, coeff_file=coeff_file,
-            spectral_file=spectral_file, n_real=n_real, w_min=w_min,
-            w_max=w_max, eta=eta, lagr=lagr
+        # define process
+        p = Process(
+            target=optimize,
+            args=(params,),
+            kwargs={
+                'tol': tol, 'max_iter': max_iter, 'coeff_file': coeff_file,
+                'spectral_file': spectral_file, 'n_real': n_real,
+                'w_min': w_min, 'w_max': w_max, 'eta': eta, 'lagr': lagr
+            }
         )
+        # start process
+        p.start()
+        processes.append(p)
+        p_num += 1
+        # if number of processes = number of cpus,
+        # then wait for all the processes to finish before starting next ones
+        if p_num % _ncpu == 0:
+            for p in processes:
+                p.join()
+            processes = []
+        os.chdir('..')
+
+    # wait for rest of the processes to finish
+    for p in processes:
+        p.join()
+
+    for i in range(num_points):
+        os.chdir(str(i))
         # load the optimized spectral data
         # -- this should correspond to the latest spectral file
         X_wsk = np.loadtxt(spectral_file)
         A_w[:, i] = X_wsk[:, 1]
         os.chdir('..')
-    
+
     # real frequency data
     freqs = X_wsk[:, 0]
     # reshape A_w
@@ -131,5 +153,5 @@ def hardy_optimization(
 
     # change back to working directory
     os.chdir(wkdir)
-    
+
     return freqs, A_w

@@ -36,7 +36,6 @@ def test_sobolev_wrapper_on_dirac_delta():
     os.chdir(wkdir + '/DiracNevan/0')
 
     n_basis = 15
-    n_params = 4 * 15
     params = np.zeros((2 * n_basis), dtype=np.complex128)
     norm = sobolev_wrapper(
         params, coeff_file='coeff.txt', n_real=n_real,
