@@ -1,10 +1,12 @@
 import numpy as np
 import time
 import h5py
+import pdb
 from os.path import abspath
 
 from mbanalysis import mb
 from mbanalysis.src import orth
+from mbanalysis.src.hardy import hardy_optimization
 
 ##################
 #
@@ -20,9 +22,6 @@ data_path = abspath('../tests/test_data')
 input_path = data_path + '/H2_GW/input.h5'
 sim_path = data_path + '/H2_GW/sim.h5'
 ir_file = data_path + '/ir_grid/1e4_104.h5'
-
-# Compiled Nevanlinna file
-nevan_exe = abspath('../Nevanlinna/nevanlinna')
 
 ##################
 #
@@ -44,6 +43,7 @@ Gr = Gr.reshape(Gr.shape[:-1])
 mu = f["iter14/mu"][()]
 f.close()
 print("Completed reading simulation data.")
+pdb.set_trace()
 
 # Read data about grids
 print("Reading mean-field data")
@@ -55,6 +55,7 @@ index = f["/grid/index"][()]
 conj_list = f["grid/conj_list"][()]
 f.close()
 print("Completed reading mean-field data.")
+pdb.set_trace()
 
 # All k-dependent matrices should lie on a full Monkhorst-Pack grid.
 # Transform from reduced BZ to full BZ
@@ -64,6 +65,7 @@ Sk = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
 Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
 Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
 print('Pre analysis complete')
+pdb.set_trace()
 
 ##################
 #
@@ -79,6 +81,7 @@ MB = mb.MB_post(
 )
 t2 = time.time()
 print("Time required to set up post processing: ", t2 - t1)
+pdb.set_trace()
 
 # By default, running Nevanlinna for all diagonal elements of MB.gtau
 # in SAO basis
@@ -88,23 +91,36 @@ freqs, A_w = MB.AC_nevanlinna(
     outdir='Nevanlinna'
 )
 t4 = time.time()
-print("TIme required for Nevanlinna AC: ", t4 - t3)
+print("Time required for Nevanlinna AC: ", t4 - t3)
+pdb.set_trace()
+freqs, A_w_opt = hardy_optimization(
+    tol=1e-6, nevanlinna_dir='Nevanlinna', coeff_file='coeff.txt'
+)
+t5 = time.time()
+print("Time required for Hardy: ", t5 - t4)
 f1 = h5py.File('dos_sao.h5', 'w')
 f1['freqs'] = freqs
 f1['A_w'] = A_w
+f1['A_w_opt'] = A_w_opt
 f1.close()
 
 # Running Nevanlinna for given G(t) in whatever orthogonal basis
-t5 = time.time()
+t6 = time.time()
 Gt_canonical = orth.canonical_orth(MB.gtau, MB.S, type='g')
 Gt_sao = orth.sao_orth(MB.gtau, MB.S, type='g')
 Gt_orbsum = np.einsum("tskii->tsk", Gt_sao)
 freqs, A_w = MB.AC_nevanlinna(
     outdir='Nevanlinna_orbsum', gtau_orth=Gt_orbsum
 )
-t6 = time.time()
-print("Time required for Nevanlinna AC in orthogonal basis: ", t6 - t5)
+t7 = time.time()
+print("Time required for Nevanlinna AC in orthogonal basis: ", t7 - t6)
+freqs, A_w_opt = hardy_optimization(
+    tol=1e-6, nevanlinna_dir='Nevanlinna_orbsum', coeff_file='coeff.txt'
+)
+t8 = time.time()
+print("Time required for Hardy: ", t8 - t7)
 f2 = h5py.File('dos_canonical.h5', 'w')
 f2['freqs'] = freqs
 f2['dos'] = A_w
+f2['A_w_opt'] = A_w_opt
 f2.close()

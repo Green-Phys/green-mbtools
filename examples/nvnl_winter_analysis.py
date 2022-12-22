@@ -6,6 +6,7 @@ from ase.dft.kpoints import sc_special_points, get_bandpath
 from pyscf.pbc import gto, dft
 from mbanalysis import mb
 from mbanalysis.src import orth, winter, dyson
+from mbanalysis.src.hardy import hardy_optimization
 
 
 #
@@ -68,6 +69,14 @@ parser.add_argument(
     "--orth", type=str, default='sao',
     help="Choice of orthonormal basis (sao or co)"
 )
+parser.add_argument(
+    "--mol", type=int, default=0,
+    help="use non-zero value when performing analyt cont for molecules"
+)
+parser.add_argument(
+    "--hardy", type=int, default=0,
+    help="Toggle Hardy optimization (default is 0: off)"
+)
 args = parser.parse_args()
 
 #
@@ -89,6 +98,8 @@ ir_file = args.ir_file
 output = args.out
 nev_outdir = args.nev_outdir
 orth_ao = args.orth
+molecule = args.mol
+hardy = args.hardy
 
 
 #
@@ -109,20 +120,21 @@ ink = ir_list.shape[0]
 f.close()
 
 # Pyscf object to generate k points
-mycell = gto.loads(cell)
+if not molecule:
+    mycell = gto.loads(cell)
 
-# Use ase to generate the kpath
-if wannier:
-    a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
-    points = sc_special_points[celltype]
-    kptlist = []
-    for kchar in bandpath_str:
-        kptlist.append(points[kchar])
-    band_kpts, kpath, sp_points = get_bandpath(kptlist, a_vecs, npoints=bandpts)
+    # Use ase to generate the kpath
+    if wannier:
+        a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
+        points = sc_special_points[celltype]
+        kptlist = []
+        for kchar in bandpath_str:
+            kptlist.append(points[kchar])
+        band_kpts, kpath, sp_points = get_bandpath(kptlist, a_vecs, npoints=bandpts)
 
-    # ASE will give scaled band_kpts. We need to transform them to absolute values
-    # using mycell.get_abs_kpts
-    band_kpts_abs = mycell.get_abs_kpts(band_kpts)
+        # ASE will give scaled band_kpts. We need to transform them to absolute values
+        # using mycell.get_abs_kpts
+        band_kpts_abs = mycell.get_abs_kpts(band_kpts)
 
 print("Reading sim file")
 f = h5py.File(sim_path, 'r')
@@ -219,12 +231,21 @@ freqs, A_w = mbo.AC_nevanlinna(
 t4 = time.time()
 print("Time required for Nevanlinna AC: ", t4 - t3)
 
+if hardy:
+    freqs, A_w_opt = hardy_optimization(
+        nevanlinna_dir=nev_outdir, n_real=len(freqs),
+        w_min=freqs[0], w_max=freqs[1], eta=0.01
+    )
+
 # Save interpolated data to HDF5
 f = h5py.File(output, 'w')
-f["kpts_interpolate"] = band_kpts
-f["kpath"] = kpath
-f["sp_points"] = sp_points
+if wannier:
+    f["kpts_interpolate"] = band_kpts
+    f["kpath"] = kpath
+    f["sp_points"] = sp_points
 f["mu"] = mu
 f["nevanlinna/freqs"] = freqs
 f["nevanlinna/dos"] = A_w
+if hardy:
+    f["nevanlinna/dos_opt"] = A_w_opt
 f.close()
