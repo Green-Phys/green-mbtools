@@ -148,7 +148,7 @@ def hardy_optimization(
     if np.size(dims) == 1:
         output_shape = (len(freqs), dims)
     else:
-        output_shape = (len(freqs), ) + dims
+        output_shape = (len(freqs), ) + tuple(dims)
     A_w = A_w.reshape(output_shape)
 
     # change back to working directory
