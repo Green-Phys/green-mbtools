@@ -30,6 +30,7 @@ Features
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 * Nevanlinna analytical continuation (External C++ library in `Nevanlinna`, authored by Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
+* Hardy optimization: naive implementation using scipy's `optimize` function and Nelder-Mead algorithm.
 * Caratheodory analytical continuation for complex valued matrices (External C++ library in `Caratheodory`, authored by Fei et.al. [Phys. Rev. B 104, 165111 (2021)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111).
 
 To-Do-List
