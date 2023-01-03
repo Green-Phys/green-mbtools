@@ -26,7 +26,7 @@ def Z_factor(
     Sigma_iw_diag = Sigma_iw_diag[nw//2:]
     freqs, Sigma_w = ac.nevan_run(
         Sigma_iw_diag, iwsample_pos, outdir=outdir, ifile=ifile, ofile=ofile,
-        coefile=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
+        coeff_file=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
         green=False
     )
 
