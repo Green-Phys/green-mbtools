@@ -179,7 +179,10 @@ for p in sp_points:
 plt.axhline(0, color='k')
 
 # x-ticks
-plt.xticks(sp_points, ls_out)
+if bandpath_str is not None:
+    plt.xticks(sp_points, ls_out)
+else:
+    plt.xticks(sp_points, labels)
 
 # save
 plt.savefig(
