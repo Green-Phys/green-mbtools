@@ -1,6 +1,5 @@
 import numpy as np
 import argparse
-import scipy.linalg as LA
 import h5py
 
 from ase.dft.kpoints import get_special_points, bandpath, special_paths
@@ -15,51 +14,57 @@ import matplotlib.pyplot as plt
 # Input data for Wannier interpolation of density matrix eigenvalues
 #
 # Example of usage:
-# python3 ~/dev/mbanalysis/examples/wannier_occ.py --bz_type "rhombohedral type 1" --celltype "rhombohedral" --inp ../../gth-dzvp-molopt-sr/NiO_5x5x5_bs_ints_pseudo_mypyscf_from_tr/input.h5 --sim sim_ao.h5
+# python3 ~/dev/mbanalysis/examples/wannier_occ.py \
+#   --bz_type "rhombohedral type 1" \
+#   --celltype "rhombohedral" \
+#   --inp input.h5 \
+#   --sim sim_ao.h5
 
 def drop_nos_molden(fout, mycell, c, occ):
     with open(fout, 'w') as f:
         molden.header(mycell, f)
         molden.orbital_coeff(mycell, f, c, ene=occ)
 
+
 # Returns density matrix in the notation gamma_{pq} = <q^\dagger p>
-def read_sim(finput): 
+def read_sim(finput):
     h_in = h5py.File(finput, 'r')
     # Pull data from the last iteration
     last_it = h_in["iter"][()]
     print("Last iteration in ", finput, " is ", last_it)
     print("Using the Green's function from the iteration ", last_it)
     # Read the Green's function
-    G_tau = h_in['iter'+str(last_it)+ "/G_tau" + "/data"][()].view(complex)
+    G_tau = h_in['iter'+str(last_it) + "/G_tau" + "/data"][()].view(complex)
     G_tau = G_tau.reshape(G_tau.shape[:-1])
-    nts = G_tau.shape[0];
-    ns  = G_tau.shape[1];
-    nk  = G_tau.shape[2];
-    nao = G_tau.shape[3];
+    nts = G_tau.shape[0]
+    ns = G_tau.shape[1]
+    nk = G_tau.shape[2]
+    nao = G_tau.shape[3]
     dmr = np.zeros((ns, nk, nao, nao), dtype=np.cdouble)
-    dmr[:,:,:,:] = G_tau[nts-1,:,:,:,:] 
-    dmr *= -1 # due to antiperiodicity of G
-    h_in.close() 
-    return dmr,nao,nk
+    dmr[:, :, :, :] = G_tau[nts-1, :, :, :, :]
+    dmr *= -1  # due to antiperiodicity of G
+    h_in.close()
+    return dmr, nao, nk
+
 
 def power(A, p):
     res = np.zeros((A.shape[0], A.shape[1], A.shape[2]), dtype=np.cdouble)
-    #nk = A.shape[0]
     for i in range(A.shape[0]):
-        tmp = power_k(A[i,:,:], p)
-        res[i,:,:] = tmp[:,:]
+        tmp = power_k(A[i, :, :],  p)
+        res[i, :, :] = tmp[:, :]
     return res
-    
+
 
 def power_k(A, p):
-    e,w = np.linalg.eigh(A)
+    e, w = np.linalg.eigh(A)
     e = np.float_power(e, p)
     return w @ np.diag(e) @ np.linalg.inv(w)
 
 
 # Default parameters
 parser = argparse.ArgumentParser(
-    description="Wannier interpolation of spin-averaged density matrix to get occupations"
+    description="Wannier interpolation of spin-averaged density matrix \
+        to get occupations"
 )
 parser.add_argument(
     "--debug", type=bool, default=False, help="Debug mode (True/False)"
@@ -86,7 +91,7 @@ parser.add_argument(
     help="Input file used in GW calculation."
 )
 parser.add_argument(
-    "--sim", type=str, default="sim.h5", 
+    "--sim", type=str, default="sim.h5",
     help="Simulation file to be read"
 )
 parser.add_argument(
@@ -129,17 +134,13 @@ kmesh_scaled = f["/grid/k_mesh_scaled"][()]
 index = f["/grid/index"][()]
 ir_list = f["/grid/ir_list"][()]
 conj_list = f["/grid/conj_list"][()]
-#Fk = f["HF/Fock-k"][()].view(complex)
-#Fk = Fk.reshape(Fk.shape[:-1])
-#nk = index.shape[0]
-#ink = ir_list.shape[0]
 f.close()
 
 # Pyscf object to generate k points
 mycell = gto.loads(cell)
 
 print("Reading simulation file")
-r_dmr,nao_sim,ink_sim = read_sim(fsim)
+r_dmr, nao_sim, ink_sim = read_sim(fsim)
 
 dmr = to_full_bz(r_dmr, conj_list, ir_list, index, 1)
 
@@ -192,24 +193,27 @@ for i in range(nk_int):
     sa_dmr = np.zeros((nao, nao), dtype=np.cdouble)
     if ns == 1 or ns == 2:
         for js in range(ns):
-            sa_dmr[:,:] += S_12[i,:,:] @ dmr_int[js,i,:,:] @ S_12[i,:,:]
+            sa_dmr[:, :] += S_12[i, :, :] @ dmr_int[js, i, :, :] \
+                @ S_12[i, :, :]
     else:
-        raise ValueError("The number of spin variables is larger than I can handle")
-    occ_ab[i,:],w_ab = np.linalg.eigh(sa_dmr)
-    c_ab[i,:,:] = np.linalg.inv(S_12[i,:,:]) @ w_ab
-    c_ab = c_ab.conj() # chemical-friendly notation
+        raise ValueError(
+            "The number of spin variables is larger than I can handle"
+        )
+    occ_ab[i, :], w_ab = np.linalg.eigh(sa_dmr)
+    c_ab[i, :, :] = np.linalg.inv(S_12[i, :, :]) @ w_ab
+    c_ab = c_ab.conj()  # chemical-friendly notation
 
     # Effective number of unpaired electrons
     yamaguchi_int[i] = 0
-    headgordon_int[i] = 0 
-    for o in occ_ab[i,:]:
+    headgordon_int[i] = 0
+    for o in occ_ab[i, :]:
         cap_o = o
         if o > 2.0:
-            cap_o = 2.0 # bound interpolated occupancies
+            cap_o = 2.0  # bound interpolated occupancies
         if o < 0.0:
-            cap_o = 0.0 # bound interpolated occupancies
+            cap_o = 0.0  # bound interpolated occupancies
         yamaguchi_int[i] += min(cap_o, 2-cap_o)
-        headgordon_int[i] += (cap_o**2) * ((2-cap_o)**2) 
+        headgordon_int[i] += (cap_o**2) * ((2-cap_o)**2)
 
 print('Number of electrons: ', mycell.nelectron)
 
@@ -231,7 +235,7 @@ f.close()
 
 #
 # Prepare a plot for an outside use
-# This gives a very verbose output file, 
+# This gives a very verbose output file,
 # but it can be adjusted for a specific application
 
 # Occupations
@@ -239,8 +243,7 @@ f_occ = open('occupancies_kpath.dat', 'w', encoding="utf-8")
 for k in range(len(kpath)):
     str_to_write = str(kpath[k]) + " "
     for n in range(nao):
-    #for n in [52,53,54,55]:
-        str_to_write += (str(occ_ab[k,n]) + " ")
+        str_to_write += (str(occ_ab[k, n]) + " ")
     print(str_to_write, file=f_occ)
 f_occ.close()
 
@@ -252,8 +255,8 @@ for sp in sp_points:
 print(str_to_write, file=f_sp)
 
 str_to_write = ""
-for l in labels:
-    str_to_write += str(l) + " "
+for ll in labels:
+    str_to_write += str(ll) + " "
 print(str_to_write, file=f_sp)
 f_sp.close()
 
@@ -268,26 +271,24 @@ f_ind.close()
 
 # AO coefficients
 for n in range(nao):
-#for n in [52,53,54,55]:
     f_ao_re = open("coefs_" + str(n) + "_re_kpath.dat", 'w', encoding="utf-8")
     f_ao_im = open("coefs_" + str(n) + "_im_kpath.dat", 'w', encoding="utf-8")
     for k in range(len(kpath)):
         str_to_write_re = str(kpath[k]) + " "
         str_to_write_im = str(kpath[k]) + " "
-        for ao in range(nao): 
-        #for ao in [9,10,11,12,13, 26,28,29,30]: 
-            str_to_write_re += (str(np.real(c_ab[k,ao,n])) + " ")
-            str_to_write_im += (str(np.imag(c_ab[k,ao,n])) + " ")
+        for ao in range(nao):
+            str_to_write_re += (str(np.real(c_ab[k, ao, n])) + " ")
+            str_to_write_im += (str(np.imag(c_ab[k, ao, n])) + " ")
         print(str_to_write_re, file=f_ao_re)
         print(str_to_write_im, file=f_ao_im)
     f_ao_re.close()
     f_ao_im.close()
 
 for k in range(len(kpath)):
-    fout   = "int_NOs_" + str(k) + "_re.molden"
-    drop_nos_molden(fout, mycell, np.real(c_ab[k,:,:]), occ_ab[k,:])
-    fout   = "int_NOs_" + str(k) + "_im.molden"
-    drop_nos_molden(fout, mycell, np.imag(c_ab[k,:,:]), occ_ab[k,:])
+    fout = "int_NOs_" + str(k) + "_re.molden"
+    drop_nos_molden(fout, mycell, np.real(c_ab[k, :, :]), occ_ab[k, :])
+    fout = "int_NOs_" + str(k) + "_im.molden"
+    drop_nos_molden(fout, mycell, np.imag(c_ab[k, :, :]), occ_ab[k, :])
 
 
 #
@@ -301,7 +302,7 @@ emax = 2.0
 plt.figure(figsize=(5, 6))
 
 for n in range(nao):
-    pop = plt.plot(kpath, occ_ab[:,n])
+    pop = plt.plot(kpath, occ_ab[:, n])
 
 # Special points
 for p in sp_points:
