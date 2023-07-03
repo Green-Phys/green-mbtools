@@ -4,6 +4,7 @@ import shutil
 import numpy as np
 import h5py
 from multiprocessing import cpu_count, Process
+from .pes_utils import run_es
 import mbanalysis.nevanlinna as nevan_exe
 import mbanalysis.caratheodory as carath_exe
 
@@ -455,3 +456,115 @@ def load_caratheodory_data(matrix_file, spectral_file, X_dims):
         Xc_w = Xc_w.reshape((freqs.shape[0],) + (ns, nk, nao, nao))
 
     return freqs, Xc_w, XA_w
+
+
+def es_nevan_run(
+    G_iw, wsample, n_real=10000, w_min=-10, w_max=10, eta=0.01, diag=True,
+    eps_pol=1.0, parallel='ska', outdir='PESNevan', ofile='Aw.txt'
+):
+    """Perform ES Nevanlinna analytic continuation for G(iw) or Sigma(iw)
+    TODO: Provide a description about the input
+    """
+    # Handle directories for saving output files
+    wkdir = os.path.abspath(os.getcwd())
+    print("PES Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
+    base_dir = wkdir + '/' + outdir
+
+    # Bring G_iw in the shape: (iw, s, k, a, b)
+    orig_shape = G_iw.shape
+    if len(orig_shape) == 1:
+        # this is simply G(iw)
+        G_iw = G_iw.reshape((orig_shape[0], 1, 1, 1))
+    elif len(orig_shape) == 2:
+        # assuming this is G(iw, a)
+        nw, nao = orig_shape
+        G_iw = G_iw.reshape((nw, 1, 1, nao))
+    elif len(orig_shape) == 5:
+        # this is already the form we want
+        pass
+    else:
+        raise ValueError(
+            'Incorrect shape G_iw. Expecting either 1-, 2- or 5-d array'
+        )
+
+    # Diagonal elements or not
+    if diag and len(G_iw.shape) == 5:
+        G_iw = np.einsum('wskaa -> wska', G_iw)
+        # update the shape
+        orig_shape = G_iw.shape
+
+    # Check consistency in number of frequencies and input data
+    nw, ns, nk = G_iw.shape[0:3]
+    assert nw == wsample.shape[0], "Number of imaginary frequency points \
+        mismatches between \"input_parser\" and Gw."
+
+    # Pre-processing - divide the data based on k-, spin-, and AO-indices
+    # for parallelized analytic continuation
+    if parallel == 'ska':
+        if not diag:
+            raise ValueError(
+                "Cannot use the 'ska' parallel scheme for full matrix"
+            )
+        dim1 = np.prod(G_iw.shape[1:])
+        G_iw = G_iw.reshape(nw, dim1, 1)
+    elif parallel == 'sk':
+        dim1 = ns * nk
+        G_iw = G_iw.reshape((nw, ns * nk) + G_iw.shape[3:])
+    else:
+        raise ValueError(
+            "Invalid value for the argument 'parralel': {}.".format(parallel)
+            + "Expecting 'ska' or 'sk'"
+        )
+
+    # Save dimensions for better understanding of output
+    np.savetxt("dimensions.txt", np.asarray(G_iw.shape[1:], dtype=int))
+
+    # define the frequency mesh
+    w_vals = np.linspace(w_min, w_max, n_real)
+
+    # perform analytical continuation
+    processes = []
+    pp = 0
+    for d1 in range(dim1):
+        if not os.path.exists(base_dir + '/' + str(d1)):
+            os.mkdir(base_dir + '/' + str(d1))
+        out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
+        # arg_ls = (ifile, nw, ofile, coeff_file, spectral,
+        #   prec, n_real, w_min, w_max, eta)
+        p = Process(
+            target=run_es,
+            args=(
+                wsample, G_iw[:, d1, :], w_vals
+            ),
+            kwargs={
+                'diag': diag,
+                'eta': eta,
+                'eps_pol': eps_pol,
+                'ofile': out_file
+            }
+        )
+        p.start()
+        processes.append(p)
+        pp += 1
+        if pp % _ncpu == 0:
+            for p in processes:
+                p.join()
+            processes = []
+
+    for p in processes:
+        p.join()
+
+    # read the computed spectrum and quantitie
+    G_w = np.zeros((n_real, ) + G_iw.shape[1:], dtype=complex)
+    pp = 0
+    for d1 in range(dim1):
+        out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
+        Gw_here = np.loadtxt(out_file, dtype=complex)
+        G_w[:, d1, :] = Gw_here.reshape((n_real, ) + G_iw.shape[2:])
+
+    # reshape and return
+    G_w = G_w.reshape((n_real, ) + orig_shape[1:])
+
+    return w_vals, G_w
