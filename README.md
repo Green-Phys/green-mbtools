@@ -16,7 +16,7 @@ python setup.py install
 This will automatically build the Nevanlinna and Caratheodory extensions, which are written in C++.
 
 **Dependencies:**
-1. Python packages: `numpy`, `scipy`, `h5py`, and `irbasis`
+1. Python packages: `numpy`, `scipy`, `h5py`, `irbasis`, `cvxpy`, and `baryrat`.
 2. C++ libraries: `Eigen`, `GMP`, `MPFR`, and `MPFR-C++` ([GitHub link for MPFR-C++](https://github.com/advanpix/mpreal))
 3. `pytest` for testing
 4. Maxent external C++ library (https://github.com/CQMP/Maxent) needs to be built separately to run analytic continuation tasks using the maxent method.
@@ -30,6 +30,7 @@ Features
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 * Nevanlinna analytical continuation (External C++ library in `Nevanlinna`, authored by Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
+* ES analytical continuation, based on [Phys. Rev. B 107, 075151 (2023)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.075151).
 * Hardy optimization: naive implementation using scipy's `optimize` function and Nelder-Mead algorithm.
 * Caratheodory analytical continuation for complex valued matrices (External C++ library in `Caratheodory`, authored by Fei et.al. [Phys. Rev. B 104, 165111 (2021)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111).
 
