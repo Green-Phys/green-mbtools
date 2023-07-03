@@ -87,13 +87,13 @@ def maxent_run(
             processes.append(p)
         pp += 1
         if pp % _ncpu == 0:
-            for p in processes:
-                p.communicate()
+            for proc in processes:
+                proc.communicate()
             processes = []
         os.chdir("..")
 
-    for p in processes:
-        p.communicate()
+    for proc in processes:
+        proc.communicate()
 
     # Combine output
     dump_A = False
@@ -191,13 +191,13 @@ def nevan_run(
         processes.append(p)
         pp += 1
         if pp % _ncpu == 0:
-            for p in processes:
-                p.join()
+            for proc in processes:
+                proc.join()
             processes = []
         os.chdir("..")
 
-    for p in processes:
-        p.join()
+    for proc in processes:
+        proc.join()
 
     # Combine output
     dump_A = False
@@ -311,13 +311,13 @@ def caratheodory_run(
         processes.append(p)
         pp += 1
         if pp % _ncpu == 0:
-            for p in processes:
-                p.join()
+            for proc in processes:
+                proc.join()
             processes = []
         os.chdir("..")
 
-    for p in processes:
-        p.join()
+    for proc in processes:
+        proc.join()
 
     # Combine output
     freqs, Xc_w, XA_w = load_caratheodory_data(
@@ -549,12 +549,12 @@ def es_nevan_run(
         processes.append(p)
         pp += 1
         if pp % _ncpu == 0:
-            for p in processes:
-                p.join()
+            for proc in processes:
+                proc.join()
             processes = []
 
-    for p in processes:
-        p.join()
+    for proc in processes:
+        proc.join()
 
     # read the computed spectrum and quantitie
     G_w = np.zeros((n_real, ) + G_iw.shape[1:], dtype=complex)

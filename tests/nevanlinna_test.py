@@ -126,9 +126,9 @@ def test_pes_nevan_exe_on_dirac_delta_spectrum():
 
     # Generate imaginary axis data for f(z) = 1 / (z - z0)
     iw_vals = np.linspace(0.1, 10, 100)
-    G_iw = 1 / (1j * iw_vals - (1 + 1e-4j))
+    G_iw = 1 / (1j * iw_vals - 1)
 
-    outdir = 'DiracESNevan'
+    outdir = 'DiracESNevanShifted'
     n_real = 201
     w_min = -0.5
     w_max = 1.5
