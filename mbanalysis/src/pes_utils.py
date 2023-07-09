@@ -88,9 +88,6 @@ def cvx_optimize(poles, GM_matrix, zM):
     # approximated Green's function on iw points
     np_G_approx = np.einsum('wp, pij -> wij', iw_pole_matrix, np_X_vec)
 
-    # XXX: Debug
-    print('CVXPy Error: ', opt_error)
-
     return opt_error, np_X_vec, np_G_approx
 
 
@@ -162,9 +159,6 @@ def cvx_optimize_spectral(poles, GM_diags, zM):
     np_X_vec = np_X_vec.reshape((num_poles, num_orb))
     # approximated Green's function on iw points
     np_G_approx = iw_pole_matrix @ np_X_vec
-
-    # XXX: Debug
-    print('CVXPy Error: ', opt_error)
 
     return opt_error, np_X_vec, np_G_approx
 
@@ -267,8 +261,7 @@ def run_es(
             }
         )
         poles_opt = res.x
-        errM, X_vec, _ = cvx_optimize_spectral(poles_opt, G_iw, iw_vals)
-        grad = 0
+        _, X_vec, _ = cvx_optimize_spectral(poles_opt, G_iw, iw_vals)
     else:
         res = minimize(
             lambda x: cvx_optimize(x, G_iw, iw_vals)[0], poles,
@@ -279,12 +272,7 @@ def run_es(
             }
         )
         poles_opt = res.x
-        errM, X_vec, _ = cvx_optimize(poles_opt, G_iw, iw_vals)
-        grad = cvx_gradient(poles_opt, G_iw, iw_vals)
-
-    print("Poles: ", poles_opt)
-    print("Error: ", errM)
-    print("Gradient: ", grad)
+        _, X_vec, _ = cvx_optimize(poles_opt, G_iw, iw_vals)
 
     # Calculate the spectrum
     Greens_calc = np.zeros(
@@ -298,7 +286,6 @@ def run_es(
             )
         Greens_calc[i_re] = Greenhere
 
-    print('Saving output data to: ', ofile)
     np.savetxt(ofile, Greens_calc.reshape(len(re_w_vals), -1))
 
     return
