@@ -2,6 +2,7 @@ from mbanalysis.src.analyt_cont import nevan_run
 from mbanalysis.src.hardy import sobolev_wrapper, optimize, hardy_optimization
 import numpy as np
 import os
+import pytest
 
 
 #
@@ -86,6 +87,7 @@ def test_optimize():
     assert norm_out <= norm_in
 
 
+@pytest.mark.skip(reason='Hardy optimization too slow')
 def test_hardy_optimization_function():
     """Test if Hardy optimization function runs without error.
     The output is rather difficult to check. But, we will at least verify

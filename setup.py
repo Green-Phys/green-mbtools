@@ -26,7 +26,7 @@ sobolev = Extension(
 
 setup(
    name='mbanalysis',
-   version='1.2.2',
+   version='1.3.0',
    description="A package for post processing of finite-temperature \
        Green's function and self-energy data",
    packages=['mbanalysis', 'mbanalysis.src'],

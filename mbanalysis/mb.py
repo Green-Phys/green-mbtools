@@ -74,10 +74,10 @@ class MB_post(object):
                 S = S.reshape((1,) + S.shape)
         else:
             raise ValueError(
-                'Incorrect dimensions of self-energy or Fock. Acceptable shapes \
-                are (nts, ns, nk, nao, nao) or (nts, nk, nao, nao) for self \
-                energy and (ns, nk, nao, nao) or (nk, nao, nao) for Fock \
-                matrix.'
+                'Incorrect dimensions of self-energy or Fock. Acceptable \
+                shapes are (nts, ns, nk, nao, nao) or (nts, nk, nao, nao) \
+                for self energy and (ns, nk, nao, nao) or (nk, nao, nao) \
+                for Fock matrix.'
             )
 
         if mu is None:
