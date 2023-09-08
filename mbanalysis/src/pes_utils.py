@@ -236,7 +236,7 @@ def run_es(
         G_iw = G_iw.reshape(G_iw.shape + (1, ))
         g_trace = G_iw * 1.0
     elif len(G_iw.shape) == 2:
-        g_trace = G_iw * 1.0
+        g_trace = np.einsum('wa -> w', G_iw)
     elif len(G_iw.shape) == 3:
         g_trace = np.einsum('wpp -> w', G_iw)
     else:
