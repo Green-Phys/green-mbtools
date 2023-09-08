@@ -477,21 +477,26 @@ def es_nevan_run(
     if len(orig_shape) == 1:
         # this is simply G(iw)
         G_iw = G_iw.reshape((orig_shape[0], 1, 1, 1))
+        print("Expecting dimensions to represent (w)")
     elif len(orig_shape) == 2:
         # assuming this is G(iw, a)
         nw, nao = orig_shape
         G_iw = G_iw.reshape((nw, 1, 1, nao))
+        print("Expecting dimensions to represent (w, a)")
+    elif len(orig_shape) == 4:
+        # for diagonal approx only
+        print("Expecting dimensions to represent (w, s, k, a)")
     elif len(orig_shape) == 5:
         # this is already the form we want
-        pass
+        print("Expecting dimensions to represent (w, s, k, a, b)")
     else:
         raise ValueError(
-            'Incorrect shape G_iw. Expecting either 1-, 2- or 5-d array'
+            'Incorrect shape G_iw. Expecting either 1-, 2-, 4- or 5-d array'
         )
 
     # Diagonal elements or not
     if diag and len(G_iw.shape) == 5:
-        G_iw = np.einsum('wskaa -> wska', G_iw)
+        G_iw = np.einsum('wskaa -> wska', G_iw, optimize=True)
         # update the shape
         orig_shape = G_iw.shape
 
