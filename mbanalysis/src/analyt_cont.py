@@ -460,7 +460,7 @@ def load_caratheodory_data(matrix_file, spectral_file, X_dims):
 
 def es_nevan_run(
     G_iw, wsample, n_real=10000, w_min=-10, w_max=10, eta=0.01, diag=True,
-    eps_pol=1.0, parallel='ska', outdir='PESNevan', ofile='Aw.txt'
+    eps_pol=1.0, parallel='sk', outdir='PESNevan', ofile='Aw.txt'
 ):
     """Perform ES Nevanlinna analytic continuation for G(iw) or Sigma(iw)
     TODO: Provide a description about the input
