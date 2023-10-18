@@ -63,15 +63,16 @@ class IR_factory(object):
         if debug:
             # Check the imaginary parts
             print(
-                "The largest imaginary parts in X_t is {}. Please double check \
-                whether this is consistent to your expectation!".format(
+                "The largest imaginary parts in X_t is {}. Please double \
+                check whether this is consistent to your expectation!".format(
                     np.max(np.abs(X_t.imag))
                 )
             )
         return X_t
 
     def tauf_to_wb(self, X_t):
-        """Transform quantity from fermionic tau-grid to bosonic frequency grid.
+        """Transform quantity from fermionic tau-grid to bosonic
+        frequency grid.
         E.g., P0(tau) -> P0(i Omega).
         """
 
@@ -95,10 +96,10 @@ class IR_factory(object):
         X_wb = X_wb.reshape(original_shape)
 
         return X_wb
-    
+
     def wb_to_tauf(self, X_wb):
-        """Transform quantity from bosonic frequency grid to fermionic tau grid.
-        e.g., P0(i Omega) -> P0(tau)
+        """Transform quantity from bosonic frequency grid to fermionic
+        tau-grid, e.g., P0(i Omega) -> P0(tau)
         """
         _, wsample_bose, _, Tcn_b, _, _ = read_IR_matrices(
                 os.path.abspath(self.ir_file), self.beta, ptype='bose'

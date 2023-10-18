@@ -109,7 +109,7 @@ iw_pos = iw_vals[n_iw//2:]
 #                       analyic continuation is vectorized over orbtal indices
 freqs, gw_sao_diag = es_nevan_run(
     G_iw=giw_sao_pos, wsample=iw_pos, n_real=1000, w_min=-5, w_max=5, eta=0.01,
-    diag=True, paralel='sk'
+    diag=True, parallel='sk'
 )
 
 # 5. Step 4 results in a real-frequeny Green's function of shape

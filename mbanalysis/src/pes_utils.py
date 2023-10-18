@@ -72,7 +72,7 @@ def cvx_optimize(poles, GM_matrix, zM):
     #
 
     prob = cp.Problem(cp.Minimize(obj_qty), constr)
-    opt_error = prob.solve(eps=1e-6)
+    opt_error = prob.solve(eps=1e-6, solver='SCS')
     # print("Constraint values: ")
     # constr_values = [constr[i].dual_value for i in range(num_poles)]
     # print(constr_values)
@@ -145,7 +145,7 @@ def cvx_optimize_spectral(poles, GM_diags, zM):
     #
 
     prob = cp.Problem(cp.Minimize(obj_qty))
-    opt_error = prob.solve()
+    opt_error = prob.solve(eps=1e-6, solver='SCS')
     # print("Constraint values: ")
     # constr_values = [constr[i].dual_value for i in range(num_poles)]
     # print(constr_values)
