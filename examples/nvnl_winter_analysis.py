@@ -6,7 +6,6 @@ from ase.dft.kpoints import sc_special_points, get_bandpath
 from pyscf.pbc import gto, dft
 from mbanalysis import mb
 from mbanalysis.src import orth, winter, dyson
-from mbanalysis.src.hardy import hardy_optimization
 
 
 #
@@ -73,10 +72,6 @@ parser.add_argument(
     "--mol", type=int, default=0,
     help="use non-zero value when performing analyt cont for molecules"
 )
-parser.add_argument(
-    "--hardy", type=int, default=0,
-    help="Toggle Hardy optimization (default is 0: off)"
-)
 args = parser.parse_args()
 
 #
@@ -99,7 +94,6 @@ output = args.out
 nev_outdir = args.nev_outdir
 orth_ao = args.orth
 molecule = args.mol
-hardy = args.hardy
 
 
 #
@@ -125,15 +119,19 @@ if not molecule:
 
     # Use ase to generate the kpath
     if wannier:
-        a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
+        a_vecs = np.genfromtxt(
+            mycell.a.replace(',', ' ').splitlines(), dtype=float
+        )
         points = sc_special_points[celltype]
         kptlist = []
         for kchar in bandpath_str:
             kptlist.append(points[kchar])
-        band_kpts, kpath, sp_points = get_bandpath(kptlist, a_vecs, npoints=bandpts)
+        band_kpts, kpath, sp_points = get_bandpath(
+            kptlist, a_vecs, npoints=bandpts
+        )
 
-        # ASE will give scaled band_kpts. We need to transform them to absolute values
-        # using mycell.get_abs_kpts
+        # ASE will give scaled band_kpts. We need to transform them to
+        # absolute values using mycell.get_abs_kpts
         band_kpts_abs = mycell.get_abs_kpts(band_kpts)
 
 print("Reading sim file")
@@ -231,14 +229,6 @@ freqs, A_w = mbo.AC_nevanlinna(
 t4 = time.time()
 print("Time required for Nevanlinna AC: ", t4 - t3)
 
-if hardy:
-    freqs, A_w_opt = hardy_optimization(
-        nevanlinna_dir=nev_outdir, n_real=len(freqs),
-        w_min=freqs[0], w_max=freqs[1], eta=0.01
-    )
-    t5 = time.time()
-    print("Time required for Hardy optimization: ", t5 - t4)
-
 # Save interpolated data to HDF5
 f = h5py.File(output, 'w')
 if wannier:
@@ -248,6 +238,4 @@ if wannier:
 f["mu"] = mu
 f["nevanlinna/freqs"] = freqs
 f["nevanlinna/dos"] = A_w
-if hardy:
-    f["nevanlinna/dos_opt"] = A_w_opt
 f.close()

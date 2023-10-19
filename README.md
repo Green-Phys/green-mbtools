@@ -37,7 +37,6 @@ Features
 
 To-Do-List
 -----------
-* Implement (or incorporate) Hardy optimization in Nevanlinna analytic continuation
 * Fix `examples/winter*.py`: The original example for Silicon has been modified to Hydrogen (for which test data is available). The high-symmetry points in the interpolation need to be readjusted accordingly.
 
 
