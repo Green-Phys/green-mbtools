@@ -4,6 +4,140 @@ import baryrat
 from scipy.optimize import minimize
 
 
+def cvx_matrix_projection(zM, GM_matrix, w_cut=10, n_real=201, ofile='Giw'):
+    """Projection of noisy GW data on to Nevanlinna manifold.
+    Once this is performed, analytic continuation either using Nevanlinna
+    or ES becomes easier.
+    Input arguments:
+        zM              :   n_imag number of imaginary frequency values
+        GM_matrix       :   Exact Matsubara Green's function data in the shape
+                            (n_imag, n_orb, n_orb)
+        w_cut           :   cut-off to consider for real axis
+        n_real          :   number of real frequencies to consider
+    Returns:
+        G_iw_proj       :   Projected Green's function
+    such that
+        G(iw_m) = sum_n P_n / (iw_m - w_n)
+    """
+    # number of imag frequency points
+    n_imag = len(zM)
+
+    # number of orbitals
+    n_orb = GM_matrix.shape[-1]
+    assert GM_matrix.shape == (n_imag, n_orb, n_orb)
+
+    # real frequency grid
+    w_grid = np.linspace(-w_cut, w_cut, n_real)
+
+    # Initialize the cvxpy variables P_vec
+    # These variables are positive-semidefinite (PSD)
+    P_vec = cp.Variable((n_real, n_orb * n_orb), complex=True)
+
+    # PSD and Hermitian constraint
+    constr = []
+    for i in range(n_real):
+        constr.append(
+            cp.reshape(P_vec[i, :], (n_orb, n_orb)) >> 0
+        )
+
+    #
+    # Define the objective function
+    #
+
+    # real and imaginary mesh matrix
+    zw_matrix = np.zeros((n_imag, n_real), dtype=complex)
+    for i, iw in enumerate(zM):
+        for j, w in enumerate(w_grid):
+            zw_matrix[i, j] = 1 / (iw - w)
+
+    G_approx = zw_matrix @ P_vec
+    G_diff = G_approx - GM_matrix.reshape((n_imag, n_orb * n_orb))
+    obj_qty = cp.norm(G_diff, p='fro')
+
+    #
+    # Define cvxy's Objective problem and solve it
+    #
+
+    prob = cp.Problem(cp.Minimize(obj_qty), constr)
+    opt_error = prob.solve(eps=1e-6, solver='SCS')
+    print("Error CVXPy optimization: ", opt_error)
+
+    #
+    # Get results for the projected imaginary-time Greens function
+    #
+
+    np_P_vec = P_vec.value
+    G_iw_proj = zw_matrix @ np_P_vec
+    G_iw_proj = G_iw_proj.reshape((n_imag, n_orb, n_orb))
+
+    np.savetxt(ofile, G_iw_proj)
+
+    return
+
+
+def cvx_diag_projection(zM, GM_diag, w_cut=10, n_real=201, ofile='Giw'):
+    """Projection of noisy GW data on to Nevanlinna manifold.
+    Once this is performed, analytic continuation either using Nevanlinna
+    or ES becomes easier.
+    Input arguments:
+        zM              :   n_imag number of imaginary frequency values
+        GM_diag         :   Exact Matsubara Green's function data in the shape
+                            (n_imag, n_orb)
+        w_cut           :   cut-off to consider for real axis
+        n_real          :   number of real frequencies to consider
+    Returns:
+        G_iw_proj       :   Projected Green's function
+    such that
+        G(iw_m) = sum_n P_n / (iw_m - w_n)
+    """
+    # number of imag frequency points
+    n_imag = len(zM)
+
+    # number of orbitals
+    n_orb = GM_diag.shape[-1]
+    assert GM_diag.shape == (n_imag, n_orb)
+
+    # real frequency grid
+    w_grid = np.linspace(-w_cut, w_cut, n_real)
+
+    # Initialize the cvxpy variables P_vec
+    # These variables are non-negative vectors
+    P_vec = cp.Variable((n_real, n_orb), nonneg=True)
+
+    #
+    # Define the objective function
+    #
+
+    # real and imaginary mesh matrix
+    zw_matrix = np.zeros((n_imag, n_real), dtype=complex)
+    for i, iw in enumerate(zM):
+        for j, w in enumerate(w_grid):
+            zw_matrix[i, j] = 1 / (iw - w)
+
+    G_approx = zw_matrix @ P_vec
+    G_diff = G_approx - GM_diag
+    obj_qty = cp.norm(G_diff, p='fro')
+
+    #
+    # Define cvxy's Objective problem and solve it
+    #
+
+    prob = cp.Problem(cp.Minimize(obj_qty))
+    opt_error = prob.solve(eps=1e-6, solver='SCS')
+    print("Error CVXPy optimization: ", opt_error)
+
+    #
+    # Get results for the projected imaginary-time Greens function
+    #
+
+    np_P_vec = P_vec.value
+    G_iw_proj = zw_matrix @ np_P_vec
+    G_iw_proj = G_iw_proj.reshape((n_imag, n_orb))
+    np.savetxt(ofile, G_iw_proj)
+
+    return
+
+
 def cvx_optimize(poles, GM_matrix, zM):
     """Top level target error function in the ES approach
     to Nevanlinna, i.e.,
@@ -68,7 +202,7 @@ def cvx_optimize(poles, GM_matrix, zM):
     )
 
     #
-    # Define cvxy's Objective problem and solve itjj
+    # Define cvxy's Objective problem and solve it
     #
 
     prob = cp.Problem(cp.Minimize(obj_qty), constr)

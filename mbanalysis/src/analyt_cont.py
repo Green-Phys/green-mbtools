@@ -4,7 +4,7 @@ import shutil
 import numpy as np
 import h5py
 from multiprocessing import cpu_count, Process
-from .pes_utils import run_es
+from .pes_utils import run_es, cvx_matrix_projection, cvx_diag_projection
 import mbanalysis.nevanlinna as nevan_exe
 import mbanalysis.caratheodory as carath_exe
 
@@ -573,3 +573,105 @@ def es_nevan_run(
     G_w = G_w.reshape((n_real, ) + orig_shape[1:])
 
     return w_vals, G_w
+
+
+def g_iw_projection(G_iw, wsample, diag=True):
+    """Projection of Matsubara Green's function data to Nevanlinna function.
+    TODO: Provide a description about the input
+    """
+    # Handle directories for saving output files
+    outdir = 'Projection'
+    ofile = 'Proj_Giw.txt'
+    wkdir = os.path.abspath(os.getcwd())
+    print("PES Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
+    base_dir = wkdir + '/' + outdir
+
+    # Bring G_iw in the shape: (iw, s, k, a, b)
+    orig_shape = G_iw.shape
+    if len(orig_shape) == 1:
+        # this is simply G(iw)
+        G_iw = G_iw.reshape((orig_shape[0], 1, 1, 1))
+        print("Expecting dimensions to represent (w)")
+    elif len(orig_shape) == 2:
+        # assuming this is G(iw, a)
+        nw, nao = orig_shape
+        G_iw = G_iw.reshape((nw, 1, 1, nao))
+        print("Expecting dimensions to represent (w, a)")
+    elif len(orig_shape) == 4:
+        # for diagonal approx only
+        print("Expecting dimensions to represent (w, s, k, a)")
+    elif len(orig_shape) == 5:
+        # this is already the form we want
+        print("Expecting dimensions to represent (w, s, k, a, b)")
+    else:
+        raise ValueError(
+            'Incorrect shape G_iw. Expecting either 1-, 2-, 4- or 5-d array'
+        )
+
+    # Diagonal elements or not
+    projection_function = cvx_matrix_projection
+    if diag:
+        projection_function = cvx_diag_projection
+    if diag and len(G_iw.shape) == 5:
+        G_iw = np.einsum('wskaa -> wska', G_iw, optimize=True)
+        # update the shape
+        orig_shape = G_iw.shape
+
+    # Check consistency in number of frequencies and input data
+    nw, ns, nk = G_iw.shape[0:3]
+    assert nw == wsample.shape[0], "Number of imaginary frequency points \
+        mismatches between \"input_parser\" and Gw."
+
+    # Pre-processing - divide the data based on k-, spin--indices
+    # for parallelized projection of data
+    dim1 = ns * nk
+    G_iw = G_iw.reshape((nw, ns * nk) + G_iw.shape[3:])
+
+    # Save dimensions for better understanding of output
+    np.savetxt("dimensions.txt", np.asarray(G_iw.shape[1:], dtype=int))
+
+    # perform analytical continuation
+    processes = []
+    pp = 0
+    for d1 in range(dim1):
+        if not os.path.exists(base_dir + '/' + str(d1)):
+            os.mkdir(base_dir + '/' + str(d1))
+        out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
+        # arg_ls = (ifile, nw, ofile, coeff_file, spectral,
+        #   prec, n_real, w_min, w_max, eta)
+        p = Process(
+            target=projection_function,
+            args=(
+                1j * wsample, G_iw[:, d1, :]
+            ),
+            kwargs={
+                'w_cut': 10,
+                'n_real': 201,
+                'ofile': out_file
+            }
+        )
+        p.start()
+        processes.append(p)
+        pp += 1
+        if pp % _ncpu == 0:
+            for proc in processes:
+                proc.join()
+            processes = []
+
+    for proc in processes:
+        proc.join()
+
+    # read the computed spectrum and quantitie
+    G_iw_proj = np.zeros((nw, ) + G_iw.shape[1:], dtype=complex)
+    pp = 0
+    for d1 in range(dim1):
+        out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
+        Gw_here = np.loadtxt(out_file, dtype=complex)
+        G_iw_proj[:, d1, :] = Gw_here.reshape((nw, ) + G_iw.shape[2:])
+
+    # reshape and return
+    G_iw_proj = G_iw_proj.reshape((nw, ) + orig_shape[1:])
+
+    return G_iw_proj
