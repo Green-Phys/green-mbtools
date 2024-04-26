@@ -664,7 +664,10 @@ def g_iw_projection(G_iw, wsample, diag=True):
         proc.join()
 
     # read the computed spectrum and quantitie
-    G_iw_proj = np.zeros((nw, ) + G_iw.shape[1:], dtype=complex)
+    if diag:
+        G_iw_proj = np.zeros((nw, dim1, nao), dtype=complex)
+    else:
+        G_iw_proj = np.zeros((nw, dim1, nao * nao), dtype=complex)
     pp = 0
     for d1 in range(dim1):
         out_file = base_dir + '/{}/{}'.format(str(d1), ofile)

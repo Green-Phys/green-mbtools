@@ -4,7 +4,9 @@ import baryrat
 from scipy.optimize import minimize
 
 
-def cvx_matrix_projection(zM, GM_matrix, w_cut=10, n_real=201, ofile='Giw'):
+def cvx_matrix_projection(
+    zM, GM_matrix, w_cut=10, n_real=201, ofile='Giw', solver='SCS'
+):
     """Projection of noisy GW data on to Nevanlinna manifold.
     Once this is performed, analytic continuation either using Nevanlinna
     or ES becomes easier.
@@ -59,8 +61,9 @@ def cvx_matrix_projection(zM, GM_matrix, w_cut=10, n_real=201, ofile='Giw'):
     #
 
     prob = cp.Problem(cp.Minimize(obj_qty), constr)
-    opt_error = prob.solve(eps=1e-6, solver='SCS')
+    opt_error = prob.solve(eps=1e-6, solver=solver)
     print("Error CVXPy optimization: ", opt_error)
+    print("Objective value after optimization: ", obj_qty.value)
 
     #
     # Get results for the projected imaginary-time Greens function
@@ -68,14 +71,14 @@ def cvx_matrix_projection(zM, GM_matrix, w_cut=10, n_real=201, ofile='Giw'):
 
     np_P_vec = P_vec.value
     G_iw_proj = zw_matrix @ np_P_vec
-    G_iw_proj = G_iw_proj.reshape((n_imag, n_orb, n_orb))
-
     np.savetxt(ofile, G_iw_proj)
 
     return
 
 
-def cvx_diag_projection(zM, GM_diag, w_cut=10, n_real=201, ofile='Giw'):
+def cvx_diag_projection(
+    zM, GM_diag, w_cut=10, n_real=201, ofile='Giw', solver='SCS'
+):
     """Projection of noisy GW data on to Nevanlinna manifold.
     Once this is performed, analytic continuation either using Nevanlinna
     or ES becomes easier.
@@ -123,8 +126,9 @@ def cvx_diag_projection(zM, GM_diag, w_cut=10, n_real=201, ofile='Giw'):
     #
 
     prob = cp.Problem(cp.Minimize(obj_qty))
-    opt_error = prob.solve(eps=1e-6, solver='SCS')
+    opt_error = prob.solve(eps=1e-6, solver=solver)
     print("Error CVXPy optimization: ", opt_error)
+    print("Objective value after optimization: ", obj_qty.value)
 
     #
     # Get results for the projected imaginary-time Greens function
@@ -138,7 +142,7 @@ def cvx_diag_projection(zM, GM_diag, w_cut=10, n_real=201, ofile='Giw'):
     return
 
 
-def cvx_optimize(poles, GM_matrix, zM):
+def cvx_optimize(poles, GM_matrix, zM, solver='SCS'):
     """Top level target error function in the ES approach
     to Nevanlinna, i.e.,
         Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||
@@ -147,6 +151,7 @@ def cvx_optimize(poles, GM_matrix, zM):
         GM_matrix       :   Exact Matsubara Green's function data in the shape
                             (num_imag, num_orb, num_orb)
         zM              :   Matsubara frequencies
+        solver          :   Specify solver type for ES SDR fit
     Returns:
         opt_error       :   Optimal value of Err (poles) for fixed poles
         np_X_vec        :   Numpy array rep of optimal X_vec in the shape
@@ -206,7 +211,7 @@ def cvx_optimize(poles, GM_matrix, zM):
     #
 
     prob = cp.Problem(cp.Minimize(obj_qty), constr)
-    opt_error = prob.solve(eps=1e-6, solver='SCS')
+    opt_error = prob.solve(eps=1e-6, solver=solver)
     # print("Constraint values: ")
     # constr_values = [constr[i].dual_value for i in range(num_poles)]
     # print(constr_values)
@@ -225,7 +230,7 @@ def cvx_optimize(poles, GM_matrix, zM):
     return opt_error, np_X_vec, np_G_approx
 
 
-def cvx_optimize_spectral(poles, GM_diags, zM):
+def cvx_optimize_spectral(poles, GM_diags, zM, solver='SCS'):
     """Top level target error function in the ES approach
     to Nevanlinna, i.e.,
         Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||
@@ -235,6 +240,7 @@ def cvx_optimize_spectral(poles, GM_diags, zM):
         GM_diags        :   Exact Matsubara Green's function diagonal data
                             in the shape (num_imag, num_orb)
         zM              :   Matsubara frequencies
+        solver          :   Specify solver for ES SDR fit
     Returns:
         opt_error       :   Optimal value of Err (poles) for fixed poles
         np_X_vec        :   Numpy array rep of optimal X_vec in the shape
@@ -279,7 +285,7 @@ def cvx_optimize_spectral(poles, GM_diags, zM):
     #
 
     prob = cp.Problem(cp.Minimize(obj_qty))
-    opt_error = prob.solve(eps=1e-6, solver='SCS')
+    opt_error = prob.solve(eps=1e-6, solver=solver)
     # print("Constraint values: ")
     # constr_values = [constr[i].dual_value for i in range(num_poles)]
     # print(constr_values)
@@ -390,8 +396,8 @@ def run_es(
         res = minimize(
             lambda x: cvx_optimize_spectral(x, G_iw, iw_vals)[0], poles,
             tol=1e-6, options={
-                "maxiter": 20,
-                "eps": 1e-6,
+                "maxiter": 30,
+                "eps": 1e-7,
             }
         )
         poles_opt = res.x
@@ -401,8 +407,8 @@ def run_es(
             lambda x: cvx_optimize(x, G_iw, iw_vals)[0], poles,
             jac=lambda x: cvx_gradient(x, G_iw, iw_vals),
             tol=1e-6, options={
-                "maxiter": 20,
-                "eps": 1e-6,
+                "maxiter": 30,
+                "eps": 1e-7,
             }
         )
         poles_opt = res.x
