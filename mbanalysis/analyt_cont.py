@@ -648,7 +648,7 @@ def g_iw_projection(G_iw, wsample, diag=True):
             ),
             kwargs={
                 'w_cut': 10,
-                'n_real': 201,
+                'n_real': 1001,
                 'ofile': out_file
             }
         )

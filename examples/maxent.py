@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 
 from mbanalysis import mb
-from mbanalysis.src import orth
+from mbanalysis import orth
 
 ##################
 #

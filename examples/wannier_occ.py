@@ -5,7 +5,7 @@ import h5py
 from ase.dft.kpoints import get_special_points, bandpath, special_paths
 from pyscf.pbc import gto, dft
 from pyscf.tools import molden
-from mbanalysis.src import winter
+from mbanalysis import winter
 from mbanalysis.mb import to_full_bz
 import matplotlib.pyplot as plt
 

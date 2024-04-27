@@ -1,10 +1,9 @@
 from functools import reduce
 from mbanalysis.mb import initialize_MB_post
-import mbanalysis.src.quasiparticle as qs
-import mbanalysis.src.orth as orth
+import mbanalysis.quasiparticle as qs
+import mbanalysis.orth as orth
 import scipy.linalg as LA
 import numpy as np
-from os.path import abspath
 
 
 #

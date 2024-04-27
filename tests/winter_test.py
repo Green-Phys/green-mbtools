@@ -1,5 +1,5 @@
 import numpy as np
-from mbanalysis.src.winter import interpolate
+from mbanalysis.winter import interpolate
 import pytest
 
 

@@ -4,7 +4,7 @@ import h5py
 from os.path import abspath
 
 from mbanalysis import mb
-from mbanalysis.src import orth
+from mbanalysis import orth
 
 ##################
 #

@@ -5,7 +5,7 @@ import numpy as np
 from ase.dft.kpoints import sc_special_points, get_bandpath
 from pyscf.pbc import gto, dft
 from mbanalysis import mb
-from mbanalysis.src import orth, winter, dyson
+from mbanalysis import orth, winter, dyson
 
 
 #

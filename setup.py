@@ -22,6 +22,6 @@ setup(
    version='1.3.0',
    description="A package for post processing of finite-temperature \
        Green's function and self-energy data",
-   packages=['mbanalysis', 'mbanalysis.src'],
+   packages=['mbanalysis', ],
    ext_modules=[nevanlinna, caratheodory]
 )

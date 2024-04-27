@@ -1,6 +1,6 @@
-from mbanalysis.src.analyt_cont import nevan_run
-from mbanalysis.src.analyt_cont import es_nevan_run
-from mbanalysis.src.orth import sao_orth
+from mbanalysis.analyt_cont import nevan_run
+from mbanalysis.analyt_cont import es_nevan_run
+from mbanalysis.orth import sao_orth
 import numpy as np
 import pytest
 

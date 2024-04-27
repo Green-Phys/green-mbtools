@@ -4,8 +4,8 @@ import h5py
 from os.path import abspath
 
 from mbanalysis import mb
-from mbanalysis.src import orth
-from mbanalysis.src.analyt_cont import es_nevan_run
+from mbanalysis import orth
+from mbanalysis.analyt_cont import es_nevan_run
 
 ##################
 #

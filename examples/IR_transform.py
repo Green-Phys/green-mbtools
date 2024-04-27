@@ -1,6 +1,6 @@
 import h5py
 import numpy as np
-from mbanalysis.src import ir
+from mbanalysis import ir
 
 
 # Data files

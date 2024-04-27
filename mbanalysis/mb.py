@@ -2,12 +2,12 @@ from functools import reduce
 import numpy as np
 import scipy.linalg as LA
 
-from .src import spectral as spec
-from .src import orth as orth
-from .src.ir import IR_factory
-from .src import dyson as dyson
-from .src import winter as winter
-from .src import analyt_cont as AC
+from . import spectral as spec
+from . import orth as orth
+from .ir import IR_factory
+from . import dyson as dyson
+from . import winter as winter
+from . import analyt_cont as AC
 
 
 def compute_no(dm, S=None):

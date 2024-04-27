@@ -1,4 +1,4 @@
-from mbanalysis.src.analyt_cont import caratheodory_run
+from mbanalysis.analyt_cont import caratheodory_run
 import mbanalysis.caratheodory as carath_exe
 import numpy as np
 import pytest
