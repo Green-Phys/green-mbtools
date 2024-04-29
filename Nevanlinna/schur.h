@@ -111,12 +111,13 @@ void Schur<T>::evaluation (std::string cofile, int spectral) {
         }
         nev_complex param {0., 0.}; //theta_{M+1}, choose to be constant function 0 here
         nev_complex theta = (result(0, 0) * param + result(0, 1)) / (result(1, 0) * param + result(1, 1));
-        //output "real.freq(), a.real(), a.imag(), ..., d.imag()\n" into a file for optimization convenience
-        coefile << to_string_p(std::real(real.freq()[i])) << " "
-                << to_string_p(std::real(result(0, 0))) << " " << to_string_p(std::imag(result(0, 0))) << " "
-                << to_string_p(std::real(result(0, 1))) << " " << to_string_p(std::imag(result(0, 1))) << " "
-                << to_string_p(std::real(result(1, 0))) << " " << to_string_p(std::imag(result(1, 0))) << " "
-                << to_string_p(std::real(result(1, 1))) << " " << to_string_p(std::imag(result(1, 1))) << std::endl;
+        // GH: commenting the output of coefficients to save disk space
+        // output "real.freq(), a.real(), a.imag(), ..., d.imag()\n" into a file for optimization convenience
+        // coefile << to_string_p(std::real(real.freq()[i])) << " "
+        //         << to_string_p(std::real(result(0, 0))) << " " << to_string_p(std::imag(result(0, 0))) << " "
+        //         << to_string_p(std::real(result(0, 1))) << " " << to_string_p(std::imag(result(0, 1))) << " "
+        //         << to_string_p(std::real(result(1, 0))) << " " << to_string_p(std::imag(result(1, 0))) << " "
+        //         << to_string_p(std::real(result(1, 1))) << " " << to_string_p(std::imag(result(1, 1))) << std::endl;
         real.val()[i] = I * (One + theta) / (One - theta); //inverse Mobius transform from theta to NG
     }
     real.write(spectral);
