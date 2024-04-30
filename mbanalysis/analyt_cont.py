@@ -333,7 +333,8 @@ def caratheodory_run(
 
 def es_nevan_run(
     G_iw, wsample, n_real=10000, w_min=-10, w_max=10, eta=0.01, diag=True,
-    eps_pol=1.0, parallel='sk', outdir='PESNevan', ofile='Aw.txt'
+    eps_pol=1.0, parallel='sk', outdir='PESNevan', ofile='Aw.txt',
+    solver='SCS', **solver_opts
 ):
     """Perform ES Nevanlinna analytic continuation for G(iw) or Sigma(iw)
     TODO: Provide a description about the input
@@ -420,7 +421,9 @@ def es_nevan_run(
                 'diag': diag,
                 'eta': eta,
                 'eps_pol': eps_pol,
-                'ofile': out_file
+                'ofile': out_file,
+                'solver': solver,
+                **solver_opts
             }
         )
         p.start()
@@ -448,7 +451,7 @@ def es_nevan_run(
     return w_vals, G_w
 
 
-def g_iw_projection(G_iw, wsample, diag=True):
+def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
     """Projection of Matsubara Green's function data to Nevanlinna function.
     TODO: Provide a description about the input
     """
@@ -522,7 +525,9 @@ def g_iw_projection(G_iw, wsample, diag=True):
             kwargs={
                 'w_cut': 10,
                 'n_real': 1001,
-                'ofile': out_file
+                'ofile': out_file,
+                'solver': solver,
+                **solver_opts
             }
         )
         p.start()

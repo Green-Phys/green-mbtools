@@ -96,7 +96,9 @@ void Schur<T>::evaluation (std::string cofile, int spectral) {
     core();
     nev_complex I {0., 1.};
     nev_complex One {1., 0.};
-    std::ofstream coefile (cofile); //"cofile" ofstream
+    // GH: commenting the output of coefficients to save disk space
+    // GH: this feature will be useful in Hardy optimization if ever implemented
+    // std::ofstream coefile (cofile); //"cofile" ofstream
     for (int i = 0; i < real.N_real(); i++) {
         nev_complex_matrix result = nev_complex_matrix::Identity(2, 2);
         nev_complex z = real.freq()[i];
