@@ -30,12 +30,22 @@ def maxent_run(
     gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxent',
     outdir="Maxent"
 ):
-    """Run dim0 times maxent continuation for gtau
-    :param gtau: (nts, dim1), dim1 = (ns, nk, nao), (ns, nk), (ns) ... etc
-    :param tau_mesh:
-    :param exe_path: Maxent executable path
-    :param outdir: output directory w.r.t. the current working directory
-    :return:
+    """Maxent analytic continuation for G(iw) or diagonal of self-energy
+
+    Input parameters
+    ----------------
+        gtau        :   contains matrix valued data on imaginary time axis
+                        shape of gtau should be:  (nt, :)
+        tau_mesh    :   tau grid points
+        error       :   error threshold in optimization
+        params      :   parameter file name to pass into maxent continuation
+        exe_path    :   Path to maxent program provided by CQMP:
+                        https://github.com/CQMP/Maxent
+        outdir      :   output directory in which data will be stored
+
+    Returns
+    ----------------
+        The maxent spectral function is stored in '<outdir>/DOS.h5'
     """
 
     wkdir = os.path.abspath(os.getcwd())
@@ -134,14 +144,44 @@ def maxent_run(
 
 
 def nevan_run(
-    X_iw, wsample, outdir='Nevanlinna', ifile='X_iw.txt', ofile='X_w.txt',
-    coeff_file='coeff.txt', n_real=10000, w_min=-10, w_max=10, eta=0.01,
-    green=True, prec=128
+    X_iw, wsample, outdir='Nevanlinna', n_real=10000, w_min=-10, w_max=10,
+    eta=0.01, green=True, prec=128
 ):
-    """Function to perform Nevanlinna analytic continuation for any quantity.
-    TODO: Provide a description about the input
-    """
+    """Nevanlinna analytic continuation for G(iw) or diagonal of self-energy
+    Input parameters
+    ----------------
+        X_iw        :   contains matrix valued data on imaginary freq. points
+                        shape of X_iw should be:  (nw, ns, nk, nao, nao)
+        wsample     :   value of imaginary frequencies
+        outdir      :   output directory in which data will be stored
+        n_real      :   number of real frequency points
+                        (used if custom_freqs = None)
+        w_min       :   minimum value of real frequency range
+                        (used if custom_freqs = None)
+        w_max       :   maximum value of real frequency range
+                        (used if custom_freqs = None)
+        eta         :   broadening parameter
+        green       :   returns Green's function if True,
+                        spectral function otherwise
+        prec        :   Precision to use in Nevanlinna
 
+    Returns:
+    ----------------
+        freqs       :   Real frequency grid on which AC data is obtained
+        X_w         :   Real valued spectral function (if green=False)
+                        or complex valued AC quantity (if green=True)
+    """
+    # print acknowledgments
+    print("----------------------------------------------")
+    print("Performing Nevanlinna analytic continuation.")
+    print("Reference:")
+    print("Fei et al, Phys. Rev. Lett. 126, 056402 (2021)")
+    print("----------------------------------------------")
+
+    # define defaults
+    ifile = 'X_iw.txt'
+    ofile = 'X_w.txt'
+    coeff_file = 'coeff.txt'
     wkdir = os.path.abspath(os.getcwd())
     print("Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
     print("Will dump input to {} and output to {}".format(ifile, ofile))
@@ -179,8 +219,6 @@ def nevan_run(
     pp = 0
     for d1 in range(dim1):
         os.chdir(str(d1))
-        # arg_ls = (ifile, nw, ofile, coeff_file, spectral,
-        #   prec, n_real, w_min, w_max, eta)
         p = Process(
             target=nevan_exe.nevanlinna,
             args=(
@@ -241,29 +279,46 @@ def nevan_run(
 
 
 def caratheodory_run(
-    X_iw, wsample, outdir='Caratheodory', ifile='X_iw.txt',
-    matrix_ofile='X_c.txt', spectral_ofile='X_A.txt', custom_freqs=None,
+    X_iw, wsample, outdir='Caratheodory', custom_freqs=None,
     n_real=2001, w_min=-10, w_max=10, eta=0.01,
 ):
-    """Function to perform Caratheodory analytic continuation for any quantity.
-    Input parameters:
-        X_iw            - contains matrix valued data on imaginary freq. points
+    """Caratheodory analytic continuation for G(iw) or self-energy
+
+    Input parameters
+    ----------------
+        X_iw            : contains matrix valued data on imaginary freq. points
                         shape of X_iw should be: (nw, ns, nk, nao, nao)
-        wsample         - value of imaginary frequencies
-        outdir          - output directory in which data will be stored
-        ifile           - intermediate input file name
-        matrix_ofile    - output file name for matrix valued data on real w
-        spectral_ofile  - output file name for spectral function data on real w
-        custom_freqs    - custom freq points on which to perform carath. AC
-        n_real          - number of real frequency points
-                        (used if custom_freqs = None)
-        w_min           - minimum value of real frequency range
-                        (used if custom_freqs = None)
-        w_max           - maximum value of real frequency range
-                        (used if custom_freqs = None)
-        eta             - broadening parameter
+        wsample         : value of imaginary frequencies
+        outdir          : output directory in which data will be stored
+        custom_freqs    : custom freq points on which to perform carath. AC
+        n_real          : number of real frequency points
+                          (used if custom_freqs = None)
+        w_min           : minimum value of real frequency range
+                          (used if custom_freqs = None)
+        w_max           : maximum value of real frequency range
+                          (used if custom_freqs = None)
+        eta             : broadening parameter
+
+    Returns:
+    ----------------
+        freqs       :   Real frequency grid on which AC data is obtained
+        Xc_w        :   analytically continued matrix data
+        XA_w        :   spectral function for AC data
     """
 
+    # print acknowledgments
+    print("----------------------------------------------")
+    print("Performing Caratheodory analytic continuation.")
+    print("Reference:")
+    print("Fei et al, Phys. Rev. B 104, 165111 (2021)")
+    print("----------------------------------------------")
+
+    # set defaults
+    ifile = 'X_iw.txt'
+    matrix_ofile = 'X_c.txt'
+    spectral_ofile = 'X_A.txt'
+
+    # create input data
     wkdir = os.path.abspath(os.getcwd())
     print("Caratheodory output:", os.path.abspath(wkdir + '/' + outdir))
     print("Dumping input to: ", ifile)
@@ -333,12 +388,51 @@ def caratheodory_run(
 
 def es_nevan_run(
     G_iw, wsample, n_real=10000, w_min=-10, w_max=10, eta=0.01, diag=True,
-    eps_pol=1.0, parallel='sk', outdir='PESNevan', ofile='Aw.txt',
-    solver='SCS', **solver_opts
+    eps_pol=1.0, parallel='sk', outdir='PESNevan', solver='SCS', **solver_opts
 ):
-    """Perform ES Nevanlinna analytic continuation for G(iw) or Sigma(iw)
-    TODO: Provide a description about the input
+    """ES analytic continuation for G(iw) or diagonal of self-energy.
+
+    Input parameters
+    ----------------
+        G_iw        :   imaginary frequency green's function
+        wsample     :   (real part) of the imaginary frequencies
+        n_real      :   number of grid-points to use on the real freuency axis
+        w_min       :   lowest real frequency to get results for
+        w_max       :   highest real frequency to get results for
+        eta         :   broadening for real-axis.
+        diag        :   value of True will perform analytic continuation only
+                        for the diagonal values of Green's function
+                        (precisely what we need for spectral function)
+                        (NOTE: we can diagonalize the G_iw first then input
+                        with diag=False as well)
+        eps_pol     :   Threshold on the imaginary part of poles
+        parallel    :   How to parallelize (over openMP) the analytic cont.
+                        'sk' meanse we parallelize over spin and k-ponts.
+                        'ska' would parallelize over spin, k and orbitals
+                        Typically, 'sk' is most optimal, because the
+                        analyic continuation is vectorized over orbtal indices
+        solver      :   ES uses semi-definite programming to perform
+                        analytical continuation. Different solvers can be
+                        employed, e.g., 'SCS', 'MOSEK', 'CLARABEL'.
+        solver_opts :   A dictionary of options, e.g., tolerance, can be
+                        passed to this function as well
+
+    Returns
+    ----------------
+        w_vals      :   real frequency grid
+        G_w         :   analytically continued Green's function on real grid
     """
+
+    # print acknowledgments
+    print("----------------------------------------------")
+    print("Performing ES analytic continuation.")
+    print("Reference:")
+    print("Huang et al, Phys. Rev. B 107, 075151 (2023)")
+    print("----------------------------------------------")
+
+    # set defaults
+    ofile = 'Aw.txt'
+
     # Handle directories for saving output files
     wkdir = os.path.abspath(os.getcwd())
     print("PES Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
@@ -410,8 +504,6 @@ def es_nevan_run(
         if not os.path.exists(base_dir + '/' + str(d1)):
             os.mkdir(base_dir + '/' + str(d1))
         out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
-        # arg_ls = (ifile, nw, ofile, coeff_file, spectral,
-        #   prec, n_real, w_min, w_max, eta)
         p = Process(
             target=run_es,
             args=(
@@ -452,9 +544,35 @@ def es_nevan_run(
 
 
 def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
-    """Projection of Matsubara Green's function data to Nevanlinna function.
-    TODO: Provide a description about the input
+    """Projection of G(iw) to a simple pole structure.
+
+    Input parameters
+    ----------------
+        G_iw        :   imaginary frequency green's function
+        wsample     :   (real part) of the imaginary frequencies
+        diag        :   value of True will perform analytic continuation only
+                        for the diagonal values of Green's function
+                        (precisely what we need for spectral function)
+                        (NOTE: we can diagonalize the G_iw first then input
+                        with diag=False as well)
+        solver      :   Projection uses semi-definite programming to perform
+                        analytical continuation. Different solvers can be
+                        employed, e.g., 'SCS', 'MOSEK', 'CLARABEL'.
+        solver_opts :   A dictionary of options, e.g., tolerance, can be
+                        passed to this function as well
+
+    Returns
+    ----------------
+        G_iw        :   projected Matsubara Green's function
     """
+
+    # print acknowledgments
+    print("----------------------------------------------")
+    print("Performing Projection of Matsubara Green's function.")
+    print("Reference:")
+    print("Huang et al, Phys. Rev. B 107, 075151 (2023)")
+    print("----------------------------------------------")
+
     # Handle directories for saving output files
     outdir = 'Projection'
     ofile = 'Proj_Giw.txt'
@@ -515,8 +633,6 @@ def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
         if not os.path.exists(base_dir + '/' + str(d1)):
             os.mkdir(base_dir + '/' + str(d1))
         out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
-        # arg_ls = (ifile, nw, ofile, coeff_file, spectral,
-        #   prec, n_real, w_min, w_max, eta)
         p = Process(
             target=projection_function,
             args=(
