@@ -47,7 +47,6 @@ print("Reading mean-field data")
 f = h5py.File(input_path, 'r')
 mo_coeff = f["/HF/mo_coeff"][()]
 ir_list = f["/grid/ir_list"][()]
-weight = f["/grid/weight"][()]
 index = f["/grid/index"][()]
 conj_list = f["grid/conj_list"][()]
 f.close()

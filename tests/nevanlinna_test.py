@@ -28,7 +28,7 @@ def test_nevan_exe_on_dirac_delta_spectrum():
 
     freqs, A_w = nevan_run(
         G_iw, iw_vals, outdir=outdir, n_real=n_real,
-        w_min=w_min, w_max=w_max, eta=eta, green=True
+        w_min=w_min, w_max=w_max, eta=eta, spectral=True
     )
 
     f_max = freqs[np.argmax(A_w)]
@@ -51,7 +51,7 @@ def test_nevan_exe_on_dirac_delta_spectrum():
 
     freqs, A_w = nevan_run(
         G_iw, iw_vals, outdir=outdir, n_real=n_real,
-        w_min=w_min, w_max=w_max, eta=eta, green=True
+        w_min=w_min, w_max=w_max, eta=eta, spectral=True
     )
 
     f_max = freqs[np.argmax(A_w)]
@@ -77,7 +77,7 @@ def test_nevan_exe_on_selfenergy():
 
     freqs, Sigma_w = nevan_run(
         Sigma_iw, iw_vals, outdir=outdir, n_real=n_real,
-        w_min=w_min, w_max=w_max, eta=eta, green=False
+        w_min=w_min, w_max=w_max, eta=eta, spectral=False
     )
 
     # check that Sigma_w is complex number

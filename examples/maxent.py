@@ -52,7 +52,7 @@ f.close()
 Fk = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
 Sk = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
 Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2) 
+Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
 
 ##################
 #

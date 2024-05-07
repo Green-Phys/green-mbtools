@@ -5,16 +5,21 @@ from os.path import abspath
 
 from mbanalysis import mb
 from mbanalysis import orth
-from mbanalysis.analyt_cont import es_nevan_run
+from mbanalysis.analyt_cont import es_nevan_run, g_iw_projection
 
-##################
+
+#
+# Example
+# Perform analytical continuation using pole estimation
+# and semidefinite optimization (ES).
+#
+
 #
 # Input parameters
 #
-##################
+
 # Inverse temperature
 T_inv = 1000
-debug = True
 
 # Input files
 data_path = abspath('../tests/test_data')
@@ -22,11 +27,9 @@ input_path = data_path + '/H2_GW/input.h5'
 sim_path = data_path + '/H2_GW/sim.h5'
 ir_file = data_path + '/ir_grid/1e4_104.h5'
 
-##################
 #
 # Read input data
 #
-##################
 
 # Read converged imaginary time calculation
 print("Reading simulation data.")
@@ -48,7 +51,6 @@ print("Reading mean-field data")
 f = h5py.File(input_path, 'r')
 mo_coeff = f["/HF/mo_coeff"][()]
 ir_list = f["/grid/ir_list"][()]
-weight = f["/grid/weight"][()]
 index = f["/grid/index"][()]
 conj_list = f["grid/conj_list"][()]
 f.close()
@@ -67,7 +69,7 @@ print('Pre analysis complete')
 # Use ES analytical continuation to get spectral function
 #
 
-# 0. Construct MB_post class
+# 0. Construct mbanalysis object
 print("Setting up mbanalysis post processing object.")
 t1 = time.time()
 MB = mb.MB_post(
@@ -89,8 +91,15 @@ n_iw = len(iw_vals)
 giw_sao_pos = giw_sao[n_iw//2:]
 iw_pos = iw_vals[n_iw//2:]
 
+# 4a. (Optional) Perform projection
+do_projection = False
+if do_projection:
+    g_iw_proj = g_iw_projection(
+        giw_sao_pos, iw_pos, diag=False
+    )
+
 # 4. perform analytic continuation.
-# The input parameters for the function have the following eaning:
+# The input parameters for the function have the following meaning:
 #   1.  G_iw        :   imaginary frequency green's function
 #   2.  wsample     :   (real part) of the imaginary frequencies
 #   3.  n_real      :   number of grid-points to use on the real freuency axis
@@ -107,6 +116,11 @@ iw_pos = iw_vals[n_iw//2:]
 #                       'ska' would parallelize over spin, k and orbitals
 #                       Typically, 'sk' is most optimal, because the
 #                       analyic continuation is vectorized over orbtal indices
+#   8. solver       :   ES uses semi-definite programming to perform
+#                       analytical continuation. Different solvers can be
+#                       employed, e.g., 'SCS', 'MOSEK', 'CLARABEL'.
+#   9. solver_opts  :   A dictionary of options, e.g., tolerance, can be
+#                       passed to this function as well
 freqs, gw_sao_diag = es_nevan_run(
     G_iw=giw_sao_pos, wsample=iw_pos, n_real=1000, w_min=-5, w_max=5, eta=0.01,
     diag=True, parallel='sk'

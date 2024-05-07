@@ -145,7 +145,7 @@ def maxent_run(
 
 def nevan_run(
     X_iw, wsample, outdir='Nevanlinna', n_real=10000, w_min=-10, w_max=10,
-    eta=0.01, green=True, prec=128
+    eta=0.01, spectral=True, prec=128
 ):
     """Nevanlinna analytic continuation for G(iw) or diagonal of self-energy
     Input parameters
@@ -161,8 +161,8 @@ def nevan_run(
         w_max       :   maximum value of real frequency range
                         (used if custom_freqs = None)
         eta         :   broadening parameter
-        green       :   returns Green's function if True,
-                        spectral function otherwise
+        spectral    :   returns real valued spectral function if True,
+                        full complex valued function otherwise
         prec        :   Precision to use in Nevanlinna
 
     Returns:
@@ -192,10 +192,6 @@ def nevan_run(
     X_iw_shape = X_iw.shape
     X_iw = X_iw.reshape(nw, -1)
     dim1 = X_iw.shape[1]
-
-    # For self-energy, we want both the real and imag data,
-    # not just the spectral function
-    spectral = green
 
     if not os.path.exists(outdir):
         os.mkdir(outdir)

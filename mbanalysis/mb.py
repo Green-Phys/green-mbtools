@@ -305,7 +305,6 @@ class MB_post(object):
 
     def AC_nevanlinna(
         self, outdir="Nevanlinna", gtau_orth=None,
-        ifile='G_iw.txt', ofile='A_w.txt', coeff_file='coeff.txt',
         n_real=10001, w_min=-10., w_max=10., eta=0.01
     ):
         """
@@ -324,9 +323,8 @@ class MB_post(object):
 
         wsample = self.ir.wsample[nw//2:]
         freqs, A_w = AC.nevan_run(
-            Gw_inp, wsample, outdir=outdir, ifile=ifile, ofile=ofile,
-            coeff_file=coeff_file, n_real=n_real, w_min=w_min, w_max=w_max,
-            eta=eta, green=True
+            Gw_inp, wsample, outdir=outdir, n_real=n_real,
+            w_min=w_min, w_max=w_max, eta=eta, spectral=True
         )
 
         return freqs, A_w
