@@ -411,7 +411,7 @@ def run_es(
             }
         )
         poles_opt = res.x
-        _, X_vec, _ = cvx_optimize_spectral(
+        opt_error, X_vec, _ = cvx_optimize_spectral(
             poles_opt, G_iw, iw_vals, solver, **kwargs
         )
     else:
@@ -424,7 +424,7 @@ def run_es(
             }
         )
         poles_opt = res.x
-        _, X_vec, _ = cvx_optimize(
+        opt_error, X_vec, _ = cvx_optimize(
             poles_opt, G_iw, iw_vals, solver, **kwargs
         )
 
@@ -441,5 +441,6 @@ def run_es(
         Greens_calc[i_re] = Greenhere
 
     np.savetxt(ofile, Greens_calc.reshape(len(re_w_vals), -1))
+    np.savetxt(ofile.replace('.txt', '_error.txt'), np.asarray([opt_error]))
 
     return

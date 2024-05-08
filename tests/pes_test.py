@@ -23,7 +23,7 @@ def test_pes_nevan_exe_on_dirac_delta_spectrum():
     w_max = 0.1
     eta = 0.01
 
-    freqs, G_w = es_nevan_run(
+    freqs, G_w, _ = es_nevan_run(
         G_iw, iw_vals, n_real=n_real, w_min=w_min, w_max=w_max,
         eta=eta, outdir=outdir
     )
@@ -47,7 +47,7 @@ def test_pes_nevan_exe_on_dirac_delta_spectrum():
     w_max = 1.5
     eta = 0.01
 
-    freqs, G_w = es_nevan_run(
+    freqs, G_w, _ = es_nevan_run(
         G_iw, iw_vals, n_real=n_real, w_min=w_min, w_max=w_max,
         eta=eta, outdir=outdir
     )
@@ -114,11 +114,11 @@ def test_pes_nevan_exe_on_selfenergy(mbo):
     w_min = -5.0
     w_max = 5.0
     eta = 0.01
-    freqs, Sigma_w = es_nevan_run(
+    freqs, Sigma_w, _ = es_nevan_run(
         sig_iw_sao, iw_vals, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
         outdir=sig_outdir, diag=False, parallel='sk', ofile='sig_w.txt'
     )
-    freqs, Green_w = es_nevan_run(
+    freqs, Green_w, _ = es_nevan_run(
         g_iw_sao, iw_vals, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
         outdir=green_outdir, diag=False, parallel='sk', ofile='g_w.txt'
     )

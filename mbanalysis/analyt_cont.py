@@ -527,16 +527,23 @@ def es_nevan_run(
 
     # read the computed spectrum and quantitie
     G_w = np.zeros((n_real, ) + G_iw.shape[1:], dtype=complex)
+    error_es = np.zeros(dim1)
     pp = 0
     for d1 in range(dim1):
+        # G_w output
         out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
         Gw_here = np.loadtxt(out_file, dtype=complex)
         G_w[:, d1, :] = Gw_here.reshape((n_real, ) + G_iw.shape[2:])
+        # G_w optimization error
+        err_file = out_file.replace('.txt', '_error.txt')
+        err_here = np.loadtxt(err_file)
+        error_es[d1] = err_here
 
     # reshape and return
     G_w = G_w.reshape((n_real, ) + orig_shape[1:])
+    error_es = error_es.reshape(orig_shape[1:])
 
-    return w_vals, G_w
+    return w_vals, G_w, error_es
 
 
 def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):

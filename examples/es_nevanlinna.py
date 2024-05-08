@@ -121,7 +121,7 @@ if do_projection:
 #                       employed, e.g., 'SCS', 'MOSEK', 'CLARABEL'.
 #   9. solver_opts  :   A dictionary of options, e.g., tolerance, can be
 #                       passed to this function as well
-freqs, gw_sao_diag = es_nevan_run(
+freqs, gw_sao_diag, es_error = es_nevan_run(
     G_iw=giw_sao_pos, wsample=iw_pos, n_real=1000, w_min=-5, w_max=5, eta=0.01,
     diag=True, parallel='sk'
 )
