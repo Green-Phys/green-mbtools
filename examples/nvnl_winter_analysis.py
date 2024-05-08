@@ -9,6 +9,18 @@ from mbanalysis import orth, winter, dyson
 
 
 #
+# Example
+# Perform wannier interpolation + Nevanlinna analytic continuation
+# of the correlated Green's function, to obtaiin correlated
+# band structure
+# This is more of a script, rather than an example, that can be
+# used directly for applications
+#
+# for usage, run
+# python nvnl_winter_analysis.py --help
+#
+
+#
 # Input data for Wannier interpolation and analytic continuation
 #
 
@@ -68,10 +80,6 @@ parser.add_argument(
     "--orth", type=str, default='sao',
     help="Choice of orthonormal basis (sao or co)"
 )
-parser.add_argument(
-    "--mol", type=int, default=0,
-    help="use non-zero value when performing analyt cont for molecules"
-)
 args = parser.parse_args()
 
 #
@@ -93,7 +101,6 @@ ir_file = args.ir_file
 output = args.out
 nev_outdir = args.nev_outdir
 orth_ao = args.orth
-molecule = args.mol
 
 
 #
@@ -114,25 +121,24 @@ ink = ir_list.shape[0]
 f.close()
 
 # Pyscf object to generate k points
-if not molecule:
-    mycell = gto.loads(cell)
+mycell = gto.loads(cell)
 
-    # Use ase to generate the kpath
-    if wannier:
-        a_vecs = np.genfromtxt(
-            mycell.a.replace(',', ' ').splitlines(), dtype=float
-        )
-        points = sc_special_points[celltype]
-        kptlist = []
-        for kchar in bandpath_str:
-            kptlist.append(points[kchar])
-        band_kpts, kpath, sp_points = get_bandpath(
-            kptlist, a_vecs, npoints=bandpts
-        )
+# Use ase to generate the kpath
+if wannier:
+    a_vecs = np.genfromtxt(
+        mycell.a.replace(',', ' ').splitlines(), dtype=float
+    )
+    points = sc_special_points[celltype]
+    kptlist = []
+    for kchar in bandpath_str:
+        kptlist.append(points[kchar])
+    band_kpts, kpath, sp_points = get_bandpath(
+        kptlist, a_vecs, npoints=bandpts
+    )
 
-        # ASE will give scaled band_kpts. We need to transform them to
-        # absolute values using mycell.get_abs_kpts
-        band_kpts_abs = mycell.get_abs_kpts(band_kpts)
+    # ASE will give scaled band_kpts. We need to transform them to
+    # absolute values using mycell.get_abs_kpts
+    band_kpts_abs = mycell.get_abs_kpts(band_kpts)
 
 print("Reading sim file")
 f = h5py.File(sim_path, 'r')

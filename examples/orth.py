@@ -3,6 +3,12 @@ import numpy as np
 from mbanalysis import mb
 from mbanalysis import orth
 
+#
+# Example
+# Perform orthogonalization of Fock matrices
+# explores symmetric and canonical orthogonalization
+#
+
 ##################
 #
 # Read input data
@@ -29,6 +35,9 @@ f.close()
 F = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
 S = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
 
+# NOTE: type = 'f' denotes that the transoformation is for Fock-type objects
+#       type = 'g' will be used for transforming Green's function or
+#       density-matrix type objects
 F_sao = orth.sao_orth(F, S, type='f')
 e_sao = np.linalg.eigh(F_sao)[0]
 F_can = orth.canonical_orth(F, S, thr=1e-7, type='f')

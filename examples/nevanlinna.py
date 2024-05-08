@@ -6,6 +6,11 @@ from os.path import abspath
 from mbanalysis import mb
 from mbanalysis import orth
 
+#
+# Example
+# Perform analytical continuation using Nevanlinna approach
+#
+
 ##################
 #
 # Input parameters

@@ -11,9 +11,11 @@ import matplotlib.pyplot as plt
 
 
 #
-# Input data for Wannier interpolation of density matrix eigenvalues
+# Example
+# Make shapgetti plots for occupation numbers, much like band structure,
+# by performing wannier interpolation of the density matrix eigenvalues.
 #
-# Example of usage:
+# Usage:
 # python3 ~/dev/mbanalysis/examples/wannier_occ.py \
 #   --bz_type "rhombohedral type 1" \
 #   --celltype "rhombohedral" \

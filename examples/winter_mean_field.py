@@ -5,11 +5,17 @@ import h5py
 from ase.spacegroup import crystal
 from mbanalysis import mb
 
-##################
+
 #
-# Wannier interpolation example for correlated methods
+# Example
+# Perform wannier interpolation for mean-field methods
+# TODO: fix or remove this exampl
+#       it uses Si crystal to get HS path but performs wannier
+#       on H2 data
+# NOTE: This example also interpolates the overlap matrix,
+#       which is not the ideal approach. Instead, one should simply
+#       use PySCF to get the overlap matrix on the high-symmetry path.
 #
-##################
 
 ##################
 #
@@ -79,9 +85,6 @@ MB = mb.MB_post(
 G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(
     kpts_inter, hermi=True, debug=debug
 )
-
-# Overlap 0.00041291502948366776
-# Fock 0.0003271901185318618
 
 # Solve the generalized eigenvalue problems
 ns = Fk_int.shape[0]

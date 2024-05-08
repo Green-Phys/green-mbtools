@@ -2,18 +2,22 @@ import h5py
 from ase.spacegroup import crystal
 from mbanalysis import mb
 
-##################
-#
-# Wannier interpolation example for correlated methods
-#
-##################
 
+#
+# Example
+# Perform wannier interpolation for correlated methods
+# TODO: fix or remove this exampl
+#       it uses Si crystal to get HS path but performs wannier
+#       on H2 data
+# NOTE: This example also interpolates the overlap matrix,
+#       which is not the ideal approach. Instead, one should simply
+#       use PySCF to get the overlap matrix on the high-symmetry path.
+#
 
-##################
 #
 # Input parameters
 #
-##################
+
 # Inverse temperature
 T_inv = 1000
 debug = True

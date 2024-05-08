@@ -4,6 +4,12 @@ import numpy as np
 from mbanalysis import mb
 from mbanalysis import orth
 
+#
+# Example
+# General example to read and post-process
+# GW or GF2 data.
+#
+
 ##################
 #
 # Read input data

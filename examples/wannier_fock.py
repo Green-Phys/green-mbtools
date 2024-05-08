@@ -8,6 +8,13 @@ from pyscf.pbc import gto, dft
 from mbanalysis import winter
 import matplotlib.pyplot as plt
 
+#
+# Example
+# Calculate mean-field band structure by performing wannier interpolation
+# of the Fock matrix
+# This is more of a script, rather than an example, that can be
+# used directly for applications
+#
 
 #
 # Input data for Wannier interpolation of Fock eigenvalue

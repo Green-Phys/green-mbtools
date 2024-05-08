@@ -7,6 +7,11 @@ import numpy as np
 
 
 #
+# Example
+# Calculate the quasiparticle mass (or renormalization) factor
+#
+
+#
 # Initialize the mbanalysis object
 #
 
@@ -21,7 +26,7 @@ nw = manybody.ir.nw
 
 #
 # Quasiparticles have to be defined in an orthogonal orbitals basis.
-# Note: this example only calculates Z at gamma point.
+# NOTE: this example only calculates Z at gamma point.
 #
 
 ''' Z in SAO basis '''

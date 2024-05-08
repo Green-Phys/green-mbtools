@@ -4,6 +4,12 @@ import h5py
 from mbanalysis import mb
 from mbanalysis import orth
 
+#
+# Example
+# Perform analytical continuation using maxent
+# provided by CQMP (see README.md for details)
+#
+
 ##################
 #
 # Input parameters

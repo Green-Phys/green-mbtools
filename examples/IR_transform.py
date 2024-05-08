@@ -2,6 +2,11 @@ import h5py
 import numpy as np
 from mbanalysis import ir
 
+#
+# Example
+# Perform IR transform: navigating between imaginary-time
+# and Matsubara frequency axes
+#
 
 # Data files
 sim_file = '../tests/test_data/H2_GW/sim.h5'
