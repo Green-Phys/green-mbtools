@@ -610,7 +610,7 @@ def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
         orig_shape = G_iw.shape
 
     # Check consistency in number of frequencies and input data
-    nw, ns, nk = G_iw.shape[0:3]
+    nw, ns, nk, nao = G_iw.shape[0:4]
     assert nw == wsample.shape[0], "Number of imaginary frequency points \
         mismatches between \"input_parser\" and Gw."
 
@@ -635,8 +635,8 @@ def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
                 1j * wsample, G_iw[:, d1, :]
             ),
             kwargs={
-                'w_cut': 10,
-                'n_real': 1001,
+                'w_cut': 50,
+                'n_real': 5001,
                 'ofile': out_file,
                 'solver': solver,
                 **solver_opts
