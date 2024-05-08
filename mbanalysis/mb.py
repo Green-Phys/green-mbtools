@@ -10,22 +10,6 @@ from . import winter as winter
 from . import analyt_cont as AC
 
 
-def compute_no(dm, S=None):
-    """Compute natural orbitals by diagonalizing density matrix
-    :return:
-    """
-    ns, ink = dm.shape[0], dm.shape[1]
-    dm_orth = orth.sao_orth(dm, S, 'g') if S is not None else dm.copy()
-    occ = np.zeros(np.shape(dm)[:-1])
-    no_coeff = np.zeros(np.shape(dm), dtype=complex)
-    for ss in range(ns):
-        for ik in range(ink):
-            occ[ss, ik], no_coeff[ss, ik] = np.linalg.eigh(dm_orth[ss, ik])
-
-    occ, no_coeff = occ[:, :, ::-1], no_coeff[:, :, :, ::-1]
-    return occ, no_coeff
-
-
 class MB_post(object):
     """Many-body analysis class"""
     def __init__(
@@ -241,7 +225,7 @@ class MB_post(object):
         Compute natural orbitals by diagonalizing density matrix
         :return:
         """
-        occ, no_coeff = compute_no(self.dm, self.S)
+        occ, no_coeff = spec.compute_no(self.dm, self.S)
         return occ, no_coeff
 
     def mulliken_analysis(self, orbitals=None):

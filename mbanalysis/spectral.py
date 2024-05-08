@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.linalg as LA
+from . import orth
 
 #################
 # Input - Fock matrix. Dim = (ns, nk, nao, nao)
@@ -8,38 +9,6 @@ import scipy.linalg as LA
 #
 # Output - Quasi-particle states
 #################
-
-
-def disper(fock, U=False, mo_basis=False):
-    nk, nao = fock.shape[-3:-1]
-    if U is True:
-        ns = fock.shape[0]
-        fock = fock.reshape(ns*nk, nao, nao)
-
-    # Compute quasi-particle states
-    if mo_basis is False:
-        if U is True:
-            eps_k = np.array(
-                [np.linalg.eigvalsh(fock[iks]) for iks in range(nk*ns)]
-            )
-            eps_k = eps_k.reshape(ns, nk, nao)
-        else:
-            eps_k = np.array(
-                [np.linalg.eigvalsh(fock[ik]) for ik in range(nk)]
-            )
-
-        return eps_k
-    else:
-        eps_k = np.zeros((fock.shape[:2]))
-        mo_coeff = np.zeros((fock.shape), dtype=complex)
-        for iks in range(fock.shape[0]):
-            eps_k[iks], mo_coeff[iks] = np.linalg.eigh(fock[iks])
-
-        if U is True:
-            eps_k = eps_k.reshape(ns, nk, nao)
-            mo_coeff = mo_coeff.reshape(ns, nk, nao, nao)
-
-        return eps_k, mo_coeff
 
 
 def compute_mo(F, S, eigh_solver=LA.eigh, thr=1e-7):
@@ -79,3 +48,19 @@ def compute_mo(F, S, eigh_solver=LA.eigh, thr=1e-7):
     # mo_coeff_sk = np.asarray(mo_coeff_sk).reshape(ns, nk, nao, nao)
 
     return eiv_sk, mo_coeff_sk
+
+
+def compute_no(dm, S=None):
+    """Compute natural orbitals by diagonalizing density matrix
+    :return:
+    """
+    ns, ink = dm.shape[0], dm.shape[1]
+    dm_orth = orth.sao_orth(dm, S, 'g') if S is not None else dm.copy()
+    occ = np.zeros(np.shape(dm)[:-1])
+    no_coeff = np.zeros(np.shape(dm), dtype=complex)
+    for ss in range(ns):
+        for ik in range(ink):
+            occ[ss, ik], no_coeff[ss, ik] = np.linalg.eigh(dm_orth[ss, ik])
+
+    occ, no_coeff = occ[:, :, ::-1], no_coeff[:, :, :, ::-1]
+    return occ, no_coeff

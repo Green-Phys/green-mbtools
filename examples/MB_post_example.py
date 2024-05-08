@@ -17,7 +17,8 @@ from mbanalysis import orth
 ##################
 
 # GW data
-f = h5py.File('../tests/test_data/H2_GW/sim.h5', 'r')
+fname_sim = '../tests/test_data/H2_GW/sim.h5'
+f = h5py.File(fname_sim, 'r')
 Sr = f["S-k"][()].view(complex)
 Sr = Sr.reshape(Sr.shape[:-1])
 Fr = f["iter14/Fock-k"][()].view(complex)
@@ -30,7 +31,8 @@ mu = f["iter14/mu"][()]
 f.close()
 
 # Input data
-f = h5py.File('../tests/test_data/H2_GW/input.h5', 'r')
+fname_inp = '../tests/test_data/H2_GW/input.h5'
+f = h5py.File(fname_inp, 'r')
 ir_list = f["/grid/ir_list"][()]
 weight = f["/grid/weight"][()]
 index = f["/grid/index"][()]
@@ -57,11 +59,19 @@ MB = mb.MB_post(
     fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, ir_file=ir_file
 )
 G = MB.gtau
+
+# NOTE: Alternate approach
 # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
-MB = mb.MB_post(
+MB_v2 = mb.MB_post(
     fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, ir_file=ir_file
 )
-G2 = MB.gtau
+G2 = MB_v2.gtau
+
+# NOTE: One more, rather compact, way
+MB_v3 = mb.initialize_MB_post(
+    sim_path=fname_sim, input_path=fname_inp, ir_file=ir_file
+)
+
 
 diff = G - G2
 print("Maximum G differences = ", np.max(np.abs(diff)))
