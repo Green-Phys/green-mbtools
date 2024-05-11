@@ -3,9 +3,7 @@
 mbanalysis
 ===================
 
-Python package for post processing of Green's-function-based many-body calculations. 
-* The main classe is the mb_post class for both spin-unpolarized and spin-polarized calculations. 
-* Check `examples` for examples to start. 
+Python package for post-processing of Green's-function-based many-body calculations. 
   
 Installation
 ----------
@@ -28,15 +26,20 @@ Features
 * Compute molecular/natural orbitals.
 * Mulliken analyasis based on symmetrical atomic orbitals.
 * Fourier transformation between real and reciprocal space.
-* Fourier transformation between imaginary-time and Matsuabara frequency domain.
+* Fourier transformation between imaginary-time and Matsuabara frequency domain on IR grids.
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 * Nevanlinna analytical continuation, based on Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
-* ES analytical continuation, based on [Phys. Rev. B 107, 075151 (2023)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.075151).
+* PES analytical continuation, based on [Phys. Rev. B 107, 075151 (2023)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.075151).
 * Caratheodory analytical continuation for complex valued matrices (External C++ library in `Caratheodory`, authored by Fei et.al. [Phys. Rev. B 104, 165111 (2021)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111).
 
 To-Do-List
 -----------
+* Migrate to newer IR grid format
+* Re-code Nevanlinna and Caratheodory for GNU Licence compliance before making the code public
+* Improved README and documentation on where to find examples (perhaps a sub-README in the examples folder),
+* Replace multiple setup files with one
+* (for current implementation of Nevanlinna) re-integrate Hardy optimization
 * Fix `examples/winter*.py`: The original example for Silicon has been modified to Hydrogen (for which test data is available). The high-symmetry points in the interpolation need to be readjusted accordingly.
 
 
