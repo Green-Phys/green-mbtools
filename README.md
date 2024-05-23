@@ -1,4 +1,4 @@
-[![Python application](https://github.com/gauravharsha/mbanalysis/actions/workflows/python-app.yml/badge.svg)](https://github.com/gauravharsha/mbanalysis/actions/workflows/python-app.yml)
+[![Python application](https://github.com/Green-Phys/MB_analysis/actions/workflows/python-app.yml/badge.svg)](https://github.com/Green-Phys/MB_analysis/actions/workflows/python-app.yml)
 
 mbanalysis
 ===================
