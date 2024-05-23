@@ -2,27 +2,35 @@ from functools import reduce
 import numpy as np
 import scipy.linalg as LA
 
-'''
+"""
 Orthogonalization utilities
-'''
+"""
+
 
 def canonical_matrices(S, thr=1e-7, type='f'):
     '''Löwdin's canonical orthogonalization'''
     # Form vectors for normalized overlap matrix
     Sval, Svec = LA.eigh(S)
-    X = Svec[:,Sval>=thr] / np.sqrt(Sval[Sval>=thr])
+    X = Svec[:, Sval >= thr] / np.sqrt(Sval[Sval >= thr])
     if type == 'f':
         return X
     elif type == 'g':
         X = LA.pinv(X)
         return X.T.conj()
     else:
-        raise ValueError("Invalid transofrmation type. Only 'f'/'g' type for Fock/Green's function only.")
+        raise ValueError(
+            "Invalid transofrmation type. Only 'f'/'g' type for \
+            Fock/Green's function only."
+        )
+
 
 def canonical_orth(H, S, thr=1e-7, type='f'):
     '''Löwdin's canonical orthogonalization'''
-    #if type != 'f':
-    #    raise ValueError("Invalid transformation type. Only 'f' type for Fock is supported currently.")
+    # if type != 'f':
+    #     raise ValueError(
+    #         "Invalid transformation type. "
+    #         "Only 'f' type for Fock is supported currently."
+    #     )
     print("Canonical orthogonalization with threshold = {}.".format(thr))
     ns = S.shape[0]
     nk = S.shape[1]
@@ -32,24 +40,33 @@ def canonical_orth(H, S, thr=1e-7, type='f'):
     H_orth = np.zeros(H.shape, dtype=H.dtype)
     for s in range(ns):
         for ik in range(nk):
-            cond = np.linalg.cond(S[s,ik])
+            cond = np.linalg.cond(S[s, ik])
             if cond > 1e7:
-                print("Warning: Condition number = {} is larger than 1e7.".format(cond))
+                print(
+                    "Warning: Condition number = {} is larger than"
+                    " 1e7.".format(cond)
+                )
             X = canonical_matrices(S[s, ik], thr, type)
             # nbands <= nao due to linear dependency
             nbands = X.shape[1]
             for d in range(H.shape[0]):
-                H_orth[d, s, ik, :nbands, :nbands] = reduce(np.dot, (X.T.conj(), H[d, s, ik], X))
+                H_orth[d, s, ik, :nbands, :nbands] = reduce(
+                    np.dot, (X.T.conj(), H[d, s, ik], X)
+                )
     H_orth = H_orth.reshape(original_shape)
 
     return H_orth
 
 
 def sao_orth(X, S, type=None):
-    if type != 'g' and type != 'f':
-        raise ValueError("Valid transformation types are 'g' for density, 'f' for Fock")
-    ns  = S.shape[0]
-    nk  = S.shape[1]
+    """Symmetrized AO basis.
+    """
+    if not(type == 'g' or type == 'f'):
+        raise ValueError(
+            "Valid transformation types are 'g' for density, 'f' for Fock"
+        )
+    ns = S.shape[0]
+    nk = S.shape[1]
     nao = S.shape[2]
     original_shape = X.shape
     X = X.reshape(-1, ns, nk, nao, nao)
@@ -57,28 +74,31 @@ def sao_orth(X, S, type=None):
     S12 = np.zeros(S.shape, dtype=S.dtype)
     for s in range(ns):
         for ik in range(nk):
-            cond = np.linalg.cond(S[s,ik])
+            cond = np.linalg.cond(S[s, ik])
             if cond > 1e7:
-                print("Warning: Condition number, {}, is larger than 1e7. Possible numerical instability could appear. \n"
-                      "Consider to use the canonical orthogonalization instead.".format(cond))
-            if type =='g':
-                S12[s,ik] = LA.sqrtm(S[s,ik])
+                print(
+                    "Warning: Condition number, {}, is larger than 1e7. "
+                    "Possible numerical instability could appear. \n"
+                    "Consider to use the canonical orthogonalization "
+                    "instead.".format(cond)
+                )
+            if type == 'g':
+                S12[s, ik] = LA.sqrtm(S[s, ik])
             elif type == 'f':
-                S12[s,ik] = np.linalg.inv(LA.sqrtm(S[s,ik]))
+                S12[s, ik] = np.linalg.inv(LA.sqrtm(S[s, ik]))
+
     for d in range(X.shape[0]):
         for s in range(ns):
             for ik in range(nk):
-                if type == 'g':
-                    X_orth[d,s,ik] = reduce(np.dot, (S12[s,ik], X[d,s,ik], S12[s,ik]))
-                elif type == 'f':
-                    X_orth[d,s,ik] = reduce(np.dot, (S12[s,ik], X[d,s,ik], S12[s,ik]))
+                X_orth[d, s, ik] = reduce(
+                    np.dot, (S12[s, ik], X[d, s, ik], S12[s, ik])
+                )
     X_orth = X_orth.reshape(original_shape)
     return X_orth
 
 
 def SAO_matrices(S):
     nk = S.shape[0]
-    nao = S.shape[1]
     X_k = []
     X_inv_k = []
 
@@ -86,7 +106,6 @@ def SAO_matrices(S):
         Sk = S[ik]
         x_pinv = LA.sqrtm(Sk)
         x = LA.inv(x_pinv)
-        n_ortho, n_nonortho = x.shape
 
         # store transformation basis for current k-point
         xx_inv = x_pinv.conj().T
@@ -129,9 +148,10 @@ def transform_per_k(Z, X, X_inv):
     # Z_X = np.einsum('ij,jk...,kl->il...', X, Z, X.T.conj())
     Z_X = np.dot(X.conj().T, np.dot(Z, X))
 
-    Z_restore = np.dot(X_inv.conj().T, np.dot(Z_X, X_inv))
+    Z_restore = X_inv.conj().T @ Z_X @ X_inv
     if not np.allclose(Z, Z_restore):
-        error = "Orthogonal transformation failed. Max difference between origin and restored quantity is {}".format(
-            np.max(Z - Z_restore))
+        error = "Orthogonal transformation failed. "\
+            "Max difference between origin and restored quantity "\
+            "is {}".format(np.max(Z - Z_restore))
         raise RuntimeError(error)
     return Z_X

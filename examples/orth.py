@@ -1,10 +1,13 @@
-from functools import reduce
 import h5py
 import numpy as np
+from mbanalysis import mb
+from mbanalysis import orth
 
-import MB_analysis
-from MB_analysis import mb
-from MB_analysis.src import orth
+#
+# Example
+# Perform orthogonalization of Fock matrices
+# explores symmetric and canonical orthogonalization
+#
 
 ##################
 #
@@ -12,15 +15,15 @@ from MB_analysis.src import orth
 #
 ##################
 
-MB_path = MB_analysis.__path__[0] + '/../'
-f = h5py.File(MB_path + '/data/H2_GW/sim.h5', 'r')
+data_dir = '../tests/test_data'
+f = h5py.File(data_dir + '/H2_GW/sim.h5', 'r')
 Sr = f["S-k"][()].view(complex)
 Sr = Sr.reshape(Sr.shape[:-1])
 Fr = f["iter14/Fock-k"][()].view(complex)
 Fr = Fr.reshape(Fr.shape[:-1])
 f.close()
 
-f = h5py.File(MB_path + '/data/H2_GW/input.h5', 'r')
+f = h5py.File(data_dir + '/H2_GW/input.h5', 'r')
 ir_list = f["/grid/ir_list"][()]
 weight = f["/grid/weight"][()]
 index = f["/grid/index"][()]
@@ -32,6 +35,9 @@ f.close()
 F = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
 S = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
 
+# NOTE: type = 'f' denotes that the transoformation is for Fock-type objects
+#       type = 'g' will be used for transforming Green's function or
+#       density-matrix type objects
 F_sao = orth.sao_orth(F, S, type='f')
 e_sao = np.linalg.eigh(F_sao)[0]
 F_can = orth.canonical_orth(F, S, thr=1e-7, type='f')

@@ -1,35 +1,42 @@
 import numpy as np
 import h5py
 
+
 def iwmesh(iw_list, beta):
-  return 1j * (2 * iw_list + 1) * np.pi / beta
+    """Defines imaginary frequency grid from imaginary time grid.
+    """
+    return 1j * (2 * iw_list + 1) * np.pi / beta
+
 
 def get_tau_mesh(beta, ncheb):
-  nts = ncheb + 2
-  tau_mesh = np.zeros(nts)
-  tau_mesh[0], tau_mesh[-1] = 0, beta
-  # Define tau mesh
-  for k in range(1, nts - 1):
-    xk = np.cos(np.pi * (k - 0.5) / ncheb)
-    tau_mesh[nts - k - 1] = (xk + 1) * beta / 2
-  return tau_mesh
+    """Generate tau grid for a given beta in the chebishev basis.
+    """
+    nts = ncheb + 2
+    tau_mesh = np.zeros(nts)
+    tau_mesh[0], tau_mesh[-1] = 0, beta
+    # Define tau mesh
+    for k in range(1, nts - 1):
+        xk = np.cos(np.pi * (k - 0.5) / ncheb)
+        tau_mesh[nts - k - 1] = (xk + 1) * beta / 2
+    return tau_mesh
 
 
 def get_Cheby(ncheb, tau_mesh):
-  nts = ncheb + 2
-  beta = tau_mesh[-1]
-  # Define Chebyshev polynomials
-  _Ttc = np.zeros((nts, ncheb))
-  for it in range(nts):
-    x = 2.0 * tau_mesh[it] / beta - 1.0
-    _Ttc[it, 0] = 1.0
-    _Ttc[it, 1] = x
-    for ic in range(2, ncheb):
-      _Ttc[it, ic] = 2.0 * x * _Ttc[it, ic - 1] - _Ttc[it, ic - 2]
-  return _Ttc
+    nts = ncheb + 2
+    beta = tau_mesh[-1]
+    # Define Chebyshev polynomials
+    _Ttc = np.zeros((nts, ncheb))
+    for it in range(nts):
+        x = 2.0 * tau_mesh[it] / beta - 1.0
+        _Ttc[it, 0] = 1.0
+        _Ttc[it, 1] = x
+        for ic in range(2, ncheb):
+            _Ttc[it, ic] = 2.0 * x * _Ttc[it, ic - 1] - _Ttc[it, ic - 2]
+    return _Ttc
+
 
 ###############
-# Input  - Fermionic object in tau domain (nts, nk, nao, nao)
+# Input    - Fermionic object in tau domain (nts, nk, nao, nao)
 #
 # Output - Fermionic object in Matsubara domain (nk, nao, nao)
 ###############
@@ -52,16 +59,16 @@ def sigma_w_uniform(Sigma_tau, nw):
             factor = 1.0
         else:
             factor = 2.0
-        for it in range(1,nts-1):
+        for it in range(1, nts-1):
             _Tct[ic, it] = _Ttc[it, ic] * factor * normal
 
-    _Tnc = np.zeros((nw,ncheb), dtype=complex)
+    _Tnc = np.zeros((nw, ncheb), dtype=complex)
     Tnc = h5py.File('/Users/CanonYeh/Projects/chebyshev_input/TNC.h5')
     for ic in range(ncheb):
         re = Tnc["TNC_" + str(ic) + "_r"][()]
         im = Tnc["TNC_" + str(ic) + "_i"][()]
         for iw in range(nw):
-            _Tnc[iw, ic] = complex(re[iw],im[iw]) * beta/2.0
+            _Tnc[iw, ic] = complex(re[iw], im[iw]) * beta / 2.0
     Tnc.close()
 
     Sigma_tau = Sigma_tau.reshape(nts, nk*nao*nao)
@@ -72,8 +79,9 @@ def sigma_w_uniform(Sigma_tau, nw):
     Sigma_w = Sigma_w.reshape(nw, nk, nao, nao)
     return Sigma_w
 
+
 ###############
-# Input  - Fermionic object in tau domain (nts, nk, nao, nao)
+# Input    - Fermionic object in tau domain (nts, nk, nao, nao)
 #
 # Output - Fermionic object in Matsubara domain at n = 0 (nk, nao, nao)
 # TODO make beta as a parameter
@@ -94,7 +102,7 @@ def sigma_zero(Sigma):
             factor = 1.0
         else:
             factor = 2.0
-        for it in range(1,nts-1):
+        for it in range(1, nts-1):
             _Tct[ic, it] = _Ttc[it, ic] * factor * normal
 
     _T_0l = np.zeros(ncheb, dtype=complex)
@@ -102,18 +110,16 @@ def sigma_zero(Sigma):
     for ic in range(ncheb):
         re = Tnl["TNC_"+str(ic)+"_r"][()]
         im = Tnl["TNC_"+str(ic)+"_i"][()]
-        _T_0l[ic] = complex(re[0],im[0]) * beta/2.0
+        _T_0l[ic] = complex(re[0], im[0]) * beta / 2.0
     Tnl.close()
 
     Sigma = Sigma.reshape(nts, nk*nao*nao)
     # Selfenergy in Chebyshev representation
     Sigma_c = np.dot(_Tct, Sigma)
-    #Sigma_c = np.einsum('ij,jklm -> iklm', _Tct, Sigma)
+    # Sigma_c = np.einsum('ij,jklm -> iklm', _Tct, Sigma)
     # Selfenergy in zero frequency
     Sigma_w0 = np.dot(_T_0l, Sigma_c)
-    #Sigma_w0 = np.einsum('i,ijkl->jkl', _T_0l, Sigma_c)
+    # Sigma_w0 = np.einsum('i,ijkl->jkl', _T_0l, Sigma_c)
 
     Sigma_w0 = Sigma_w0.reshape(nk, nao, nao)
     return Sigma_w0
-
-

@@ -1,18 +1,26 @@
 import h5py
 import numpy as np
-from MB_analysis.src import ir
+from mbanalysis import ir
 
-f = h5py.File("../data/H2_GW/sim.h5", 'r')
+#
+# Example
+# Perform IR transform: navigating between imaginary-time
+# and Matsubara frequency axes
+#
+
+# Data files
+sim_file = '../tests/test_data/H2_GW/sim.h5'
+f = h5py.File(sim_file, 'r')
 it = f["iter"][()]
-G_tau = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
-tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
+G_tau = f["iter" + str(it) + "/G_tau/data"][()].view(complex)
+tau_mesh = f["iter" + str(it) + "/G_tau/mesh"][()]
 f.close()
 
-# Lambda is determined by the tau_mesh you use. Here the H2 GW simulation uses lambda = 1e4
-lamb = '1e4'
+# Here the H2 GW simulation uses lambda = 1e4
+ir_file = '../tests/test_data/ir_grid/1e4_104.h5'
 beta = tau_mesh[-1]
 nts = tau_mesh.shape[0]
-my_ir = ir.IR_factory(beta, lamb)
+my_ir = ir.IR_factory(beta, ir_file)
 
 # Fourier transform from G(tau) to  G(iw_n)
 G_iw = my_ir.tau_to_w(G_tau)
