@@ -196,19 +196,6 @@ def mesh_bandpath(cell, kptlist, a_vecs, num_total):
 
     return mesh_list, kpath, sp_points, (num_pix_len,num_pix_wid)
 
-# Pyscf object to generate k points
-if not molecule:
-    mycell = gto.loads(cell)
-    # Use ase to generate the kpath
-    if wannier:
-        a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
-        points = sc_special_points[celltype]
-        kptlist = []
-        for kchar in bandpath_str:
-            kptlist.append(points[kchar])
-        band_kpts, kpath, sp_points, mesh_grid = mesh_bandpath(cell, kptlist, a_vecs, bandpts)
-        print(mesh_grid)
-
 
 #
 # Read Input file
@@ -228,6 +215,19 @@ rHk = f["/HF/H-k"][()]  # Core Hamiltonian.
 nk = index.shape[0]
 ink = ir_list.shape[0]
 f.close()
+
+# Pyscf object to generate k points
+if not molecule:
+    mycell = gto.loads(cell)
+    # Use ase to generate the kpath
+    if wannier:
+        a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
+        points = sc_special_points[celltype]
+        kptlist = []
+        for kchar in bandpath_str:
+            kptlist.append(points[kchar])
+        band_kpts, kpath, sp_points, mesh_grid = mesh_bandpath(cell, kptlist, a_vecs, bandpts)
+        print(mesh_grid)
 
 print("Reading sim file")
 f = h5py.File(sim_path, 'r')
