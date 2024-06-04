@@ -16,9 +16,8 @@ Citation of the paper is encouraged.
 #include <cmath>
 #include <algorithm>
 #include <Eigen/Dense>
-#include <unsupported/Eigen/MPRealSupport>
-#include <mpfr.h>
 
+#include "mpfr_float.h"
 
 //precision class is used to define typenames
 //template T can be any precision type, e.g. double or mpreal

@@ -1,5 +1,5 @@
 import numpy as np
-import mbanalysis.src.analyt_cont as ac
+from . import analyt_cont as ac
 
 """
 Perform quasiparticle approximation
