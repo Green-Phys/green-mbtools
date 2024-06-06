@@ -2,14 +2,12 @@
 #include <typeinfo>
 #include "schur.h"
 
-using namespace mpfr;
-
 void runNevanlinna (
     std::string ifile, int n_imag, std::string ofile, std::string coefile, int prec=128,
     bool spectral=false, int n_real=10000, double w_min=-10., double w_max=10., double eta=0.01
 ) {
-    mpreal::set_default_prec(prec);
-    Schur<mpreal> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
+    mpf_set_default_prec(prec);
+    Schur<green::ac::gmp_float> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
     std::cout << "Schur class initialized";
     NG.evaluation(coefile, spectral);
 
@@ -31,14 +29,14 @@ static PyObject* method_nevanlinna (PyObject *self, PyObject *args, PyObject *kw
     double eta = 0.01;
 
     //Define keywords dictionary
-    static char* kwlist[] = {
+    static const char* kwlist[] = {
         "ifile", "n_imag", "ofile", "coefile", "prec", "spectral", "n_real", "w_min", "w_max", "eta", NULL
     };
 
     // Parse arguments
     if (
         !PyArg_ParseTupleAndKeywords(
-            args, kwargs, "siss|iiiddd", kwlist,
+            args, kwargs, "siss|iiiddd", (char**)kwlist,
             &ifile, &n_imag, &ofile, &coefile, &prec, &spectral, &n_real, &w_min, &w_max, &eta
         )
     ) {
@@ -47,8 +45,8 @@ static PyObject* method_nevanlinna (PyObject *self, PyObject *args, PyObject *kw
     }
 
     // Perform the Nevanlinna analytic continuation for the given files and parameters
-    mpreal::set_default_prec(prec);
-    Schur<mpreal> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
+    mpf_set_default_prec(prec);
+    Schur<green::ac::gmp_float> NG(ifile, n_imag, ofile, n_real, w_min, w_max, eta);
     NG.evaluation(coefile, spectral);
 
     Py_RETURN_NONE;

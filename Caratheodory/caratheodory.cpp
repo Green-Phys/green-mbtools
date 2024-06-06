@@ -2,8 +2,6 @@
 #include <typeinfo>
 
 #include "iter.h"
-using namespace mpfr;
-
 
 /**
  * @brief Example function for Caratheodory analytical continuation of matrix-valued imaginary time data.
@@ -25,13 +23,13 @@ void runCaratheodory (
     int use_custom_real_grid=false, std::string grid_file="real_grid.txt",
     int n_real=10000, double w_min=-10., double w_max=10., double eta=0.01
 ) {
-    mpreal::set_default_prec(1024);
-    real_domain_data<mpreal> real(
+    mpfr_set_default_prec(1024);
+    real_domain_data<green::ac::mpfr_float> real(
         n_real, dim, use_custom_real_grid, grid_file, w_min, w_max, eta
     );
 
     // Perform analytic continuation
-    Cara<mpreal> cara(n_imag, dim, ifile);
+    Cara<green::ac::mpfr_float> cara(n_imag, dim, ifile);
     std::cout << "Cara class initialized";
     cara.evaluation(real);
 
@@ -58,7 +56,7 @@ static PyObject* method_caratheodory (PyObject *self, PyObject *args, PyObject *
     double eta = 0.01;
 
     // Define keywords dictionary
-    static char* kwlist[] = {
+    static const char* kwlist[] = {
         "ifile", "n_imag", "dim", "compfile", "kresfile", "use_custom_real_grid",
         "grid_file", "n_real", "w_min", "w_max", "eta", NULL
     };
@@ -66,7 +64,7 @@ static PyObject* method_caratheodory (PyObject *self, PyObject *args, PyObject *
     // Parse arguments
     if (
         !PyArg_ParseTupleAndKeywords(
-            args, kwargs, "siiss|isiddd", kwlist,
+            args, kwargs, "siiss|isiddd", (char**)kwlist,
             &ifile, &n_imag, &dim, &compfile, &kresfile,
             &use_custom_real_grid, &grid_file, &n_real, &w_min, &w_max, &eta
         )
@@ -75,8 +73,8 @@ static PyObject* method_caratheodory (PyObject *self, PyObject *args, PyObject *
         return NULL;
     }
 
-    mpreal::set_default_prec(1024);
-    real_domain_data<mpreal> real(
+    mpfr_set_default_prec(1024);
+    real_domain_data<green::ac::mpfr_float> real(
         n_real, dim, use_custom_real_grid, grid_file, w_min, w_max, eta
     );
 
@@ -85,7 +83,7 @@ static PyObject* method_caratheodory (PyObject *self, PyObject *args, PyObject *
     }
 
     // Perform Caratheodory analytic continuation
-    Cara<mpreal> cara(n_imag, dim, ifile);
+    Cara<green::ac::mpfr_float> cara(n_imag, dim, ifile);
     std::cout << "Caratheodory class initialized" << std::endl;
     cara.evaluation(real);
 

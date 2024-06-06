@@ -57,7 +57,7 @@ Schur<T>::Schur (
         }
     }
     //check the positive semi-definiteness of the Pick matrix using Cholesky decomposition
-    Eigen::LLT<nev_complex_matrix> lltOfPick(Pick + nev_complex_matrix::Identity(M, M) * 1e-250);
+    Eigen::LLT<nev_complex_matrix> lltOfPick(Pick + nev_complex_matrix::Identity(M, M) * T(1e-250));
 
     //Write the output of check to logfile
     std::ofstream logfile;

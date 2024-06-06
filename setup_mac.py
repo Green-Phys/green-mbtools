@@ -7,10 +7,13 @@ nevanlinna = Extension(
     sources=['Nevanlinna/nevanlinna.cpp', ],
     include_dirs=[
         '/usr/local/include',
+        '/opt/homebrew/include',
         '/usr/local/include/eigen3',
+        '/opt/homebrew/include/eigen3'
     ],
+    library_dirs=['/opt/homebrew/lib',],
     libraries=['gmp', 'gmpxx', 'mpfr'],
-    extra_compile_args=["-std=c++11"]
+    extra_compile_args=["-std=c++17"]
 )
 
 # Build Caratheodory extension
@@ -19,10 +22,13 @@ caratheodory = Extension(
     sources=['Caratheodory/caratheodory.cpp', ],
     include_dirs=[
         '/usr/local/include',
+        '/opt/homebrew/include',
         '/usr/local/include/eigen3',
+        '/opt/homebrew/include/eigen3'
     ],
+    library_dirs=['/opt/homebrew/lib',],
     libraries=['gmp', 'gmpxx', 'mpfr'],
-    extra_compile_args=["-std=c++11"]
+    extra_compile_args=["-std=c++17"]
 )
 
 setup(

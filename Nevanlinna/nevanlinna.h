@@ -6,8 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <Eigen/Dense>
-#include <unsupported/Eigen/MPRealSupport>
-#include <mpfr.h>
+#include "gmp_float.h"
 
 
 //precision class is used to define typenames

@@ -32,12 +32,13 @@ private:
     ca_complex_matrix_vector sqrt_two; //[1 - W_i^dagger * W_i]^-0.5
     //calculate Hermitian square root of matrix M
     ca_complex_matrix sqrt_m (const ca_complex_matrix & M) {
-        Eigen::ComplexEigenSolver<ca_complex_matrix> ces;
-        ces.compute(M);
-        ca_complex_matrix evals(M.rows(), 1);
-        for (int i = 0; i < M.rows(); i++)
-            evals(i, 0) = std::sqrt(ces.eigenvalues()(i, 0));
-        return ces.eigenvectors() * evals.asDiagonal() * ces.eigenvectors().inverse();
+      Eigen::ComplexEigenSolver<ca_complex_matrix> ces;
+      ces.compute(M);
+      ca_complex_matrix evals = ces.eigenvalues();//(M.rows(), 1);
+      for (int i = 0; i < M.rows(); i++) {
+        evals(i, 0) = std::sqrt(ces.eigenvalues()(i, 0));
+      }
+      return ces.eigenvectors() * evals.asDiagonal() * ces.eigenvectors().inverse();
     }
     //calculate W_is
     void core();
@@ -46,8 +47,8 @@ private:
 
 
 template <class T>
-Cara<T>::Cara (int imag_num, int dim, std::string ifile) : 
-               imag(imag_num, dim, ifile), dim_(dim) {
+Cara<T>::Cara (int imag_num, int dim, std::string ifile) :
+                dim_(dim), imag(imag_num, dim, ifile) {
 
     //reshape intermediate vectors
     Ws.resize(imag_num);
