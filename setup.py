@@ -1,27 +1,23 @@
 from setuptools import setup, Extension
 
-
 # Build Nevanlinna extension
 nevanlinna = Extension(
-    'mbanalysis.nevanlinna',
+    'green_mbtools.pesto.nevanlinna',
     sources=['Nevanlinna/nevanlinna.cpp', ],
     include_dirs=['/usr/include/eigen3', ],
-    libraries=['gmp', 'gmpxx', 'mpfr']
+    libraries=['gmp', 'gmpxx', 'mpfr'],
+    extra_compile_args=["-std=c++17"]
 )
 
 # Build Caratheodory extension
 caratheodory = Extension(
-    'mbanalysis.caratheodory',
+    'green_mbtools.pesto.caratheodory',
     sources=['Caratheodory/caratheodory.cpp', ],
     include_dirs=['/usr/include/eigen3', ],
     libraries=['gmp', 'gmpxx', 'mpfr'],
+    extra_compile_args=["-std=c++17"]
 )
 
 setup(
-   name='mbanalysis',
-   version='1.3.0',
-   description="A package for post processing of finite-temperature \
-       Green's function and self-energy data",
-   packages=['mbanalysis', ],
    ext_modules=[nevanlinna, caratheodory]
 )

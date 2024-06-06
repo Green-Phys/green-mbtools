@@ -1,3 +1,4 @@
-# __init__.py
+import sys
+from green_mbtools import pesto
 
-#import .
+sys.modules['mbanalysis'] = pesto
