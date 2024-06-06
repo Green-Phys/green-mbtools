@@ -567,6 +567,15 @@ def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
     Returns
     ----------------
         G_iw        :   projected Matsubara Green's function
+
+    Practical info
+    ----------------
+    For different practical applications, different CVXPy solvers may be
+    required to achieve optimal results. Some options to consider:
+    *   SCS (default)
+    *   MOSEK
+    *   CLARABEL
+    For individual use, all three options are available free of use.
     """
 
     # print acknowledgments
@@ -669,7 +678,7 @@ def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
     for d1 in range(dim1):
         out_file = base_dir + '/{}/{}'.format(str(d1), ofile)
         Gw_here = np.loadtxt(out_file, dtype=complex)
-        G_iw_proj[:, d1, :] = Gw_here.reshape((nw, ) + G_iw.shape[2:])
+        G_iw_proj[:, d1, :] = Gw_here * 1.0
 
     # reshape and return
     G_iw_proj = G_iw_proj.reshape((nw, ) + orig_shape[1:])
