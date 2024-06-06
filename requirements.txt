@@ -1,0 +1,9 @@
+numpy
+scipy
+h5py
+irbasis
+baryrat
+cvxpy
+# Solvers for CVXPY
+clarabel
+mosek
