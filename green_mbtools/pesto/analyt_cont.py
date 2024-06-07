@@ -546,7 +546,9 @@ def es_nevan_run(
     return w_vals, G_w, error_es
 
 
-def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
+def g_iw_projection(
+    G_iw, wsample, diag=True, solver='SCS', wcut=5, n_real=101, **solver_opts
+):
     """Projection of G(iw) to a simple pole structure.
 
     Input parameters
@@ -563,6 +565,8 @@ def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
                         employed, e.g., 'SCS', 'MOSEK', 'CLARABEL'.
         solver_opts :   A dictionary of options, e.g., tolerance, can be
                         passed to this function as well
+        wcut        :   real frequency cutoff to employ in projection
+        n_real      :   number of points to use in the range (-wcut, wcut)
 
     Returns
     ----------------
@@ -651,8 +655,8 @@ def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', **solver_opts):
                 1j * wsample, G_iw[:, d1, :]
             ),
             kwargs={
-                'w_cut': 50,
-                'n_real': 5001,
+                'w_cut': wcut,
+                'n_real': n_real,
                 'ofile': out_file,
                 'solver': solver,
                 **solver_opts
