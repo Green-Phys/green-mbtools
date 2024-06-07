@@ -76,12 +76,12 @@ def test_projection_on_green(mbo):
     # perform projection of G_iw to manifestly Nevanlinna function
     # with a simple pole expansion
     proj_giw = g_iw_projection(
-        g_iw_sao, iw_vals, diag=False, solver='CLARABEL'
+        g_iw_sao, iw_vals, diag=False, wcut=1, n_real=201, solver='CLARABEL'
     )
 
     # check diff between projected and true G
     g_diff = proj_giw - g_iw_sao
-    assert np.max(np.abs(g_diff)) < 5e-5
+    assert np.max(np.abs(g_diff)) < 1e-5
 
 
 @pytest.mark.skip(reason='ES not the right way for self-energy continuation')

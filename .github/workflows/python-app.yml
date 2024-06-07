@@ -42,4 +42,4 @@ jobs:
     - name: Test with pytest
       run: |
         cd tests
-        pytest --ignore pes_test.py
+        pytest
