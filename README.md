@@ -29,7 +29,7 @@ Installation
   pip install green-mbtools
   ```
 
-* To build from sources download the source code either from github or from [PyPI](https://pypi.org/project/green-mbtools) and run
+*  To build from sources download the source code either from github or from [PyPI](https://pypi.org/project/green-mbtools/#files) and run:
   ```bash
   python -m build
   ```
