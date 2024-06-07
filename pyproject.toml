@@ -7,7 +7,7 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 
 [project]
 name = "green-mbtools"
-version = "0.2.2-beta"
+version = "0.2.3-beta"
 authors = [
   { name="Sergei Iskakov", email="siskakov@umich.edu" },
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
@@ -34,7 +34,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://green-phys.org"
-Issues = "https://github.com/Green-Phys/green-python/issues"
+Issues = "https://github.com/Green-Phys/green-mbtools/issues"
 
 
 [project.optional-dependencies]

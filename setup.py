@@ -7,19 +7,21 @@ library_dirs = ['/opt/homebrew/lib','/usr/local/lib' ] if sys.platform=='darwin'
 # Build Nevanlinna extension
 nevanlinna = Extension(
     'green_mbtools.pesto.nevanlinna',
-    sources=['Nevanlinna/nevanlinna.cpp', ],
-    include_dirs=include_dirs,
+    sources=['Nevanlinna/nevanlinna.cpp' ],
+    include_dirs=include_dirs + ['Nevanlinna',],
     library_dirs=library_dirs,
-    libraries=['gmp', 'gmpxx', 'mpfr'],
+    depends=['Nevanlinna/schur.h','Nevanlinna/nevanlinna.h','Nevanlinna/gmp_float.h'],
+    libraries=['gmp', 'gmpxx'],
     extra_compile_args=["-std=c++17"]
 )
 
 # Build Caratheodory extension
 caratheodory = Extension(
     'green_mbtools.pesto.caratheodory',
-    sources=['Caratheodory/caratheodory.cpp', ],
-    include_dirs=include_dirs,
+    sources=['Caratheodory/caratheodory.cpp'],
+    include_dirs=include_dirs + ['Caratheodory',],
     library_dirs=library_dirs,
+    depends=['Caratheodory/carath.h','Caratheodory/iter.h','Caratheodory/mpfr_float.h'],
     libraries=['gmp', 'gmpxx', 'mpfr'],
     extra_compile_args=["-std=c++17"]
 )
