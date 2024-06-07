@@ -29,8 +29,6 @@ jobs:
         pip install flake8 pytest
         pip install -r requirements.txt
         sudo apt install libeigen3-dev libgmp-dev libmpfr-dev libfftw3-dev
-        git clone https://github.com/advanpix/mpreal
-        sudo cp mpreal/mpreal.h /usr/include
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |

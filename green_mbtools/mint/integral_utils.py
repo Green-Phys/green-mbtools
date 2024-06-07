@@ -59,7 +59,7 @@ def get_coarsegrained_coulG(lattice_kmesh, cell, k=np.zeros(3), exx=False, mf=No
     if mesh is None:
         mesh = cell.mesh
     if 'gs' in kwargs:
-        warnings.warn('cell.gs is deprecated.  It is replaced by cell.mesh,'
+        logging.warning('cell.gs is deprecated.  It is replaced by cell.mesh,'
                       'the number of PWs (=2*gs+1) along each direction.')
         mesh = [2*n+1 for n in kwargs['gs']]
     if Gv is None:
@@ -114,7 +114,7 @@ def get_coarsegrained_coulG(lattice_kmesh, cell, k=np.zeros(3), exx=False, mf=No
             raise NotImplementedError
 
         elif cell.dimension == 1:
-            logger.warn(cell, 'No method for PBC dimension 1, dim-type %s.'
+            logging.warning(cell, 'No method for PBC dimension 1, dim-type %s.'
                         '  cell.low_dim_ft_type="inf_vacuum"  should be set.',
                         cell.low_dim_ft_type)
             raise NotImplementedError
