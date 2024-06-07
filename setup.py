@@ -1,10 +1,15 @@
 from setuptools import setup, Extension
+import sys
+
+include_dirs = ['/usr/local/include', '/opt/homebrew/include', '/usr/local/include/eigen3', '/opt/homebrew/include/eigen3' ] if sys.platform=='darwin' else ['/usr/include/eigen3']
+library_dirs = ['/opt/homebrew/lib','/usr/local/lib' ] if sys.platform=='darwin' else []
 
 # Build Nevanlinna extension
 nevanlinna = Extension(
     'green_mbtools.pesto.nevanlinna',
     sources=['Nevanlinna/nevanlinna.cpp', ],
-    include_dirs=['/usr/include/eigen3', ],
+    include_dirs=include_dirs,
+    library_dirs=library_dirs,
     libraries=['gmp', 'gmpxx', 'mpfr'],
     extra_compile_args=["-std=c++17"]
 )
@@ -13,7 +18,8 @@ nevanlinna = Extension(
 caratheodory = Extension(
     'green_mbtools.pesto.caratheodory',
     sources=['Caratheodory/caratheodory.cpp', ],
-    include_dirs=['/usr/include/eigen3', ],
+    include_dirs=include_dirs,
+    library_dirs=library_dirs,
     libraries=['gmp', 'gmpxx', 'mpfr'],
     extra_compile_args=["-std=c++17"]
 )

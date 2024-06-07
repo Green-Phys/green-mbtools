@@ -16,6 +16,10 @@ authors = [
   { name="Pavel Pokhilko", email="pokhilko@umich.edu" },
 ]
 
+dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py",
+                "irbasis", "baryrat", "cvxpy", # Solvers for CVXPY
+                "clarabel", "mosek"]
+
 description = "Collection of tools for quantum many-body simulation using Green Software Package"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -31,3 +35,11 @@ classifiers = [
 [project.urls]
 Homepage = "https://green-phys.org"
 Issues = "https://github.com/Green-Phys/green-python/issues"
+
+
+[project.optional-dependencies]
+tests = [
+  'coverage>=5.0.3',
+  'pytest',
+  'pytest-benchmark[histogram]>=3.2.1',
+]
