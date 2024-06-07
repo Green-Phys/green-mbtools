@@ -2,7 +2,6 @@ numpy
 pyscf >=2.0.0
 ase
 spglib
-logging
 numba
 scipy
 h5py
