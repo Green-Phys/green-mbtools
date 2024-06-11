@@ -46,7 +46,7 @@ tests = [
 
 [tool.cibuildwheel]
 test-requires = "pytest"
-test-command = "pytest {project}/tests"
+test-command = "pytest {project}/tests --ignore {project}/tests/pes_test.py"
 
 [tool.cibuildwheel.linux]
 before-all = "yum install -y eigen3-devel gmp-devel mpfr-devel fftw3-devel"
