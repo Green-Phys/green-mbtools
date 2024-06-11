@@ -42,12 +42,12 @@ tests = [
   'coverage>=5.0.3',
   'pytest',
   'pytest-benchmark[histogram]>=3.2.1',
-
+]
 
 [tool.cibuildwheel.linux]
 before-all = "yum install  eigen3-devel gmp-devel mpfr-devel fftw3-devel"
-test-command = "echo 'installed'"]
+test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos]
 before-all = "brew install  eigen3 gmp mpfr fftw"
-test-command = "echo 'installed'"]
+test-command = "echo 'installed'"
