@@ -53,4 +53,4 @@ before-all = "brew install eigen gmp mpfr fftw"
 test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos.environment]
-MACOSX_DEPLOYMENT_TARGET = "10.14"
+MACOSX_DEPLOYMENT_TARGET = "13.0"
