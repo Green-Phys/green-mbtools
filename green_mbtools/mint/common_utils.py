@@ -349,7 +349,7 @@ def add_common_params(parser):
     parser.add_argument("--damping", type=float, default=0.0, help="Damping factor for mean-field iterations")
     parser.add_argument("--max_iter", type=int, default=100, help="Maximum number of iterations in the SCF loop")
     parser.add_argument("--keep_cderi", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Keep generated cderi files.")
-    parser.add_argument("--job", choices=["init", "sym_path", "ewald_corr"], default="init")
+    parser.add_argument("--job", choices=["init", "sym_path", "ewald_corr"], default="init", nargs="+")
     parser.add_argument("--finite_size_kind", choices=["ewald", "gf2", "gw", "gw_s", "coarse_grained"], default="ewald", help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.")
 
 def init_pbc_params():

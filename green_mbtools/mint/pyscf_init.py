@@ -153,7 +153,7 @@ class pyscf_init:
     def evaluate_high_symmetry_path(self):
         if self.args.print_high_symmetry_points:
             comm.print_high_symmetry_points(self.cell, self.args)
-            exit(0)
+            return
         if self.args.high_symmetry_path is None:
             raise RuntimeError("Please specify high-symmetry path")
         if self.args.high_symmetry_path is not None:
