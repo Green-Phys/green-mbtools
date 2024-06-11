@@ -5,6 +5,7 @@ import os
 import h5py
 import numpy as np
 import pyscf.lib.chkfile as chk
+from io import StringIO
 from numba import jit
 from pyscf import gto as mgto
 from pyscf.pbc import tools, gto, df, scf, dft
@@ -35,11 +36,7 @@ def extract_ase_data(a, atoms):
     '''
     symbols = []
     positions = []
-    lattice_vectors = []
-    for a_i in a.splitlines():
-        if len(a_i) == 0 or len(a_i.split(",")) != 3:
-            continue
-        lattice_vectors.append([float(x.strip()) for x in a_i.split(",")])
+    lattice_vectors = np.genfromtxt(StringIO(a))
     for atom in atoms.splitlines():
         if len(atom) == 0 or len(atom.split()) != 4:
             continue
@@ -49,7 +46,7 @@ def extract_ase_data(a, atoms):
         symbols.append(symbol)
         position = [float(p) for p in position.split()]
         positions.append(np.dot(np.linalg.inv(lattice_vectors), position).tolist())
-    return (np.array(lattice_vectors), symbols, positions)
+    return (lattice_vectors, symbols, positions)
 
 def print_high_symmetry_points(cell, args):
     '''
