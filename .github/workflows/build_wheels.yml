@@ -4,18 +4,25 @@ on: [push, pull_request]
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build wheels on ${{ matrix.plat.os }}
+    runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
-        os: [ubuntu-latest, macos-13, macos-14]
+        plat: 
+        - { os: ubuntu-latest, target: "", arch: x86_64}
+        - { os: macos-13, target: "13.0" , arch: x86_64}
+        - { os: macos-14, target: "14.0" , arch: "x86_64 arm64"}
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19.0
+        env:
+          CIBW_ARCH: ${{ matrix.plat.arch }}
+          CIBW_ENVIRONMENT: >
+            MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
         # env:
         #   CIBW_SOME_OPTION: value
         #    ...
@@ -26,6 +33,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.plat.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
