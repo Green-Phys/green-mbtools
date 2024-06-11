@@ -48,6 +48,8 @@ tests = [
 test-requires = "pytest"
 test-command = "pytest {project}/tests --ignore {project}/tests/pes_test.py"
 
+manylinux-x86_64-image = "manylinux2014"
+
 [tool.cibuildwheel.linux]
 before-all = "yum install -y eigen3-devel gmp-devel mpfr-devel fftw3-devel"
 #test-command = "echo 'installed'"
