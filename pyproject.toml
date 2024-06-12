@@ -47,7 +47,7 @@ tests = [
 [tool.cibuildwheel]
 skip = ["*-musllinux*"]
 test-requires = "pytest"
-test-command = "pytest {project}/tests --ignore {project}/tests/pes_test.py"
+test-command = "pytest {project}/tests -k 'not test_projection_on_green'"
 
 manylinux-x86_64-image = "manylinux2014"
 
