@@ -20,7 +20,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19.0
         env:
-          CIBW_BUILD: cp312-*  #cp38-* cp39-* cp310-* cp311-* cp312-*
+          CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ENVIRONMENT: >
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
@@ -71,6 +71,6 @@ jobs:
           merge-multiple: true
 
       - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
+        #with:
           # To test: 
-          repository-url: https://test.pypi.org/legacy/
+          # repository-url: https://test.pypi.org/legacy/
