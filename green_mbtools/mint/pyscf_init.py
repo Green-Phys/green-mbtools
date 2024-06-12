@@ -4,11 +4,12 @@ import h5py
 import logging
 import numpy as np
 from pyscf.df import addons
-from pyscf.pbc import tools
+from pyscf.pbc import tools, gto
 
 from . import gdf_s_metric as gdf_S
 from . import common_utils as comm
 from . import integral_utils as int_utils
+
 
 
 class pyscf_init:
@@ -23,30 +24,46 @@ class pyscf_init:
         Monkhorst-Pack reciprocal space grid
     '''
 
-    def __init__(self, args=None):
+    def __init__(self, args):
         '''
         Initialize PySCF interoperation class
 
         Parameters
         ----------
         args: map
-            argument's map, if None will be initialized as argparse arguments map
+            argument's map
         '''
-        if args is None :
-            self.args = comm.init_pbc_params()
-        else:
-            self.args = args
-            if self.args.Nk is None:
-                self.args.Nk = 0
-            if self.args.spin is None:
-                self.args.spin = 0
-            if self.args.damping is None:
-                self.args.damping = 0
-            if self.args.max_iter is None:
-                self.args.max_iter = 100
-        self.cell = comm.cell(self.args)
-        self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik = comm.init_k_mesh(self.args, self.cell)
+        self.args = args
+        if self.args.Nk is None:
+            self.args.Nk = 0
+        if self.args.spin is None:
+            self.args.spin = 0
+        if self.args.damping is None:
+            self.args.damping = 0
+        if self.args.max_iter is None:
+            self.args.max_iter = 100
+        self.cell = self.cell_object()
         
+    
+    def compute_df_int(self, nao, X_k):
+        raise NotImplementedError("Please Implement this method")
+    def mf_object(self, mydf=None):
+        raise NotImplementedError("Please Implement this method")
+    def df_object(self, mydf=None):
+        raise NotImplementedError("Please Implement this method")
+    def cell_object(self):
+        raise NotImplementedError("Please Implement this method")
+    def mean_field_input(self, mydf=None):
+        raise NotImplementedError("Please Implement this method")
+
+
+
+class pyscf_pbc_init (pyscf_init):
+    '''
+    '''
+    def __init__(self, args=None):
+        super().__init__(comm.init_pbc_params() if args is None else args)
+        self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik = comm.init_k_mesh(self.args, self.cell)
 
     def mean_field_input(self, mydf=None):
         '''
@@ -58,7 +75,7 @@ class pyscf_init:
             pyscf density-fitting object, will be generated if None
         '''
         if mydf is None:
-            mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
+            mydf = self.df_object()
 
         if os.path.exists("cderi.h5"):
             mydf._cderi = "cderi.h5"
@@ -90,7 +107,7 @@ class pyscf_init:
         auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
         NQ = auxcell.nao_nr()
     
-        mf = comm.solve_mean_field(self.args, mydf, self.cell)
+        mf = self.mf_object(mydf)
     
         # Get Overlap and Fock matrices
         hf_dm = mf.make_rdm1().astype(dtype=np.complex128)
@@ -149,7 +166,6 @@ class pyscf_init:
             gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_old
         else:
             gdf.GDF.weighted_coulG = weighted_coulG_old
-
 
     def evaluate_high_symmetry_path(self):
         if self.args.print_high_symmetry_points:
@@ -215,3 +231,136 @@ class pyscf_init:
         f["X2"] = X2
         f["madelung"] = tools.pbc.madelung(self.cell, self.kmesh)
         f.close()
+
+    def mf_object(self, mydf=None):
+        return comm.solve_mean_field(self.args, mydf, self.cell)
+
+    def df_object(self, mydf=None):
+        return comm.construct_gdf(self.args, self.cell, self.kmesh)
+
+    def cell_object(self):
+        return comm.pbc_cell(self.args)
+
+class pyscf_mol_init (pyscf_init):
+    '''
+    '''
+    def __init__(self, args=None):
+        super().__init__(comm.init_mol_params() if args is None else args)
+        self.kmesh = np.array([[0.,0.,0.]])
+        self.k_ibz = np.array([[0.,0.,0.],])
+        self.ir_list = np.array([0])
+        self.conj_list= np.array([0])
+        self.weight= np.array([1.0])
+        self.ind= np.array([0])
+        self.num_ik = 1
+        self.kcell = gto.Cell(verbose=0)
+        self.kcell.a = [[1,0,0],[0,1,0],[0,0,1]]
+        self.kcell.atom = self.cell.atom
+        self.kcell.spin = self.cell.spin
+        self.kcell.charge = self.cell.charge
+        self.kcell.unit = 'A'
+        self.kcell.basis = self.cell.basis
+        self.kcell.kpts = self.kcell.make_kpts([1, 1, 1])
+        self.kcell.ecp = self.cell.ecp
+        self.kcell.build()
+
+    def mean_field_input(self, mydf=None):
+        '''
+        Solve a give mean-field problem and store the solution in the Green/WeakCoupling format
+        
+        Parameters
+        ----------
+        mydf : pyscf.df
+            pyscf density-fitting object, will be generated if None
+        '''
+        if mydf is None:
+            mydf = self.df_object()
+#comm.construct_gdf(self.args, self.cell, self.kmesh)
+
+        # number of k-points in each direction for Coulomb integrals
+        nk       = self.args.nk ** 3
+        # number of k-points in each direction to evaluate Coulomb kernel
+        Nk       = self.args.Nk
+
+        # number of orbitals per cell
+        nao = self.cell.nao_nr()
+        Zs = np.asarray(self.cell.atom_charges())
+        logging.info(f"Number of atoms: {Zs.shape[0]}")
+        logging.info("Effective nuclear charge of each atom: {Zs")
+        atoms_info = np.asarray(self.cell.aoslice_by_atom())
+        last_ao = atoms_info[:,3]
+        logging.info(f"aoslice_by_atom = {atoms_info}")
+        logging.info(f"Last AO index for each atom = {last_ao}")
+
+        '''
+        Generate integrals for mean-field calculations
+        '''
+        auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
+        NQ = auxcell.nao_nr()
+    
+        mf = self.mf_object(mydf)
+    
+        # Get Overlap and Fock matrices
+        hf_dm = mf.make_rdm1().astype(dtype=np.complex128)
+        S     = mf.get_ovlp().astype(dtype=np.complex128)
+        T     = mf.get_hcore().astype(dtype=np.complex128)
+        if self.args.xc is not None:
+            vhf = mf.get_veff().astype(dtype=np.complex128)
+        else:
+            vhf = mf.get_veff(hf_dm).astype(dtype=np.complex128)
+        F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
+
+
+        F = F.reshape((self.args.ns, self.args.nk, nao, nao))
+        hf_dm = hf_dm.reshape((self.args.ns, self.args.nk, nao, nao))
+        S = S.reshape((self.args.nk, nao, nao))
+        T = T.reshape((self.args.nk, nao, nao))
+    
+        if len(F.shape) == 3:
+            F     = F.reshape((1,) + F.shape)
+            hf_dm = hf_dm.reshape((1,) + hf_dm.shape)
+        S = np.array((S, ) * self.args.ns)
+        T = np.array((T, ) * self.args.ns)
+
+        X_k = []
+        X_inv_k = []
+
+        # Orthogonalization matrix
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
+        comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, Zs, last_ao)
+        if bool(self.args.df_int):
+            self.compute_df_int(nao, X_k)
+
+    def compute_df_int(self, nao, X_k):
+        '''
+        Generate density-fitting integrals for correlated methods
+        '''
+        h_in = h5py.File("cderi_mol.h5", 'a')
+        h_out = h5py.File("cderi.h5", 'w')
+
+        j3c_obj = h_in["/j3c"]
+        if not isinstance(j3c_obj, h5py.Dataset):  # not a dataset
+            if isinstance(j3c_obj, h5py.Group):  # pyscf >= 2.1
+                h_in.copy(h_in["/j3c"], h_out, "j3c/0")
+            else:
+                raise ValueError("Unknown structure of cderi_mol.h5. Perhaps, PySCF upgrade went badly...")
+        else:  # pyscf < 2.1
+            h_in.copy(h_in["/j3c"], h_out, "j3c/0/0")
+
+        kptij = np.zeros((1, 2, 3))
+        h_out["j3c-kptij"] = kptij
+
+        h_in.close()
+        h_out.close()
+        mydf = comm.construct_gdf(self.args, self.kcell, self.kmesh)
+        int_utils.compute_integrals(self.args, self.kcell, mydf, self.kmesh, nao, X_k, "df_hf_int", "cderi.h5", True, self.args.keep_cderi)
+        mydf = None
+
+    def df_object(self, mydf=None):
+        return comm.construct_mol_gdf(self.args, self.kcell)
+
+    def mf_object(self, mydf=None):
+        return comm.solve_mol_mean_field(self.args, mydf, self.cell)
+
+    def cell_object(self):
+        return comm.mol_cell(self.args)
