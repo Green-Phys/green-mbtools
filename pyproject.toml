@@ -45,14 +45,12 @@ tests = [
 ]
 
 [tool.cibuildwheel]
+skip = ["*-musllinux*"]
 test-requires = "pytest"
 test-command = "pytest {project}/tests --ignore {project}/tests/pes_test.py"
 
 manylinux-x86_64-image = "manylinux2014"
 
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux*"
-before-all = "apk add eigen-dev gmp-dev mpfr-dev fftw-dev"
 
 
 [tool.cibuildwheel.linux]
