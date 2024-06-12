@@ -150,6 +150,8 @@ def get_coarsegrained_coulG(lattice_kmesh, cell, k=np.zeros(3), exx=False, mf=No
     return coulG
 
 def weighted_coulG_ewald(mydf, kpt, exx, mesh, omega=None):
+    if omega is None:
+        return df.aft.weighted_coulG(mydf, kpt, "ewald", mesh)
     return df.aft.weighted_coulG(mydf, kpt, "ewald", mesh, omega)
 
 # a = lattice vectors / (2*pi)
@@ -360,8 +362,14 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     EW     = data.create_group("EW")
     EW_bar = data.create_group("EW_bar")
     # keep original method for computing Coulomb kernel
-    import pyscf.pbc.df.gdf_builder as gdf
-    weighted_coulG_old = gdf._CCGDFBuilder.weighted_coulG
+    import importlib.util as iu
+    new_pyscf = iu.find_spec('pyscf.pbc.df.gdf_builder') is not None
+    if new_pyscf :
+        import pyscf.pbc.df.gdf_builder as gdf
+        weighted_coulG_old = gdf._CCGDFBuilder.weighted_coulG
+    else:
+        from pyscf.pbc import df as gdf
+        weighted_coulG_old = gdf.GDF.weighted_coulG
 
     # density-fitting w/o ewald correction for fine grid
     df2 = df.GDF(maindf.cell)
@@ -383,8 +391,10 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     buffer1 = np.zeros((NQ, nao, nao), dtype=np.complex128)
     buffer2 = np.zeros((NQ, nao, nao), dtype=np.complex128)
     Lpq_mo = np.zeros((NQ, nao, nao), dtype=np.complex128)
-
-    gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_ewald_2nd
+    if new_pyscf :
+        gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_ewald_2nd
+    else:
+        gdf.GDF.weighted_coulG = weighted_coulG_ewald_2nd
     # df.aft.weighted_coulG = weighted_coulG_ewald_2nd
     df1 = df.GDF(maindf.cell)
     df1.cell.full_k_mesh = maindf.kpts
@@ -408,7 +418,10 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     for i, ki in enumerate(kmesh):
         # Change the way to compute Coulomb kernel to include G=0 correction
         # df.GDF.weighted_coulG = weighted_coulG_ewald_2nd
-        gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_ewald_2nd
+        if new_pyscf :
+            gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_ewald_2nd
+        else:
+            df.GDF.weighted_coulG = weighted_coulG_ewald_2nd
         s1 = 0
         # Compute three-point integrals with G=0 contribution included with Ewald correction
         for XXX in df1.sr_loop((ki,ki), max_memory=4000, compact=False):
@@ -422,7 +435,10 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
 
         # Restore the way to compute Coulomb kernel
         # df.aft.weighted_coulG = weighted_coulG_old
-        gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_old
+        if new_pyscf:
+            gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_old
+        else:
+            df.GDF.weighted_coulG = weighted_coulG_old
         s1 = 0
         # Compute three-point integral without G=0 contribution included with Ewald correction
         # and subtract it from the computed buffer to keep pure Ewald correction only
@@ -448,7 +464,10 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     data.close()
     # cleanup
     # df.aft.weighted_coulG = weighted_coulG_old
-    gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_old
+    if new_pyscf:
+        gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_old
+    else:
+        gdf.GDF.weighted_coulG = weighted_coulG_old
     os.remove(cderi_file_1)
     os.remove(cderi_file_2)
     print("Ewald correction has been computed and stored into {}".format(filename))

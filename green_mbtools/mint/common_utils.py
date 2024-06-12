@@ -184,7 +184,7 @@ def parse_basis(basis_list):
     '''
     Parse information about chosen basis sets
     '''
-    logging.debug(basis_list, len(basis_list) % 2)
+    logging.debug(f"{basis_list}, {len(basis_list) % 2}")
     if len(basis_list) % 2 == 0:
         b = {}
         for atom_i in range(0, len(basis_list), 2):
@@ -296,7 +296,7 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S):
         diff = np.eye(n_nonortho) - np.dot(x, x_pinv)
         diff_max = np.max(np.abs(diff))
         maxdiff = max(maxdiff, diff_max)
-    logging.info("max diff from identity ", maxdiff)
+    logging.info(f"max diff from identity {maxdiff}")
     X_inv_k = np.asarray(X_inv_k).reshape(F.shape[1:])
     X_k = np.asarray(X_k).reshape(F.shape[1:])
     # Orthogonalization

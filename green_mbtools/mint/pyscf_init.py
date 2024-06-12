@@ -139,6 +139,7 @@ class pyscf_init:
             weighted_coulG_old = gdf._CCGDFBuilder.weighted_coulG
             gdf._CCGDFBuilder.weighted_coulG = int_utils.weighted_coulG_ewald
         else:
+            from pyscf.pbc import df as gdf
             weighted_coulG_old = gdf.GDF.weighted_coulG
             gdf.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
     
