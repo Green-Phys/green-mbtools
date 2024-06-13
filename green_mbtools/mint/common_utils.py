@@ -13,6 +13,8 @@ from pyscf import dft as mdft
 from pyscf import df as mdf
 from pyscf.pbc import tools, gto, df, scf, dft
 
+import importlib.metadata as imd
+
 from . import integral_utils as int_utils
 
 def construct_rmesh(nkx, nky, nkz):
@@ -257,6 +259,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["params/nel_cell"] = mycell.nelectron
     inp_data["params/nk"] = kmesh.shape[0]
     inp_data["params/NQ"] = NQ
+    inp_data.attrs["__green_version__"] = imd.version("green_mbtools")
     inp_data.close()
     chk.save(args.output_path, "Cell", mycell.dumps())
     inp_data = h5py.File("dm.h5", "w")

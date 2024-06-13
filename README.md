@@ -65,7 +65,7 @@ To-Do-List
 
 Contirbutions to the code
 -----------
-* Most of the source code was written by @cnyeh
+* Most of the `pesto` source code was written by @cnyeh
 * Nevanlinna analytic continuation was implemented by @jianiOnly
 * Clean up and packaging of the code and extension modules, including Nevanlinna and Caratheodory, was performed by by @gauravharsha
 * ES analytic continuation implemented by @gauravharsha

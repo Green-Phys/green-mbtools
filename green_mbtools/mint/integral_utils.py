@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+import importlib.metadata as imd
 
 import h5py
 import numpy as np
@@ -336,6 +337,7 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
 
     data["chunk_size"] = chunk_size
     data["chunk_indices"] = np.array(chunk_indices)
+    data.attrs["__green_version__"] = imd.version("green_mbtools")
     data.close()
     if not keep_after:
         os.remove(cderi_name)
