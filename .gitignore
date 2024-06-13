@@ -5,6 +5,8 @@ tests/test_data/caratheodory/Dirac*
 tests/test_data/caratheodory/ShiftDiracCarath
 tests/test_data/caratheodory/SigmaNevan
 tests/test_data/caratheodory/*_test
+tests/Projection**
+tests/dimensions.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

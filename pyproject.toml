@@ -7,13 +7,20 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 
 [project]
 name = "green-mbtools"
-version = "0.2.4b2"
+version = "0.2.4b3"
 authors = [
-  { name="Sergei Iskakov", email="siskakov@umich.edu" },
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
+  { name="Sergei Iskakov", email="siskakov@umich.edu" },
   { name="Vibin Abraham", email="avibin@umich.edu" },
   { name="Pavel Pokhilko", email="pokhilko@umich.edu" },
+]
+
+maintainers = [
+  { name="Sergei Iskakov", email="siskakov@umich.edu" },
+  { name="Gaurav Harsha", email="gharsha@umich.edu" },
+  { name="Vibin Abraham", email="avibin@umich.edu" },
+  { name="Pavel Pokhilko", email="pokhilko@umich.edu" }
 ]
 
 dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py",
