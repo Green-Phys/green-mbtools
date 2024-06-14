@@ -41,7 +41,7 @@ def extract_ase_data(a, atoms):
     '''
     symbols = []
     positions = []
-    lattice_vectors = np.genfromtxt(StringIO(a))
+    lattice_vectors = np.genfromtxt(StringIO(a),delimiter=',',dtype=np.float64)
     for atom in atoms.splitlines():
         if len(atom) == 0 or len(atom.split()) != 4:
             continue

@@ -91,7 +91,7 @@ class pyscf_pbc_init (pyscf_init):
         nao = self.cell.nao_nr()
         Zs = np.asarray(self.cell.atom_charges())
         logging.info(f"Number of atoms: {Zs.shape[0]}")
-        logging.info("Effective nuclear charge of each atom: {Zs")
+        logging.info(f"Effective nuclear charge of each atom: {Zs}")
         atoms_info = np.asarray(self.cell.aoslice_by_atom())
         last_ao = atoms_info[:,3]
         logging.info(f"aoslice_by_atom = {atoms_info}")
@@ -142,7 +142,7 @@ class pyscf_pbc_init (pyscf_init):
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, "df_hf_int", "cderi.h5", True, self.args.keep_cderi)
         mydf = None
 
-        if self.args.finite_size_kind in ['gf2', 'gw', 'gw_s'] :
+        if 'gf2' in self.args.finite_size_kind or 'gw' in self.args.finite_size_kind or 'gw_s' in self.args.finite_size_kind:
             self.compute_twobody_finitesize_correction()
             return
 
@@ -196,9 +196,9 @@ class pyscf_pbc_init (pyscf_init):
     def compute_twobody_finitesize_correction(self, mydf=None):
         if not os.path.exists(self.args.hf_int_path):
             os.mkdir(self.args.hf_int_path)
-        if self.args.finite_size_kind == 'gf2' :
+        if 'gf2' in self.args.finite_size_kind :
             comm.compute_ewald_correction(self.args, self.cell, self.kmesh, self.args.hf_int_path + "/df_ewald.h5")
-        elif self.args.finite_size_kind == 'gw' :
+        if 'gw' in self.args.finite_size_kind :
             self.evaluate_gw_correction(mydf)
             
     
@@ -286,7 +286,7 @@ class pyscf_mol_init (pyscf_init):
         nao = self.cell.nao_nr()
         Zs = np.asarray(self.cell.atom_charges())
         logging.info(f"Number of atoms: {Zs.shape[0]}")
-        logging.info("Effective nuclear charge of each atom: {Zs")
+        logging.info(f"Effective nuclear charge of each atom: {Zs}")
         atoms_info = np.asarray(self.cell.aoslice_by_atom())
         last_ao = atoms_info[:,3]
         logging.info(f"aoslice_by_atom = {atoms_info}")
