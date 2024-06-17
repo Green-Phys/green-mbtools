@@ -184,7 +184,10 @@ class pyscf_pbc_init (pyscf_init):
                 logging.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 logging.error(e)
                 exit(-1)
-        kmesh_hs, Hk_hs, Sk_hs = comm.high_symmetry_path(self.cell, self.args)
+        kmesh_hs, Hk_hs, Sk_hs, lin_kpt_axis = comm.high_symmetry_path(
+            self.cell, self.args
+        )
+        xpath, special_points, special_labels = lin_kpt_axis
         inp_data = h5py.File(self.args.output_path, "a")
         logging.debug(kmesh_hs)
         logging.debug(self.cell.get_scaled_kpts(kmesh_hs))
@@ -192,6 +195,9 @@ class pyscf_pbc_init (pyscf_init):
         inp_data["high_symm_path/r_mesh"] = comm.construct_rmesh(self.args.nk, self.args.nk, self.args.nk)
         inp_data["high_symm_path/Hk"] = Hk_hs
         inp_data["high_symm_path/Sk"] = Sk_hs
+        inp_data["high_symm_path/xpath"] = xpath
+        inp_data["high_symm_path/special_points"] = special_points
+        inp_data["high_symm_path/special_labels"] = special_labels
 
     def compute_twobody_finitesize_correction(self, mydf=None):
         if not os.path.exists(self.args.hf_int_path):
