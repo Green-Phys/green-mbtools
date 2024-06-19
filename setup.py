@@ -2,8 +2,8 @@ from setuptools import setup, Extension
 import sys
 import platform
 
-include_dirs    = ['/usr/local/include', '/opt/homebrew/include', '/usr/local/include/eigen3', '/opt/homebrew/include/eigen3' ] if sys.platform=='darwin' else ['/usr/include/eigen3']
-library_dirs    = ['/opt/homebrew/lib','/usr/local/lib' ] if sys.platform=='darwin' else []
+include_dirs    = ['/usr/local/include', '/opt/homebrew/include', '/opt/local/include','/usr/local/include/eigen3', '/opt/homebrew/include/eigen3', '/opt/local/include/eigen3'] if sys.platform=='darwin' else ['/usr/include/eigen3']
+library_dirs    = ['/opt/homebrew/lib','/opt/local/lib', '/usr/local/lib' ] if sys.platform=='darwin' else []
 compile_flags   = ["-std=c++17"]
 extra_link_args = []
 if sys.platform=='darwin' and int(platform.mac_ver()[0].split('.')[0]) >= 14 :
