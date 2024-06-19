@@ -191,7 +191,11 @@ if bandpath_str is not None:
 else:
     plt.xticks(sp_points, labels)
 
+# x-limit
+plt.xlim([-10, 10])
+
 # save
 plt.savefig(
-    'fock_bands.pdf', format='pdf', bbox_inches='tight', pad_inches=0.1
+    output.replace('.h5', '.pdf'), format='pdf',
+    bbox_inches='tight', pad_inches=0.1
 )
