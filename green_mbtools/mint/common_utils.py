@@ -598,7 +598,8 @@ def solve_mean_field(args, mydf, mycell):
         mf.kernel(init_dm)
     else:
         mf.kernel()
-    mf.analyze()
+    if not args.x2c:
+        mf.analyze()
     return mf
 
 def solve_mol_mean_field(args, mydf, mycell):
@@ -627,7 +628,8 @@ def solve_mol_mean_field(args, mydf, mycell):
         mf.kernel(init_dm)
     else:
         mf.kernel()
-    mf.analyze()
+    if not args.x2c:
+        mf.analyze()
     return mf
 
 
