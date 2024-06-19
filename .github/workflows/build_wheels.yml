@@ -12,6 +12,7 @@ jobs:
         plat: 
         - { os: ubuntu-latest, target: "", arch: x86_64}
         - { os: macos-13, target: "13.0" , arch: x86_64}
+        - { os: macos-13, target: "13.0" , arch: arm64}
         - { os: macos-14, target: "14.0" , arch: arm64}
 
     steps:
@@ -20,7 +21,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19.0
         env:
-          CIBW_BUILD: cp38-manylinux* cp39-manylinux* cp310-manylinux* cp311-* cp312-*
+          CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ENVIRONMENT: >
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
