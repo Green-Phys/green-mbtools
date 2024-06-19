@@ -269,7 +269,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["HF/mo_coeff"] = mf.mo_coeff
     inp_data["mulliken/Zs"] = Zs
     inp_data["mulliken/last_ao"] = last_ao
-    inp_data["params/nao"] = S.shape[2]
+    inp_data["params/nao"] = mycell.nao_nr()
     inp_data["params/nso"] = S.shape[2]
     inp_data["params/ns"] = S.shape[0]
     inp_data["params/nel_cell"] = mycell.nelectron
@@ -353,9 +353,6 @@ def add_common_params(parser):
     parser.add_argument("--active_space", type=int, nargs='+', default=None, help="active space orbitals")
     parser.add_argument("--spin", type=int, default=0, help="Local spin")
     parser.add_argument("--restricted", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Spin restricted calculations.")
-    parser.add_argument("--print_high_symmetry_points", default=False, action='store_true', help="Print available high symmetry points for current system and exit.")
-    parser.add_argument("--high_symmetry_path", type=str, default=None, help="High symmetry path")
-    parser.add_argument("--high_symmetry_path_points", type=int, default=0, help="Number of points for high symmetry path")
     parser.add_argument("--memory", type=int, default=700, help="Memory bound for integral chunk in MB")
     parser.add_argument("--grid_only", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Only recompute k-grid points")
     parser.add_argument("--diffuse_cutoff", type=float, default=0.0, help="Remove the diffused Gaussians whose exponents are less than the cutoff")
@@ -363,8 +360,6 @@ def add_common_params(parser):
     parser.add_argument("--max_iter", type=int, default=100, help="Maximum number of iterations in the SCF loop")
     parser.add_argument("--keep_cderi", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Keep generated cderi files.")
     parser.add_argument("--job", choices=["init", "sym_path", "ewald_corr"], default="init", nargs="+")
-    parser.add_argument("--finite_size_kind", choices=["ewald", "gf2", "gw", "gw_s", "coarse_grained"], default="ewald", nargs="+", 
-                              help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.")
     parser.add_argument("--x2c", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="enable X2C calculations")
 
 def add_pbc_params(parser):
@@ -377,6 +372,11 @@ def add_pbc_params(parser):
     parser.add_argument("--shift", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh shift")
     parser.add_argument("--center", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh center")
     parser.add_argument("--symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use inversion symmetry")
+    parser.add_argument("--print_high_symmetry_points", default=False, action='store_true', help="Print available high symmetry points for current system and exit.")
+    parser.add_argument("--high_symmetry_path", type=str, default=None, help="High symmetry path")
+    parser.add_argument("--high_symmetry_path_points", type=int, default=0, help="Number of points for high symmetry path")
+    parser.add_argument("--finite_size_kind", choices=["ewald", "gf2", "gw", "gw_s", "coarse_grained"], default="ewald", nargs="+", 
+                              help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.")
 
 def init_mol_params():
     '''
@@ -401,7 +401,7 @@ def init_mol_params():
             args.mean_field = mscf.GHF
         else :
             args.mean_field = mscf.RHF if args.restricted else mscf.UHF
-    args.ns = 1 if args.restricted else 2
+    args.ns = 1 if args.restricted or args.x2c else 2
     # parameters needed to create empty grid
     args.a = [[1,0,0],[0,1,0],[0,0,1]]
     args.nk = 1
@@ -614,7 +614,14 @@ def solve_mol_mean_field(args, mydf, mycell):
         mf.xc = args.xc
     #mf.max_memory = 10000
     #mydf._cderi = "cderi.h5"
-    mf.with_df._cderi_to_save = "cderi_mol.h5"
+    if args.x2c:
+        tmp_mf = mscf.RHF(mycell).density_fit() if args.restricted else mscf.UHF(mycell).density_fit()
+        tmp_mf.with_df._cderi_to_save = "cderi_mol.h5"
+        tmp_mf.with_df.build()
+        tmp_mf = None
+    else:
+        mf.with_df._cderi_to_save = "cderi_mol.h5"
+        mf.with_df.build()
     mf.diis_space = 16
     mf.damp = args.damping
     mf.max_cycle = args.max_iter

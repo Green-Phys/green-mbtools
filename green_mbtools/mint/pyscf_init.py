@@ -89,6 +89,7 @@ class pyscf_pbc_init (pyscf_init):
 
         # number of orbitals per cell
         nao = self.cell.nao_nr()
+        nso = 2*self.cell.nao_nr() if self.args.x2c else self.cell.nao_nr()
         Zs = np.asarray(self.cell.atom_charges())
         logging.info(f"Number of atoms: {Zs.shape[0]}")
         logging.info(f"Effective nuclear charge of each atom: {Zs}")
@@ -290,6 +291,7 @@ class pyscf_mol_init (pyscf_init):
 
         # number of orbitals per cell
         nao = self.cell.nao_nr()
+        nso = 2*self.cell.nao_nr() if self.args.x2c else self.cell.nao_nr()
         Zs = np.asarray(self.cell.atom_charges())
         logging.info(f"Number of atoms: {Zs.shape[0]}")
         logging.info(f"Effective nuclear charge of each atom: {Zs}")
@@ -317,10 +319,10 @@ class pyscf_mol_init (pyscf_init):
         F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
 
 
-        F = F.reshape((self.args.ns, self.args.nk, nao, nao))
-        hf_dm = hf_dm.reshape((self.args.ns, self.args.nk, nao, nao))
-        S = S.reshape((self.args.nk, nao, nao))
-        T = T.reshape((self.args.nk, nao, nao))
+        F = F.reshape((self.args.ns, self.args.nk, nso, nso))
+        hf_dm = hf_dm.reshape((self.args.ns, self.args.nk, nso, nso))
+        S = S.reshape((self.args.nk, nso, nso))
+        T = T.reshape((self.args.nk, nso, nso))
     
         if len(F.shape) == 3:
             F     = F.reshape((1,) + F.shape)
@@ -341,7 +343,7 @@ class pyscf_mol_init (pyscf_init):
         '''
         Generate density-fitting integrals for correlated methods
         '''
-        h_in = h5py.File("cderi_mol.h5", 'a')
+        h_in = h5py.File("cderi_mol.h5", 'r')
         h_out = h5py.File("cderi.h5", 'w')
 
         j3c_obj = h_in["/j3c"]
