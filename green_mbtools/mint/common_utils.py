@@ -89,25 +89,41 @@ def check_high_symmetry_path(cell, args):
         raise RuntimeError(("Chosen high symmetry path {} has invalid special points {}. Valid "
                             "special points are {} ").format(args.high_symmetry_path, path, special_points.keys()))
 
+
 def high_symmetry_path(cell, args):
     '''
     Compute high-symmetry k-path
 
     :param cell: unit-cell object
     :param args: simulation parameters
-    :return: Points on the chosen high-symmetry path and corresponding non-interacting Hamiltonian and overlap matrix
+    :return: Points on the chosen high-symmetry path, corresponding \
+        non-interacting Hamiltonian and overlap matrix, and linear k-point
+        axis and labels (used in band structure plots)
     '''
     if args.high_symmetry_path is None:
         return [None, None, None]
     import ase
-    lattice_vectors, symbols, positions = extract_ase_data(args.a, args.atom)
-    path = args.high_symmetry_path
-    kpath = ase.dft.kpoints.bandpath(args.high_symmetry_path, lattice_vectors, npoints=args.high_symmetry_path_points)
+    lattice_vectors, _, _ = extract_ase_data(args.a, args.atom)
+    kpath = ase.dft.kpoints.bandpath(
+        args.high_symmetry_path, lattice_vectors,
+        npoints=args.high_symmetry_path_points
+    )
     kmesh = cell.get_abs_kpts(kpath.kpts)
-    new_mf    = dft.KUKS(cell,kmesh).density_fit()
+    if args.x2c:
+        new_mf = args.mean_field(cell, kmesh).density_fit().x2c1e()
+    else:
+        new_mf = args.mean_field(cell, kmesh).density_fit()
     H0_hs = new_mf.get_hcore()
     Sk_hs = new_mf.get_ovlp()
-    return [kmesh, H0_hs, Sk_hs]
+    # get symmetry labels
+    # lin_kpt_axis = a tuple of (
+    #   linear axis for plotting kpoints,
+    #   special point location along the linear axis,
+    #   symmetry point labels
+    # )
+    lin_kpt_axis = kpath.get_linear_kpoint_axis()
+    return [kmesh, H0_hs, Sk_hs, lin_kpt_axis]
+
 
 def transform(Z, X, X_inv):
     '''
