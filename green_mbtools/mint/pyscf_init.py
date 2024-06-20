@@ -131,7 +131,8 @@ class pyscf_pbc_init (pyscf_init):
 
         # Orthogonalization matrix
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
-        comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, Zs, last_ao)
+        # Save data into Green Software package input format.
+        comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 
@@ -335,7 +336,8 @@ class pyscf_mol_init (pyscf_init):
 
         # Orthogonalization matrix
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
-        comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, Zs, last_ao)
+        # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is not long range divergence for molecule
+        comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
         if bool(self.args.df_int):
             self.compute_df_int(nao, X_k)
 

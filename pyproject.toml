@@ -7,7 +7,7 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 
 [project]
 name = "green-mbtools"
-version = "0.2.4b6"
+version = "0.2.4b7"
 authors = [
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
@@ -29,7 +29,7 @@ dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py",
 
 description = "Collection of Python tools for quantum many-body simulation using Green Software Package"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.13"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",

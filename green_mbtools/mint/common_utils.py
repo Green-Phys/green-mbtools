@@ -233,8 +233,7 @@ def parse_geometry(g):
         res = g
     return res
 
-def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm,
-              Zs, last_ao):
+def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm, madelung, Zs, last_ao):
     '''
     Save data in Green/WeakCoupling format into a hdf5 file
     '''
@@ -264,7 +263,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["HF/S-k"].attrs["__complex__"] = np.int8(1)
     inp_data["HF/H-k"] = T.view(np.float64).reshape(T.shape[0], T.shape[1], T.shape[2], T.shape[3], 2)
     inp_data["HF/H-k"].attrs["__complex__"] = np.int8(1)
-    inp_data["HF/madelung"] = tools.pbc.madelung(mycell, kmesh)
+    inp_data["HF/madelung"] = madelung
     inp_data["HF/mo_energy"] = mf.mo_energy
     inp_data["HF/mo_coeff"] = mf.mo_coeff
     inp_data["mulliken/Zs"] = Zs
