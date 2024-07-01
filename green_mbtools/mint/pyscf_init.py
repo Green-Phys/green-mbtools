@@ -89,7 +89,7 @@ class pyscf_pbc_init (pyscf_init):
 
         # number of orbitals per cell
         nao = self.cell.nao_nr()
-        nso = 2*self.cell.nao_nr() if self.args.x2c else self.cell.nao_nr()
+        nso = 2*self.cell.nao_nr() if self.args.x2c == 2 else self.cell.nao_nr()
         Zs = np.asarray(self.cell.atom_charges())
         logging.info(f"Number of atoms: {Zs.shape[0]}")
         logging.info(f"Effective nuclear charge of each atom: {Zs}")
@@ -292,7 +292,7 @@ class pyscf_mol_init (pyscf_init):
 
         # number of orbitals per cell
         nao = self.cell.nao_nr()
-        nso = 2*self.cell.nao_nr() if self.args.x2c else self.cell.nao_nr()
+        nso = 2*self.cell.nao_nr() if self.args.x2c == 2 else self.cell.nao_nr()
         Zs = np.asarray(self.cell.atom_charges())
         logging.info(f"Number of atoms: {Zs.shape[0]}")
         logging.info(f"Effective nuclear charge of each atom: {Zs}")
