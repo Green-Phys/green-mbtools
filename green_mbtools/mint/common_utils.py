@@ -109,8 +109,10 @@ def high_symmetry_path(cell, args):
         npoints=args.high_symmetry_path_points
     )
     kmesh = cell.get_abs_kpts(kpath.kpts)
-    if args.x2c:
+    if args.x2c == 2:
         new_mf = args.mean_field(cell, kmesh).density_fit().x2c1e()
+    elif args.x2c == 1:
+        new_mf = args.mean_field(cell, kmesh).density_fit().sfx2c1e()
     else:
         new_mf = args.mean_field(cell, kmesh).density_fit()
     H0_hs = new_mf.get_hcore()
@@ -359,7 +361,11 @@ def add_common_params(parser):
     parser.add_argument("--max_iter", type=int, default=100, help="Maximum number of iterations in the SCF loop")
     parser.add_argument("--keep_cderi", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Keep generated cderi files.")
     parser.add_argument("--job", choices=["init", "sym_path", "ewald_corr"], default="init", nargs="+")
-    parser.add_argument("--x2c", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="enable X2C calculations")
+    parser.add_argument(
+        "--x2c", type=int, default=0, choices=[0, 1, 2],
+        help="enable X2C calculations (0: non-rel., 1: sfX2C1e, 2: X2C1e)"
+    )
+
 
 def add_pbc_params(parser):
     '''
@@ -388,19 +394,19 @@ def init_mol_params():
     args.auxbasis = parse_basis(args.auxbasis)
     args.ecp = parse_basis(args.ecp)
     args.xc = parse_basis(args.xc)
-    if args.x2c and args.restricted:
+    if args.x2c == 2 and args.restricted:
         raise RuntimeError("X2C calculation can not be spin restricted")
     if args.xc is not None:
-        if args.x2c :
+        if args.x2c == 2:
             args.mean_field = mdft.GKS
         else:
             args.mean_field = mdft.RKS if args.restricted else mdft.UKS
     else:
-        if args.x2c:
+        if args.x2c == 2:
             args.mean_field = mscf.GHF
-        else :
+        else:
             args.mean_field = mscf.RHF if args.restricted else mscf.UHF
-    args.ns = 1 if args.restricted or args.x2c else 2
+    args.ns = 1 if args.restricted or args.x2c == 2 else 2
     # parameters needed to create empty grid
     args.a = [[1,0,0],[0,1,0],[0,0,1]]
     args.nk = 1
@@ -421,17 +427,17 @@ def init_pbc_params():
     args.ecp = parse_basis(args.ecp)
     args.pseudo = parse_basis(args.pseudo)
     args.xc = parse_basis(args.xc)
-    if args.x2c and args.restricted:
+    if args.x2c == 2 and args.restricted:
         raise RuntimeError("X2C calculation can not be spin restricted")
     if args.xc is not None:
-        if args.x2c :
+        if args.x2c == 2:
             args.mean_field = dft.KGKS
         else:
             args.mean_field = dft.KRKS if args.restricted else dft.KUKS
     else:
-        if args.x2c:
+        if args.x2c == 2:
             args.mean_field = scf.KGHF
-        else :
+        else:
             args.mean_field = scf.KRHF if args.restricted else scf.KUHF
     args.ns = 1 if args.restricted or args.x2c else 2
     return args
@@ -577,7 +583,12 @@ def solve_mean_field(args, mydf, mycell):
     '''
     logging.info("Solve Mean-field")
     # prepare and solve DFT
-    mf    =  args.mean_field(mycell,mydf.kpts).density_fit().x2c1e() if args.x2c  else args.mean_field(mycell,mydf.kpts).density_fit() # if args.xc is not None else scf.KUHF(mycell,mydf.kpts).density_fit()
+    if args.x2c == 0:
+        mf = args.mean_field(mycell, mydf.kpts).density_fit()
+    elif args.x2c == 1:
+        mf = args.mean_field(mycell, mydf.kpts).density_fit().sfx2c1e()
+    elif args.x2c == 2:
+        mf = args.mean_field(mycell, mydf.kpts).density_fit().x2c1e()
     if args.xc is not None:
         mf.xc = args.xc
     #mf.max_memory = 10000
@@ -597,7 +608,7 @@ def solve_mean_field(args, mydf, mycell):
         mf.kernel(init_dm)
     else:
         mf.kernel()
-    if not args.x2c:
+    if args.x2c < 2:
         mf.analyze()
     return mf
 
@@ -607,13 +618,18 @@ def solve_mol_mean_field(args, mydf, mycell):
     '''
     logging.info("Solve LDA")
     # prepare and solve DFT
-    
-    mf    = args.mean_field(mycell).x2c1e() if args.x2c else  args.mean_field(mycell).density_fit() # if args.xc is not None else scf.KUHF(mycell,mydf.kpts).density_fit()
+
+    if args.x2c == 0:
+        mf = args.mean_field(mycell).density_fit()
+    elif args.x2c == 1:
+        mf = args.mean_field(mycell).density_fit().sfx2c1e()
+    elif args.x2c == 2:
+        mf = args.mean_field(mycell).x2c1e()
     if args.xc is not None:
         mf.xc = args.xc
-    #mf.max_memory = 10000
-    #mydf._cderi = "cderi.h5"
-    if args.x2c:
+    # mf.max_memory = 10000
+    # mydf._cderi = "cderi.h5"
+    if args.x2c == 2:
         tmp_mf = mscf.RHF(mycell).density_fit() if args.restricted else mscf.UHF(mycell).density_fit()
         tmp_mf.with_df._cderi_to_save = "cderi_mol.h5"
         tmp_mf.with_df.build()
@@ -634,7 +650,7 @@ def solve_mol_mean_field(args, mydf, mycell):
         mf.kernel(init_dm)
     else:
         mf.kernel()
-    if not args.x2c:
+    if args.x2c < 2:
         mf.analyze()
     return mf
 
