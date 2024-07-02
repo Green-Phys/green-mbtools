@@ -406,7 +406,7 @@ def init_mol_params():
             args.mean_field = mscf.GHF
         else:
             args.mean_field = mscf.RHF if args.restricted else mscf.UHF
-    args.ns = 1 if args.restricted or args.x2c else 2
+    args.ns = 1 if args.restricted or args.x2c == 2 else 2
     # parameters needed to create empty grid
     args.a = [[1,0,0],[0,1,0],[0,0,1]]
     args.nk = 1
