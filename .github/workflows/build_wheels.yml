@@ -12,7 +12,6 @@ jobs:
         plat: 
         - { os: ubuntu-latest, target: "", arch: x86_64}
         - { os: macos-13, target: "13.0" , arch: x86_64}
-        - { os: macos-13, target: "13.0" , arch: arm64}
         - { os: macos-14, target: "14.0" , arch: arm64}
 
     steps:

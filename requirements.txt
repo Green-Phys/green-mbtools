@@ -11,3 +11,4 @@ cvxpy
 # Solvers for CVXPY
 clarabel
 mosek
+green-ac

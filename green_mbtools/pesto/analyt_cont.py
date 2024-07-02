@@ -8,7 +8,7 @@ from .pes_utils import run_es, cvx_matrix_projection, cvx_diag_projection
 from .ac_utils import dump_input_caratheodory_data, load_caratheodory_data
 import green_mbtools.pesto.nevanlinna as nevan_exe
 import green_mbtools.pesto.caratheodory as carath_exe
-
+import green_ac
 
 # Find the number of cpus to use for parallelization of analtyic continuation
 slurm_env_var = 'SLURM_JOB_CPUS_PER_NODE'
@@ -193,83 +193,11 @@ def nevan_run(
     X_iw = X_iw.reshape(nw, -1)
     dim1 = X_iw.shape[1]
 
-    if not os.path.exists(outdir):
-        os.mkdir(outdir)
-    os.chdir(outdir)
-
-    # Save dim1 for better understanding of output
-    np.savetxt("dimensions.txt", np.asarray(X_iw_shape[1:], dtype=int))
-
-    for d1 in range(dim1):
-        if not os.path.exists(str(d1)):
-            os.mkdir(str(d1))
-        np.savetxt(
-            "{}/{}".format(d1, ifile),
-            np.column_stack(
-                (wsample, X_iw[:, d1].real, X_iw[:, d1].imag)
-            )
-        )
-
-    # Start analytical continuation
-    processes = []
-    pp = 0
-    for d1 in range(dim1):
-        os.chdir(str(d1))
-        p = Process(
-            target=nevan_exe.nevanlinna,
-            args=(
-                ifile, nw, ofile, coeff_file, prec, spectral,
-                n_real, w_min, w_max, eta
-            )
-        )
-        p.start()
-        processes.append(p)
-        pp += 1
-        if pp % _ncpu == 0:
-            for proc in processes:
-                proc.join()
-            processes = []
-        os.chdir("..")
-
-    for proc in processes:
-        proc.join()
-
-    # Combine output
-    dump_A = False
-    try:
-        X_w = np.loadtxt("0/{}".format(ofile))
-        dtype = complex if X_w.shape[1] == 3 else float
-        freqs = X_w[:, 0]
-        X_wk = np.loadtxt("0/{}".format(ofile))
-        dtype = complex if X_wk.shape[1] == 3 else float
-        freqs = X_wk[:, 0]
-    except IOError:
-        pass
-    else:
-        dump_A = True
-    if dump_A:
-        X_w = np.zeros((freqs.shape[0], dim1), dtype=dtype)
-        for d1 in range(dim1):
-            # Read X_w data
-            try:
-                X_wk = np.loadtxt("{}/{}".format(d1, ofile))
-                if dtype == complex:
-                    X_w[:, d1].real = X_wk[:, 1]
-                    X_w[:, d1].imag = X_wk[:, 2]
-                else:
-                    X_w[:, d1] = X_wk[:, 1]
-            except IOError:
-                print(
-                    "{} is missing in {} folder. Possibly analytical \
-                    continuation fails at that point.".format(ofile, d1)
-                )
-        X_w = X_w.reshape((freqs.shape[0],) + X_iw_shape[1:])
-        X_iw = X_iw.reshape(X_iw_shape)
-    else:
-        print("All AC fails. Will not dump to DOS.h5")
-        X_iw = X_iw.reshape(X_iw_shape)
-
-    os.chdir(wkdir)
+    freqs = np.linspace(w_min, w_max, n_real)
+    X_w = green_ac.solve("Nevanlinna", wsample*1.j, freqs +1.j * eta, X_iw, prec)
+    X_w = X_w.reshape((freqs.shape[0],) + X_iw_shape[1:])
+    if spectral:
+        X_w = -X_w.imag/np.pi
 
     return freqs, X_w
 
