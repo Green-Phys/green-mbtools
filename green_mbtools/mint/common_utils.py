@@ -362,7 +362,7 @@ def add_common_params(parser):
     parser.add_argument("--keep_cderi", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Keep generated cderi files.")
     parser.add_argument("--job", choices=["init", "sym_path", "ewald_corr"], default="init", nargs="+")
     parser.add_argument(
-        "--x2c", type=lambda x: (int(x) in [0, 1, 2]), default=0,
+        "--x2c", type=int, default=0, choices=[0, 1, 2],
         help="enable X2C calculations (0: non-rel., 1: sfX2C1e, 2: X2C1e)"
     )
 
@@ -589,8 +589,6 @@ def solve_mean_field(args, mydf, mycell):
         mf = args.mean_field(mycell, mydf.kpts).density_fit().sfx2c1e()
     elif args.x2c == 2:
         mf = args.mean_field(mycell, mydf.kpts).density_fit().x2c1e()
-    else:
-        raise ValueError("Inappropriate value for --x2c. Use 0, 1, or 2.")
     if args.xc is not None:
         mf.xc = args.xc
     #mf.max_memory = 10000
@@ -627,8 +625,6 @@ def solve_mol_mean_field(args, mydf, mycell):
         mf = args.mean_field(mycell).density_fit().sfx2c1e()
     elif args.x2c == 2:
         mf = args.mean_field(mycell).x2c1e()
-    else:
-        raise ValueError("Inappropriate value for --x2c. Use 0, 1, or 2.")
     if args.xc is not None:
         mf.xc = args.xc
     # mf.max_memory = 10000
