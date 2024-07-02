@@ -23,7 +23,7 @@ maintainers = [
   { name="Pavel Pokhilko", email="pokhilko@umich.edu" }
 ]
 
-dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py",
+dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py", "green-ac",
                 "irbasis", "baryrat", "cvxpy", # Solvers for CVXPY
                 "clarabel", "mosek"]
 
