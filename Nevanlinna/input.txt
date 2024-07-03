@@ -1,1 +1,0 @@
-G_iw.txt 500 A_w.txt coeff

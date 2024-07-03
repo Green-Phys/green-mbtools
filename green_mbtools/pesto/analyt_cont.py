@@ -6,7 +6,6 @@ import h5py
 from multiprocessing import cpu_count, Process
 from .pes_utils import run_es, cvx_matrix_projection, cvx_diag_projection
 from .ac_utils import dump_input_caratheodory_data, load_caratheodory_data
-import green_mbtools.pesto.nevanlinna as nevan_exe
 import green_mbtools.pesto.caratheodory as carath_exe
 import green_ac
 
@@ -178,14 +177,6 @@ def nevan_run(
     print("Fei et al, Phys. Rev. Lett. 126, 056402 (2021)")
     print("----------------------------------------------")
 
-    # define defaults
-    ifile = 'X_iw.txt'
-    ofile = 'X_w.txt'
-    coeff_file = 'coeff.txt'
-    wkdir = os.path.abspath(os.getcwd())
-    print("Nevanlinna output:", os.path.abspath(wkdir + '/' + outdir))
-    print("Will dump input to {} and output to {}".format(ifile, ofile))
-
     nw = wsample.shape[0]
     assert nw == X_iw.shape[0], "Number of imaginary frequency points \
         mismatches between \"input_parser\" and Gw."
@@ -194,7 +185,7 @@ def nevan_run(
     dim1 = X_iw.shape[1]
 
     freqs = np.linspace(w_min, w_max, n_real)
-    X_w = green_ac.solve("Nevanlinna", wsample*1.j, freqs +1.j * eta, X_iw, prec)
+    X_w = green_ac.solve("Nevanlinna", wsample, freqs, X_iw, prec=prec, eta=eta)
     X_w = X_w.reshape((freqs.shape[0],) + X_iw_shape[1:])
     if spectral:
         X_w = -X_w.imag/np.pi

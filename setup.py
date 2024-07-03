@@ -10,18 +10,6 @@ if sys.platform=='darwin' and int(platform.mac_ver()[0].split('.')[0]) >= 14 :
     compile_flags+=['-arch', 'x86_64', '-arch', 'arm64']
     extra_link_args+=["-undefined", "dynamic_lookup"]
 
-# Build Nevanlinna extension
-nevanlinna = Extension(
-    'green_mbtools.pesto.nevanlinna',
-    sources=['Nevanlinna/nevanlinna.cpp' ],
-    include_dirs=include_dirs + ['Nevanlinna',],
-    library_dirs=library_dirs,
-    depends=['Nevanlinna/schur.h','Nevanlinna/nevanlinna.h','Nevanlinna/gmp_float.h'],
-    libraries=['gmp', 'gmpxx'],
-    extra_compile_args=compile_flags,
-    extra_link_args=extra_link_args
-)
-
 # Build Caratheodory extension
 caratheodory = Extension(
     'green_mbtools.pesto.caratheodory',
@@ -35,5 +23,5 @@ caratheodory = Extension(
 )
 
 setup(
-   ext_modules=[nevanlinna, caratheodory]
+   ext_modules=[caratheodory]
 )
