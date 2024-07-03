@@ -143,7 +143,7 @@ def maxent_run(
 
 
 def nevan_run(
-    X_iw, wsample, outdir='Nevanlinna', n_real=10000, w_min=-10, w_max=10,
+    X_iw, wsample, n_real=10000, w_min=-10, w_max=10,
     eta=0.01, spectral=True, prec=128
 ):
     """Nevanlinna analytic continuation for G(iw) or diagonal of self-energy
@@ -152,7 +152,6 @@ def nevan_run(
         X_iw        :   contains matrix valued data on imaginary freq. points
                         shape of X_iw should be:  (nw, ns, nk, nao, nao)
         wsample     :   value of imaginary frequencies
-        outdir      :   output directory in which data will be stored
         n_real      :   number of real frequency points
                         (used if custom_freqs = None)
         w_min       :   minimum value of real frequency range
@@ -167,8 +166,8 @@ def nevan_run(
     Returns:
     ----------------
         freqs       :   Real frequency grid on which AC data is obtained
-        X_w         :   Real valued spectral function (if green=False)
-                        or complex valued AC quantity (if green=True)
+        X_w         :   Real valued spectral function (if spectral=True)
+                        or complex valued AC quantity (if spectral=False)
     """
     # print acknowledgments
     print("----------------------------------------------")

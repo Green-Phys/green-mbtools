@@ -1,4 +1,5 @@
 import numpy as np
+from warnings import warn
 from . import analyt_cont as ac
 
 """
@@ -17,6 +18,8 @@ def Z_factor(
     ifile='Sigma_iw.txt', ofile='Sigma_w.txt', coefile='coeff',
     n_real=10001, w_min=-10, w_max=10, eta=0.01
 ):
+    if outdir:
+        warn("'outdir' parameter is deprecated for Nevanlinna", DeprecationWarning, 2)
     ns, nao = F.shape[:2]
     # Nevanlinna continuation of self-energy.
     Sigma_iw_diag = np.einsum('wsii->wsi', Sigma_iw)
@@ -25,7 +28,7 @@ def Z_factor(
     iwsample_pos = iwsample[nw//2:]
     Sigma_iw_diag = Sigma_iw_diag[nw//2:]
     freqs, Sigma_w = ac.nevan_run(
-        Sigma_iw_diag, iwsample_pos, outdir=outdir, ifile=ifile, ofile=ofile,
+        Sigma_iw_diag, iwsample_pos, ifile=ifile, ofile=ofile,
         coeff_file=coefile, n_real=n_real, w_min=w_min, w_max=w_max, eta=eta,
         green=False
     )
