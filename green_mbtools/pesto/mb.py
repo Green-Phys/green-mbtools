@@ -288,14 +288,18 @@ class MB_post(object):
         AC.maxent_run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
     def AC_nevanlinna(
-        self, outdir="Nevanlinna", gtau_orth=None,
-        n_real=10001, w_min=-10., w_max=10., eta=0.01
+        self, gtau_orth=None, n_real=10001, w_min=-10., w_max=10.,
+        eta=0.01, outdir="Nevanlinna"
     ):
         """
         Analytical continuation using Nevanlinna interpolation
-        :param nevan_exe:
-        :param outdir:
-        :return:
+        :param gtau_orth: imaginary time Green's function in the orthogonal basis, will be obtained from curren self.gtau if None
+        :param n_real: number of real frequency points
+        :param w_min: smallest value on real frequency grid
+        :param w_max: largest value on real frequency grid
+        :param eta: broadening parameter
+        :param outdir: [DEPRECATED]
+        :return: real frequency grid along with spectral function for a given Green's function
         """
         if gtau_orth is None:
             gtau_orth = orth.sao_orth(
@@ -307,7 +311,7 @@ class MB_post(object):
 
         wsample = self.ir.wsample[nw//2:]
         freqs, A_w = AC.nevan_run(
-            Gw_inp, wsample, outdir=outdir, n_real=n_real,
+            Gw_inp, wsample, n_real=n_real,
             w_min=w_min, w_max=w_max, eta=eta, spectral=True
         )
 

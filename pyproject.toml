@@ -7,7 +7,7 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 
 [project]
 name = "green-mbtools"
-version = "0.2.4b7"
+version = "0.2.4b8"
 authors = [
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
@@ -23,7 +23,7 @@ maintainers = [
   { name="Pavel Pokhilko", email="pokhilko@umich.edu" }
 ]
 
-dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py",
+dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py", "green-ac",
                 "irbasis", "baryrat", "cvxpy", # Solvers for CVXPY
                 "clarabel", "mosek"]
 

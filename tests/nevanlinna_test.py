@@ -20,14 +20,13 @@ def test_nevan_exe_on_dirac_delta_spectrum():
     G_iw = 1 / (1j * iw_vals)
     G_iw = G_iw.reshape((G_iw.shape[0], 1))
 
-    outdir = 'DiracNevan'
     n_real = 101
     w_min = -0.1
     w_max = 0.1
     eta = 0.01
 
     freqs, A_w = nevan_run(
-        G_iw, iw_vals, outdir=outdir, n_real=n_real,
+        G_iw, iw_vals, n_real=n_real,
         w_min=w_min, w_max=w_max, eta=eta, spectral=True
     )
 
@@ -43,14 +42,13 @@ def test_nevan_exe_on_dirac_delta_spectrum():
     G_iw = 1 / (1j * iw_vals - (1 + 1e-4j))
     G_iw = G_iw.reshape((G_iw.shape[0], 1))
 
-    outdir = 'DiracNevan'
     n_real = 201
     w_min = -0.5
     w_max = 1.5
     eta = 0.01
 
     freqs, A_w = nevan_run(
-        G_iw, iw_vals, outdir=outdir, n_real=n_real,
+        G_iw, iw_vals, n_real=n_real,
         w_min=w_min, w_max=w_max, eta=eta, spectral=True
     )
 
@@ -69,14 +67,13 @@ def test_nevan_exe_on_selfenergy():
     Sigma_iw = 1 / (1j * iw_vals - (1 + 1e-4j))
     Sigma_iw = Sigma_iw.reshape((Sigma_iw.shape[0], 1))
 
-    outdir = 'SigmaNevan'
     n_real = 201
     w_min = -0.5
     w_max = 1.5
     eta = 1.
 
     freqs, Sigma_w = nevan_run(
-        Sigma_iw, iw_vals, outdir=outdir, n_real=n_real,
+        Sigma_iw, iw_vals, n_real=n_real,
         w_min=w_min, w_max=w_max, eta=eta, spectral=False
     )
 
