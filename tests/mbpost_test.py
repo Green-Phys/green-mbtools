@@ -16,7 +16,7 @@ def test_initMBpost(mbo, data_path):
     input_path = data_dir + '/H2_GW/input.h5'
     ir_path = data_dir + '/ir_grid/1e4_104.h5'
     mbo_new = mb.initialize_MB_post(
-        sim_path, input_path, ir_path
+        sim_path, input_path, ir_path, legacy_ir=True
     )
 
     # compare G

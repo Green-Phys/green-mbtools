@@ -1,11 +1,14 @@
 from numpy.linalg import norm
+from green_mbtools.pesto.ir import IR_factory
+import h5py
+import pytest
 
 #
 # Test function for IR-Transform
 #
 
 
-def test_ir_transform(mbo):
+def test_ir_fourier_transform(mbo):
     """Transfrom from tau to iw and back.
     """
 
@@ -28,3 +31,26 @@ def test_ir_transform(mbo):
     # Transform back to G_tau
     gtau2 = my_ir.w_to_tau(G_iw)
     assert norm(gtau2 - gtau) < 1e-10
+
+
+def test_new_ir_fourier_transform(data_path):
+    """Tests 1) initialization of new-format IR grids, and
+    2) trnasforms G from tau to iw, and back to tau to check
+    functionality and accuracy.
+    """
+
+    # init IR handler
+    beta = 100
+    ir_file = pytest.test_data_dir + '/ir_grid/1e4_new.h5'
+    myir = IR_factory(beta, ir_file)
+
+    # load new-format GF2 data
+    gf2_path = pytest.test_data_dir + '/H2_GF2_new_ir/data.h5'
+    fdata = h5py.File(gf2_path, 'r')
+    g_tau = fdata['G_tau'][()]
+
+    # transform
+    g_iw = myir.tau_to_w(g_tau)
+    g_tau2 = myir.w_to_tau(g_iw)
+
+    assert norm(g_tau2 - g_tau) < 1e-10

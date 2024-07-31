@@ -4,14 +4,30 @@ import irbasis
 import h5py
 import os
 
-'''
-Fourier transform between imaginary time and Matsubara frequency using
-the intermediate representation (IR)
-'''
-
 
 class IR_factory(object):
-    def __init__(self, beta, ir_file=None):
+    """
+    Fourier transform between imaginary time and Matsubara frequency using
+    the intermediate representation (IR) grids.
+    """
+
+    def __init__(self, beta, ir_file=None, legacy=False):
+        """Initialize IR basis class for post processing of Green data.
+
+        Parameters
+        ----------
+        beta : float
+            inverse temperature of the calculation
+        ir_file : string, required
+            IR-grid file, by default None
+        legacy : bool, optional
+            toggle legacy format for IR grid file, by default False
+
+        Raises
+        ------
+        ValueError
+            when a valid IR-grid file is not provided
+        """
 
         if ir_file is None:
             raise ValueError(
@@ -21,8 +37,12 @@ class IR_factory(object):
 
         self.beta = beta
         self.ir_file = ir_file
+        if legacy:
+            self.read_IR_matrices = legacy_read_IR_matrices
+        else:
+            self.read_IR_matrices = new_read_IR_matrices
         self.tau_mesh, self.wsample, self.Ttc, self.Tcn, \
-            self.Tnc, self.Tct = read_IR_matrices(
+            self.Tnc, self.Tct = self.read_IR_matrices(
                 os.path.abspath(ir_file), self.beta
             )
         self.nts = self.tau_mesh.shape[0]
@@ -36,7 +56,7 @@ class IR_factory(object):
         if beta is not None:
             self.beta = beta
         self.tau_mesh, self.wsample, self.Ttc, self.Tcn, \
-            self.Tnc, self.Tct = read_IR_matrices(self.ir_file, self.beta)
+            self.Tnc, self.Tct = self.read_IR_matrices(self.ir_file, self.beta)
         self.nts = self.tau_mesh.shape[0]
         self.nw = self.wsample.shape[0]
 
@@ -76,7 +96,7 @@ class IR_factory(object):
         E.g., P0(tau) -> P0(i Omega).
         """
 
-        _, wsample_bose, Ttc_b, _, Tnc_b, Tct_b = read_IR_matrices(
+        _, wsample_bose, Ttc_b, _, Tnc_b, Tct_b = self.read_IR_matrices(
                 os.path.abspath(self.ir_file), self.beta, ptype='bose'
             )
         fir = h5py.File(self.ir_file, 'r')
@@ -101,7 +121,7 @@ class IR_factory(object):
         """Transform quantity from bosonic frequency grid to fermionic
         tau-grid, e.g., P0(i Omega) -> P0(tau)
         """
-        _, wsample_bose, _, Tcn_b, _, _ = read_IR_matrices(
+        _, wsample_bose, _, Tcn_b, _, _ = self.read_IR_matrices(
                 os.path.abspath(self.ir_file), self.beta, ptype='bose'
             )
         nw_b = len(wsample_bose)
@@ -141,7 +161,36 @@ class IR_factory(object):
         return X_w
 
 
-def read_IR_matrices(ir_path, beta, ptype='fermi'):
+def new_read_IR_matrices(ir_path, beta, ptype='fermi'):
+    ir = h5py.File(ir_path, 'r')
+    wsample = ir[ptype + "/ngrid"][()]
+    xsample = ir[ptype + "/xgrid"][()]
+
+    Ttc_minus1 = ir[ptype + "/u1l_neg"][()]
+    Ttc_tmp = ir[ptype + "/uxl"][()]
+    Ttc_1 = ir[ptype + "/u1l_pos"][()]
+    Ttc = np.zeros((Ttc_tmp.shape[0]+2, Ttc_tmp.shape[1]))
+    Ttc[0], Ttc[1:-1], Ttc[-1] = Ttc_minus1, Ttc_tmp, Ttc_1
+    Tnc = ir[ptype + "/uwl"][()]
+    ir.close()
+
+    if ptype == 'fermi':
+        zeta = 1
+    else:
+        zeta = 0
+    wsample = (2*wsample + zeta) * np.pi / beta
+    tau_mesh = np.zeros(xsample.shape[0]+2)
+    tau_mesh[0], tau_mesh[1:-1], tau_mesh[-1] = 0, (xsample+1)*beta/2.0, beta
+
+    Ttc *= np.sqrt(2.0/beta)
+    Tnc *= np.sqrt(beta)
+    Tct = np.linalg.inv(Ttc[1:-1])
+    Tcn = np.linalg.inv(Tnc)
+
+    return tau_mesh, wsample, Ttc, Tcn, Tnc, Tct
+
+
+def legacy_read_IR_matrices(ir_path, beta, ptype='fermi'):
     ir = h5py.File(ir_path, 'r')
     wsample = ir[ptype + "/wsample"][()]
     xsample = ir[ptype + "/xsample"][()]
