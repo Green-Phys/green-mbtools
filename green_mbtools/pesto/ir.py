@@ -11,7 +11,7 @@ class IR_factory(object):
     the intermediate representation (IR) grids.
     """
 
-    def __init__(self, beta, ir_file=None, legacy=False):
+    def __init__(self, beta, ir_file=None, legacy_ir=False):
         """Initialize IR basis class for post processing of Green data.
 
         Parameters
@@ -37,7 +37,7 @@ class IR_factory(object):
 
         self.beta = beta
         self.ir_file = ir_file
-        if legacy:
+        if legacy_ir:
             self.read_IR_matrices = legacy_read_IR_matrices
         else:
             self.read_IR_matrices = new_read_IR_matrices
