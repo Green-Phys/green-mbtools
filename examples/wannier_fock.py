@@ -192,7 +192,8 @@ else:
     plt.xticks(sp_points, labels)
 
 # x-limit
-plt.xlim([-10, 10])
+plt.xlim([kpath[0], kpath[-1]])
+plt.ylim([-10, 10])
 
 # save
 plt.savefig(
