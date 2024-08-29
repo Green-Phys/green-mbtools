@@ -11,12 +11,47 @@ from . import analyt_cont as AC
 
 
 class MB_post(object):
-    """Many-body analysis class"""
+    """Many-body analysis class for post processing of GREEN data.
+    """
+
     def __init__(
         self, fock, sigma=None, mu=None, gtau=None, S=None, kmesh=None,
         beta=None, ir_file=None
     ):
-        """ Initialization """
+        """Initialize MB_post class for post processing of GREEN data.
+
+        Parameters
+        ----------
+        fock : array_like
+            Fock matrix, generally from a scGW calculation.
+        sigma : array_like, optional
+            Imaginary time Self-energy, by default None
+        mu : float, optional
+            Chemical potential, by default None (will be set to 0.0)
+        gtau : array_like, optional
+            Imaginary time Green's function, by default None
+            If None provided, new Greens function will be computed by solving
+            Dyson equation with available Fock and Sigma
+        S : array_like, optional
+            Overlap matrix, by default None (orthonormal orbitals)
+        kmesh : array_like, optional
+            Brillouin-zone kmesh, by default None
+        beta : float, optional
+            Inverse temperature, by default None
+        ir_file : string, optional
+            Path to IR-grid file, by default None
+        legacy_ir : bool, optional
+            Toggles to old format of IR-grid file, by default False
+
+        Raises
+        ------
+        ValueError
+            If dimension of fock is not compliant with GREEN data format
+            i.e., UHF (ns, nk, nao, nao) or RHF(nk, nao, nao)
+        ValueError
+            If IR file is not provided
+        """
+
         # Public instance variables
         self.sigma = None
         self.fock = None
@@ -126,8 +161,11 @@ class MB_post(object):
     def ir_file(self, value):
         """Changing ir_file will automatically update both self._nts
         and self.ir for consistency.
-        :param value: Path to the IR grid HDF5 file.
-        :return:
+
+        Parameters
+        ----------
+        value : string
+            path to IR-grid file.
         """
         print("Setting up IR grid for {}".format(value))
         self._ir_file = value
@@ -145,8 +183,11 @@ class MB_post(object):
     def mu(self, value):
         """Updating chemical potential implicitly implies updating the
         Green's function and density matrix.
-        :param value:
-        :return:
+
+        Parameters
+        ----------
+        value : float
+            chemical potential
         """
         print("Updated mu = {}".format(value))
         self._mu = value
@@ -161,10 +202,12 @@ class MB_post(object):
 
     @gtau.setter
     def gtau(self, G):
-        """
-        Updating gtau will implicitly update density matrix (dm).
-        :param G:
-        :return:
+        """Updating gtau will implicitly update density matrix (dm).
+
+        Parameters
+        ----------
+        value : array_like
+            imaginary time Green's function
         """
         self._gtau = G
 
