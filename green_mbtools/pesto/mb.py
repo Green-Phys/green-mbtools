@@ -16,7 +16,7 @@ class MB_post(object):
 
     def __init__(
         self, fock, sigma=None, mu=None, gtau=None, S=None, kmesh=None,
-        beta=None, ir_file=None
+        beta=None, ir_file=None, legacy_ir=False
     ):
         """Initialize MB_post class for post processing of GREEN data.
 
@@ -71,6 +71,7 @@ class MB_post(object):
         self._ir_file = None
         self._beta = None
         self._mu = None
+        self.legacy_ir = legacy_ir
 
         """Setup"""
         if fock.ndim == 4:
@@ -149,7 +150,7 @@ class MB_post(object):
         print("Updated beta = {}".format(value))
         self._beta = value
         if self.ir is None:
-            self.ir = IR_factory(self.beta, self.ir_file)
+            self.ir = IR_factory(self.beta, self.ir_file, self.legacy_ir)
         else:
             self.ir.update(self.beta, self.ir_file)
 
@@ -170,7 +171,7 @@ class MB_post(object):
         print("Setting up IR grid for {}".format(value))
         self._ir_file = value
         if self.ir is None:
-            self.ir = IR_factory(self.beta, self.ir_file)
+            self.ir = IR_factory(self.beta, self.ir_file, self.legacy_ir)
         else:
             self.ir.update(self.beta, self.ir_file)
         self._nts = self.ir.nts
@@ -336,13 +337,15 @@ class MB_post(object):
     ):
         """
         Analytical continuation using Nevanlinna interpolation
-        :param gtau_orth: imaginary time Green's function in the orthogonal basis, will be obtained from curren self.gtau if None
+        :param gtau_orth: imaginary time Green's function in the orthogonal
+            basis, will be obtained from curren self.gtau if None
         :param n_real: number of real frequency points
         :param w_min: smallest value on real frequency grid
         :param w_max: largest value on real frequency grid
         :param eta: broadening parameter
         :param outdir: [DEPRECATED]
-        :return: real frequency grid along with spectral function for a given Green's function
+        :return: real frequency grid along with spectral function for a given
+            Green's function
         """
         if gtau_orth is None:
             gtau_orth = orth.sao_orth(
@@ -418,7 +421,28 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
     return Y
 
 
-def initialize_MB_post(sim_path=None, input_path=None, ir_file=None):
+def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
+    """Automatically reads the input and sim files, and initializes
+    a MB_post object for post processing of GREEN data.
+
+    Parameters
+    ----------
+    sim_path : string
+        results or sim file from the GREEN calculation
+    input_path : string
+        input file used in the GREEN calculation
+    ir_file : string
+        IR-grid file used in the GREEN calculation
+    legacy_ir : bool, optional
+        Toggle old format IR-grid file, by default False
+
+    Returns
+    -------
+    MB_post instance
+        object that contains information about the input and simulation,
+        and allows further post processing such as wannier interpolation,
+        analytic cotninuation, orthogonalization, etc.
+    """
     import h5py
     f = h5py.File(sim_path, 'r')
     it = f["iter"][()]
@@ -441,15 +465,20 @@ def initialize_MB_post(sim_path=None, input_path=None, ir_file=None):
     conj_list = f["grid/conj_list"][()]
     f.close()
 
-    """ All k-dependent matrices should lie on a full Monkhorst-Pack grid. """
+    """
+    All k-dependent matrices should lie on a full Monkhorst-Pack grid.
+    """
     F = to_full_bz(Fr, conj_list, ir_list, index, 1)
     S = to_full_bz(Sr, conj_list, ir_list, index, 1)
     Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
     G = to_full_bz(Gr, conj_list, ir_list, index, 2)
 
-    """ Results from correlated methods """
+    """
+    Results from correlated methods
+    """
 
     # Standard way to initialize
     return MB_post(
-        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, ir_file=ir_file
+        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, ir_file=ir_file,
+        legacy_ir=legacy_ir
     )

@@ -52,7 +52,8 @@ def mbo(data_path):
 
     # Standard way to initialize
     mbobj = mb.MB_post(
-        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, ir_file=irf
+        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000,
+        ir_file=irf, legacy_ir=True
     )
 
     return mbobj
