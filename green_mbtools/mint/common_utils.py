@@ -439,7 +439,7 @@ def init_pbc_params():
             args.mean_field = scf.KGHF
         else:
             args.mean_field = scf.KRHF if args.restricted else scf.KUHF
-    args.ns = 1 if args.restricted or args.x2c else 2
+    args.ns = 1 if args.restricted or args.x2c == 2 else 2
     return args
 
 def mol_cell(args):

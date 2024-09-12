@@ -7,7 +7,7 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 
 [project]
 name = "green-mbtools"
-version = "0.2.4b9"
+version = "0.2.4b10"
 authors = [
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
