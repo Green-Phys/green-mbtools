@@ -12,8 +12,10 @@ np.set_printoptions(suppress=True, precision=6, linewidth=400)
 
 # Argument parser
 parser = argparse.ArgumentParser(
-    description="Plot density of state (DOS) for molecular system. Requires the output of nevanlinna"
-)
+    description=(
+        "Plot density of states (DOS) for a molecular system using RHF reference. "
+        "Requires the output of Nevanlinna. For UHF references, the alpha DOS will be plotted instead."
+    )
 parser.add_argument(
     "--ac_out", type=str, default="ac_out.h5",
     help="Output of UGF2 code, i.e., sim.h5"
@@ -78,14 +80,17 @@ with h5py.File('Aw.h5', 'w') as file:
 # Plotting
 plt.figure(figsize=(8, 3))
 plt.rcParams.update({'font.size': 16})
-plt.plot(freqs_ev + mu * AU2EV, total_dos[:, 0, 0], label='scGW', linestyle='-', color='tab:red', alpha=1, linewidth=2.0)
+plt.plot(
+    freqs_ev + mu * AU2EV, total_dos[:, 0, 0], label='scGW',
+    linestyle='-', color='tab:red', alpha=1, linewidth=2.0
+)
+#plt.minorticks_on()
 plt.tick_params(axis="x", direction="in")
 plt.tick_params(axis="y", direction="in")
 
 plt.xlabel('eV')
 plt.ylabel(r'A($\omega$')
 plt.axis(xmin=-20, xmax=20, ymax=4, ymin=-0.1)
-plt.minorticks_on()
 plt.legend()
 plt.savefig("spectra.pdf", format="pdf", bbox_inches="tight")
 
