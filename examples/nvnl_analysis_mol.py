@@ -91,7 +91,7 @@ def main():
     # Initialize mbanalysis post processing
     mbo = mb.MB_post(
         fock=Fk_mo, sigma=Sigma_tk_mo, mu=mu, S=Sk_mo, kmesh=kmesh_scaled,
-        beta=args.beta, ir_file=args.grid_file
+        beta=args.beta, ir_file=args.grid_file, legacy_ir=args.legacy_ir
     )
 
     Gt = mbo.gtau
@@ -118,7 +118,7 @@ def main():
     Gw_inp = Gw_pos[idx]
 
     freqs_aw, A_w = ac.nevan_run(
-        Gw_inp, iw_inp, n_real=args.n_omega, w_min=args.e_min, w_max=args.e_max, eta=args.eta, prec=128, legacy_ir=args.legacy_ir,
+        Gw_inp, iw_inp, n_real=args.n_omega, w_min=args.e_min, w_max=args.e_max, eta=args.eta, prec=128,
     )
     
     elapsed_time = time.time() - start_time
