@@ -12,13 +12,12 @@ np.set_printoptions(precision=5, linewidth=200, suppress=True)
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Nevanlinna analytic continuation for molecule.")
     parser.add_argument("--beta", type=float, default=1000, help="Inverse temperature")
-    parser.add_argument("--debug", action='store_true', help="Debug mode (True/False)")
     parser.add_argument("--input", type=str, default="input.h5", help="Input file used in GW calculation")
     parser.add_argument("--sim", type=str, default="sim.h5", help="Output of UGF2 code, i.e., sim.h5")
     parser.add_argument("--iter", type=int, default=-1, help="Iteration number of the scGW cycle to use for continuation")
     parser.add_argument("--grid_file", type=str, help="HDF5 file with IR grid information (new format).")
+    parser.add_argument("--legacy_ir", type=bool, default=False, help="Toggles to old format of IR-grid file.")
     parser.add_argument("--out", type=str, default='ac_out.h5', help="Name for output file (should be .h5 format)")
-    parser.add_argument("--nev_outdir", type=str, default="./Nevanlinna/", help="Directory for Nevanlinna output")
     parser.add_argument("--e_min", type=float, default=-4.0, help="Minimum energy (in Hartree) for real axis")
     parser.add_argument("--e_max", type=float, default=4.0, help="Maximum energy (in Hartree) for real axis")
     parser.add_argument("--n_omega", type=int, default=8000, help="Number of points in the real axis")
@@ -119,7 +118,7 @@ def main():
     Gw_inp = Gw_pos[idx]
 
     freqs_aw, A_w = ac.nevan_run(
-        Gw_inp, iw_inp, n_real=args.n_omega, w_min=args.e_min, w_max=args.e_max, eta=args.eta, prec=128
+        Gw_inp, iw_inp, n_real=args.n_omega, w_min=args.e_min, w_max=args.e_max, eta=args.eta, prec=128, legacy_ir=args.legacy_ir,
     )
     
     elapsed_time = time.time() - start_time
