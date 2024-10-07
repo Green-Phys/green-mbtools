@@ -12,9 +12,8 @@ np.set_printoptions(suppress=True, precision=6, linewidth=400)
 
 # Argument parser
 parser = argparse.ArgumentParser(
-    description=(
-        "Plot density of states (DOS) for a molecular system using RHF reference. "
-        "Requires the output of Nevanlinna. For UHF references, the alpha DOS will be plotted instead."
+    description=("Plot density of states (DOS) for a molecular system using RHF reference. "
+        "Requires the output of Nevanlinna. For UHF references, the alpha DOS will be plotted instead.")
     )
 parser.add_argument(
     "--ac_out", type=str, default="ac_out.h5",
