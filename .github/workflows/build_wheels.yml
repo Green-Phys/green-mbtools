@@ -10,7 +10,7 @@ jobs:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
-        - { os: ubuntu-latest, target: "", arch: x86_64}
+        - { os: ubuntu-22.04, target: "", arch: x86_64}
         - { os: macos-13, target: "13.0" , arch: x86_64}
         - { os: macos-14, target: "14.0" , arch: arm64}
 
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.19.0
+        uses: pypa/cibuildwheel@v2.31.3
         env:
           CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
