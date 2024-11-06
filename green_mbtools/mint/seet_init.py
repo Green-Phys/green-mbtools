@@ -62,7 +62,7 @@ class seet_init:
         last_gf2_iter = gf2_inp_data["iter"][()]
         S1     = gf2_inp_data["iter{}/Sigma1".format(last_gf2_iter)][()].view(np.complex128)
         if len(S1.shape) == 5:
-            S1     = S1.reshape(F.shape[:-1])
+            S1     = S1.reshape(S1.shape[:-1])
 
         gf2_inp_data = h5py.File(self.args.gf2_input_file, "r")
         last_gf2_iter = gf2_inp_data["iter"][()]
@@ -72,7 +72,7 @@ class seet_init:
         else :
             dm    = - G_tau[G_tau.shape[0]-1,:].reshape(G_tau.shape[1:])
         dm_s  = np.copy(dm)
-        dm    = dm[0] + dm[1]
+        dm    = (dm[0] + dm[1])*0.5
         gf2_inp_data.close()
 
         e_nuc           = inp_data["HF/Energy_nuc"][()]
