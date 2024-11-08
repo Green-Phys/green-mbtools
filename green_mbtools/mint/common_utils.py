@@ -702,7 +702,7 @@ def construct_gdf(args, mycell, kmesh=None):
     We make sure to disable range-separeting implementation
     '''
     #pyscf version check for our specific df requirement
-    if(pyscf_version != "2.0.1")
+    if(pyscf_version != "2.0.1"):
       print("###WARNING*****************************************************************###")
       print("###WARNING POSSIBLE INCOMPATIBILITY OF DF INTEGRALS USE ONLY VERSION 2.0.1 ###")
       print("###WARNING*****************************************************************###")
