@@ -12,6 +12,7 @@ from pyscf import scf as mscf
 from pyscf import dft as mdft
 from pyscf import df as mdf
 from pyscf.pbc import tools, gto, df, scf, dft
+from pyscf import __version__ as pyscf_version
 
 import importlib.metadata as imd
 
@@ -700,6 +701,12 @@ def construct_gdf(args, mycell, kmesh=None):
     Construct Gaussian Density Fitting obejct for a given parameters and unit cell.
     We make sure to disable range-separeting implementation
     '''
+    #pyscf version check for our specific df requirement
+    if(pyscf_version != "2.0.1"):
+        print("###WARNING******************************************************************###")
+        print("###WARNING  POSSIBLE INCOMPATIBILITY OF DF INTEGRALS USE ONLY VERSION 2.0.1 ###")
+        print("###WARNING******************************************************************###")
+        print("current pyscf version is",pyscf_version," should be 2.0.1")
     # Use gaussian density fitting to get fitted densities
     mydf = df.GDF(mycell)
     if hasattr(mydf, "_prefer_ccdf"):
