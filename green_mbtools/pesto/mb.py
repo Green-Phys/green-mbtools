@@ -332,8 +332,7 @@ class MB_post(object):
         AC.maxent_run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
     def AC_nevanlinna(
-        self, gtau_orth=None, n_real=10001, w_min=-10., w_max=10.,
-        eta=0.01, outdir="Nevanlinna"
+        self, gtau_orth=None, n_real=10001, w_min=-10., w_max=10., eta=0.01
     ):
         """
         Analytical continuation using Nevanlinna interpolation

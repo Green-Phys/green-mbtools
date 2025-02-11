@@ -4,10 +4,10 @@ import argparse
 import numpy as np
 import scipy
 from ase.dft.kpoints import sc_special_points, get_bandpath
-from pyscf.pbc import gto
-from mbanalysis import mb, orth, analyt_cont as ac
+from green_mbtools.pesto import mb, orth, analyt_cont as ac
 
 np.set_printoptions(precision=5, linewidth=200, suppress=True)
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Nevanlinna analytic continuation for molecule.")
@@ -23,6 +23,7 @@ def parse_arguments():
     parser.add_argument("--n_omega", type=int, default=8000, help="Number of points in the real axis")
     parser.add_argument("--eta", type=float, default=0.005, help="Broadening parameter for real axis")
     return parser.parse_args()
+
 
 def read_h5_data(file_path):
     with h5py.File(file_path, 'r') as f:
@@ -43,6 +44,7 @@ def read_h5_data(file_path):
         print(scfFk.shape)
     return kmesh_scaled, index, ir_list, conj_list, scfFk, rSk, rH0k
 
+
 def read_sim_data(sim_path, it):
     with h5py.File(sim_path, 'r') as f:
         if it == -1:
@@ -54,11 +56,12 @@ def read_sim_data(sim_path, it):
         mu = f[f"iter{it}/mu"][()]
     return it, rVeffk, rGk, rSigmak, tau_mesh, mu
 
+
 def main():
     args = parse_arguments()
 
     print("Reading input file")
-    kmesh_scaled, index, ir_list, conj_list, scfFk, rSk, rH0k = read_h5_data(args.input)
+    kmesh_scaled, index, _, _, _, rSk, rH0k = read_h5_data(args.input)
     nk = index.shape[0]
 
     print("Reading sim file")
@@ -118,9 +121,10 @@ def main():
     Gw_inp = Gw_pos[idx]
 
     freqs_aw, A_w = ac.nevan_run(
-        Gw_inp, iw_inp, n_real=args.n_omega, w_min=args.e_min, w_max=args.e_max, eta=args.eta, prec=128,
+        Gw_inp, iw_inp, n_real=args.n_omega,
+        w_min=args.e_min, w_max=args.e_max, eta=args.eta, prec=128
     )
-    
+
     elapsed_time = time.time() - start_time
     print("Time required for Nevanlinna AC:", elapsed_time)
 
@@ -139,6 +143,6 @@ def main():
         f["nevanlinna/dos"] = A_w
         f["HF/mo_coeff"] = mo_coeff  # after scGW iterations
 
+
 if __name__ == "__main__":
     main()
-
