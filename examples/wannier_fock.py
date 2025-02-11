@@ -5,7 +5,7 @@ import h5py
 
 from ase.dft.kpoints import get_special_points, bandpath, special_paths
 from pyscf.pbc import gto, dft
-from mbanalysis import winter
+from green_mbtools.pesto import winter
 import matplotlib.pyplot as plt
 
 #
@@ -176,7 +176,8 @@ plt.figure(figsize=(5, 6))
 
 for n in range(nao):
     pa, = plt.plot(kpath, au2ev * evals[0, :, n])
-    pb, = plt.plot(kpath, au2ev * evals[1, :, n], color=pa.get_color())
+    if ns > 1:
+        pb, = plt.plot(kpath, au2ev * evals[1, :, n], color=pa.get_color())
 
 # Special points
 for p in sp_points:
@@ -200,3 +201,5 @@ plt.savefig(
     output.replace('.h5', '.pdf'), format='pdf',
     bbox_inches='tight', pad_inches=0.1
 )
+
+# plt.show()
