@@ -1,0 +1,33 @@
+name: Weekly build for MBtools
+# check the package's compatibility with recent python libraries
+
+on:
+  schedule:
+  # run every Wednesday at 11:00 AM EST
+  - cron: "0 16 * * 3"
+
+permissions:
+  contents: read
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.plat.os }}
+    runs-on: ${{ matrix.plat.os }}
+    strategy:
+      matrix:
+        # macos-13 is an intel runner, macos-14 is apple silicon
+        plat:
+        - { os: ubuntu-latest, target: "", arch: x86_64}
+        - { os: macos-13, target: "13.0" , arch: x86_64}
+        - { os: macos-14, target: "14.0" , arch: arm64}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Periodic build wheels
+        uses: pypa/cibuildwheel@v2.21.3
+        env:
+          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
+          CIBW_ARCHS: ${{ matrix.plat.arch }}
+          CIBW_ENVIRONMENT: >
+            MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}

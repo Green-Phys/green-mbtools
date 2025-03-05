@@ -282,7 +282,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data.attrs["__green_version__"] = imd.version("green_mbtools")
     inp_data.close()
     chk.save(args.output_path, "Cell", mycell.dumps())
-    inp_data = h5py.File("dm.h5", "w")
+    inp_data = h5py.File(os.path.join(os.path.dirname(args.output_path),"dm.h5"), "w")
     inp_data["HF/dm-k"] = hf_dm.view(np.float64).reshape(hf_dm.shape[0], hf_dm.shape[1], hf_dm.shape[2], hf_dm.shape[3], 2)
     inp_data["HF/dm-k"].attrs["__complex__"] = np.int8(1)
     inp_data["dm_gamma"] = hf_dm[:, 0, :, :]
@@ -386,13 +386,13 @@ def add_pbc_params(parser):
     parser.add_argument("--finite_size_kind", choices=["ewald", "gf2", "gw", "gw_s", "coarse_grained"], default="ewald", nargs="+", 
                               help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.")
 
-def init_mol_params():
+def init_mol_params(params=None):
     '''
     Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for molecular calculations
     '''
     parser = argparse.ArgumentParser(description="Green/WeakCoupling initialization script")
     add_common_params(parser)
-    args = parser.parse_args()
+    args = parser.parse_args(args=params)
     args.basis = parse_basis(args.basis)
     args.auxbasis = parse_basis(args.auxbasis)
     args.ecp = parse_basis(args.ecp)
@@ -417,14 +417,14 @@ def init_mol_params():
     args.center = [0.,0.,0.]
     return args
 
-def init_pbc_params():
+def init_pbc_params(params=None):
     '''
     Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for periodic calculations
     '''
     parser = argparse.ArgumentParser(description="Green/WeakCoupling initialization script")
     add_common_params(parser)
     add_pbc_params(parser)
-    args = parser.parse_args()
+    args = parser.parse_args(args=params)
     args.basis = parse_basis(args.basis)
     args.auxbasis = parse_basis(args.auxbasis)
     args.ecp = parse_basis(args.ecp)
@@ -703,12 +703,6 @@ def construct_gdf(args, mycell, kmesh=None):
     Construct Gaussian Density Fitting obejct for a given parameters and unit cell.
     We make sure to disable range-separeting implementation
     '''
-    #pyscf version check for our specific df requirement
-    if(pyscf_version != "2.0.1"):
-        print("###WARNING******************************************************************###")
-        print("###WARNING  POSSIBLE INCOMPATIBILITY OF DF INTEGRALS USE ONLY VERSION 2.0.1 ###")
-        print("###WARNING******************************************************************###")
-        print("current pyscf version is",pyscf_version," should be 2.0.1")
     # Use gaussian density fitting to get fitted densities
     mydf = df.GDF(mycell)
     if hasattr(mydf, "_prefer_ccdf"):

@@ -12,3 +12,4 @@ cvxpy
 clarabel
 mosek
 green-ac
+green-igen

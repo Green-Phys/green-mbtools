@@ -242,7 +242,7 @@ def integrals_grid(mycell, kmesh):
     num_kpair_stored = len(kpair_irre_list)
     return kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs
 
-def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_int", cderi_name="cderi.h5", keep=True, keep_after=False):
+def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_int", cderi_name="cderi.h5", keep=True, keep_after=False, cderi_name2="cderi_ewald.h5"):
 
     kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = integrals_grid(mycell, kmesh)
 
@@ -262,6 +262,13 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
     else:
         mydf._cderi_to_save = cderi_name
         mydf.build()
+    correction_df = None
+    apply_correction = False
+    if os.path.exists(cderi_name2) :
+        import copy
+        apply_correction = True
+        correction_df = copy.copy(mydf)
+        correction_df._cderi = cderi_name2
 
     auxcell = addons.make_auxmol(mycell, mydf.auxbasis)
     NQ = auxcell.nao_nr()
@@ -311,6 +318,15 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
             buffer[cnt% chunk_size, s1:s1+Lpq.shape[0], :, :] = Lpq[0:Lpq.shape[0],:,:]
             # s1 = NQ at maximum.
             s1 += Lpq.shape[0]
+        if apply_correction and np.allclose(k1, k2) :
+            s1 = 0
+            for XXX in correction_df.sr_loop((k1,k1), max_memory=4000, compact=False):
+                LpqR = XXX[0]
+                LpqI = XXX[1]
+                Lpq = (LpqR + LpqI*1j).reshape(LpqR.shape[0], nao, nao)
+                buffer[cnt% chunk_size, s1:s1+Lpq.shape[0], :, :] = Lpq[0:Lpq.shape[0],:,:]
+                # s1 = NQ at maximum.
+                s1 += Lpq.shape[0]
         cnt += 1
 
         # if reach chunk size: (cnt-chunk_size) equals to chunk id.
@@ -341,6 +357,7 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
     data.close()
     if not keep_after:
         os.remove(cderi_name)
+        os.remove(cderi_name2)
         os.system("sync")
     print("Integrals have been computed and stored into {}".format(filename))
     return kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored
