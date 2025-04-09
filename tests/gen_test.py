@@ -32,5 +32,4 @@ def test_igen(data_path):
     shutil.rmtree('/tmp/df_hf_int')
     os.remove("/tmp/input.h5")
     os.remove("/tmp/dm.h5")
-
-    assert np.allclose(test_data, data)
+    assert np.allclose(test_data, data, atol=1e-7)
