@@ -117,7 +117,7 @@ class pyscf_pbc_init (pyscf_init):
         if self.args.xc is not None:
             vhf = mf.get_veff().astype(dtype=np.complex128)
         else:
-            vhf = mf.get_veff(dm=hf_dm).astype(dtype=np.complex128)
+            vhf = mf.get_veff(hf_dm).astype(dtype=np.complex128)
         F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
     
         if len(F.shape) == 3:
