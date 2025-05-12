@@ -324,7 +324,7 @@ class pyscf_mol_init (pyscf_init):
             vhf = mf.get_veff().astype(dtype=np.complex128)
         else:
             vhf = mf.get_veff(dm=hf_dm).astype(dtype=np.complex128)
-        hf_dm.astype(dtype=np.complex128)
+        hf_dm = hf_dm.astype(dtype=np.complex128)
         F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
 
 
