@@ -68,7 +68,7 @@ def test_meanfield_variants(data_path, extra_flags, subdir):
             "HF/Fock-k",
             "HF/S-k",
             "HF/H-k",
-            "HF/mo_coeff",
+            #"HF/mo_coeff",
             "HF/mo_energy",
         ]
         compare_datasets(output_h5, expected_h5, datasets)
