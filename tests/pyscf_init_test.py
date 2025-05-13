@@ -13,11 +13,11 @@ from green_mbtools.mint import common_utils as comm
 #
 
 def compare_datasets(
-    actual_path: Path,
-    expected_path: Path,
-    dataset_names: str,
-    rtol: float = 1e-6,
-    atol: float = 1e-7
+    actual_path,
+    expected_path,
+    dataset_names,
+    rtol = 1e-6,
+    atol = 1e-7
 ) -> None:
     """Helper to assert that each named dataset in two HDF5 files is allclose."""
     with h5py.File(actual_path, "r") as actual, h5py.File(expected_path, "r") as expected:
@@ -37,10 +37,10 @@ def compare_datasets(
     (["--xc", "lda", "--restricted", "1"], "RKS"),
     (["--xc", "lda", "--x2c", "2"], "GKS"),
 ])
-def test_meanfield_variants(data_path, extra_flags: list[str], subdir: str) -> None:
+def test_meanfield_variants(data_path, extra_flags, subdir) -> None:
     import os
-    test_data_dir: Path = Path(pytest.test_data_dir) / "H2_mol"
-    tmp_dir: Path = Path(__file__).parent / "tmp"
+    test_data_dir = Path(pytest.test_data_dir) / "H2_mol"
+    tmp_dir = Path(__file__).parent / "tmp"
 
     # ensure a clean slate
     if tmp_dir.exists():
@@ -54,7 +54,7 @@ def test_meanfield_variants(data_path, extra_flags: list[str], subdir: str) -> N
 
     try:
         # build parameters 
-        base_params: list[str] = [
+        base_params = [
             "--atom",        "H -0.25 -0.25 -0.25\nH  0.25  0.25  0.25",
             "--basis",       "sto3g",
             "--output_path", str(output_h5),
@@ -71,7 +71,7 @@ def test_meanfield_variants(data_path, extra_flags: list[str], subdir: str) -> N
 
         # compare key HF datasets 
         expected_h5 = test_data_dir / subdir / "input.h5"
-        datasets: list[str] = [
+        datasets = [
             "HF/Energy",
             "HF/Energy_nuc",
             "HF/Fock-k",
