@@ -317,13 +317,14 @@ class pyscf_mol_init (pyscf_init):
         mf = self.mf_object(mydf)
     
         # Get Overlap and Fock matrices
-        hf_dm = mf.make_rdm1().astype(dtype=np.complex128)
+        hf_dm = mf.make_rdm1()
         S     = mf.get_ovlp().astype(dtype=np.complex128)
         T     = mf.get_hcore().astype(dtype=np.complex128)
         if self.args.xc is not None:
             vhf = mf.get_veff().astype(dtype=np.complex128)
         else:
-            vhf = mf.get_veff(hf_dm).astype(dtype=np.complex128)
+            vhf = mf.get_veff(dm=hf_dm).astype(dtype=np.complex128)
+        hf_dm = hf_dm.astype(dtype=np.complex128)
         F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
 
 

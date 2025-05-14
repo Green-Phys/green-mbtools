@@ -357,7 +357,8 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
     data.close()
     if not keep_after:
         os.remove(cderi_name)
-        os.remove(cderi_name2)
+        if apply_correction:
+            os.remove(cderi_name2)
         os.system("sync")
     print("Integrals have been computed and stored into {}".format(filename))
     return kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored
