@@ -456,6 +456,11 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
     beta = tau_mesh[-1]
     mu = f["iter"+str(it)+"/mu"][()]
+    nao = f["params/nao"][()]
+    nso = f["params/nso"][()]
+    x2c = False
+    if nso == nao * 2:
+        x2c = True
     f.close()
 
     f = h5py.File(input_path, 'r')
@@ -467,10 +472,16 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     """
     All k-dependent matrices should lie on a full Monkhorst-Pack grid.
     """
-    F = to_full_bz(Fr, conj_list, ir_list, index, 1)
-    S = to_full_bz(Sr, conj_list, ir_list, index, 1)
-    Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-    G = to_full_bz(Gr, conj_list, ir_list, index, 2)
+    if not x2c:
+        F = to_full_bz(Fr, conj_list, ir_list, index, 1)
+        S = to_full_bz(Sr, conj_list, ir_list, index, 1)
+        Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
+        G = to_full_bz(Gr, conj_list, ir_list, index, 2)
+    else:
+        F = to_full_bz_TRsym(Fr, conj_list, ir_list, index, 1)
+        S = to_full_bz_TRsym(Sr, conj_list, ir_list, index, 1)
+        Sigma = to_full_bz_TRsym(Sigmar, conj_list, ir_list, index, 2)
+        G = to_full_bz_TRsym(Gr, conj_list, ir_list, index, 2)
 
     """
     Results from correlated methods
