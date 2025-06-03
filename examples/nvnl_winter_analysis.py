@@ -109,10 +109,17 @@ if __name__ == "__main__":
     index = f["/grid/index"][()]
     ir_list = f["/grid/ir_list"][()]
     conj_list = f["/grid/conj_list"][()]
+    nao = f['params/nao'][()]
+    nso = f['params/nso'][()]
     reduced_kmesh_scaled = kmesh_scaled[ir_list]
     nk = index.shape[0]
     ink = ir_list.shape[0]
     f.close()
+
+    # get x2c info
+    x2c = 0
+    if np.isclose(nso//2, nao, 1e-8):
+        x2c = 1
 
     # Pyscf object to generate k points
     mycell = gto.loads(cell)
@@ -151,10 +158,16 @@ if __name__ == "__main__":
     print(rSigmak.shape)
 
     print("Transfrom quantities to full BZ")
-    Fk = mb.to_full_bz(rFk, conj_list, ir_list, index, 1)
-    Fk += Hk  # add Hcore contribution fron imput file
-    G_tk = mb.to_full_bz(rGk, conj_list, ir_list, index, 2)
-    Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
+    if x2c:
+        Fk = mb.to_full_bz_TRsym(rFk, conj_list, ir_list, index, 1)
+        Fk += Hk  # add Hcore contribution fron imput file
+        G_tk = mb.to_full_bz_TRsym(rGk, conj_list, ir_list, index, 2)
+        Sigma_tk = mb.to_full_bz_TRsym(rSigmak, conj_list, ir_list, index, 2)
+    else:
+        Fk = mb.to_full_bz(rFk, conj_list, ir_list, index, 1)
+        Fk += Hk  # add Hcore contribution fron imput file
+        G_tk = mb.to_full_bz(rGk, conj_list, ir_list, index, 2)
+        Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
     print("Fock shape: ", Fk.shape)
     print("Overlap shape: ", Sk.shape)
     print("Self-energy shape: ", Sigma_tk.shape)
@@ -175,7 +188,10 @@ if __name__ == "__main__":
         print("Starting interpolation")
         t1 = time.time()
         # interpolate Sk
-        kmf = dft.KUKS(mycell, kmesh_abs)
+        if not x2c:
+            kmf = dft.KUKS(mycell, kmesh_abs)
+        else:
+            kmf = dft.KGKS(mycell, kmesh_abs).density_fit().x2c1e()
         Sk_int = kmf.get_ovlp(kpt=band_kpts_abs)
         # interpolate Fk and Sigma_tk
         Fk_int = winter.interpolate(

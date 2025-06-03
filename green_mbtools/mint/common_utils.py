@@ -63,7 +63,6 @@ def print_high_symmetry_points(cell, args):
     import ase.spacegroup
     lattice_vectors, symbols, positions = extract_ase_data(args.a, args.atom)
     cc = ase.spacegroup.crystal(symbols, positions, cellpar=ase.geometry.cell_to_cellpar(lattice_vectors))
-    space_group = ase.spacegroup.get_spacegroup(cc)
     lat = cc.cell.get_bravais_lattice()
     special_points = lat.get_special_points()
     print("List of special points: {}".format(special_points))
@@ -81,7 +80,6 @@ def check_high_symmetry_path(cell, args):
     lattice_vectors, symbols, positions = extract_ase_data(args.a, args.atom)
     logging.info(f"parse: {lattice_vectors} {symbols} {positions}")
     cc = ase.spacegroup.crystal(symbols, positions, cellpar=ase.geometry.cell_to_cellpar(lattice_vectors))
-    space_group = ase.spacegroup.get_spacegroup(cc)
     lat = cc.cell.get_bravais_lattice()
     special_points = lat.get_special_points()
     path = args.high_symmetry_path
