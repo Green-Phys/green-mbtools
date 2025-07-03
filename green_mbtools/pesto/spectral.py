@@ -11,14 +11,12 @@ from . import orth
 #################
 
 
-def compute_mo(F, S, eigh_solver=LA.eigh, thr=1e-7):
+def compute_mo(F, S):
     '''
     Solve the generalized eigen problem: FC = SCE
 
     :param F: Fock matrix, dim = (ns, nk, nao, nao)
     :param S: Overlap matrix, dim = (ns, nk, nao, nao)
-    :param eigh_solver: eigenvalue problem solver
-    :param thr: lowest eigenvalues of S.
     Only used in canonical orthogonalization.
 
     :return:
@@ -34,7 +32,7 @@ def compute_mo(F, S, eigh_solver=LA.eigh, thr=1e-7):
         S = np.array([[np.eye(nao)]*nk]*ns)
     for ss in range(ns):
         for k in range(nk):
-            eiv, mo = eigh_solver(F[ss, k], S[ss, k], thr)
+            eiv, mo = LA.eigh(F[ss, k], S[ss, k])
             # Re-order
             idx = np.argmax(abs(mo.real), axis=0)
             mo[:, mo[idx, np.arange(len(eiv))].real < 0] *= -1

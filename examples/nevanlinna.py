@@ -57,7 +57,7 @@ if __name__ == "__main__":
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     x2c = 0
-    if np.isclose(nso // 2, nao, 1e-8):
+    if nso // 2 == nao:
         x2c = 1
     f.close()
     print("Completed reading mean-field data.")

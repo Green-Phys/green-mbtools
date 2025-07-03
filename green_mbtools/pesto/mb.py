@@ -456,17 +456,17 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
     beta = tau_mesh[-1]
     mu = f["iter"+str(it)+"/mu"][()]
-    nao = f["params/nao"][()]
-    nso = f["params/nso"][()]
-    x2c = False
-    if nso == nao * 2:
-        x2c = True
     f.close()
 
     f = h5py.File(input_path, 'r')
     ir_list = f["/grid/ir_list"][()]
     index = f["/grid/index"][()]
     conj_list = f["grid/conj_list"][()]
+    nao = f["params/nao"][()]
+    nso = f["params/nso"][()]
+    x2c = False
+    if nso == nao:
+        x2c = True
     f.close()
 
     """
