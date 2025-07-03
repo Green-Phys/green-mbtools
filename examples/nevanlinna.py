@@ -54,16 +54,27 @@ if __name__ == "__main__":
     ir_list = f["/grid/ir_list"][()]
     index = f["/grid/index"][()]
     conj_list = f["grid/conj_list"][()]
+    nao = f["params/nao"][()]
+    nso = f["params/nso"][()]
+    x2c = 0
+    if nso // 2 == nao:
+        x2c = 1
     f.close()
     print("Completed reading mean-field data.")
 
     # All k-dependent matrices should lie on a full Monkhorst-Pack grid.
     # Transform from reduced BZ to full BZ
     print("Transforming data from reduced BZ to full BZ.")
-    Fk = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
-    Sk = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
-    Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-    Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+    if x2c:
+        Fk = mb.to_full_bz_TRsym(Fr, conj_list, ir_list, index, 1)
+        Sk = mb.to_full_bz_TRsym(Sr, conj_list, ir_list, index, 1)
+        Sigmak = mb.to_full_bz_TRsym(Sigmar, conj_list, ir_list, index, 2)
+        Gk = mb.to_full_bz_TRsym(Gr, conj_list, ir_list, index, 2)
+    else:
+        Fk = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
+        Sk = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
+        Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
+        Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
     print('Pre analysis complete')
 
     ##################
