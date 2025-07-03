@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     # get x2c info
     x2c = 0
-    if np.isclose(nso//2, nao, 1e-8):
+    if nso//2 == nao:
         x2c = 1
 
     # Pyscf object to generate k points
