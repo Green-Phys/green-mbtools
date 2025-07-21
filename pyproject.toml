@@ -10,7 +10,7 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 
 [project]
 name = "green-mbtools"
-version = "0.2.4b13"
+version = "0.2.4b14"
 authors = [
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
@@ -64,7 +64,7 @@ manylinux-x86_64-image = "manylinux2014"
 
 
 [tool.cibuildwheel.linux]
-before-all = "sed -i -e 's/mirrorlist/#mirrorlist/g' -e 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*; yum install -y eigen3-devel gmp-devel mpfr-devel fftw3-devel"
+before-all = "sed -i -e 's/mirrorlist/#mirrorlist/g' -e 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*; yum install -y eigen3-devel gmp-devel mpfr-devel fftw3-devel libjpeg-devel"
 #test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos]
