@@ -1,11 +1,35 @@
 import numpy as np
+from ir import IR_factory
 
 
 def solve_dyson(fock, S=None, sigma=None, mu=0, ir=None):
+    """Solve Dyson equation and construct Green's function. If overlap is None, it is set to identity.
+
+    Parameters
+    ----------
+    fock : numpy.ndarray
+        Fock matrix of shape (ns, nk, nao, nao)
+    S : numpy.ndarray, optional
+        Overlap matrix of shape (ns, nk, nao, nao), by default None
+    sigma : numpy.ndarray, optional
+        Imaginary-time self-energy of shape (ntau, ns, nk, nao, nao), by default None (zero)
+    mu : float, optional
+        chemical potential, by default 0
+    ir : ir.IR_factory, optional
+        Instance of IR factory for transforming between imaginary time and Matsubara frequencies, by default None
+
+    Returns
+    -------
+    numpy.ndarray
+        Green's function on imaginary time axis of shape (ntau, ns, nk, nao, nao)
+
+    Raises
+    ------
+    ValueError
+        if `ir` is not provided
     """
-    Compute Green's function through Dyson's equation.
-    :return:
-    """
+    if ir is None:
+        raise ValueError("ir parameter is necessary to perform Matsubara Fourier transforms")
     nts, nw = ir.nts, ir.nw
     ns, nk, nao = fock.shape[0], fock.shape[1], fock.shape[2]
     if S is None:

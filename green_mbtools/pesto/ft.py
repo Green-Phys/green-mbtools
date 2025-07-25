@@ -6,12 +6,27 @@ Fourier transform between real and reciprocal space
 
 
 def construct_rmesh(nkx, nky, nkz):
-    """Generat a real-space rmesh.
-    rmesh is constructed in the units of lattice translation vectors.
-    e.g.:   if nk = 6
-            L = 2
-            left = 1
-            rx = -2, -1, 0, 1, 2, 3
+    """Generate real-space mesh, in the units of lattice translation vectors.
+    e.g.:
+        if nk = 7
+        then 
+        L = 2
+        left = 1
+        rx = -2, -1, 0, 1, 2, 3
+
+    Parameters
+    ----------
+    nkx : int
+        number of k-points in the x direction
+    nky : int
+        number of k-points in the y direction
+    nkz : int
+        number of k-points in the z direction
+
+    Returns
+    -------
+    numpy.ndarray
+        real-space mesh
     """
     Lx, Ly, Lz = (nkx - 1) // 2, (nky - 1) // 2, (nkz - 1) // 2
     leftx, lefty, leftz = (nkx - 1) % 2, (nky - 1) % 2, (nkz - 1) % 2
@@ -26,11 +41,27 @@ def construct_rmesh(nkx, nky, nkz):
 
 
 def construct_symmetric_rmesh(nkx, nky, nkz):
-    """Generate a rmesh that is symmetric along the coordinate axes.
-    e.g.:   if nk = 6
-            L = 2
-            left = 1
-            rx_symm = -3, -2, -1, 0, 1, 2, 3
+    """Generate a real-space mesh that is symmetric along coordinate axes.
+    e.g.:
+        if nk = 6
+        then 
+        L = 2
+        left = 1
+        rx_symm = -3, -2, -1, 0, 1, 2, 3
+
+    Parameters
+    ----------
+    nkx : int
+        number of k-points in the x direction
+    nky : int
+        number of k-points in the y direction
+    nkz : int
+        number of k-points in the z direction
+
+    Returns
+    -------
+    numpy.ndarray
+        unique / symmetric real-space mesh
     """
     Lx, Ly, Lz = (nkx - 1) // 2, (nky - 1) // 2, (nkz - 1) // 2
     leftx, lefty, leftz = (nkx - 1) % 2, (nky - 1) % 2, (nkz - 1) % 2
@@ -47,13 +78,21 @@ def construct_symmetric_rmesh(nkx, nky, nkz):
 
 
 def compute_fourier_coefficients(kmesh, rmesh):
-    """Compute Fourier coefficients for direct and
-    inverse Fourier transform
+    """Compute Fourier coefficients for direct and inverse transforms between k and real space
 
-    Input   :   kmesh, rmesh
-    Returns :   fkr, frk
-                where fkr = coefficients from r to k,
-                and frk = coefficients from k to r.
+    Parameters
+    ----------
+    kmesh : numpy.ndarray
+        k-mesh of shape (nk, 3)
+    rmesh : numpy.ndarray
+        real-space mesh
+
+    Returns
+    -------
+    numpy.ndarray
+        coefficients to transform from r to k space
+    numpy.ndarray
+        coefficients to transform from k to r space
     """
     fkr = np.zeros((kmesh.shape[0], rmesh.shape[0]), dtype=complex)
     frk = np.zeros((rmesh.shape[0], kmesh.shape[0]), dtype=complex)
@@ -69,13 +108,21 @@ def compute_fourier_coefficients(kmesh, rmesh):
 
 
 def k_to_real(frk, obj_k, weights):
-    """
-    Perform Fourier transform from reciprocal to real space
-    frk     - Fourier transform coefficients from reciprocal to real space
-    obj_k   - reciprocal space object
-    weights - Fourier coefficient degenerate weights
+    """Perform Fourier transform from reciprocal to real space
 
-    return obj_i - inverse Fourier transform of obj_k
+    Parameters
+    ----------
+    frk : numpy.ndarray
+        coefficients to transform from k to r space
+    obj_k : numpy.ndarray
+        Reciprocal space object
+    weights : numpy.ndarray
+        Fourier coefficient's degeneracy weights
+
+    Returns
+    -------
+    numpy.ndarray
+        Real space (inverse Fourier transformed) object
     """
     obj_i = np.einsum("k...,k,ki->i...", obj_k, weights, frk.conj().T)
     obj_i /= np.sum(weights)
@@ -83,12 +130,19 @@ def k_to_real(frk, obj_k, weights):
 
 
 def real_to_k(fkr, obj_i):
-    """
-    Perform Fourier transform from reciprocal to real space
-    fkr     - Fourier transform coefficients from real to reciprocal space
-    obj_i   - real space object
+    """Perform Fourier transform from real to reciprocal space
 
-    return obj_k - Fourier transform of obj_i
+    Parameters
+    ----------
+    fkr : numpy.ndarray
+        coefficients to transform from r to k space
+    obj_i : numpy.ndarray
+        Real space (inverse Fourier transformed) object
+
+    Returns
+    -------
+    numpy.ndarray
+        Reciprocal space object
     """
     original_shape = obj_i.shape
     obj_k = np.dot(fkr.conj(), obj_i.reshape(original_shape[0], -1))

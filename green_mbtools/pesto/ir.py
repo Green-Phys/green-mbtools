@@ -7,7 +7,7 @@ import os
 
 class IR_factory(object):
     """
-    Fourier transform between imaginary time and Matsubara frequency using
+    Class to handle Fourier transform between imaginary time and Matsubara frequency using
     the intermediate representation (IR) grids.
     """
 
@@ -49,7 +49,14 @@ class IR_factory(object):
         self.nw = self.wsample.shape[0]
 
     def update(self, beta=None, ir_file=None):
-        """Update IR grid information in run-time.
+        """Update IR grid information for the IR_facory object
+
+        Parameters
+        ----------
+        beta : float, optional
+            inverse temperature of the calculation, by default None
+        ir_file : string, required
+            IR-grid file, by default None
         """
         if ir_file is not None:
             self.ir_file = ir_file
@@ -61,7 +68,17 @@ class IR_factory(object):
         self.nw = self.wsample.shape[0]
 
     def tau_to_w(self, X_t):
-        """Transform `X_t` from tau to imaginary frequency representation.
+        """Transform from imaginary time to Matsubara axis
+
+        Parameters
+        ----------
+        X_t : numpy.ndarray
+            Data on imaginary time axis
+
+        Returns
+        -------
+        numpy.ndarray
+            Data on Matsubara axis
         """
         X_w = np.zeros((self.nw,) + X_t.shape[1:], dtype=complex)
         original_shape = X_w.shape
@@ -72,7 +89,17 @@ class IR_factory(object):
         return X_w
 
     def w_to_tau(self, X_w, debug=False):
-        """Transform `X_w` from imaginary frequency to tau representation.
+        """Transform from Matsubara to imaginary time axis
+
+        Parameters
+        ----------
+        X_w : numpy.ndarray
+            Data on Matsubara axis
+
+        Returns
+        -------
+        numpy.ndarray
+            Data on imaginary time axis
         """
         X_t = np.zeros((self.nts,) + X_w.shape[1:], dtype=complex)
         original_shape = X_t.shape
@@ -91,11 +118,20 @@ class IR_factory(object):
         return X_t
 
     def tauf_to_wb(self, X_t):
-        """Transform quantity from fermionic tau-grid to bosonic
-        frequency grid.
-        E.g., P0(tau) -> P0(i Omega).
-        """
+        """Transform from fermionic imaginary time to bosonic Matsubara axis. Imaginary time axis
+        is the same for fermions and bosons, but Matsubara frequencies differ. E.g., Polarization
+        from tau to i Omega axis.
 
+        Parameters
+        ----------
+        X_t : numpy.ndarray
+            Data on imaginary time axis
+
+        Returns
+        -------
+        numpy.ndarray
+            Data on bosonic Matsubara axis
+        """
         _, wsample_bose, Ttc_b, _, Tnc_b, Tct_b = self.read_IR_matrices(
                 os.path.abspath(self.ir_file), self.beta, ptype='bose'
             )
@@ -118,8 +154,17 @@ class IR_factory(object):
         return X_wb
 
     def wb_to_tauf(self, X_wb):
-        """Transform quantity from bosonic frequency grid to fermionic
-        tau-grid, e.g., P0(i Omega) -> P0(tau)
+        """Transform from bosonic Matsubara to imaginary time axis
+
+        Parameters
+        ----------
+        X_w : numpy.ndarray
+            Data on bosonic Matsubara axis
+
+        Returns
+        -------
+        numpy.ndarray
+            Data on imaginary time axis
         """
         _, wsample_bose, _, Tcn_b, _, _ = self.read_IR_matrices(
                 os.path.abspath(self.ir_file), self.beta, ptype='bose'
@@ -143,9 +188,21 @@ class IR_factory(object):
 
     # TODO Specify the version of irbasis.
     def tau_to_w_other(self, X_t, wsample):
-        """Use IR basis python package to intrinsically transform other type of
-        quantities from tau to imaginary frequency basis.
-        XXX: What are these "other" quantities?
+        """Transform from imaginary time axis to user-provided Matsubara frequency points.
+        Typically, we deal with time and Matsubara grids that are pre-determined by intermediate
+        representation grid files. This function allows transformation to other Matsubarar frequencies.
+
+        Parameters
+        ----------
+        X_t : numpy.ndarray
+            Data on imaginary time axis
+        wsample : numpy.ndarray
+            Frequency points on which Matsubara data is required
+
+        Returns
+        -------
+        numpy.ndarray
+            Data on Matsubara axis
         """
         nw = wsample.shape[0]
         X_w = np.zeros((nw,)+X_t.shape[1:], dtype=complex)
@@ -162,6 +219,32 @@ class IR_factory(object):
 
 
 def new_read_IR_matrices(ir_path, beta, ptype='fermi'):
+    """Read IR file with new data format
+
+    Parameters
+    ----------
+    ir_path : string
+        path to IR file
+    beta : float
+        inverse temperature
+    ptype : str, optional
+        parity type ('fermi' or 'bose'), by default 'fermi'
+
+    Returns
+    -------
+    numpy.ndarray
+        Imaginary time grid
+    numpy.ndarray
+        Matsubara grid
+    numpy.ndarray
+        Transformation coefficients
+    numpy.ndarray
+        Transformation coefficients
+    numpy.ndarray
+        Transformation coefficients
+    numpy.ndarray
+        Transformation coefficients
+    """
     ir = h5py.File(ir_path, 'r')
     wsample = ir[ptype + "/ngrid"][()]
     xsample = ir[ptype + "/xgrid"][()]
@@ -191,6 +274,32 @@ def new_read_IR_matrices(ir_path, beta, ptype='fermi'):
 
 
 def legacy_read_IR_matrices(ir_path, beta, ptype='fermi'):
+    """Read IR file with legacy data format
+
+    Parameters
+    ----------
+    ir_path : string
+        path to IR file
+    beta : float
+        inverse temperature
+    ptype : str, optional
+        parity type ('fermi' or 'bose'), by default 'fermi'
+
+    Returns
+    -------
+    numpy.ndarray
+        Imaginary time grid
+    numpy.ndarray
+        Matsubara grid
+    numpy.ndarray
+        Transformation coefficients
+    numpy.ndarray
+        Transformation coefficients
+    numpy.ndarray
+        Transformation coefficients
+    numpy.ndarray
+        Transformation coefficients
+    """
     ir = h5py.File(ir_path, 'r')
     wsample = ir[ptype + "/wsample"][()]
     xsample = ir[ptype + "/xsample"][()]

@@ -6,10 +6,32 @@ from . import dyson
 
 # Only work for full_bz object
 def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
-    """Interpolate obj_k[ns, nk, nao, nao] from kmesh to kpts_inter
-    using Wannier interpolation.
+    """Perform Wannier interpolation for static quantities
 
-    NOTE: all the k-points are in scaled units.
+    Parameters
+    ----------
+    obj_k : numpy.ndarray
+        input object on full Brillouin zone k-mesh, of shape (ns, nk, nao, nao)
+    kmesh : numpy.ndarray
+        original k-mesh (in scaled units)
+    kpts_inter : numpy.ndarray
+        k-points to interpolate on (in scaled units)
+    dim : int, optional
+        dimensionality of crystal (2D or 3D)
+    hermi : bool, optional
+        set to True if the interpolated matrix Hermitian, by default False
+    debug : bool, optional
+        set to True if debug information needs to be printed, by default False
+
+    Returns
+    -------
+    numpy.ndarray
+        Interpolated tensor
+
+    Raises
+    ------
+    ValueError
+        if `dim` other than 2 or 3 is specified
     """
     ns, Nk, nao = obj_k.shape[:3]
     if dim == 3:
@@ -52,11 +74,33 @@ def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
 
 # Only work for full_bz object
 # TODO merge interpolate_tk_object and interpolate
-def interpolate_tk_object(
-    obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=False
-):
-    """Interpolate dynamic obj_k[nts, ns, nk, nao, nao] from kmesh to
-    kpts_inter using Wannier interpolation
+def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
+    """Perform Wannier interpolation for dynamic quantities
+
+    Parameters
+    ----------
+    obj_k : numpy.ndarray
+        input object on full Brillouin zone k-mesh, of shape (ntau, ns, nk, nao, nao)
+    kmesh : numpy.ndarray
+        original k-mesh (in scaled units)
+    kpts_inter : numpy.ndarray
+        k-points to interpolate on (in scaled units)
+    dim : int, optional
+        dimensionality of crystal (2D or 3D)
+    hermi : bool, optional
+        set to True if the interpolated matrix Hermitian, by default False
+    debug : bool, optional
+        set to True if debug information needs to be printed, by default False
+
+    Returns
+    -------
+    numpy.ndarray
+        Interpolated tensor
+
+    Raises
+    ------
+    ValueError
+        if `dim` other than 2 or 3 is specified
     """
     nts, ns, Nk, nao = obj_tk.shape[:4]
     if dim == 3:
@@ -112,6 +156,41 @@ def interpolate_G(
     Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, dim=3,
     hermi=False, debug=False
 ):
+    """Interpolate Green's function from full BZ k-mesh to specified k-points
+
+    Parameters
+    ----------
+    Fk : numpy.ndarray
+        Fock matrix
+    Sigma_tk : numpy.ndarray
+        Self-energy on imaginar time axis
+    mu : float
+        Chemical potential
+    Sk : numpy.ndarray
+        overlap matrix
+    kmesh : numpy.ndarray
+        input k-mesh in the Brillouin zone
+    kpts_inter : numpy.ndarray
+        interpolation k-points
+    ir : IR_factory
+        handler for Fourier transforms between imaginary time and Matsubara frequencies
+    dim : int, optional
+        dimensionality of latticej, by default 3
+    hermi : bool, optional
+        Is Green's function expected to be Hermitian, by default False
+    debug : bool, optional
+        print extra messages for debugging, by default False
+
+    Returns
+    -------
+    numpy.ndarray
+        Green's function interpolated on k-points
+
+    Raises
+    ------
+    ValueError
+        if `dim` other than 2 or 3 is specified
+    """    
     ns, Nk, nao = Fk.shape[:3]
     if dim != 3 and dim != 2:
         raise ValueError(

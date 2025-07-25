@@ -25,26 +25,23 @@ else:
     _ncpu = int(phys_ncpu // 2)
 
 
-def maxent_run(
-    gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxent',
-    outdir="Maxent"
-):
-    """Maxent analytic continuation for G(iw) or diagonal of self-energy
+def maxent_run(gtau, tau_mesh, error=5e-3, params="green.param", exe_path='maxent', outdir="Maxent"):
+    """Maxent analytic continuation for G(iw) or diagonal of self-energy. The results are stored in outdir/DOS.h5
 
-    Input parameters
-    ----------------
-        gtau        :   contains matrix valued data on imaginary time axis
-                        shape of gtau should be:  (nt, :)
-        tau_mesh    :   tau grid points
-        error       :   error threshold in optimization
-        params      :   parameter file name to pass into maxent continuation
-        exe_path    :   Path to maxent program provided by CQMP:
-                        https://github.com/CQMP/Maxent
-        outdir      :   output directory in which data will be stored
-
-    Returns
-    ----------------
-        The maxent spectral function is stored in '<outdir>/DOS.h5'
+    Parameters
+    ----------
+    gtau : numpy.ndarray
+        matrix valued data on imaginary time axis, of shape (ntau, :)
+    tau_mesh : numpy.ndarray
+        imaginary time grid points
+    error : float, optional
+        error threshold in optimization, by default 5e-3
+    params : str, optional
+        parameter file name to pass into maxent continuation, by default "green.param"
+    exe_path : str, optional
+        Path to maxent program provided by CQMP (https://github.com/CQMP/Maxent), by default 'maxent'
+    outdir : str, optional
+        Path to output directory in which results will be stored, by default "Maxent"
     """
 
     wkdir = os.path.abspath(os.getcwd())
@@ -142,32 +139,34 @@ def maxent_run(
     os.chdir("..")
 
 
-def nevan_run(
-    X_iw, wsample, n_real=10000, w_min=-10, w_max=10,
-    eta=0.01, spectral=True, prec=128
-):
+def nevan_run(X_iw, wsample, n_real=10000, w_min=-10., w_max=10., eta=0.01, spectral=True, prec=128):
     """Nevanlinna analytic continuation for G(iw) or diagonal of self-energy
-    Input parameters
-    ----------------
-        X_iw        :   contains matrix valued data on imaginary freq. points
-                        shape of X_iw should be:  (nw, ns, nk, nao, nao)
-        wsample     :   value of imaginary frequencies
-        n_real      :   number of real frequency points
-                        (used if custom_freqs = None)
-        w_min       :   minimum value of real frequency range
-                        (used if custom_freqs = None)
-        w_max       :   maximum value of real frequency range
-                        (used if custom_freqs = None)
-        eta         :   broadening parameter
-        spectral    :   returns real valued spectral function if True,
-                        full complex valued function otherwise
-        prec        :   Precision to use in Nevanlinna
 
-    Returns:
-    ----------------
-        freqs       :   Real frequency grid on which AC data is obtained
-        X_w         :   Real valued spectral function (if spectral=True)
-                        or complex valued AC quantity (if spectral=False)
+    Parameters
+    ----------
+    X_iw : numpy.ndarray
+        matrix valued data on Matsubara frequency axis, of shape (nw, ns, nk, nao, nao)
+    wsample : numpy.ndarray
+        Matsubara frequency grid
+    n_real : int, optional
+        numbr of real frequency points to construct, by default 10000
+    w_min : float, optional
+        minimum real frequency to consider, by default -10.0
+    w_max : float, optional
+        maximum real frequency to consider, by default 10.0
+    eta : float, optional
+        broadening parameter, by default 0.01
+    spectral : bool, optional
+        returns spectral function if set to True and complex valued G if set to False, by default True
+    prec : int, optional
+        Precision in which Nevanlinna should be performed, by default 128
+
+    Returns
+    -------
+    numpy.ndarray
+        1D array of real frequency points on which continued data is generated
+    numpy.ndarray
+        Nevanlinna continued equivalent (spectral function or full complex valued) of Matsubara data X_iw
     """
     # print acknowledgments
     print("----------------------------------------------")
@@ -194,32 +193,38 @@ def nevan_run(
 
 def caratheodory_run(
     X_iw, wsample, outdir='Caratheodory', custom_freqs=None,
-    n_real=2001, w_min=-10, w_max=10, eta=0.01,
+    n_real=2001, w_min=-10., w_max=10., eta=0.01
 ):
     """Caratheodory analytic continuation for G(iw) or self-energy
 
-    Input parameters
-    ----------------
-        X_iw            : contains matrix valued data on imaginary freq. points
-                        shape of X_iw should be: (nw, ns, nk, nao, nao)
-        wsample         : value of imaginary frequencies
-        outdir          : output directory in which data will be stored
-        custom_freqs    : custom freq points on which to perform carath. AC
-        n_real          : number of real frequency points
-                          (used if custom_freqs = None)
-        w_min           : minimum value of real frequency range
-                          (used if custom_freqs = None)
-        w_max           : maximum value of real frequency range
-                          (used if custom_freqs = None)
-        eta             : broadening parameter
+    Parameters
+    ----------
+    X_iw : numpy.ndarray
+        matrix valued data on Matsubara frequency axis, of shape (nw, ns, nk, nao, nao)
+    wsample : numpy.ndarray
+        Matsubara frequency grid
+    outdir : str, optional
+        Output directory in which Caratheodory results will be temporarily stored, by default 'Ccaratheodory'
+    custom_freqs : numpy.ndarray, optional
+        1D array of custom real frequency points to minimize output data in Caratheodory, by default None
+    n_real : int, optional
+        numbr of real frequency points to construct (used if custom_freqs=None), by default 2001
+    w_min : float, optional
+        minimum real frequency to consider, by default -10.0
+    w_max : float, optional
+        maximum real frequency to consider, by default 10.0
+    eta : float, optional
+        broadening parameter, by default 0.01
 
-    Returns:
-    ----------------
-        freqs       :   Real frequency grid on which AC data is obtained
-        Xc_w        :   analytically continued matrix data
-        XA_w        :   spectral function for AC data
+    Returns
+    -------
+    numpy.ndarray
+        1D array of real frequency points on which continued data is generated
+    numpy.ndarray
+        Complex valued analytically continued matrix
+    numpy.ndarray
+        Spectral function corresponding to the continued matrix
     """
-
     # print acknowledgments
     print("----------------------------------------------")
     print("Performing Caratheodory analytic continuation.")
@@ -301,42 +306,59 @@ def caratheodory_run(
 
 
 def es_nevan_run(
-    G_iw, wsample, n_real=10000, w_min=-10, w_max=10, eta=0.01, diag=True,
+    G_iw, wsample, n_real=10000, w_min=-10., w_max=10., eta=0.01, diag=True,
     eps_pol=1.0, parallel='sk', outdir='PESNevan', solver='SCS', **solver_opts
 ):
     """ES analytic continuation for G(iw) or diagonal of self-energy.
 
-    Input parameters
-    ----------------
-        G_iw        :   imaginary frequency green's function
-        wsample     :   (real part) of the imaginary frequencies
-        n_real      :   number of grid-points to use on the real freuency axis
-        w_min       :   lowest real frequency to get results for
-        w_max       :   highest real frequency to get results for
-        eta         :   broadening for real-axis.
-        diag        :   value of True will perform analytic continuation only
-                        for the diagonal values of Green's function
-                        (precisely what we need for spectral function)
-                        (NOTE: we can diagonalize the G_iw first then input
-                        with diag=False as well)
-        eps_pol     :   Threshold on the imaginary part of poles
-        parallel    :   How to parallelize (over openMP) the analytic cont.
-                        'sk' meanse we parallelize over spin and k-ponts.
-                        'ska' would parallelize over spin, k and orbitals
-                        Typically, 'sk' is most optimal, because the
-                        analyic continuation is vectorized over orbtal indices
-        solver      :   ES uses semi-definite programming to perform
-                        analytical continuation. Different solvers can be
-                        employed, e.g., 'SCS', 'MOSEK', 'CLARABEL'.
-        solver_opts :   A dictionary of options, e.g., tolerance, can be
-                        passed to this function as well
+    Parameters
+    ----------
+    G_iw : numpy.ndarray
+        matrix valued data on Matsubara frequency axis, of shape (nw, ns, nk, nao, nao)
+    wsample : numpy.ndarray
+        Matsubara frequency grid
+    n_real : int, optional
+        numbr of real frequency points to construct (used if custom_freqs=None), by default 10000
+    w_min : float, optional
+        minimum real frequency to consider, by default -10.0
+    w_max : float, optional
+        maximum real frequency to consider, by default 10.0
+    eta : float, optional
+        broadening parameter, by default 0.01
+    diag : bool, optional
+        performs continuation only for diagonal if set to True
+        (NOTE: if input data is diagonal only, user should use diag=False), by default True
+    eps_pol : float, optional
+        Threshold on the imaginary part of the poles, by default 1.0
+    parallel : {"sk", "ska"}, optional
+        Scheme to use in parallelizing the AC jobs.
+        "sk" parallelizes over spin and k-points, and "ska" parallelizes over spin, k-points and orbitals.
+        Typically, "sk" is optimal choice because AC is already vectorized over orbital indices
+    outdir : str, optional
+        Path to output directory in which results will be temporarily dumped, by default 'PESNevan'
+    solver : str, optional
+        choice of CVXPy semi-definite solver (e.g., SCS, MOSEK, CLARABEL), by default 'SCS'
+    **solver_opts : dict, optional
+        dictionary of options such as tolerance for CVXPy calls
 
     Returns
-    ----------------
-        w_vals      :   real frequency grid
-        G_w         :   analytically continued Green's function on real grid
+    -------
+    numpy.ndarray
+        1D array of real frequency points on which continued data is generated
+    numpy.ndarray
+        Complex valued analytically continued Green's function matrix
+    
+    Raises
+    ------
+    ValueError
+        if the shape of input Matsubara Green's function is not one of the following:
+        (nw), (nw, nao), (nw, ns, nk, nao) or (nw, ns, nk, nao, nao)
+    ValueError
+        if parallelization over spin, k-points and orbitals (ska) is requested but diag=False,
+        i.e., full matrix continuation is desired
+    ValueError
+        if parallelization scheme is not one of "sk" or "ska"
     """
-
     # print acknowledgments
     print("----------------------------------------------")
     print("Performing ES analytic continuation.")
@@ -464,42 +486,46 @@ def es_nevan_run(
     return w_vals, G_w, error_es
 
 
-def g_iw_projection(
-    G_iw, wsample, diag=True, solver='SCS', wcut=5, n_real=101, **solver_opts
-):
-    """Projection of G(iw) to a simple pole structure.
+def g_iw_projection(G_iw, wsample, diag=True, solver='SCS', wcut=5., n_real=101, **solver_opts):
+    """Projection of G(iw) to a simple pole structure. This is useful pre-processing for
+    noisy Matsubara data before performing actual analytic continuation.
 
-    Input parameters
-    ----------------
-        G_iw        :   imaginary frequency green's function
-        wsample     :   (real part) of the imaginary frequencies
-        diag        :   value of True will perform analytic continuation only
-                        for the diagonal values of Green's function
-                        (precisely what we need for spectral function)
-                        (NOTE: we can diagonalize the G_iw first then input
-                        with diag=False as well)
-        solver      :   Projection uses semi-definite programming to perform
-                        analytical continuation. Different solvers can be
-                        employed, e.g., 'SCS', 'MOSEK', 'CLARABEL'.
-        solver_opts :   A dictionary of options, e.g., tolerance, can be
-                        passed to this function as well
-        wcut        :   real frequency cutoff to employ in projection
-        n_real      :   number of points to use in the range (-wcut, wcut)
+    Parameters
+    ----------
+    G_iw : numpy.ndarray
+        matrix valued data on Matsubara frequency axis, of shape (nw, ns, nk, nao, nao)
+    wsample : numpy.ndarray
+        Matsubara frequency grid
+    diag : bool, optional
+        performs continuation only for diagonal if set to True
+        (NOTE: if input data is diagonal only, user should use diag=False), by default True
+    solver : str, optional
+        choice of CVXPy semi-definite solver (e.g., SCS, MOSEK, CLARABEL), by default 'SCS'
+    wcut : float, optional
+        real frequency cutoff to employ in projection, by default 5.
+    n_real : int, optional
+        numbr of real frequency points to construct in the range (-wcut, wcut), by default 101
 
     Returns
-    ----------------
-        G_iw        :   projected Matsubara Green's function
+    -------
+    numpy.ndarray
+        Projected Matsubara Green's function data
 
-    Practical info
-    ----------------
-    For different practical applications, different CVXPy solvers may be
-    required to achieve optimal results. Some options to consider:
-    *   SCS (default)
-    *   MOSEK
-    *   CLARABEL
-    For individual use, all three options are available free of use.
+    Raises
+    ------
+    ValueError
+        if the shape of input Matsubara Green's function is not one of the following:
+        (nw), (nw, nao), (nw, ns, nk, nao) or (nw, ns, nk, nao, nao)
+
+    Notes
+    ----
+    For different practical applications, different CVXPy solvers may be required to achieve
+    optimal results. Some options to consider:
+    - SCS (default)
+    - MOSEK
+    - CLARABEL
+    For individual use, all three solvers are available free of charge.
     """
-
     # print acknowledgments
     print("----------------------------------------------")
     print("Performing Projection of Matsubara Green's function.")
