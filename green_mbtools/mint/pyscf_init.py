@@ -9,15 +9,17 @@ from pyscf.pbc import tools, gto
 from . import gdf_s_metric as gdf_S
 from . import common_utils as comm
 from . import integral_utils as int_utils
+from ..pesto import ft
 
 
 
 class pyscf_init:
-    '''
+    '''Initialization class for Green project
+
     Attributes
     ----------
     args : map
-        argument's map
+        simulation parameters
     cell : pyscf.pbc.cell
         unit cell object
     kmesh : numpy.ndarray
@@ -31,7 +33,7 @@ class pyscf_init:
         Parameters
         ----------
         args: map
-            argument's map
+            simulation parameters
         '''
         self.args = args
         if self.args.Nk is None:
@@ -59,7 +61,7 @@ class pyscf_init:
 
 
 class pyscf_pbc_init (pyscf_init):
-    '''
+    '''Initialization class for periodic / solid-state systems for the Green project
     '''
     def __init__(self, args=None):
         super().__init__(comm.init_pbc_params() if args is None else args)
@@ -178,13 +180,13 @@ class pyscf_pbc_init (pyscf_init):
 
     def evaluate_high_symmetry_path(self):
         if self.args.print_high_symmetry_points:
-            comm.print_high_symmetry_points(self.cell, self.args)
+            comm.print_high_symmetry_points(self.args)
             return
         if self.args.high_symmetry_path is None:
             raise RuntimeError("Please specify high-symmetry path")
         if self.args.high_symmetry_path is not None:
             try:
-                comm.check_high_symmetry_path(self.cell, self.args)
+                comm.check_high_symmetry_path(self.args)
             except RuntimeError as e:
                 logging.error("\n\n\n")
                 logging.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -201,7 +203,7 @@ class pyscf_pbc_init (pyscf_init):
         logging.debug(kmesh_hs)
         logging.debug(self.cell.get_scaled_kpts(kmesh_hs))
         inp_data["high_symm_path/k_mesh"] = self.cell.get_scaled_kpts(kmesh_hs)
-        inp_data["high_symm_path/r_mesh"] = comm.construct_rmesh(self.args.nk, self.args.nk, self.args.nk)
+        inp_data["high_symm_path/r_mesh"] = ft.construct_rmesh(self.args.nk, self.args.nk, self.args.nk)
         inp_data["high_symm_path/Hk"] = Hk_hs
         inp_data["high_symm_path/Sk"] = Sk_hs
         inp_data["high_symm_path/xpath"] = xpath
@@ -257,7 +259,7 @@ class pyscf_pbc_init (pyscf_init):
         return comm.pbc_cell(self.args)
 
 class pyscf_mol_init (pyscf_init):
-    '''
+    '''Initialization class for molecular systems in the Green project
     '''
     def __init__(self, args=None):
         super().__init__(comm.init_mol_params() if args is None else args)

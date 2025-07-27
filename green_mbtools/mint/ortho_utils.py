@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.linalg as LA
 from functools import reduce
+from ..pesto import orth
 
 def wrap_k(k):
     while k < 0 :
@@ -8,40 +9,6 @@ def wrap_k(k):
     while (k - 9.9999999999e-1) > 0.0 :
         k = k - 1
     return k
-
-def transform_per_k(Z, X, X_inv):
-    '''
-    Transform Z into X basis
-    Z_X = X^* Z X
-    :param Z: Object to be transformed
-    :param X: Transformation matrix
-    :param X_inv: Inverse transformation matrix
-    :return: Z in new basis
-    '''
-    #Z_X = np.zeros(Z.shape, dtype=np.complex128)
-    #Z_X = np.einsum('ij,jk...,kl->il...', X, Z, X.T.conj())
-    Z_X = np.dot(X.conj().T, np.dot(Z, X))
-
-    Z_restore = np.dot(X_inv.conj().T, np.dot(Z_X, X_inv))
-    if not np.allclose(Z, Z_restore) :
-        error = "Orthogonal transformation failed. Max difference between origin and restored quantity is {}".format(np.max(Z - Z_restore))
-        raise RuntimeError(error)
-    return Z_X
-
-def transform(Z, X, X_inv):
-    '''
-    Transform Z into X basis
-    Z_X = X^* Z X
-    :param Z: Object to be transformed
-    :param X: Transformation matrix
-    :param X_inv: Inverse transformation matrix
-    :return: Z in new basis
-    '''
-    Z_X = np.zeros(Z.shape, dtype=np.complex128)
-    for ik in range(Z.shape[0]):
-        Z_X[ik] = transform_per_k(Z[ik,:], X[ik], X_inv[ik])
-
-    return Z_X
 
 def normalize(Sv):
     Svo = np.zeros(Sv.shape, dtype=Sv.dtype)
@@ -304,7 +271,7 @@ def natural_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
         # check that direct and inverse symmetries are consistent
         assert(np.allclose(np.dot(x, x_pinv), np.eye(x.shape[0])))
 
-        dmkd = transform_per_k(dmk, x_pinv.conj().T, x.conj().T)
+        dmkd = orth.transform_per_k(dmk, x_pinv.conj().T, x.conj().T)
         assert(np.allclose(dmkd, np.diag(np.diag(dmkd))))
 
         # store transformation basis for current k-point
