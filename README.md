@@ -44,11 +44,14 @@ Installation
 
 Features
 ----------
+The `mbtools` package comes with two sub-packages: `mint` and `pesto`. The `mint` sub-package contains utilities for the following tasks:
 * Generate input for Green/WeakCoupling.
 * Compute molecular/natural orbitals.
 * Mulliken analyasis based on symmetrical atomic orbitals.
+
+On the other hand, the `pesto` sub-package, formerly known as the `mbanalysis` package, caters to:
 * Fourier transformation between real and reciprocal space.
-* Fourier transformation between imaginary-time and Matsuabara frequency domain on IR grids.
+* Fourier transformation between imaginary-time and Matsuabara frequency domain on intermediate representation (IR) grids (see [Phys. Rev. B 101, 035144 (2020)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144) for further detail).
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 * Nevanlinna analytical continuation, based on Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
@@ -57,9 +60,6 @@ Features
 
 To-Do-List
 -----------
-* Migrate to newer IR grid format
-* Improved README and documentation on where to find examples (perhaps a sub-README in the examples folder),
-* (for current implementation of Nevanlinna) re-integrate Hardy optimization
 * Fix `examples/winter*.py`: The original example for Silicon has been modified to Hydrogen (for which test data is available). The high-symmetry points in the interpolation need to be readjusted accordingly.
 
 
