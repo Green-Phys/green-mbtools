@@ -1,5 +1,4 @@
 import numpy as np
-from ir import IR_factory
 
 
 def solve_dyson(fock, S=None, sigma=None, mu=0, ir=None):
@@ -15,7 +14,7 @@ def solve_dyson(fock, S=None, sigma=None, mu=0, ir=None):
         Imaginary-time self-energy of shape (ntau, ns, nk, nao, nao), by default None (zero)
     mu : float, optional
         chemical potential, by default 0
-    ir : ir.IR_factory, optional
+    ir : green_mbtools.pesto.ir.IR_factory, optional
         Instance of IR factory for transforming between imaginary time and Matsubara frequencies, by default None
 
     Returns
