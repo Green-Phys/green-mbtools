@@ -416,10 +416,12 @@ def es_nevan_run(
             raise ValueError(
                 "Cannot use the 'ska' parallel scheme for full matrix"
             )
+        error_shape = G_iw.shape[1:]
         dim1 = np.prod(G_iw.shape[1:])
         G_iw = G_iw.reshape(nw, dim1, 1)
     elif parallel == 'sk':
         dim1 = ns * nk
+        error_shape = (ns, nk)
         G_iw = G_iw.reshape((nw, ns * nk) + G_iw.shape[3:])
     else:
         raise ValueError(
@@ -481,7 +483,7 @@ def es_nevan_run(
 
     # reshape and return
     G_w = G_w.reshape((n_real, ) + orig_shape[1:])
-    error_es = error_es.reshape(orig_shape[1:])
+    error_es = error_es.reshape(error_shape)
 
     return w_vals, G_w, error_es
 
