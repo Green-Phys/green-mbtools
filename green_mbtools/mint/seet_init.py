@@ -1,22 +1,15 @@
 import numpy as np
-import sys
-import scipy.linalg as LA
 import h5py
-import time
-from functools import reduce
-from threading import Thread
-
-from . import ortho_utils
 
 class seet_init:
     '''
-    SEET pre-processing class
-    computes proper orthogonal transformation and projection matricies
+    SEET pre-processing class.
+    Computes proper orthogonal transformation and projection matricies
 
     Attributes
     ----------
     args : map
-        argument's map
+        simulation parameters
     '''
 
     def __init__(self, args):
@@ -26,7 +19,7 @@ class seet_init:
         Parameters
         ----------
         args: map
-            argument's map
+            simulation parameters
         '''
         self.args = args
 

@@ -11,18 +11,23 @@ from . import orth
 #################
 
 
-def compute_mo(F, S):
-    '''
-    Solve the generalized eigen problem: FC = SCE
+def compute_mo(F, S=None):
+    """Solve the generalized eigen problem: FC = SCE
 
-    :param F: Fock matrix, dim = (ns, nk, nao, nao)
-    :param S: Overlap matrix, dim = (ns, nk, nao, nao)
-    Only used in canonical orthogonalization.
+    Parameters
+    ----------
+    F : numpy.ndarray
+        Fock matrix, dim = (ns, nk, nao, nao)
+    S : numpy.ndarray, optional
+        Overlap matrix, dim = (ns, nk, nao, nao), by default None
 
-    :return:
-    eig_sk: molecular energies
-    mo_coeff_k: molecular orbital coefficient in AO basis
-    '''
+    Returns
+    -------
+    numpy.ndarray
+        molecular orbital energies
+    numpy.ndarray
+        molecular orbital coefficient in AO basis
+    """
     ns, nk, nao = F.shape[0:3]
     eiv_sk = np.zeros((ns, nk, nao))
     mo_coeff_sk = np.zeros((ns, nk, nao, nao), dtype=F.dtype)
@@ -50,7 +55,18 @@ def compute_mo(F, S):
 
 def compute_no(dm, S=None):
     """Compute natural orbitals by diagonalizing density matrix
-    :return:
+
+    Parameters
+    ----------
+    dm : numpy.ndarray
+        density matrix of shape (ns, nk, nao, nao)
+    
+    Returns
+    -------
+    numpy.ndarray
+        natural orbital occupations
+    numpy.ndarray
+        natural orbital coefficients / vectors
     """
     ns, ink = dm.shape[0], dm.shape[1]
     dm_orth = orth.sao_orth(dm, S, 'g') if S is not None else dm.copy()

@@ -3,22 +3,25 @@ import os
 
 
 def dump_input_caratheodory_data(wsample, X_iw, ifile):
-    """Function to dump input data to files for caratheodory
-    analytic continuation.
+    """Function to dump input data to files for caratheodory analytic continuation.
 
-    Caratheodory requires input data file to be in the following format:
-        iw_1 iw_2 iw_3 ... iw_n
+    Parameters
+    ----------
+    wsample : numpy.ndarray
+        1D array of Matsubara frequencies
+    X_iw : numpy.ndarray
+        5D array of shape (nw, ns, nk, nao, nao) 
+    ifile : string
+        filename for storing the Matsubara data. The data is stored in the format::
 
-        Real X(iw_1) Matrix
+            iw_1 iw_2 iw_3 ... iw_n
+            Real X(iw_1) Matrix
+            Imag X(iw_1) Matrix
+            Real X(iw_2) Matrix
+            Imag X(iw_2) Matrix
+            ... and so on.
 
-        Imag X(iw_1) Matrix
-
-        Real X(iw_2) Matrix
-
-        Imag X(iw_2) Matrix
-
-        ... and so on.
-    """
+    """    
 
     nw, ns, nk, nao = X_iw.shape[:4]
 
@@ -54,20 +57,38 @@ def dump_input_caratheodory_data(wsample, X_iw, ifile):
                     fs.write('\n')
             dim += 1
 
-    return None
-
 
 def load_caratheodory_data(matrix_file, spectral_file, X_dims):
-    """Load output data from caratheodory analytic continuation.
-    The spectral function output file has the format:
-        w1 XA(w1 + i eta)
-        w2 XA(w2 + i eta)
-        ... and so on.
-    And the complex matrix output file has the format:
-        w1 Re.Xc[11](w1 + i eta) Im.Xc[11](w1 + i eta) Re.Xc[12](w1 + i eta)
-        w2 Re.Xc[11](w2 + i eta) Im.Xc[11](w2 + i eta) Re.Xc[12](w2 + i eta)
-        ... and so on.
-    """
+    """Loads output data from Caratheodory analytic continuation.
+
+    Parameters
+    ----------
+    matrix_file : string
+        Path to output matrix file. The output file has the following format::
+
+            w1 Re.Xc[11](w1 + i eta) Im.Xc[11](w1 + i eta) Re.Xc[12](w1 + i eta)
+            w2 Re.Xc[11](w2 + i eta) Im.Xc[11](w2 + i eta) Re.Xc[12](w2 + i eta)
+            ... and so on
+
+    spectral_file : string
+        Path to output spectral file, which has the following format::
+
+            w1 XA(w1 + i eta)
+            w2 XA(w2 + i eta)
+            ... and so on
+
+    X_dims : tuple
+        shape of tensor for reading and storing the output data into
+
+    Returns
+    -------
+    numpy.ndarray
+        real frequencies on which analytically continued data is returned
+    numpy.ndarray
+        Complex valued output tensor with full matrix form of continued data
+    numpy.ndarray
+        Real valued spectral function corresponding to the complex continued data
+    """    
 
     # Dimensions
     _, ns, nk, nao = X_dims[:4]

@@ -144,8 +144,12 @@ class MB_post(object):
 
     @beta.setter
     def beta(self, value):
-        """
-        Changing beta will automatically update self.ir for consistency
+        """Update inverse temperature. Changing beta will automatically update self.ir for consistency
+
+        Parameters
+        ----------
+        value : float
+            inverse temperature
         """
         print("Updated beta = {}".format(value))
         self._beta = value
@@ -229,10 +233,7 @@ class MB_post(object):
             )
 
     def solve_dyson(self):
-        """
-        Compute Green's function through Dyson's equation and update self.gtau
-        and self.dm.
-        :return:
+        """Compute Green's function through Dyson's equation and update self.gtau and self.dm
         """
         self.gtau = dyson.solve_dyson(
             self.fock, self.S, self.sigma, self.mu, self.ir
@@ -253,9 +254,21 @@ class MB_post(object):
         return e, c
 
     def get_mo(self, canonical=False, thr=1e-7):
-        """
-        Compute molecular orbital energy by solving FC=SCE
-        :return:
+        """Compute molecular orbital energy by solving the generalized eigenvalue problem FC=SCE
+
+        Parameters
+        ----------
+        canonical : bool, optional
+            use Lowdin's canonical AO basis, by default False
+        thr : float, optional
+            threshold for canonical orthogonalization, by default 1e-7
+
+        Returns
+        -------
+        numpy.ndarray
+            MO energies
+        numpy.ndarray
+            MO eigen vectors
         """
         if not canonical:
             eigh = self.eigh
@@ -265,14 +278,31 @@ class MB_post(object):
         return mo_energy, mo_coeff
 
     def get_no(self):
-        """
-        Compute natural orbitals by diagonalizing density matrix
-        :return:
+        """Compute natural orbitals by diagonalizing density matrix
+
+        Returns
+        -------
+        numpy.ndarray
+            natural orbital occupations
+        numpy.ndarray
+            natural orbital coefficients / vectors
         """
         occ, no_coeff = spec.compute_no(self.dm, self.S)
         return occ, no_coeff
 
     def mulliken_analysis(self, orbitals=None):
+        """Perform Mulliken occupation analysis
+
+        Parameters
+        ----------
+        orbitals : numpy.ndarray, optional
+            provide orbital basis vectors, by default None
+
+        Returns
+        -------
+        numpy.ndarray
+            occupation numbers in the specified basis
+        """
         if orbitals is None:
             orbitals = np.arange(self._nao)
         occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=complex)
@@ -292,10 +322,26 @@ class MB_post(object):
         return occupations.real
 
     def wannier_interpolation(self, kpts_inter, hermi=False, debug=False):
-        """
-        Wannier interpolation
-        :param kpts_int: Scaled k-points for the target k grid
-        :return:
+        """Perform Wannier interpolation
+
+        Parameters
+        ----------
+        kpts_inter : numpy.ndarray
+            k-points to interpolate on
+        hermi : bool, optional
+            set to True if the interpolated matrix Hermitian, by default False
+        debug : bool, optional
+            set to True if debug information needs to be printed, by default False
+
+        Returns
+        -------
+        numpy.ndarray
+            Interpolated tensor
+
+        Raises
+        ------
+        ValueError
+            if the MB_post object has no attribute for kmesh
         """
         if self.kmesh is None:
             raise ValueError(
@@ -311,14 +357,20 @@ class MB_post(object):
         self, error=5e-3, maxent_exe='maxent', params='green.param',
         outdir='Maxent', gtau_orth=None
     ):
-        """
-        Analytical continuation using Maxent
-        :param error:
-        :param maxent_exe:
-        :param params:
-        :param outdir:
-        :param gtau:
-        :return:
+        """Perform Maxent analytic continuation
+
+        Parameters
+        ----------
+        error : float, optional
+            threshold for continuation, by default 5e-3
+        maxent_exe : str, optional
+            Path to maxent compiled program, by default 'maxent'
+        params : str, optional
+            parameters for maxent program, by default 'green.param'
+        outdir : str, optional
+            path to dump output data, by default 'Maxent'
+        gtau_orth : numpy.ndarray, optional
+            Green's function in orthonormal basis, by default None
         """
         if gtau_orth is None:
             gtau_orth = orth.sao_orth(
@@ -334,17 +386,27 @@ class MB_post(object):
     def AC_nevanlinna(
         self, gtau_orth=None, n_real=10001, w_min=-10., w_max=10., eta=0.01
     ):
-        """
-        Analytical continuation using Nevanlinna interpolation
-        :param gtau_orth: imaginary time Green's function in the orthogonal
-            basis, will be obtained from curren self.gtau if None
-        :param n_real: number of real frequency points
-        :param w_min: smallest value on real frequency grid
-        :param w_max: largest value on real frequency grid
-        :param eta: broadening parameter
-        :param outdir: [DEPRECATED]
-        :return: real frequency grid along with spectral function for a given
-            Green's function
+        """Perform Nevanlinna analytic continuation
+
+        Parameters
+        ----------
+        gtau_orth : numpy.ndarray, optional
+            imaginary time Green's function in the orthogonal basis, will be obtained from
+            current self.gtau if None, by default None
+        n_real : int, optional
+            number of real frequency points, by default 10001
+        w_min : float, optional
+            smallest value on real frequency grid, by default -10.0
+        w_max : float, optional
+            largest value on real frequency grid, by default 10.0
+        eta : float, optional
+            broadening parameter, by default 0.01
+        Returns
+        -------
+        numpy.ndarray
+            real frequency grid along
+        numpy.ndarray
+            spectral function for the given Green's function
         """
         if gtau_orth is None:
             gtau_orth = orth.sao_orth(
@@ -397,8 +459,25 @@ def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
 
 
 def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
-    """Transform input quantity from irreducible number of k-points
-    to the entire Brillouin Zone.
+    """Transform input quantity from irreducible number of k-points to full Brillouin zone.
+
+    Parameters
+    ----------
+    X : numpy.ndarray
+        input quantity that needs to be transformed
+    conj_list : numpy.ndarray
+        truth table for indices compressed based on complex conjugation (k -> -k)
+    ir_list : numpy.ndarray
+        list of unique or irreducible k-indices
+    bz_index : numpy.ndarray
+        irreducible k-index associated for every k-point in full Brillouin zone k-mesh
+    k_ind : int
+        location of k-index in the input array X.
+
+    Returns
+    -------
+    numpy.ndarray
+        data on full Brillouin zone k-mesh
     """
     index_list = np.zeros(bz_index.shape, dtype=int)
     for i, irn in enumerate(ir_list):

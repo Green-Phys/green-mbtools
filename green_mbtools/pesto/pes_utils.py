@@ -4,22 +4,35 @@ import baryrat
 from scipy.optimize import minimize
 
 
-def cvx_matrix_projection(
-    zM, GM_matrix, w_cut=10, n_real=201, ofile='Giw', solver='SCS', **kwargs
-):
-    """Projection of noisy GW data on to Nevanlinna manifold.
+def cvx_matrix_projection(zM, GM_matrix, w_cut=10, n_real=201, ofile='Giw', solver='SCS', **kwargs):
+    """Projection of noisy Green's function matrix data on to Nevanlinna manifold.
     Once this is performed, analytic continuation either using Nevanlinna
     or ES becomes easier.
-    Input arguments:
-        zM              :   n_imag number of imaginary frequency values
-        GM_matrix       :   Exact Matsubara Green's function data in the shape
-                            (n_imag, n_orb, n_orb)
-        w_cut           :   cut-off to consider for real axis
-        n_real          :   number of real frequencies to consider
-    Returns:
-        G_iw_proj       :   Projected Green's function
-    such that
+    The main idea is to obtain a projected Matsubara Green's function of the form
+
         G(iw_m) = sum_n P_n / (iw_m - w_n)
+
+    Parameters
+    ----------
+    zM : numpy.ndarray
+        n_imag number of imaginary frequency values
+    GM_matrix : numpy.ndarray
+        Exact Matsubara Green's function data in the shape (n_imag, n_orb, n_orb)
+    w_cut : float, optional
+        cut-off to consider for real axis, by default 10.0
+    n_real : int, optional
+        number of real frequencies to consider, by default 201
+    ofile : str, optional
+        Output file in which the green's function data will be dumped, by default 'Giw'
+    solver : str, optional
+        CVXPy solver to use, by default 'SCS'
+    **kwargs : dict, optional
+        dictionary of keyword arguments for CVXPy solver
+
+    Returns
+    -------
+    numpy.ndarray
+        Projected Green's function
     """
     # number of imag frequency points
     n_imag = len(zM)
@@ -77,22 +90,35 @@ def cvx_matrix_projection(
     return
 
 
-def cvx_diag_projection(
-    zM, GM_diag, w_cut=10, n_real=201, ofile='Giw', solver='SCS', **kwargs
-):
-    """Projection of noisy GW data on to Nevanlinna manifold.
+def cvx_diag_projection(zM, GM_diag, w_cut=10, n_real=201, ofile='Giw', solver='SCS', **kwargs):
+    """Projection of noisy Green's function diagonal data on to Nevanlinna manifold.
     Once this is performed, analytic continuation either using Nevanlinna
     or ES becomes easier.
-    Input arguments:
-        zM              :   n_imag number of imaginary frequency values
-        GM_diag         :   Exact Matsubara Green's function data in the shape
-                            (n_imag, n_orb)
-        w_cut           :   cut-off to consider for real axis
-        n_real          :   number of real frequencies to consider
-    Returns:
-        G_iw_proj       :   Projected Green's function
-    such that
+    The main idea is to obtain a projected Matsubara Green's function of the form
+
         G(iw_m) = sum_n P_n / (iw_m - w_n)
+
+    Parameters
+    ----------
+    zM : numpy.ndarray
+        n_imag number of imaginary frequency values
+    GM_matrix : numpy.ndarray
+        Exact Matsubara Green's function data in the shape (n_imag, n_orb, n_orb)
+    w_cut : float, optional
+        cut-off to consider for real axis, by default 10.0
+    n_real : int, optional
+        number of real frequencies to consider, by default 201
+    ofile : str, optional
+        Output file in which the green's function data will be dumped, by default 'Giw'
+    solver : str, optional
+        CVXPy solver to use, by default 'SCS'
+    **kwargs : dict, optional
+        dictionary of keyword arguments for CVXPy solver
+
+    Returns
+    -------
+    numpy.ndarray
+        Projected Green's function
     """
     # number of imag frequency points
     n_imag = len(zM)
@@ -145,23 +171,32 @@ def cvx_diag_projection(
 
 
 def cvx_optimize(poles, GM_matrix, zM, solver='SCS', **kwargs):
-    """Top level target error function in the ES approach
-    to Nevanlinna, i.e.,
+    """Top level target error function in the ES approach for matrix analytic continuation. It returns
+
         Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||
-    Input Arguments:
-        poles           :   pole positions
-        GM_matrix       :   Exact Matsubara Green's function data in the shape
-                            (num_imag, num_orb, num_orb)
-        zM              :   Matsubara frequencies
-        solver          :   Specify solver type for ES SDR fit
-    Returns:
-        opt_error       :   Optimal value of Err (poles) for fixed poles
-        np_X_vec        :   Numpy array rep of optimal X_vec in the shape
-                            (num_poles, num_orb, num_orb)
-        np_G_approxx    :   Numpy array rep of approximated optimal Green's
-                            function for the specified Matsubara frequencies.
-                            The shape of the array is
-                            (num_imag, num_orb, num_orb)
+    
+    Parameters
+    ----------
+    poles : numpy.ndarray
+        1D array of pole positions
+    GM_matrix : numpy.ndarray
+        Exact Matsubara Green's function data in the shape (num_imag, num_orb, num_orb)
+    zM : numpy.ndarray
+        1D Matsubara frequencies
+    solver : str, optional
+        CVXPy solver for semi-definite relaxation in the ES continuation, by default 'SCS'
+    **kwargs : dict, optional
+        dictionary of keyword arguments for CVXPy solver
+
+    Returns
+    -------
+    float
+        Optimal value of error function Err (poles) for fixed poles
+    numpy.ndarray
+        optimal X_vec in the shape (num_poles, num_orb, num_orb)
+    numpy.ndarray
+        approximated optimal Green's function for the specified Matsubara frequencies.
+        The shape of the array is (num_imag, num_orb, num_orb)
     """
     # number of imag frequency points
     num_imag = len(zM)
@@ -234,24 +269,32 @@ def cvx_optimize(poles, GM_matrix, zM, solver='SCS', **kwargs):
 
 
 def cvx_optimize_spectral(poles, GM_diags, zM, solver='SCS', **kwargs):
-    """Top level target error function in the ES approach
-    to Nevanlinna, i.e.,
-        Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||
-    This function only computes the spectral function, not the full G matrix.
-    Input Arguments:
-        poles           :   pole positions
-        GM_diags        :   Exact Matsubara Green's function diagonal data
-                            in the shape (num_imag, num_orb)
-        zM              :   Matsubara frequencies
-        solver          :   Specify solver for ES SDR fit
-    Returns:
-        opt_error       :   Optimal value of Err (poles) for fixed poles
-        np_X_vec        :   Numpy array rep of optimal X_vec in the shape
-                            (num_poles, num_orb)
-        np_G_approxx    :   Numpy array rep of approximated optimal Green's
-                            function for the specified Matsubara frequencies.
-                            The shape of the array is
-                            (num_imag, num_orb)
+    """Top level target error function in the ES approach for spectral analytic continuation. It returns
+
+        Err (poles) = min_{X} || Diag(Gimag (iw) - Gapprox [poles, X] (iw)) ||
+    
+    Parameters
+    ----------
+    poles : numpy.ndarray
+        1D array of pole positions
+    GM_diags : numpy.ndarray
+        Exact Matsubara Green's function diagonal data in the shape (num_imag, num_orb)
+    zM : numpy.ndarray
+        1D Matsubara frequencies
+    solver : str, optional
+        CVXPy solver for semi-definite relaxation in the ES continuation, by default 'SCS'
+    **kwargs : dict, optional
+        dictionary of keyword arguments for CVXPy solver
+
+    Returns
+    -------
+    float
+        Optimal value of error function Err (poles) for fixed poles
+    numpy.ndarray
+        optimal X_vec in the shape (num_poles, num_orb)
+    numpy.ndarray
+        approximated optimal Green's function diagonals for the specified Matsubara frequencies.
+        The shape of the array is (num_imag, num_orb)
     """
     # number of imag frequency points
     num_imag = len(zM)
@@ -308,22 +351,30 @@ def cvx_optimize_spectral(poles, GM_diags, zM, solver='SCS', **kwargs):
 
 
 def cvx_gradient(poles, GM_matrix, zM):
-    """Computes the gradient for top-level optimization of pole positions
-    in ES approach to Nevanlinna
-        d Err / d poles
-    where,
-        Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||
+    """Computes the gradient for top-level optimization of pole positions in ES analytic continuation
+    i.e., d Err / d poles where,
+
+        `Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||`
+
     Specifically, G_approx is defined as
-        G_approx = sum_m X_vec(:,:,m)/(1j*zM - poles(m))
-        X_vec is shape (N_orb, N_orb, num_poles) and is just an array of
-        optimized X_l matrices, for given vallue of pole positions poles
-    Args:
-        poles           :   pole positions
-        GM_matrix       :   Exact Matsubara Green's function data in the shape
-                            (num_imag, num_orb, num_orb)
-        zM              :   Matsubara frequencies
-    Returns:
-        grad            :   Gradient of E with respect to poles
+
+        `G_approx = sum_m X_vec(:,:,m)/(1j*zM - poles(m))`
+        `X_vec is shape (N_orb, N_orb, num_poles) and is just an array of`
+        `optimized X_l matrices, for given vallue of pole positions poles`
+
+    Parameters
+    ----------
+    poles : numpy.ndarray
+        pole positions
+    GM_matrix : numpy.ndarray
+        Exact Matsubara Green's function data in the shape (num_imag, num_orb, num_orb)
+    zM : numpy.ndarray
+        Matsubara frequencies
+
+    Returns
+    -------
+    numpy.ndarray
+        Gradient of E with respect to poles
     """
 
     #
@@ -365,19 +416,29 @@ def run_es(
     iw_vals, G_iw, re_w_vals, diag=True, eta=0.01, eps_pol=1,
     ofile='Xw_real.txt', solver='SCS', **kwargs
 ):
-    """Pole estimation and semi-definite relaation algorithm based on
-    Huang, Gull and Lin, 10.1103/PhysRevB.107.075151
-    Input args
-        iw_vals     :   imaginary frequency values (value only, without iota)
-        G_iw        :   matsubara quantity to be analytically continued
-        re_w_vals   :   real frequency grid to perform continuation on
-        diag        :   True / False decides how to encode the convex problem
-        eta         :   broadening
-        eps_pol     :   max imag part of the poles to be considered
-        ofile       :   Name of output file for storing the continued data
-        solver      :   CVXPy solver to use
-                        (default is SCS; other options: MOSEK, CLARABEL)
-        **kwargs    :   other options specific to the CVXPy solver
+    """Pole estimation and semi-definite (PES) relaation algorithm based on
+    Huang, Gull and Lin, 10.1103/PhysRevB.107.075151. The output is saved in ofile.
+
+    Parameters
+    ----------
+    iw_vals : numpy.ndarray
+        1D array of imaginary frequency values (value only, without i)
+    G_iw : numpy.ndarray
+        matsubara quantity to be analytically continued
+    re_w_vals : numpy.ndarray
+        real frequency grid to perform continuation on
+    diag : bool, optional
+        perform continuation for diagonal entries only if set to True, by default True
+    eta : float, optional
+        broadening parameter, by default 0.01
+    eps_pol : float, optional
+        maximum imag part of the poles to be considered, by default 1
+    ofile : str, optional
+        Path or name of output file for storing the continued data
+    solver : str, optional
+        CVXPy solver to use (options: SCS, MOSEK, CLARABEL, etc.), by default 'SCS'
+    **kwargs : dict, optional
+        dictionary of keyword arguments for CVXPy solver
     """
 
     # step 1: AAA algorithm for pole estimation

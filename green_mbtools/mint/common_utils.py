@@ -18,28 +18,22 @@ import importlib.metadata as imd
 
 from . import integral_utils as int_utils
 
-def construct_rmesh(nkx, nky, nkz):
-    '''
-    Construct real space grid centered around (0,0,0)
-    '''
-    Lx, Ly, Lz = (nkx-1)//2, (nky-1)//2, (nkz-1)//2 # nk=6, L=2
-    leftx, lefty, leftz = (nkx-1)%2, (nky-1)%2, (nkz-1)%2 # left = 1
-
-    rx = np.linspace(-Lx, Lx+leftx, nkx, endpoint=True) # -2,-1,0,1,2,3
-    ry = np.linspace(-Ly, Ly+lefty, nky, endpoint=True)
-    rz = np.linspace(-Lz, Lz+leftz, nkz, endpoint=True)
-    RX, RY, RZ = np.meshgrid(rx, ry, rz)
-    rmesh = np.array([RX.flatten(), RY.flatten(), RZ.flatten()]).T
-
-    return rmesh
 
 def extract_ase_data(a, atoms):
-    '''
-    For a given data in XYZ format generate parameters in ASE format
+    """For a given data in XYZ format generate parameters in ASE format
     
-    :param a: string containing lattice vectros in XYZ format
-    :param atoms: string containin atoms positions in XYZ format
-    '''
+    Parameters
+    ----------
+    a : str
+        string containing lattice vectros in XYZ format
+    atoms: str
+        string containin atoms positions in XYZ format
+    
+    Returns
+    -------
+    tuple
+        numpy array of lattice vectors, list of atom symbols, and list of atom coordinates
+    """
     symbols = []
     positions = []
     lattice_vectors = np.genfromtxt(
@@ -56,10 +50,15 @@ def extract_ase_data(a, atoms):
         positions.append(np.dot(np.linalg.inv(lattice_vectors), position).tolist())
     return (lattice_vectors, symbols, positions)
 
-def print_high_symmetry_points(cell, args):
-    '''
-    For a given unit cell and simulation parameters generate and print list of lattice special points
-    '''
+
+def print_high_symmetry_points(args):
+    """For given simulation parameters, generate and print list of lattice special points
+
+    Parameters
+    ----------
+    args : map
+        simulation parameters
+    """
     import ase.spacegroup
     lattice_vectors, symbols, positions = extract_ase_data(args.a, args.atom)
     cc = ase.spacegroup.crystal(symbols, positions, cellpar=ase.geometry.cell_to_cellpar(lattice_vectors))
@@ -67,13 +66,15 @@ def print_high_symmetry_points(cell, args):
     special_points = lat.get_special_points()
     print("List of special points: {}".format(special_points))
 
-def check_high_symmetry_path(cell, args):
-    '''
-    Check that selected high-symmetry path is correct for the chosen simulation parameters
 
-    :param cell: unit cell object
-    :param args: simulation parameters
-    '''
+def check_high_symmetry_path(args):
+    """Check that selected high-symmetry path is correct for the chosen simulation parameters
+
+    Parameters
+    ----------
+    args : map
+        simulation parameters
+    """
     if args.high_symmetry_path is None:
         return
     import ase.spacegroup
@@ -92,15 +93,22 @@ def check_high_symmetry_path(cell, args):
 
 
 def high_symmetry_path(cell, args):
-    '''
-    Compute high-symmetry k-path
+    """Compute high-symmetry k-path
 
-    :param cell: unit-cell object
-    :param args: simulation parameters
-    :return: Points on the chosen high-symmetry path, corresponding \
+    Parameters
+    ----------
+    cell : pyscf.pbc.Cell
+        unit-cell object
+    args : map
+        simulation parameters
+    
+    Returns
+    -------
+    tuple
+        k-points on the chosen high-symmetry path; corresponding
         non-interacting Hamiltonian and overlap matrix, and linear k-point
         axis and labels (used in band structure plots)
-    '''
+    """
     if args.high_symmetry_path is None:
         return [None, None, None]
     import ase
@@ -129,13 +137,22 @@ def high_symmetry_path(cell, args):
 
 
 def transform(Z, X, X_inv):
-    '''
-    Transform Z into X basis
-    :param Z: Object to be transformed
-    :param X: Transformation matrix
-    :param X_inv: Inverse transformation matrix
-    :return: Z in new basis
-    '''
+    """Transform Z into X basis
+
+    Parameters
+    ----------
+    Z : numpy.ndarray
+        Object to be transformed
+    X : numpy.ndarray
+        Transformation matrix
+    X_inv : numpy.ndarray
+        Inverse transformation matrix
+    
+    Returns
+    -------
+    numpy.ndarray
+        Z in new basis
+    """
     Z_X = np.zeros(Z.shape, dtype=np.complex128)
     maxdiff = -1
     for ss in range(Z.shape[0]):
@@ -152,22 +169,46 @@ def transform(Z, X, X_inv):
     logging.info(f"Maximum difference between Z and Z_restore {maxdiff}")
     return Z_X
 
-def fold_back_to_1stBZ(kpts):
-    '''
-    Map each k-point from a given list of scaled k-points into the first Brillouin zone
 
-    :param kpts: list of k-points
-    '''
+def fold_back_to_1stBZ(kpts):
+    """Map each k-point from a given list of scaled k-points into the first Brillouin zone
+
+    Parameters
+    ----------
+    kpts : numpy.ndarray
+        list of k-points
+
+    Returns
+    -------
+    numpy.ndarray
+        k-points folded into 1st Brillouin-zone
+    """
     nkpts = len(kpts)
     for i, ik in enumerate(kpts):
         kpts[i] = np.array([wrap_1stBZ(kk) for kk in ik])
     return kpts
 
+
 def inversion_sym(kmesh_scaled):
-    '''
-    For a given list of the scaled k-point in the full Brillouin zone select k-points that are 
+    """For a given list of the scaled k-points in the full Brillouin zone select k-points that are 
     equivalent by the time-reversal symmetry and return them and their corresponding weight and index
-    '''
+
+    Parameters
+    ----------
+    kpts : numpy.ndarray
+        list of scaled k-points
+    
+    Returns
+    -------
+    numpy.ndarray
+        indices of irreducible k-points in the input k-list
+    numpy.ndarray
+        inverse index, associating each k-point with its unique equivalent
+    numpy.ndarray
+        weights for each irreducible k-point (degeneracy)
+    numpy.ndarray
+        truth table for whether a k-point has an irreducible time-reversal equivalent
+    """
     ind = np.arange(np.shape(kmesh_scaled)[0])
     weight = np.zeros(np.shape(kmesh_scaled)[0])
     for i, ki in enumerate(kmesh_scaled):
@@ -197,6 +238,7 @@ def inversion_sym(kmesh_scaled):
 
     return ir_list, ind, weight, conj_list
 
+
 def wrap_k(k):
     while k < 0 :
         k = 1 + k
@@ -204,10 +246,20 @@ def wrap_k(k):
         k = k - 1
     return k
 
+
 def parse_basis(basis_list):
-    '''
-    Parse information about chosen basis sets
-    '''
+    """Parse information about chosen basis sets
+
+    Parameters
+    ----------
+    basis_list : str
+        basis-set information
+    
+    Returns
+    -------
+    list
+        basis-set information usable in initialization of pyscf Cell object
+    """
     logging.debug(f"{basis_list}, {len(basis_list) % 2}")
     if len(basis_list) % 2 == 0:
         b = {}
@@ -224,10 +276,10 @@ def parse_basis(basis_list):
     else:
         return basis_list[0]
 
+
 def parse_geometry(g):
-    '''
-    parse geometry of the system
-    '''
+    """Parse geometry of the system
+    """
     res = ""
     if os.path.exists(g) :
         with open(g) as gf:
@@ -235,6 +287,7 @@ def parse_geometry(g):
     else:
         res = g
     return res
+
 
 def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm, madelung, Zs, last_ao):
     '''
@@ -491,13 +544,32 @@ def wrap_1stBZ(k):
     return k
 
 def init_k_mesh(args, mycell):
-    '''
-    init k-points mesh for GDF
+    """init k-points mesh for GDF
 
-    :param args: script arguments
-    :param mycell: unit cell for simulation
-    :return: kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik
-    '''
+    Parameters
+    ----------
+    args : map
+        simulation parameters 
+    mycell : pyscf.pbc.Cell
+        unit cell for simulation
+    
+    Returns
+    -------
+    numpy.ndarray
+        k-mesh for the Brillouin Zone
+    numpy.ndarray
+        k-mesh with unique k-points, forming the irreducible k-mesh
+    numpy.ndarray
+        indices of irreducible k-points in the input k-list
+    numpy.ndarray
+        truth table for whether a k-point has an irreducible time-reversal equivalent
+    numpy.ndarray
+        weights for each irreducible k-point (degeneracy)
+    numpy.ndarray
+        inverse index, associating each k-point with its unique equivalent
+    int
+        number of irreducible k-points
+    """
     if args.center is None:
        args.center = [0,0,0]
     if args.shift is None:
@@ -730,16 +802,23 @@ def compute_ewald_correction(args, cell, kmesh, filename):
     int_utils.compute_ewald_correction(args, mydf, kmesh, cell.nao_nr(), filename)
 
 def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):
-    '''
-    Generate density-fitting integrals for correlated methods using q-averaging over the super-lattice points to compensate finite-size error
+    """Generate density-fitting integrals for correlated methods using q-averaging over the super-lattice points to compensate finite-size error
     
-    :param args: simulation parameters
-    :param mycell: unit cell object
-    :param kmesh: reciprocal space grid
-    :param lattice_kmesh: super-lattice k-points
-    :param nao: number of atomic orbitals in the unit cell
-    :param X_k: trasformation matrix for projection onto an orthogonal space
-    '''
+    Parameters
+    ----------
+    args : map
+        simulation parameters
+    mycell : pyscf.pbc.Cell or pyscf.Mol
+        unit cell object
+    kmesh : numpy.ndarray
+        reciprocal space grid
+    lattice_kmesh : numpy.ndarray
+        super-lattice k-points
+    nao : int
+        number of atomic orbitals in the unit cell
+    X_k : numpy.ndarray
+        trasformation matrix for projection onto an orthogonal space
+    """
 
     if not bool(args.df_int):
         return

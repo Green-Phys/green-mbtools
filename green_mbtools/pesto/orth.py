@@ -8,7 +8,27 @@ Orthogonalization utilities
 
 
 def canonical_matrices(S, thr=1e-7, type='f'):
-    '''Löwdin's canonical orthogonalization'''
+    """Löwdin's canonical orthogonalization transformation matrix
+
+    Parameters
+    ----------
+    S : numpy.ndarray
+        overlap matrix
+    thr : float, optional
+        threshold for orthogonalization and inverses, by default 1e-7
+    type : str, optional
+        'f' for Fock and 'g' for Green's function or density matrix, by default 'f'
+
+    Returns
+    -------
+    numpy.ndarray
+        Transformation matrix for canonical orthogonalization
+
+    Raises
+    ------
+    ValueError
+        if type of input is anything other than 'g' or 'f'.
+    """    
     # Form vectors for normalized overlap matrix
     Sval, Svec = LA.eigh(S)
     X = Svec[:, Sval >= thr] / np.sqrt(Sval[Sval >= thr])
@@ -25,7 +45,25 @@ def canonical_matrices(S, thr=1e-7, type='f'):
 
 
 def canonical_orth(H, S, thr=1e-7, type='f'):
-    '''Löwdin's canonical orthogonalization'''
+    """Löwdin's canonical orthogonalization
+
+    Parameters
+    ----------
+    H : numpy.ndarray
+        tensor/matrix to be orthogonalized (e.g., Fock, density or Green's function).
+        It has shape (..., ns, nk, nao, nao)
+    S : numpy.ndarray
+        overlap matrix
+    thr : float, optional
+        threshold for orthogonalization and inverses, by default 1e-7
+    type : str, optional
+        'f' for Fock and 'g' for Green's function or density matrix, by default 'f'
+
+    Returns
+    -------
+    numpy.ndarray
+        Orthogonalized matrix / tensor
+    """
     # if type != 'f':
     #     raise ValueError(
     #         "Invalid transformation type. "
@@ -59,7 +97,27 @@ def canonical_orth(H, S, thr=1e-7, type='f'):
 
 
 def sao_orth(X, S, type=None):
-    """Symmetrized AO basis.
+    """Löwdin's symmetric orthogonalization
+
+    Parameters
+    ----------
+    X : numpy.ndarray
+        tensor/matrix to be orthogonalized (e.g., Fock, density or Green's function).
+        It has shape (..., ns, nk, nao, nao)
+    S : numpy.ndarray
+        overlap matrix
+    type : str, optional
+        'f' for Fock and 'g' for Green's function or density matrix, by default 'f'
+
+    Returns
+    -------
+    numpy.ndarray
+        Orthogonalized matrix / tensor
+    
+    Raises
+    ------
+    ValueError
+        if type of input is anything other than 'g' or 'f'.
     """
     if not(type == 'g' or type == 'f'):
         raise ValueError(
@@ -98,6 +156,18 @@ def sao_orth(X, S, type=None):
 
 
 def SAO_matrices(S):
+    """Löwdin's symmetric orthogonalization transformation matrix
+
+    Parameters
+    ----------
+    S : numpy.ndarray
+        overlap matrix
+
+    Returns
+    -------
+    numpy.ndarray
+        Transformation matrix for symmetric orthogonalization
+    """
     nk = S.shape[0]
     X_k = []
     X_inv_k = []
@@ -121,14 +191,22 @@ def SAO_matrices(S):
 
 
 def transform(Z, X, X_inv):
-    '''
-    Transform Z into X basis
-    Z_X = X^* Z X
-    :param Z: Object to be transformed
-    :param X: Transformation matrix
-    :param X_inv: Inverse transformation matrix
-    :return: Z in new basis
-    '''
+    """Transform Z into X basis using Z_X = X^* Z X
+
+    Parameters
+    ----------
+    Z : numpy.ndarray
+        Object to be transformed
+    X : numpy.ndarray
+        Transformation matrix
+    X_inv : numpy.ndarray
+        Inverse transformation matrix (used to check the sanity of transformation)
+    
+    Returns
+    -------
+    numpy.ndarray
+        Z in new basis
+    """
     Z_X = np.zeros(Z.shape, dtype=complex)
     for ik in range(Z.shape[0]):
         Z_X[ik] = transform_per_k(Z[ik, :], X[ik], X_inv[ik])
@@ -137,14 +215,22 @@ def transform(Z, X, X_inv):
 
 
 def transform_per_k(Z, X, X_inv):
-    '''
-    Transform Z into X basis
-    Z_X = X^* Z X
-    :param Z: Object to be transformed
-    :param X: Transformation matrix
-    :param X_inv: Inverse transformation matrix
-    :return: Z in new basis
-    '''
+    """Transform Z into X basis as Z_X = X^* Z X for each k-point
+
+    Parameters
+    ----------
+    Z : numpy.ndarray
+        Object to be transformed
+    X : numpy.ndarray
+        Transformation matrix
+    X_inv : numpy.ndarray
+        Inverse transformation matrix (used to check the sanity of transformation)
+    
+    Returns
+    -------
+    numpy.ndarray
+        Z in new basis for the given k-point
+    """
     # Z_X = np.einsum('ij,jk...,kl->il...', X, Z, X.T.conj())
     Z_X = np.dot(X.conj().T, np.dot(Z, X))
 
