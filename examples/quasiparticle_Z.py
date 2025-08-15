@@ -1,7 +1,7 @@
 from functools import reduce
-from mbanalysis.mb import initialize_MB_post
-import mbanalysis.quasiparticle as qs
-import mbanalysis.orth as orth
+from green_mbtools.pesto.mb import initialize_MB_post
+import green_mbtools.pesto.quasiparticle as qs
+import green_mbtools.pesto.orth as orth
 import scipy.linalg as LA
 import numpy as np
 
@@ -18,7 +18,7 @@ import numpy as np
 data_dir = '../tests/test_data'
 sim_path = data_dir + '/H2_GW/sim.h5'
 input_path = data_dir + '/H2_GW/input.h5'
-ir_file = data_dir + '/ir_grid/1e4_104.h5'
+ir_file = data_dir + '/ir_grid/1e4.h5'
 manybody = initialize_MB_post(sim_path, input_path, ir_file)
 nts, ns, nk, nao = manybody.sigma.shape[:4]
 nw = manybody.ir.nw

@@ -5,8 +5,8 @@ import h5py
 from ase.dft.kpoints import get_special_points, bandpath, special_paths
 from pyscf.pbc import gto, dft
 from pyscf.tools import molden
-from mbanalysis import winter
-from mbanalysis.mb import to_full_bz
+from green_mbtools.pesto import winter
+from green_mbtools.pesto.mb import to_full_bz
 import matplotlib.pyplot as plt
 
 
@@ -37,7 +37,6 @@ def read_sim(finput):
     print("Using the Green's function from the iteration ", last_it)
     # Read the Green's function
     G_tau = h_in['iter'+str(last_it) + "/G_tau" + "/data"][()].view(complex)
-    G_tau = G_tau.reshape(G_tau.shape[:-1])
     nts = G_tau.shape[0]
     ns = G_tau.shape[1]
     nk = G_tau.shape[2]
@@ -65,45 +64,20 @@ def power_k(A, p):
 
 # Default parameters
 parser = argparse.ArgumentParser(
-    description="Wannier interpolation of spin-averaged density matrix \
-        to get occupations"
+    description="Wannier interpolation of spin-averaged density matrix to get occupations"
 )
+parser.add_argument("--debug", type=bool, default=False, help="Debug mode (True/False)")
+parser.add_argument("--celltype", type=str, default="cubic", help="Type of lattice: cubic, diamond, etc.")
+parser.add_argument("--bz_type", type=str, default="cubic", help="Brillouin zone to get special k-path.")
 parser.add_argument(
-    "--debug", type=bool, default=False, help="Debug mode (True/False)"
+    "--bandpath", type=str, nargs="*", default=None,
+    help="High symmetry path for the band structure, e.g. 'L G X G'. NOTE: Use spaces."
 )
-parser.add_argument(
-    "--celltype", type=str, default="cubic",
-    help="Type of lattice: cubic, diamond, etc."
-)
-parser.add_argument(
-    "--bz_type", type=str, default="cubic",
-    help="Brillouin zone to get special k-path."
-)
-parser.add_argument(
-    "--bandpath", type=str, default=None,
-    help="High symmetry path for the band structure, e.g. 'L G X G'. \
-        NOTE: Use spaces."
-)
-parser.add_argument(
-    "--bandpts", type=int, default=50,
-    help="Number of k-points used in the band path."
-)
-parser.add_argument(
-    "--input", type=str, default="input.h5",
-    help="Input file used in GW calculation."
-)
-parser.add_argument(
-    "--sim", type=str, default="sim.h5",
-    help="Simulation file to be read"
-)
-parser.add_argument(
-    "--out", type=str, default='occ_bands.h5',
-    help="Name for output file (should be .h5 format)."
-)
-parser.add_argument(
-    "--x2c", type=int, default=0,
-    help="level of x2c approximation: 0=none, 1=sfx2c1e, 2=x2c1e."
-)
+parser.add_argument("--bandpts", type=int, default=50, help="Number of k-points used in the band path.")
+parser.add_argument("--input", type=str, default="input.h5", help="Input file used in GW calculation.")
+parser.add_argument("--sim", type=str, default="sim.h5", help="Simulation file to be read")
+parser.add_argument("--out", type=str, default='occ_bands.h5', help="Name for output file (should be .h5 format).")
+parser.add_argument("--x2c", type=int, default=0, help="level of x2c approximation: 0=none, 1=sfx2c1e, 2=x2c1e.")
 args = parser.parse_args()
 
 #
@@ -198,9 +172,7 @@ for i in range(nk_int):
             sa_dmr[:, :] += S_12[i, :, :] @ dmr_int[js, i, :, :] \
                 @ S_12[i, :, :]
     else:
-        raise ValueError(
-            "The number of spin variables is larger than I can handle"
-        )
+        raise ValueError("The number of spin variables is larger than I can handle")
     occ_ab[i, :], w_ab = np.linalg.eigh(sa_dmr)
     c_ab[i, :, :] = np.linalg.inv(S_12[i, :, :]) @ w_ab
     c_ab = c_ab.conj()  # chemical-friendly notation
@@ -320,6 +292,4 @@ else:
     plt.xticks(sp_points, labels)
 
 # save
-plt.savefig(
-    'occ_bands.pdf', format='pdf', bbox_inches='tight', pad_inches=0.1
-)
+plt.savefig('occ_bands.pdf', format='pdf', bbox_inches='tight', pad_inches=0.1)

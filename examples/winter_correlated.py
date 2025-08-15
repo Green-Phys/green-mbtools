@@ -1,14 +1,15 @@
 import h5py
 from ase.spacegroup import crystal
-from mbanalysis import mb
+from green_mbtools.pesto import mb
 
 
 #
 # Example
 # Perform wannier interpolation for correlated methods
-# TODO: fix or remove this exampl
-#       it uses Si crystal to get HS path but performs wannier
-#       on H2 data
+# 
+# System: cubic crystal of H2 molecules
+
+#
 # NOTE: This example also interpolates the overlap matrix,
 #       which is not the ideal approach. Instead, one should simply
 #       use PySCF to get the overlap matrix on the high-symmetry path.
@@ -23,25 +24,25 @@ T_inv = 1000
 debug = True
 
 # Crystal structure
-a, b, c = 5.43, 5.43, 5.43
+a, b, c = 4.0655, 4.0655, 4.0655
 alpha, beta, gamma = 90, 90, 90
-group = 227
+group = 221
 
 cc = crystal(
-    symbols=['Si'],
-    basis=[(0.0, 0.0, 0.0)],
+    symbols=['H', 'H'],
+    basis=[(-0.25, -0.25, -0.25), (0.25, 0.25, 0.25)],
     spacegroup=group,
     cellpar=[a, b, c, alpha, beta, gamma], primitive_cell=True
 )
 
-path = cc.cell.bandpath('WGXWLG', npoints=100)
+path = cc.cell.bandpath('GXMGR', npoints=100)
 kpts_inter = path.kpts
 
 # Input files
 data_dir = '../tests/test_data'
 input_path = data_dir + '/H2_GW/input.h5'
 GW_path = data_dir + '/H2_GW/sim.h5'
-ir_file = data_dir + '/ir_grid/1e4_105.h5'
+ir_file = data_dir + '/ir_grid/1e4.h5'
 
 # Output file
 output = "test.h5"  # "666Si_GW_WGXWLF.h5"
@@ -53,6 +54,10 @@ output = "test.h5"  # "666Si_GW_WGXWLF.h5"
 ##################
 
 f = h5py.File(input_path, 'r')
+Sk = f["HF/S-k"][()].view(complex)
+Sk = Sk.reshape(Sk.shape[:-1])
+Hk = f["HF/H-k"][()].view(complex)
+Hk = Hk.reshape(Hk.shape[:-1])
 kmesh_scaled = f["/grid/k_mesh_scaled"][()]
 index = f["grid/index"][()]
 ir_list = f["/grid/ir_list"][()]
@@ -64,24 +69,20 @@ f.close()
 
 f = h5py.File(GW_path, 'r')
 it = f["iter"][()]
-rSk = f["/S-k"][()].view(complex)
-rFk = f["iter" + str(it) + "/Fock-k"][()].view(complex)
+rSigma1 = f["iter" + str(it) + "/Sigma1"][()].view(complex)
 rGk = f["iter" + str(it) + "/G_tau/data"][()].view(complex)
 rSigmak = f["iter" + str(it) + "/Selfenergy/data"][()].view(complex)
 tau_mesh = f["iter" + str(it) + "/G_tau/mesh"][()]
 mu = f["iter" + str(it) + "/mu"][()]
-rFk = rFk.reshape(rFk.shape[:-1])
-rGk = rGk.reshape(rGk.shape[:-1])
-rSigmak = rSigmak.reshape(rSigmak.shape[:-1])
-rSk = rSk.reshape(rSk.shape[:-1])
-nao = rFk.shape[-1]
+nao = rSigma1.shape[-1]
 nts = rSigmak.shape[0]
 f.close()
 
-Fk = mb.to_full_bz(rFk, conj_list, ir_list, index, 1)
-Sk = mb.to_full_bz(rSk, conj_list, ir_list, index, 1)
+Sigma1 = mb.to_full_bz(rSigma1, conj_list, ir_list, index, 1)
 Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
-del rFk, rSk, rSigmak
+del rSigma1, rSigmak
+
+Fk = Hk + Sigma1
 
 ##################
 #

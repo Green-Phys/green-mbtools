@@ -21,41 +21,18 @@ import matplotlib.pyplot as plt
 #
 
 # Default parameters
-parser = argparse.ArgumentParser(
-    description="Wannier interpolaotion for Fock to get bands"
-)
+parser = argparse.ArgumentParser(description="Wannier interpolaotion for Fock to get bands")
+parser.add_argument("--debug", type=bool, default=False, help="Debug mode (True/False)")
+parser.add_argument("--celltype", type=str, default="cubic", help="Type of lattice: cubic, diamond, etc.")
+parser.add_argument("--bz_type", type=str, default="cubic", help="Brillouin zone to get special k-path.")
 parser.add_argument(
-    "--debug", type=bool, default=False, help="Debug mode (True/False)"
+    "--bandpath", type=str, nargs="*", default=None,
+    help="High symmetry path for the band structure, e.g. 'L G X G'. NOTE: Use spaces."
 )
-parser.add_argument(
-    "--celltype", type=str, default="cubic",
-    help="Type of lattice: cubic, diamond, etc."
-)
-parser.add_argument(
-    "--bz_type", type=str, default="cubic",
-    help="Brillouin zone to get special k-path."
-)
-parser.add_argument(
-    "--bandpath", type=str, default=None,
-    help="High symmetry path for the band structure, e.g. 'L G X G'. \
-        NOTE: Use spaces."
-)
-parser.add_argument(
-    "--bandpts", type=int, default=50,
-    help="Number of k-points used in the band path."
-)
-parser.add_argument(
-    "--input", type=str, default="input.h5",
-    help="Input file used in GW calculation."
-)
-parser.add_argument(
-    "--out", type=str, default='fock_bands.h5',
-    help="Name for output file (should be .h5 format)."
-)
-parser.add_argument(
-    "--x2c", type=int, default=0,
-    help="level of x2c approximation: 0=none, 1=sfx2c1e, 2=x2c1e."
-)
+parser.add_argument("--bandpts", type=int, default=50, help="Number of k-points used in the band path.")
+parser.add_argument("--input", type=str, default="input.h5", help="Input file used in GW calculation.")
+parser.add_argument("--out", type=str, default='fock_bands.h5', help="Name for output file (should be .h5 format).")
+parser.add_argument("--x2c", type=int, default=0, help="level of x2c approximation: 0=none, 1=sfx2c1e, 2=x2c1e.")
 args = parser.parse_args()
 
 #
@@ -99,7 +76,7 @@ a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
 points = get_special_points(a_vecs, lattice=celltype)
 
 if bandpath_str is not None:
-    kptlist = bandpath_str.split(' ')
+    kptlist = bandpath_str
 else:
     special_path_str = special_paths[bz_type]
     kptlist = special_paths[bz_type]
