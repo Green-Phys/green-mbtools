@@ -1,8 +1,8 @@
 import h5py
 import numpy as np
 
-from mbanalysis import mb
-from mbanalysis import orth
+from green_mbtools.pesto import mb
+from green_mbtools.pesto import orth
 
 #
 # Example
@@ -16,38 +16,41 @@ from mbanalysis import orth
 #
 ##################
 
-# GW data
-fname_sim = '../tests/test_data/H2_GW/sim.h5'
-f = h5py.File(fname_sim, 'r')
-Sr = f["S-k"][()].view(complex)
-Sr = Sr.reshape(Sr.shape[:-1])
-Fr = f["iter14/Fock-k"][()].view(complex)
-Fr = Fr.reshape(Fr.shape[:-1])
-Sigmar = f["iter14/Selfenergy/data"][()].view(complex)
-Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
-Gr = f["iter14/G_tau/data"][()].view(complex)
-Gr = Gr.reshape(Gr.shape[:-1])
-mu = f["iter14/mu"][()]
-f.close()
-
 # Input data
 fname_inp = '../tests/test_data/H2_GW/input.h5'
 f = h5py.File(fname_inp, 'r')
+S = f['HF/S-k'][()].view(complex)
+S = S.reshape(S.shape[:-1])
+H0 = f['HF/H-k'][()].view(complex)
+H0 = H0.reshape(H0.shape[:-1])
 ir_list = f["/grid/ir_list"][()]
 weight = f["/grid/weight"][()]
 index = f["/grid/index"][()]
 conj_list = f["grid/conj_list"][()]
 f.close()
 
+# GW data
+fname_sim = '../tests/test_data/H2_GW/sim.h5'
+f = h5py.File(fname_sim, 'r')
+it = f['iter'][()]  # read the final iteration number
+Sigma_inf_r = f["iter{}/Sigma1".format(it)][()].view(complex)
+# Fr = Fr.reshape(Fr.shape[:-1])
+Sigmar = f["iter{}/Selfenergy/data".format(it)][()].view(complex)
+# Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
+Gr = f["iter{}/G_tau/data".format(it)][()].view(complex)
+# Gr = Gr.reshape(Gr.shape[:-1])
+mu = f["iter{}/mu".format(it)][()]
+f.close()
+
 # IR-grid file
-ir_file = '../tests/test_data/ir_grid/1e4_104.h5'
+ir_file = '../tests/test_data/ir_grid/1e4.h5'
 
 ''' All k-dependent matrices should lie on a full Monkhorst-Pack grid. '''
 # Transform from reduced BZ to full BZ
-F = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
-S = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
+Sigma_inf = mb.to_full_bz(Sigma_inf_r, conj_list, ir_list, index, 1)
 Sigma = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
 G = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+F = H0 + Sigma_inf
 
 ##################
 #
@@ -55,22 +58,16 @@ G = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
 #
 ##################
 
-MB = mb.MB_post(
-    fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, ir_file=ir_file
-)
+MB = mb.MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, ir_file=ir_file)
 G = MB.gtau
 
 # NOTE: Alternate approach
 # If G(t) is not known, Dyson euqation can be solved on given beta and ir grid.
-MB_v2 = mb.MB_post(
-    fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, ir_file=ir_file
-)
+MB_v2 = mb.MB_post(fock=F, sigma=Sigma, mu=mu, S=S, beta=1000, ir_file=ir_file)
 G2 = MB_v2.gtau
 
 # NOTE: One more, rather compact, way
-MB_v3 = mb.initialize_MB_post(
-    sim_path=fname_sim, input_path=fname_inp, ir_file=ir_file
-)
+MB_v3 = mb.initialize_MB_post(sim_path=fname_sim, input_path=fname_inp, ir_file=ir_file)
 
 
 diff = G - G2
@@ -111,9 +108,7 @@ print(mo_can[0, 0])
 F_orth = orth.sao_orth(F, S, type='f')
 Sigma_orth = orth.sao_orth(Sigma, S, type='f')
 G_orth = orth.sao_orth(G, S, type='g')
-MB = mb.MB_post(
-    fock=F_orth, sigma=Sigma_orth, mu=mu, beta=1000, ir_file=ir_file
-)
+MB = mb.MB_post(fock=F_orth, sigma=Sigma_orth, mu=mu, beta=1000, ir_file=ir_file)
 
 print("Mullinken analysis: ")
 occs = MB.mulliken_analysis()

@@ -1,8 +1,8 @@
 import numpy as np
 import h5py
 
-from mbanalysis import mb
-from mbanalysis import orth
+from green_mbtools.pesto import mb
+from green_mbtools.pesto import orth
 
 #
 # Example
@@ -20,8 +20,8 @@ T_inv = 1000
 debug = True
 
 # Input files
-input_path = '../tests/test_data/H2_GW/input.h5'
-sim_path = '../tests/test_data/H2_GW/sim.h5'
+input_path = '../tests/test_data/H2_GW_legacy/input.h5'
+sim_path = '../tests/test_data/H2_GW_legacy/sim.h5'
 ir_file = '../tests/test_data/ir_grid/1e4_104.h5'
 
 # NOTE: Edit the value of maxent_exe variable to the path of the
@@ -67,9 +67,7 @@ Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
 ##################
 
 # Construct MB_post class
-MB = mb.MB_post(
-    fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv, ir_file=ir_file
-)
+MB = mb.MB_post(fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv, ir_file=ir_file, legacy_ir=True)
 
 # By default, running Maxent for all diagonal elements of MB.gtau in SAO basis
 MB.AC_maxent(

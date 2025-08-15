@@ -1,6 +1,6 @@
 import h5py
 import numpy as np
-from mbanalysis import ir
+from green_mbtools.pesto import ir
 
 #
 # Example
@@ -17,7 +17,7 @@ tau_mesh = f["iter" + str(it) + "/G_tau/mesh"][()]
 f.close()
 
 # Here the H2 GW simulation uses lambda = 1e4
-ir_file = '../tests/test_data/ir_grid/1e4_104.h5'
+ir_file = '../tests/test_data/ir_grid/1e4.h5'
 beta = tau_mesh[-1]
 nts = tau_mesh.shape[0]
 my_ir = ir.IR_factory(beta, ir_file)
@@ -26,6 +26,8 @@ my_ir = ir.IR_factory(beta, ir_file)
 G_iw = my_ir.tau_to_w(G_tau)
 # Fourier transform from G(iw_n) to G(tau)
 G_tau_2 = my_ir.w_to_tau(G_iw)
+# List w values
+print("Matsubara frequencies: ", my_ir.wsample)
 
 diff = G_tau - G_tau_2
 print(np.max(np.abs(diff.real)))

@@ -1,7 +1,7 @@
 import h5py
 import pytest
 import os
-from mbanalysis import mb
+from green_mbtools.pesto import mb
 
 
 #
@@ -23,37 +23,35 @@ def mbo(data_path):
 
     # data file (sim.h5)
     f = h5py.File(data_dir + '/H2_GW/sim.h5', 'r')
-    Sr = f["S-k"][()].view(complex)
-    Sr = Sr.reshape(Sr.shape[:-1])
-    Fr = f["iter14/Fock-k"][()].view(complex)
-    Fr = Fr.reshape(Fr.shape[:-1])
-    Sigmar = f["iter14/Selfenergy/data"][()].view(complex)
-    Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
-    Gr = f["iter14/G_tau/data"][()].view(complex)
-    Gr = Gr.reshape(Gr.shape[:-1])
-    mu = f["iter14/mu"][()]
+    it = f['iter'][()]
+    iter_str = "iter{}".format(it)
+    Sigma1r = f[iter_str + "/Sigma1"][()].view(complex)
+    Sigmar = f[iter_str + "/Selfenergy/data"][()].view(complex)
+    Gr = f[iter_str + "/G_tau/data"][()].view(complex)
+    mu = f[iter_str + "/mu"][()]
     f.close()
 
     # input file (input.h5)
     f = h5py.File(data_dir + '/H2_GW/input.h5', 'r')
+    S = f['HF/S-k'][()].view(complex)
+    S = S.reshape(S.shape[:-1])
+    H0 = f['HF/H-k'][()].view(complex)
+    H0 = H0.reshape(H0.shape[:-1])
     ir_list = f["/grid/ir_list"][()]
     index = f["/grid/index"][()]
     conj_list = f["grid/conj_list"][()]
     f.close()
 
     # ir grid file
-    irf = data_dir + '/ir_grid/1e4_104.h5'
+    irf = data_dir + '/ir_grid/1e4.h5'
 
     # All k-dependent matrices should lie on a full Monkhorst-Pack grid.
-    F = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
-    S = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
+    Sigma1 = mb.to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
     Sigma = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
     G = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+    F = H0 + Sigma1
 
     # Standard way to initialize
-    mbobj = mb.MB_post(
-        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000,
-        ir_file=irf, legacy_ir=True
-    )
+    mbobj = mb.MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, ir_file=irf)
 
     return mbobj

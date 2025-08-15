@@ -24,7 +24,7 @@ if __name__ == "__main__":
     data_path = abspath('../tests/test_data')
     input_path = data_path + '/H2_GW/input.h5'
     sim_path = data_path + '/H2_GW/sim.h5'
-    ir_file = data_path + '/ir_grid/1e4_104.h5'
+    ir_file = data_path + '/ir_grid/1e4.h5'
 
     ##################
     #
@@ -35,21 +35,21 @@ if __name__ == "__main__":
     # Read converged imaginary time calculation
     print("Reading simulation data.")
     f = h5py.File(sim_path, 'r')
-    Sr = f["S-k"][()].view(complex)
-    Sr = Sr.reshape(Sr.shape[:-1])
-    Fr = f["iter14/Fock-k"][()].view(complex)
-    Fr = Fr.reshape(Fr.shape[:-1])
-    Sigmar = f["iter14/Selfenergy/data"][()].view(complex)
-    Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
-    Gr = f["iter14/G_tau/data"][()].view(complex)
-    Gr = Gr.reshape(Gr.shape[:-1])
-    mu = f["iter14/mu"][()]
+    it = f["iter"][()]
+    Sigma1r = f["iter" + str(it) + "/Sigma1"][()].view(complex)
+    Sigmar = f["iter" + str(it) + "/Selfenergy/data"][()].view(complex)
+    Gr = f["iter" + str(it) + "/G_tau/data"][()].view(complex)
+    mu = f["iter" + str(it) + "/mu"][()]
     f.close()
     print("Completed reading simulation data.")
 
     # Read data about grids
     print("Reading mean-field data")
     f = h5py.File(input_path, 'r')
+    Hk = f['HF/H-k'][()].view(complex)
+    Hk = Hk.reshape(Hk.shape[:-1])
+    Sk = f['HF/S-k'][()].view(complex)
+    Sk = Sk.reshape(Sk.shape[:-1])
     mo_coeff = f["/HF/mo_coeff"][()]
     ir_list = f["/grid/ir_list"][()]
     index = f["/grid/index"][()]
@@ -66,15 +66,14 @@ if __name__ == "__main__":
     # Transform from reduced BZ to full BZ
     print("Transforming data from reduced BZ to full BZ.")
     if x2c:
-        Fk = mb.to_full_bz_TRsym(Fr, conj_list, ir_list, index, 1)
-        Sk = mb.to_full_bz_TRsym(Sr, conj_list, ir_list, index, 1)
+        Sigma1 = mb.to_full_bz_TRsym(Sigma1r, conj_list, ir_list, index, 1)
         Sigmak = mb.to_full_bz_TRsym(Sigmar, conj_list, ir_list, index, 2)
         Gk = mb.to_full_bz_TRsym(Gr, conj_list, ir_list, index, 2)
     else:
-        Fk = mb.to_full_bz(Fr, conj_list, ir_list, index, 1)
-        Sk = mb.to_full_bz(Sr, conj_list, ir_list, index, 1)
+        Sigma1 = mb.to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
         Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
         Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+    Fk = Hk + Sigma1
     print('Pre analysis complete')
 
     ##################
@@ -88,7 +87,7 @@ if __name__ == "__main__":
     t1 = time.time()
     MB = mb.MB_post(
         fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv,
-        ir_file=ir_file, legacy_ir=True
+        ir_file=ir_file
     )
     t2 = time.time()
     print("Time required to set up post processing: ", t2 - t1)
