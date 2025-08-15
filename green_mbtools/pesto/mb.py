@@ -544,7 +544,7 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     nso = f["params/nso"][()]
     ns = f['params/ns'][()]
     x2c = False
-    if nso == nao and ns == 1:
+    if nso == 2*nao:
         x2c = True
     f.close()
 
