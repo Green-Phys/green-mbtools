@@ -239,19 +239,20 @@ class MB_post(object):
             self.fock, self.S, self.sigma, self.mu, self.ir
         )
 
-    def eigh(self, F, S, thr=1e-7):
-        return LA.eigh(F, S)
-    # FIXME c here is differ with the c from eigh() by a phase factor.
-    # Fix it or leave it like this?
-
     def eigh_canonical(self, F, S, thr=1e-7):
         # S: m*m, x =: m*n, xFx: n*n, c: n*n, e: n, xc: m*n
-        x = orth.canonical_matrices(S, thr, 'f')
-        xFx = reduce(np.dot, (x.T.conj(), F, x))
-        e, c = LA.eigh(xFx)
-        c = np.dot(x, c)
-
-        return e, c
+        ns, nk, nao = F.shape[0:3]
+        eigs = np.zeros((ns, nk, nao))
+        vecs = np.zeros((ns, nk, nao, nao), dtype=complex)
+        for s in range(ns):
+            for k in range(nk):
+                x = orth.canonical_matrices(S[s, k], thr, 'f')
+                xFx = reduce(np.dot, (x.T.conj(), F[s, k], x))
+                e, c = LA.eigh(xFx)
+                c = np.dot(x, c)
+                eigs[s, k, :] = e * 1.0
+                vecs[s, k, :, :] = c * 1.0
+        return eigs, vecs
 
     def get_mo(self, canonical=False, thr=1e-7):
         """Compute molecular orbital energy by solving the generalized eigenvalue problem FC=SCE
@@ -271,10 +272,9 @@ class MB_post(object):
             MO eigen vectors
         """
         if not canonical:
-            eigh = self.eigh
+            mo_energy, mo_coeff = spec.compute_mo(self.fock, self.S)
         else:
-            eigh = self.eigh_canonical
-        mo_energy, mo_coeff = spec.compute_mo(self.fock, self.S, eigh, thr)
+            mo_energy, mo_coeff = self.eigh_canonical(self.fock, self.S, thr)
         return mo_energy, mo_coeff
 
     def get_no(self):
@@ -524,27 +524,27 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     import h5py
     f = h5py.File(sim_path, 'r')
     it = f["iter"][()]
-    Sr = f["S-k"][()].view(complex)
-    Sr = Sr.reshape(Sr.shape[:-1])
-    Fr = f["iter"+str(it)+"/Fock-k"][()].view(complex)
-    Fr = Fr.reshape(Fr.shape[:-1])
+    Sigma1r = f["iter"+str(it)+"/Sigma1"][()].view(complex)
     Sigmar = f["iter"+str(it)+"/Selfenergy/data"][()].view(complex)
-    Sigmar = Sigmar.reshape(Sigmar.shape[:-1])
     Gr = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
-    Gr = Gr.reshape(Gr.shape[:-1])
     tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
     beta = tau_mesh[-1]
     mu = f["iter"+str(it)+"/mu"][()]
     f.close()
 
     f = h5py.File(input_path, 'r')
+    S = f['HF/S-k'][()].view(complex)
+    S = S.reshape(S.shape[:-1])
+    H0 = f['HF/H-k'][()].view(complex)
+    H0 = H0.reshape(H0.shape[:-1])
     ir_list = f["/grid/ir_list"][()]
     index = f["/grid/index"][()]
     conj_list = f["grid/conj_list"][()]
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
+    ns = f['params/ns'][()]
     x2c = False
-    if nso == nao:
+    if nso == 2*nao:
         x2c = True
     f.close()
 
@@ -552,15 +552,14 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     All k-dependent matrices should lie on a full Monkhorst-Pack grid.
     """
     if not x2c:
-        F = to_full_bz(Fr, conj_list, ir_list, index, 1)
-        S = to_full_bz(Sr, conj_list, ir_list, index, 1)
+        Sigma1 = to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
         Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
         G = to_full_bz(Gr, conj_list, ir_list, index, 2)
     else:
-        F = to_full_bz_TRsym(Fr, conj_list, ir_list, index, 1)
-        S = to_full_bz_TRsym(Sr, conj_list, ir_list, index, 1)
+        Sigma1 = to_full_bz_TRsym(Sigma1r, conj_list, ir_list, index, 1)
         Sigma = to_full_bz_TRsym(Sigmar, conj_list, ir_list, index, 2)
         G = to_full_bz_TRsym(Gr, conj_list, ir_list, index, 2)
+    F = H0 + Sigma1
 
     """
     Results from correlated methods
