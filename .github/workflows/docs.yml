@@ -57,3 +57,15 @@ jobs:
           user_name: github-actions[bot]
           user_email: github-actions[bot]@users.noreply.github.com
           allow_empty_commit: true
+
+      # Deploy latest to root
+      - name: Deploy latest to root
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_build/${{ env.DOC_VERSION }}/html
+          destination_dir: ""   # root
+          keep_files: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          allow_empty_commit: true
