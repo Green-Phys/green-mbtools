@@ -254,26 +254,634 @@
         <article role="main" id="furo-main-content">
           <section id="green-mbtools-mint">
 <h1>green_mbtools.mint<a class="headerlink" href="#green-mbtools-mint" title="Link to this heading">¶</a></h1>
-<section id="green-mbtools-mint-common-utils">
-<h2>green_mbtools.mint.common_utils<a class="headerlink" href="#green-mbtools-mint-common-utils" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.mint.common_utils">
+<span id="green-mbtools-mint-common-utils"></span><h2>green_mbtools.mint.common_utils<a class="headerlink" href="#module-green_mbtools.mint.common_utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.add_common_params">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">add_common_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#add_common_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.add_common_params" title="Link to this definition">¶</a></dt>
+<dd><p>Define common command line arguments for Green python module</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.add_pbc_params">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">add_pbc_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#add_pbc_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.add_pbc_params" title="Link to this definition">¶</a></dt>
+<dd><p>Define PBC-specific command line arguments for Green python module</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.check_high_symmetry_path">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">check_high_symmetry_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#check_high_symmetry_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.check_high_symmetry_path" title="Link to this definition">¶</a></dt>
+<dd><p>Check that selected high-symmetry path is correct for the chosen simulation parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>map</em>) – simulation parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.compute_df_int_dca">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">compute_df_int_dca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice_kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nao</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#compute_df_int_dca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.compute_df_int_dca" title="Link to this definition">¶</a></dt>
+<dd><p>Generate density-fitting integrals for correlated methods using q-averaging over the super-lattice points to compensate finite-size error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>map</em>) – simulation parameters</p></li>
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.Cell</em><em> or </em><em>pyscf.Mol</em>) – unit cell object</p></li>
+<li><p><strong>kmesh</strong> (<em>numpy.ndarray</em>) – reciprocal space grid</p></li>
+<li><p><strong>lattice_kmesh</strong> (<em>numpy.ndarray</em>) – super-lattice k-points</p></li>
+<li><p><strong>nao</strong> (<em>int</em>) – number of atomic orbitals in the unit cell</p></li>
+<li><p><strong>X_k</strong> (<em>numpy.ndarray</em>) – trasformation matrix for projection onto an orthogonal space</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.compute_ewald_correction">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">compute_ewald_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#compute_ewald_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.compute_ewald_correction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.construct_gdf">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">construct_gdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#construct_gdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.construct_gdf" title="Link to this definition">¶</a></dt>
+<dd><p>Construct Gaussian Density Fitting obejct for a given parameters and unit cell.
+We make sure to disable range-separeting implementation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.construct_mol_gdf">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">construct_mol_gdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#construct_mol_gdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.construct_mol_gdf" title="Link to this definition">¶</a></dt>
+<dd><p>Construct Gaussian Density Fitting obejct for a given parameters and unit cell.
+We make sure to disable range-separeting implementation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.extract_ase_data">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">extract_ase_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#extract_ase_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.extract_ase_data" title="Link to this definition">¶</a></dt>
+<dd><p>For a given data in XYZ format generate parameters in ASE format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>str</em>) – string containing lattice vectros in XYZ format</p></li>
+<li><p><strong>atoms</strong> (<em>str</em>) – string containin atoms positions in XYZ format</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy array of lattice vectors, list of atom symbols, and list of atom coordinates</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.fold_back_to_1stBZ">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">fold_back_to_1stBZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#fold_back_to_1stBZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.fold_back_to_1stBZ" title="Link to this definition">¶</a></dt>
+<dd><p>Map each k-point from a given list of scaled k-points into the first Brillouin zone</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kpts</strong> (<em>numpy.ndarray</em>) – list of k-points</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>k-points folded into 1st Brillouin-zone</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.high_symmetry_path">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">high_symmetry_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#high_symmetry_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.high_symmetry_path" title="Link to this definition">¶</a></dt>
+<dd><p>Compute high-symmetry k-path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell</strong> (<em>pyscf.pbc.Cell</em>) – unit-cell object</p></li>
+<li><p><strong>args</strong> (<em>map</em>) – simulation parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>k-points on the chosen high-symmetry path; corresponding
+non-interacting Hamiltonian and overlap matrix, and linear k-point
+axis and labels (used in band structure plots)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.init_k_mesh">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">init_k_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#init_k_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.init_k_mesh" title="Link to this definition">¶</a></dt>
+<dd><p>init k-points mesh for GDF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>map</em>) – simulation parameters</p></li>
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.Cell</em>) – unit cell for simulation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – k-mesh for the Brillouin Zone</p></li>
+<li><p><em>numpy.ndarray</em> – k-mesh with unique k-points, forming the irreducible k-mesh</p></li>
+<li><p><em>numpy.ndarray</em> – indices of irreducible k-points in the input k-list</p></li>
+<li><p><em>numpy.ndarray</em> – truth table for whether a k-point has an irreducible time-reversal equivalent</p></li>
+<li><p><em>numpy.ndarray</em> – weights for each irreducible k-point (degeneracy)</p></li>
+<li><p><em>numpy.ndarray</em> – inverse index, associating each k-point with its unique equivalent</p></li>
+<li><p><em>int</em> – number of irreducible k-points</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.init_mol_params">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">init_mol_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#init_mol_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.init_mol_params" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for molecular calculations</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.init_pbc_params">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">init_pbc_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#init_pbc_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.init_pbc_params" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for periodic calculations</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.inversion_sym">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">inversion_sym</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kmesh_scaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#inversion_sym"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.inversion_sym" title="Link to this definition">¶</a></dt>
+<dd><p>For a given list of the scaled k-points in the full Brillouin zone select k-points that are
+equivalent by the time-reversal symmetry and return them and their corresponding weight and index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kpts</strong> (<em>numpy.ndarray</em>) – list of scaled k-points</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – indices of irreducible k-points in the input k-list</p></li>
+<li><p><em>numpy.ndarray</em> – inverse index, associating each k-point with its unique equivalent</p></li>
+<li><p><em>numpy.ndarray</em> – weights for each irreducible k-point (degeneracy)</p></li>
+<li><p><em>numpy.ndarray</em> – truth table for whether a k-point has an irreducible time-reversal equivalent</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.mol_cell">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">mol_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#mol_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.mol_cell" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize PySCF unit cell object for a given system</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.orthogonalize">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">orthogonalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_inv_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#orthogonalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.orthogonalize" title="Link to this definition">¶</a></dt>
+<dd><p>Transform Fock-matrix, non-interacting Hamiltonian, density matrix and overlap matrix into an orthogonal basis</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.parse_basis">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">parse_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#parse_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.parse_basis" title="Link to this definition">¶</a></dt>
+<dd><p>Parse information about chosen basis sets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>basis_list</strong> (<em>str</em>) – basis-set information</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>basis-set information usable in initialization of pyscf Cell object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.parse_geometry">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">parse_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#parse_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.parse_geometry" title="Link to this definition">¶</a></dt>
+<dd><p>Parse geometry of the system</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.pbc_cell">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">pbc_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#pbc_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.pbc_cell" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize PySCF unit cell object for a given system</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.print_high_symmetry_points">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">print_high_symmetry_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#print_high_symmetry_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.print_high_symmetry_points" title="Link to this definition">¶</a></dt>
+<dd><p>For given simulation parameters, generate and print list of lattice special points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>map</em>) – simulation parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.read_dm">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">read_dm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dm0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dm_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#read_dm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.read_dm" title="Link to this definition">¶</a></dt>
+<dd><p>Read density matrix from smaller kmesh</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.save_data">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">save_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_ik</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conj_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">madelung</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Zs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_ao</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#save_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.save_data" title="Link to this definition">¶</a></dt>
+<dd><p>Save data in Green/WeakCoupling format into a hdf5 file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.solve_mean_field">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">solve_mean_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#solve_mean_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.solve_mean_field" title="Link to this definition">¶</a></dt>
+<dd><p>Obtain pySCF mean-field solution for a given parameters, unit-cell object and density-fitting object</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.solve_mol_mean_field">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">solve_mol_mean_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#solve_mol_mean_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.solve_mol_mean_field" title="Link to this definition">¶</a></dt>
+<dd><p>Obtain pySCF mean-field solution for a given parameters, unit-cell object and density-fitting object</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.store_k_grid">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">store_k_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_ibz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conj_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_ik</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#store_k_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.store_k_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Store reciprocal space information into a hdf5 file in Green’WeakCoupling format</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.transform">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_inv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.transform" title="Link to this definition">¶</a></dt>
+<dd><p>Transform Z into X basis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Z</strong> (<em>numpy.ndarray</em>) – Object to be transformed</p></li>
+<li><p><strong>X</strong> (<em>numpy.ndarray</em>) – Transformation matrix</p></li>
+<li><p><strong>X_inv</strong> (<em>numpy.ndarray</em>) – Inverse transformation matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Z in new basis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.wrap_1stBZ">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">wrap_1stBZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#wrap_1stBZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.wrap_1stBZ" title="Link to this definition">¶</a></dt>
+<dd><p>wrap scaled k into [-0.5,0.5) range
+:type k: 
+:param k: value of k-point at some dimension</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.wrap_k">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">wrap_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#wrap_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.wrap_k" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="green-mbtools-mint-gdf-s-metric">
-<h2>green_mbtools.mint.gdf_s_metric<a class="headerlink" href="#green-mbtools-mint-gdf-s-metric" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.mint.gdf_s_metric">
+<span id="green-mbtools-mint-gdf-s-metric"></span><h2>green_mbtools.mint.gdf_s_metric<a class="headerlink" href="#module-green_mbtools.mint.gdf_s_metric" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.check_eri">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">check_eri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j3c1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j3c2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kptij_lst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#check_eri"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.check_eri" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.compute_j2c_sqrt">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">compute_j2c_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uniq_kptji_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j2c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_dep_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-09</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#compute_j2c_sqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.compute_j2c_sqrt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.make_j2c_sqrt">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">make_j2c_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#make_j2c_sqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.make_j2c_sqrt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.make_j3c">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">make_j3c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j2c_sqrt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#make_j3c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.make_j3c" title="Link to this definition">¶</a></dt>
+<dd><p>The inefficient incore version of make_j3c</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.make_j3c_outcore">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">make_j3c_outcore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'df_int'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsgdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j2c_sqrt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#make_j3c_outcore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.make_j3c_outcore" title="Link to this definition">¶</a></dt>
+<dd><p>The outcore version of make_j3c</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.make_kptij_lst">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">make_kptij_lst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpts_band</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#make_kptij_lst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.make_kptij_lst" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.sqrt_j2c">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">sqrt_j2c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j2c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#sqrt_j2c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.sqrt_j2c" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.gdf_s_metric.transformation_PW_to_auxbasis">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.gdf_s_metric.</span></span><span class="sig-name descname"><span class="pre">transformation_PW_to_auxbasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j2c_sqrt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/gdf_s_metric.html#transformation_PW_to_auxbasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.gdf_s_metric.transformation_PW_to_auxbasis" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="green-mbtools-mint-integral-utils">
-<h2>green_mbtools.mint.integral_utils<a class="headerlink" href="#green-mbtools-mint-integral-utils" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.mint.integral_utils">
+<span id="green-mbtools-mint-integral-utils"></span><h2>green_mbtools.mint.integral_utils<a class="headerlink" href="#module-green_mbtools.mint.integral_utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.compute_ewald_correction">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">compute_ewald_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maindf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nao</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'df_ewald.h5'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#compute_ewald_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.compute_ewald_correction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.compute_integrals">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">compute_integrals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nao</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'df_int'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cderi_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cderi.h5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cderi_name2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cderi_ewald.h5'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#compute_integrals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.compute_integrals" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.compute_kG">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">compute_kG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_around</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#compute_kG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.compute_kG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.get_coarsegrained_coulG">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">get_coarsegrained_coulG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lattice_kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.,</span> <span class="pre">0.])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_around</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#get_coarsegrained_coulG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.get_coarsegrained_coulG" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the coarse-grained Coulomb kernel for all G-vectors, handling G=0 and exchange.
+This routine overrides get_coulG to perform interaction coarse-graining.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.integrals_grid">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">integrals_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#integrals_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.integrals_grid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.kpair_reduced_lists">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">kpair_reduced_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kptis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kptjs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kptij_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#kpair_reduced_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.kpair_reduced_lists" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.weighted_coulG_ewald">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">weighted_coulG_ewald</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#weighted_coulG_ewald"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.weighted_coulG_ewald" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.integral_utils.weighted_coulG_ewald_2nd">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.integral_utils.</span></span><span class="sig-name descname"><span class="pre">weighted_coulG_ewald_2nd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/integral_utils.html#weighted_coulG_ewald_2nd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.integral_utils.weighted_coulG_ewald_2nd" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="green-mbtools-mint-namespace">
-<h2>green_mbtools.mint.namespace<a class="headerlink" href="#green-mbtools-mint-namespace" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.mint.namespace">
+<span id="green-mbtools-mint-namespace"></span><h2>green_mbtools.mint.namespace<a class="headerlink" href="#module-green_mbtools.mint.namespace" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="green_mbtools.mint.namespace.Namespace">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.namespace.</span></span><span class="sig-name descname"><span class="pre">Namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/namespace.html#Namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.namespace.Namespace" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Generic namespace class that can be set by a dictionary object
+and return None for missing arguments</p>
+</dd></dl>
+
 </section>
-<section id="green-mbtools-mint-ortho-utils">
-<h2>green_mbtools.mint.ortho_utils<a class="headerlink" href="#green-mbtools-mint-ortho-utils" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.mint.ortho_utils">
+<span id="green-mbtools-mint-ortho-utils"></span><h2>green_mbtools.mint.ortho_utils<a class="headerlink" href="#module-green_mbtools.mint.ortho_utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.ortho_utils.avg">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.ortho_utils.</span></span><span class="sig-name descname"><span class="pre">avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/ortho_utils.html#avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.ortho_utils.avg" title="Link to this definition">¶</a></dt>
+<dd><p>Average momentum dependent quantity</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.ortho_utils.canonical_orbitals">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.ortho_utils.</span></span><span class="sig-name descname"><span class="pre">canonical_orbitals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_dn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_dn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Debug_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/ortho_utils.html#canonical_orbitals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.ortho_utils.canonical_orbitals" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.ortho_utils.natural_orbitals">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.ortho_utils.</span></span><span class="sig-name descname"><span class="pre">natural_orbitals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_dn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_dn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Debug_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/ortho_utils.html#natural_orbitals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.ortho_utils.natural_orbitals" title="Link to this definition">¶</a></dt>
+<dd><p>Compute transformation matricies for natural orbtial basis from spin-averaged density matrix
+—</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.ortho_utils.normalize">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.ortho_utils.</span></span><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/ortho_utils.html#normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.ortho_utils.normalize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.ortho_utils.symmetrical_orbitals">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.ortho_utils.</span></span><span class="sig-name descname"><span class="pre">symmetrical_orbitals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_dn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_dn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Debug_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/ortho_utils.html#symmetrical_orbitals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.ortho_utils.symmetrical_orbitals" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.ortho_utils.wrap_k">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.ortho_utils.</span></span><span class="sig-name descname"><span class="pre">wrap_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/ortho_utils.html#wrap_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.ortho_utils.wrap_k" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="green-mbtools-mint-pyscf-init">
-<h2>green_mbtools.mint.pyscf_init<a class="headerlink" href="#green-mbtools-mint-pyscf-init" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.mint.pyscf_init">
+<span id="green-mbtools-mint-pyscf-init"></span><h2>green_mbtools.mint.pyscf_init<a class="headerlink" href="#module-green_mbtools.mint.pyscf_init" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.pyscf_init.</span></span><span class="sig-name descname"><span class="pre">pyscf_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Initialization class for Green project</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.args" title="Link to this definition">¶</a></dt>
+<dd><p>simulation parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>map</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.cell">
+<span class="sig-name descname"><span class="pre">cell</span></span><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.cell" title="Link to this definition">¶</a></dt>
+<dd><p>unit cell object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyscf.pbc.cell</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.kmesh">
+<span class="sig-name descname"><span class="pre">kmesh</span></span><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.kmesh" title="Link to this definition">¶</a></dt>
+<dd><p>Monkhorst-Pack reciprocal space grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.cell_object">
+<span class="sig-name descname"><span class="pre">cell_object</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_init.cell_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.cell_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.compute_df_int">
+<span class="sig-name descname"><span class="pre">compute_df_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nao</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_init.compute_df_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.compute_df_int" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.df_object">
+<span class="sig-name descname"><span class="pre">df_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_init.df_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.df_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.mean_field_input">
+<span class="sig-name descname"><span class="pre">mean_field_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_init.mean_field_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.mean_field_input" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_init.mf_object">
+<span class="sig-name descname"><span class="pre">mf_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_init.mf_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_init.mf_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_mol_init">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.pyscf_init.</span></span><span class="sig-name descname"><span class="pre">pyscf_mol_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_mol_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init" title="green_mbtools.mint.pyscf_init.pyscf_init"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyscf_init</span></code></a></p>
+<p>Initialization class for molecular systems in the Green project</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_mol_init.cell_object">
+<span class="sig-name descname"><span class="pre">cell_object</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_mol_init.cell_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.cell_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_mol_init.compute_df_int">
+<span class="sig-name descname"><span class="pre">compute_df_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nao</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_mol_init.compute_df_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.compute_df_int" title="Link to this definition">¶</a></dt>
+<dd><p>Generate density-fitting integrals for correlated methods</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_mol_init.df_object">
+<span class="sig-name descname"><span class="pre">df_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_mol_init.df_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.df_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_mol_init.mean_field_input">
+<span class="sig-name descname"><span class="pre">mean_field_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_mol_init.mean_field_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.mean_field_input" title="Link to this definition">¶</a></dt>
+<dd><p>Solve a give mean-field problem and store the solution in the Green/WeakCoupling format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mydf</strong> (<em>pyscf.df</em>) – pyscf density-fitting object, will be generated if None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_mol_init.mf_object">
+<span class="sig-name descname"><span class="pre">mf_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_mol_init.mf_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.mf_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.pyscf_init.</span></span><span class="sig-name descname"><span class="pre">pyscf_pbc_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init" title="green_mbtools.mint.pyscf_init.pyscf_init"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyscf_init</span></code></a></p>
+<p>Initialization class for periodic / solid-state systems for the Green project</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.cell_object">
+<span class="sig-name descname"><span class="pre">cell_object</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.cell_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.cell_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_df_int">
+<span class="sig-name descname"><span class="pre">compute_df_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nao</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.compute_df_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_df_int" title="Link to this definition">¶</a></dt>
+<dd><p>Generate density-fitting integrals for correlated methods</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_twobody_finitesize_correction">
+<span class="sig-name descname"><span class="pre">compute_twobody_finitesize_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.compute_twobody_finitesize_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_twobody_finitesize_correction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.df_object">
+<span class="sig-name descname"><span class="pre">df_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.df_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.df_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_gw_correction">
+<span class="sig-name descname"><span class="pre">evaluate_gw_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.evaluate_gw_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_gw_correction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_high_symmetry_path">
+<span class="sig-name descname"><span class="pre">evaluate_high_symmetry_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.evaluate_high_symmetry_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_high_symmetry_path" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.mean_field_input">
+<span class="sig-name descname"><span class="pre">mean_field_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.mean_field_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.mean_field_input" title="Link to this definition">¶</a></dt>
+<dd><p>Solve a give mean-field problem and store the solution in the Green/WeakCoupling format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mydf</strong> (<em>pyscf.pbc.df</em>) – pyscf density-fitting object, will be generated if None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.pyscf_init.pyscf_pbc_init.mf_object">
+<span class="sig-name descname"><span class="pre">mf_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/pyscf_init.html#pyscf_pbc_init.mf_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.mf_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="green-mbtools-mint-seet-init">
-<h2>green_mbtools.mint.seet_init<a class="headerlink" href="#green-mbtools-mint-seet-init" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.mint.seet_init">
+<span id="green-mbtools-mint-seet-init"></span><h2>green_mbtools.mint.seet_init<a class="headerlink" href="#module-green_mbtools.mint.seet_init" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="green_mbtools.mint.seet_init.seet_init">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.seet_init.</span></span><span class="sig-name descname"><span class="pre">seet_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/seet_init.html#seet_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.seet_init.seet_init" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SEET pre-processing class.
+Computes proper orthogonal transformation and projection matricies</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.seet_init.seet_init.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#green_mbtools.mint.seet_init.seet_init.args" title="Link to this definition">¶</a></dt>
+<dd><p>simulation parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>map</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.seet_init.seet_init.get_input_data">
+<span class="sig-name descname"><span class="pre">get_input_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/seet_init.html#seet_init.get_input_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.seet_init.seet_init.get_input_data" title="Link to this definition">¶</a></dt>
+<dd><p>Read weak-coupling solution</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.mint.seet_init.seet_init.to_full_bz">
+<span class="sig-name descname"><span class="pre">to_full_bz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conj_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bz_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/seet_init.html#seet_init.to_full_bz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.seet_init.seet_init.to_full_bz" title="Link to this definition">¶</a></dt>
+<dd><p>Project moment-dependent quantity onto full Brillouin zone</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -333,13 +941,114 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">green_mbtools.mint</a><ul>
-<li><a class="reference internal" href="#green-mbtools-mint-common-utils">green_mbtools.mint.common_utils</a></li>
-<li><a class="reference internal" href="#green-mbtools-mint-gdf-s-metric">green_mbtools.mint.gdf_s_metric</a></li>
-<li><a class="reference internal" href="#green-mbtools-mint-integral-utils">green_mbtools.mint.integral_utils</a></li>
-<li><a class="reference internal" href="#green-mbtools-mint-namespace">green_mbtools.mint.namespace</a></li>
-<li><a class="reference internal" href="#green-mbtools-mint-ortho-utils">green_mbtools.mint.ortho_utils</a></li>
-<li><a class="reference internal" href="#green-mbtools-mint-pyscf-init">green_mbtools.mint.pyscf_init</a></li>
-<li><a class="reference internal" href="#green-mbtools-mint-seet-init">green_mbtools.mint.seet_init</a></li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.common_utils">green_mbtools.mint.common_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.add_common_params"><code class="docutils literal notranslate"><span class="pre">add_common_params()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.add_pbc_params"><code class="docutils literal notranslate"><span class="pre">add_pbc_params()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.check_high_symmetry_path"><code class="docutils literal notranslate"><span class="pre">check_high_symmetry_path()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.compute_df_int_dca"><code class="docutils literal notranslate"><span class="pre">compute_df_int_dca()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.compute_ewald_correction"><code class="docutils literal notranslate"><span class="pre">compute_ewald_correction()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.construct_gdf"><code class="docutils literal notranslate"><span class="pre">construct_gdf()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.construct_mol_gdf"><code class="docutils literal notranslate"><span class="pre">construct_mol_gdf()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.extract_ase_data"><code class="docutils literal notranslate"><span class="pre">extract_ase_data()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.fold_back_to_1stBZ"><code class="docutils literal notranslate"><span class="pre">fold_back_to_1stBZ()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.high_symmetry_path"><code class="docutils literal notranslate"><span class="pre">high_symmetry_path()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.init_k_mesh"><code class="docutils literal notranslate"><span class="pre">init_k_mesh()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.init_mol_params"><code class="docutils literal notranslate"><span class="pre">init_mol_params()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.init_pbc_params"><code class="docutils literal notranslate"><span class="pre">init_pbc_params()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.inversion_sym"><code class="docutils literal notranslate"><span class="pre">inversion_sym()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.mol_cell"><code class="docutils literal notranslate"><span class="pre">mol_cell()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.orthogonalize"><code class="docutils literal notranslate"><span class="pre">orthogonalize()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.parse_basis"><code class="docutils literal notranslate"><span class="pre">parse_basis()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.parse_geometry"><code class="docutils literal notranslate"><span class="pre">parse_geometry()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.pbc_cell"><code class="docutils literal notranslate"><span class="pre">pbc_cell()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.print_high_symmetry_points"><code class="docutils literal notranslate"><span class="pre">print_high_symmetry_points()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.read_dm"><code class="docutils literal notranslate"><span class="pre">read_dm()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.save_data"><code class="docutils literal notranslate"><span class="pre">save_data()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.solve_mean_field"><code class="docutils literal notranslate"><span class="pre">solve_mean_field()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.solve_mol_mean_field"><code class="docutils literal notranslate"><span class="pre">solve_mol_mean_field()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.store_k_grid"><code class="docutils literal notranslate"><span class="pre">store_k_grid()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.transform"><code class="docutils literal notranslate"><span class="pre">transform()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.wrap_1stBZ"><code class="docutils literal notranslate"><span class="pre">wrap_1stBZ()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.wrap_k"><code class="docutils literal notranslate"><span class="pre">wrap_k()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.gdf_s_metric">green_mbtools.mint.gdf_s_metric</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.check_eri"><code class="docutils literal notranslate"><span class="pre">check_eri()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.compute_j2c_sqrt"><code class="docutils literal notranslate"><span class="pre">compute_j2c_sqrt()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.make_j2c_sqrt"><code class="docutils literal notranslate"><span class="pre">make_j2c_sqrt()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.make_j3c"><code class="docutils literal notranslate"><span class="pre">make_j3c()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.make_j3c_outcore"><code class="docutils literal notranslate"><span class="pre">make_j3c_outcore()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.make_kptij_lst"><code class="docutils literal notranslate"><span class="pre">make_kptij_lst()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.sqrt_j2c"><code class="docutils literal notranslate"><span class="pre">sqrt_j2c()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.gdf_s_metric.transformation_PW_to_auxbasis"><code class="docutils literal notranslate"><span class="pre">transformation_PW_to_auxbasis()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.integral_utils">green_mbtools.mint.integral_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.compute_ewald_correction"><code class="docutils literal notranslate"><span class="pre">compute_ewald_correction()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.compute_integrals"><code class="docutils literal notranslate"><span class="pre">compute_integrals()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.compute_kG"><code class="docutils literal notranslate"><span class="pre">compute_kG()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.get_coarsegrained_coulG"><code class="docutils literal notranslate"><span class="pre">get_coarsegrained_coulG()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.integrals_grid"><code class="docutils literal notranslate"><span class="pre">integrals_grid()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.kpair_reduced_lists"><code class="docutils literal notranslate"><span class="pre">kpair_reduced_lists()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.weighted_coulG_ewald"><code class="docutils literal notranslate"><span class="pre">weighted_coulG_ewald()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.integral_utils.weighted_coulG_ewald_2nd"><code class="docutils literal notranslate"><span class="pre">weighted_coulG_ewald_2nd()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.namespace">green_mbtools.mint.namespace</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.namespace.Namespace"><code class="docutils literal notranslate"><span class="pre">Namespace</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.ortho_utils">green_mbtools.mint.ortho_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.ortho_utils.avg"><code class="docutils literal notranslate"><span class="pre">avg()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.ortho_utils.canonical_orbitals"><code class="docutils literal notranslate"><span class="pre">canonical_orbitals()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.ortho_utils.natural_orbitals"><code class="docutils literal notranslate"><span class="pre">natural_orbitals()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.ortho_utils.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.ortho_utils.symmetrical_orbitals"><code class="docutils literal notranslate"><span class="pre">symmetrical_orbitals()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.ortho_utils.wrap_k"><code class="docutils literal notranslate"><span class="pre">wrap_k()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.pyscf_init">green_mbtools.mint.pyscf_init</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init"><code class="docutils literal notranslate"><span class="pre">pyscf_init</span></code></a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.args"><code class="docutils literal notranslate"><span class="pre">pyscf_init.args</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.cell"><code class="docutils literal notranslate"><span class="pre">pyscf_init.cell</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.kmesh"><code class="docutils literal notranslate"><span class="pre">pyscf_init.kmesh</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.cell_object"><code class="docutils literal notranslate"><span class="pre">pyscf_init.cell_object()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.compute_df_int"><code class="docutils literal notranslate"><span class="pre">pyscf_init.compute_df_int()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.df_object"><code class="docutils literal notranslate"><span class="pre">pyscf_init.df_object()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.mean_field_input"><code class="docutils literal notranslate"><span class="pre">pyscf_init.mean_field_input()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_init.mf_object"><code class="docutils literal notranslate"><span class="pre">pyscf_init.mf_object()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init"><code class="docutils literal notranslate"><span class="pre">pyscf_mol_init</span></code></a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.cell_object"><code class="docutils literal notranslate"><span class="pre">pyscf_mol_init.cell_object()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.compute_df_int"><code class="docutils literal notranslate"><span class="pre">pyscf_mol_init.compute_df_int()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.df_object"><code class="docutils literal notranslate"><span class="pre">pyscf_mol_init.df_object()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.mean_field_input"><code class="docutils literal notranslate"><span class="pre">pyscf_mol_init.mean_field_input()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_mol_init.mf_object"><code class="docutils literal notranslate"><span class="pre">pyscf_mol_init.mf_object()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init</span></code></a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.cell_object"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.cell_object()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_df_int"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.compute_df_int()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_twobody_finitesize_correction"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.compute_twobody_finitesize_correction()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.df_object"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.df_object()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_gw_correction"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.evaluate_gw_correction()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_high_symmetry_path"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.evaluate_high_symmetry_path()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.mean_field_input"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.mean_field_input()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.pyscf_init.pyscf_pbc_init.mf_object"><code class="docutils literal notranslate"><span class="pre">pyscf_pbc_init.mf_object()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.seet_init">green_mbtools.mint.seet_init</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init"><code class="docutils literal notranslate"><span class="pre">seet_init</span></code></a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init.args"><code class="docutils literal notranslate"><span class="pre">seet_init.args</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init.get_input_data"><code class="docutils literal notranslate"><span class="pre">seet_init.get_input_data()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init.to_full_bz"><code class="docutils literal notranslate"><span class="pre">seet_init.to_full_bz()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

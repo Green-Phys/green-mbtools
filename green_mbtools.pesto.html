@@ -254,41 +254,861 @@
         <article role="main" id="furo-main-content">
           <section id="green-mbtools-pesto">
 <h1>green_mbtools.pesto<a class="headerlink" href="#green-mbtools-pesto" title="Link to this heading">¶</a></h1>
-<section id="green-mbtools-pesto-ac-utils">
-<h2>green_mbtools.pesto.ac_utils<a class="headerlink" href="#green-mbtools-pesto-ac-utils" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.ac_utils">
+<span id="green-mbtools-pesto-ac-utils"></span><h2>green_mbtools.pesto.ac_utils<a class="headerlink" href="#module-green_mbtools.pesto.ac_utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ac_utils.dump_input_caratheodory_data">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ac_utils.</span></span><span class="sig-name descname"><span class="pre">dump_input_caratheodory_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wsample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_iw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ac_utils.html#dump_input_caratheodory_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ac_utils.dump_input_caratheodory_data" title="Link to this definition">¶</a></dt>
+<dd><p>Function to dump input data to files for caratheodory analytic continuation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wsample</strong> (<em>numpy.ndarray</em>) – 1D array of Matsubara frequencies</p></li>
+<li><p><strong>X_iw</strong> (<em>numpy.ndarray</em>) – 5D array of shape (nw, ns, nk, nao, nao)</p></li>
+<li><p><strong>ifile</strong> (<em>string</em>) – <p>filename for storing the Matsubara data. The data is stored in the format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iw_1</span> <span class="n">iw_2</span> <span class="n">iw_3</span> <span class="o">...</span> <span class="n">iw_n</span>
+<span class="n">Real</span> <span class="n">X</span><span class="p">(</span><span class="n">iw_1</span><span class="p">)</span> <span class="n">Matrix</span>
+<span class="n">Imag</span> <span class="n">X</span><span class="p">(</span><span class="n">iw_1</span><span class="p">)</span> <span class="n">Matrix</span>
+<span class="n">Real</span> <span class="n">X</span><span class="p">(</span><span class="n">iw_2</span><span class="p">)</span> <span class="n">Matrix</span>
+<span class="n">Imag</span> <span class="n">X</span><span class="p">(</span><span class="n">iw_2</span><span class="p">)</span> <span class="n">Matrix</span>
+<span class="o">...</span> <span class="ow">and</span> <span class="n">so</span> <span class="n">on</span><span class="o">.</span>
+</pre></div>
+</div>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ac_utils.load_caratheodory_data">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ac_utils.</span></span><span class="sig-name descname"><span class="pre">load_caratheodory_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ac_utils.html#load_caratheodory_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ac_utils.load_caratheodory_data" title="Link to this definition">¶</a></dt>
+<dd><p>Loads output data from Caratheodory analytic continuation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matrix_file</strong> (<em>string</em>) – <p>Path to output matrix file. The output file has the following format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">w1</span> <span class="n">Re</span><span class="o">.</span><span class="n">Xc</span><span class="p">[</span><span class="mi">11</span><span class="p">](</span><span class="n">w1</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span> <span class="n">Im</span><span class="o">.</span><span class="n">Xc</span><span class="p">[</span><span class="mi">11</span><span class="p">](</span><span class="n">w1</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span> <span class="n">Re</span><span class="o">.</span><span class="n">Xc</span><span class="p">[</span><span class="mi">12</span><span class="p">](</span><span class="n">w1</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span>
+<span class="n">w2</span> <span class="n">Re</span><span class="o">.</span><span class="n">Xc</span><span class="p">[</span><span class="mi">11</span><span class="p">](</span><span class="n">w2</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span> <span class="n">Im</span><span class="o">.</span><span class="n">Xc</span><span class="p">[</span><span class="mi">11</span><span class="p">](</span><span class="n">w2</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span> <span class="n">Re</span><span class="o">.</span><span class="n">Xc</span><span class="p">[</span><span class="mi">12</span><span class="p">](</span><span class="n">w2</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span>
+<span class="o">...</span> <span class="ow">and</span> <span class="n">so</span> <span class="n">on</span>
+</pre></div>
+</div>
+</p></li>
+<li><p><strong>spectral_file</strong> (<em>string</em>) – <p>Path to output spectral file, which has the following format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">w1</span> <span class="n">XA</span><span class="p">(</span><span class="n">w1</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span>
+<span class="n">w2</span> <span class="n">XA</span><span class="p">(</span><span class="n">w2</span> <span class="o">+</span> <span class="n">i</span> <span class="n">eta</span><span class="p">)</span>
+<span class="o">...</span> <span class="ow">and</span> <span class="n">so</span> <span class="n">on</span>
+</pre></div>
+</div>
+</p></li>
+<li><p><strong>X_dims</strong> (<em>tuple</em>) – shape of tensor for reading and storing the output data into</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – real frequencies on which analytically continued data is returned</p></li>
+<li><p><em>numpy.ndarray</em> – Complex valued output tensor with full matrix form of continued data</p></li>
+<li><p><em>numpy.ndarray</em> – Real valued spectral function corresponding to the complex continued data</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="green-mbtools-pesto-analyt-cont">
 <h2>green_mbtools.pesto.analyt_cont<a class="headerlink" href="#green-mbtools-pesto-analyt-cont" title="Link to this heading">¶</a></h2>
 </section>
-<section id="green-mbtools-pesto-cheby">
-<h2>green_mbtools.pesto.cheby<a class="headerlink" href="#green-mbtools-pesto-cheby" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.cheby">
+<span id="green-mbtools-pesto-cheby"></span><h2>green_mbtools.pesto.cheby<a class="headerlink" href="#module-green_mbtools.pesto.cheby" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.cheby.get_Cheby">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.cheby.</span></span><span class="sig-name descname"><span class="pre">get_Cheby</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ncheb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/cheby.html#get_Cheby"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.cheby.get_Cheby" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.cheby.get_tau_mesh">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.cheby.</span></span><span class="sig-name descname"><span class="pre">get_tau_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncheb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/cheby.html#get_tau_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.cheby.get_tau_mesh" title="Link to this definition">¶</a></dt>
+<dd><p>Generate tau grid for a given beta in the chebishev basis.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.cheby.iwmesh">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.cheby.</span></span><span class="sig-name descname"><span class="pre">iwmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iw_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/cheby.html#iwmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.cheby.iwmesh" title="Link to this definition">¶</a></dt>
+<dd><p>Defines imaginary frequency grid from imaginary time grid.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.cheby.sigma_w_uniform">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.cheby.</span></span><span class="sig-name descname"><span class="pre">sigma_w_uniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sigma_tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/cheby.html#sigma_w_uniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.cheby.sigma_w_uniform" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.cheby.sigma_zero">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.cheby.</span></span><span class="sig-name descname"><span class="pre">sigma_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/cheby.html#sigma_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.cheby.sigma_zero" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="green-mbtools-pesto-dyson">
-<h2>green_mbtools.pesto.dyson<a class="headerlink" href="#green-mbtools-pesto-dyson" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.dyson">
+<span id="green-mbtools-pesto-dyson"></span><h2>green_mbtools.pesto.dyson<a class="headerlink" href="#module-green_mbtools.pesto.dyson" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.dyson.solve_dyson">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.dyson.</span></span><span class="sig-name descname"><span class="pre">solve_dyson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/dyson.html#solve_dyson"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.dyson.solve_dyson" title="Link to this definition">¶</a></dt>
+<dd><p>Solve Dyson equation and construct Green’s function. If overlap is None, it is set to identity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fock</strong> (<em>numpy.ndarray</em>) – Fock matrix of shape (ns, nk, nao, nao)</p></li>
+<li><p><strong>S</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – Overlap matrix of shape (ns, nk, nao, nao), by default None</p></li>
+<li><p><strong>sigma</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – Imaginary-time self-energy of shape (ntau, ns, nk, nao, nao), by default None (zero)</p></li>
+<li><p><strong>mu</strong> (<em>float</em><em>, </em><em>optional</em>) – chemical potential, by default 0</p></li>
+<li><p><strong>ir</strong> (<a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory" title="green_mbtools.pesto.ir.IR_factory"><em>green_mbtools.pesto.ir.IR_factory</em></a><em>, </em><em>optional</em>) – Instance of IR factory for transforming between imaginary time and Matsubara frequencies, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Green’s function on imaginary time axis of shape (ntau, ns, nk, nao, nao)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <cite>ir</cite> is not provided</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="green-mbtools-pesto-ft">
-<h2>green_mbtools.pesto.ft<a class="headerlink" href="#green-mbtools-pesto-ft" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.ft">
+<span id="green-mbtools-pesto-ft"></span><h2>green_mbtools.pesto.ft<a class="headerlink" href="#module-green_mbtools.pesto.ft" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ft.compute_fourier_coefficients">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ft.</span></span><span class="sig-name descname"><span class="pre">compute_fourier_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ft.html#compute_fourier_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ft.compute_fourier_coefficients" title="Link to this definition">¶</a></dt>
+<dd><p>Compute Fourier coefficients for direct and inverse transforms between k and real space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kmesh</strong> (<em>numpy.ndarray</em>) – k-mesh of shape (nk, 3)</p></li>
+<li><p><strong>rmesh</strong> (<em>numpy.ndarray</em>) – real-space mesh</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – coefficients to transform from r to k space</p></li>
+<li><p><em>numpy.ndarray</em> – coefficients to transform from k to r space</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ft.construct_rmesh">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ft.</span></span><span class="sig-name descname"><span class="pre">construct_rmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nkx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nky</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nkz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ft.html#construct_rmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ft.construct_rmesh" title="Link to this definition">¶</a></dt>
+<dd><p>Generate real-space mesh, in the units of lattice translation vectors. e.g.,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nkx</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">L</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>  <span class="c1"># = 2</span>
+<span class="n">rx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nkx</strong> (<em>int</em>) – number of k-points in the x direction</p></li>
+<li><p><strong>nky</strong> (<em>int</em>) – number of k-points in the y direction</p></li>
+<li><p><strong>nkz</strong> (<em>int</em>) – number of k-points in the z direction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>real-space mesh</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ft.construct_symmetric_rmesh">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ft.</span></span><span class="sig-name descname"><span class="pre">construct_symmetric_rmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nkx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nky</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nkz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ft.html#construct_symmetric_rmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ft.construct_symmetric_rmesh" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a real-space mesh that is symmetric along coordinate axes. e.g.,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nkx</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">L</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>  <span class="c1"># = 2</span>
+<span class="n">rx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nkx</strong> (<em>int</em>) – number of k-points in the x direction</p></li>
+<li><p><strong>nky</strong> (<em>int</em>) – number of k-points in the y direction</p></li>
+<li><p><strong>nkz</strong> (<em>int</em>) – number of k-points in the z direction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>unique / symmetric real-space mesh</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ft.k_to_real">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ft.</span></span><span class="sig-name descname"><span class="pre">k_to_real</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ft.html#k_to_real"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ft.k_to_real" title="Link to this definition">¶</a></dt>
+<dd><p>Perform Fourier transform from reciprocal to real space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frk</strong> (<em>numpy.ndarray</em>) – coefficients to transform from k to r space</p></li>
+<li><p><strong>obj_k</strong> (<em>numpy.ndarray</em>) – Reciprocal space object</p></li>
+<li><p><strong>weights</strong> (<em>numpy.ndarray</em>) – Fourier coefficient’s degeneracy weights</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Real space (inverse Fourier transformed) object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ft.real_to_k">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ft.</span></span><span class="sig-name descname"><span class="pre">real_to_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fkr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ft.html#real_to_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ft.real_to_k" title="Link to this definition">¶</a></dt>
+<dd><p>Perform Fourier transform from real to reciprocal space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fkr</strong> (<em>numpy.ndarray</em>) – coefficients to transform from r to k space</p></li>
+<li><p><strong>obj_i</strong> (<em>numpy.ndarray</em>) – Real space (inverse Fourier transformed) object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reciprocal space object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="green-mbtools-pesto-ir">
-<h2>green_mbtools.pesto.ir<a class="headerlink" href="#green-mbtools-pesto-ir" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.ir">
+<span id="green-mbtools-pesto-ir"></span><h2>green_mbtools.pesto.ir<a class="headerlink" href="#module-green_mbtools.pesto.ir" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.IR_factory">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ir.</span></span><span class="sig-name descname"><span class="pre">IR_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legacy_ir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#IR_factory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.IR_factory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to handle Fourier transform between imaginary time and Matsubara frequency using
+the intermediate representation (IR) grids.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.IR_factory.tau_to_w">
+<span class="sig-name descname"><span class="pre">tau_to_w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#IR_factory.tau_to_w"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.IR_factory.tau_to_w" title="Link to this definition">¶</a></dt>
+<dd><p>Transform from imaginary time to Matsubara axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X_t</strong> (<em>numpy.ndarray</em>) – Data on imaginary time axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data on Matsubara axis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.IR_factory.tau_to_w_other">
+<span class="sig-name descname"><span class="pre">tau_to_w_other</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wsample</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#IR_factory.tau_to_w_other"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.IR_factory.tau_to_w_other" title="Link to this definition">¶</a></dt>
+<dd><p>Transform from imaginary time axis to user-provided Matsubara frequency points.
+Typically, we deal with time and Matsubara grids that are pre-determined by intermediate
+representation grid files. This function allows transformation to other Matsubarar frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_t</strong> (<em>numpy.ndarray</em>) – Data on imaginary time axis</p></li>
+<li><p><strong>wsample</strong> (<em>numpy.ndarray</em>) – Frequency points on which Matsubara data is required</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data on Matsubara axis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.IR_factory.tauf_to_wb">
+<span class="sig-name descname"><span class="pre">tauf_to_wb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#IR_factory.tauf_to_wb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.IR_factory.tauf_to_wb" title="Link to this definition">¶</a></dt>
+<dd><p>Transform from fermionic imaginary time to bosonic Matsubara axis. Imaginary time axis
+is the same for fermions and bosons, but Matsubara frequencies differ. E.g., Polarization
+from tau to i Omega axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X_t</strong> (<em>numpy.ndarray</em>) – Data on imaginary time axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data on bosonic Matsubara axis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.IR_factory.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#IR_factory.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.IR_factory.update" title="Link to this definition">¶</a></dt>
+<dd><p>Update IR grid information for the IR_facory object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>float</em><em>, </em><em>optional</em>) – inverse temperature of the calculation, by default None</p></li>
+<li><p><strong>ir_file</strong> (<em>string</em><em>, </em><em>required</em>) – IR-grid file, by default None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.IR_factory.w_to_tau">
+<span class="sig-name descname"><span class="pre">w_to_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#IR_factory.w_to_tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.IR_factory.w_to_tau" title="Link to this definition">¶</a></dt>
+<dd><p>Transform from Matsubara to imaginary time axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X_w</strong> (<em>numpy.ndarray</em>) – Data on Matsubara axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data on imaginary time axis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.IR_factory.wb_to_tauf">
+<span class="sig-name descname"><span class="pre">wb_to_tauf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_wb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#IR_factory.wb_to_tauf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.IR_factory.wb_to_tauf" title="Link to this definition">¶</a></dt>
+<dd><p>Transform from bosonic Matsubara to imaginary time axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X_w</strong> (<em>numpy.ndarray</em>) – Data on bosonic Matsubara axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data on imaginary time axis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.legacy_read_IR_matrices">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ir.</span></span><span class="sig-name descname"><span class="pre">legacy_read_IR_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fermi'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#legacy_read_IR_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.legacy_read_IR_matrices" title="Link to this definition">¶</a></dt>
+<dd><p>Read IR file with legacy data format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ir_path</strong> (<em>string</em>) – path to IR file</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – inverse temperature</p></li>
+<li><p><strong>ptype</strong> (<em>str</em><em>, </em><em>optional</em>) – parity type (‘fermi’ or ‘bose’), by default ‘fermi’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – Imaginary time grid</p></li>
+<li><p><em>numpy.ndarray</em> – Matsubara grid</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.ir.new_read_IR_matrices">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.ir.</span></span><span class="sig-name descname"><span class="pre">new_read_IR_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fermi'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/ir.html#new_read_IR_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.ir.new_read_IR_matrices" title="Link to this definition">¶</a></dt>
+<dd><p>Read IR file with new data format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ir_path</strong> (<em>string</em>) – path to IR file</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – inverse temperature</p></li>
+<li><p><strong>ptype</strong> (<em>str</em><em>, </em><em>optional</em>) – parity type (‘fermi’ or ‘bose’), by default ‘fermi’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – Imaginary time grid</p></li>
+<li><p><em>numpy.ndarray</em> – Matsubara grid</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+<li><p><em>numpy.ndarray</em> – Transformation coefficients</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="green-mbtools-pesto-mb">
 <h2>green_mbtools.pesto.mb<a class="headerlink" href="#green-mbtools-pesto-mb" title="Link to this heading">¶</a></h2>
 </section>
-<section id="green-mbtools-pesto-orth">
-<h2>green_mbtools.pesto.orth<a class="headerlink" href="#green-mbtools-pesto-orth" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.orth">
+<span id="green-mbtools-pesto-orth"></span><h2>green_mbtools.pesto.orth<a class="headerlink" href="#module-green_mbtools.pesto.orth" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.orth.SAO_matrices">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.orth.</span></span><span class="sig-name descname"><span class="pre">SAO_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/orth.html#SAO_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.orth.SAO_matrices" title="Link to this definition">¶</a></dt>
+<dd><p>Löwdin’s symmetric orthogonalization transformation matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>S</strong> (<em>numpy.ndarray</em>) – overlap matrix</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformation matrix for symmetric orthogonalization</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.orth.canonical_matrices">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.orth.</span></span><span class="sig-name descname"><span class="pre">canonical_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'f'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/orth.html#canonical_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.orth.canonical_matrices" title="Link to this definition">¶</a></dt>
+<dd><p>Löwdin’s canonical orthogonalization transformation matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>S</strong> (<em>numpy.ndarray</em>) – overlap matrix</p></li>
+<li><p><strong>thr</strong> (<em>float</em><em>, </em><em>optional</em>) – threshold for orthogonalization and inverses, by default 1e-7</p></li>
+<li><p><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – ‘f’ for Fock and ‘g’ for Green’s function or density matrix, by default ‘f’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformation matrix for canonical orthogonalization</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if type of input is anything other than ‘g’ or ‘f’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.orth.canonical_orth">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.orth.</span></span><span class="sig-name descname"><span class="pre">canonical_orth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'f'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/orth.html#canonical_orth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.orth.canonical_orth" title="Link to this definition">¶</a></dt>
+<dd><p>Löwdin’s canonical orthogonalization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>H</strong> (<em>numpy.ndarray</em>) – tensor/matrix to be orthogonalized (e.g., Fock, density or Green’s function).
+It has shape (…, ns, nk, nao, nao)</p></li>
+<li><p><strong>S</strong> (<em>numpy.ndarray</em>) – overlap matrix</p></li>
+<li><p><strong>thr</strong> (<em>float</em><em>, </em><em>optional</em>) – threshold for orthogonalization and inverses, by default 1e-7</p></li>
+<li><p><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – ‘f’ for Fock and ‘g’ for Green’s function or density matrix, by default ‘f’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Orthogonalized matrix / tensor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.orth.sao_orth">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.orth.</span></span><span class="sig-name descname"><span class="pre">sao_orth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/orth.html#sao_orth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.orth.sao_orth" title="Link to this definition">¶</a></dt>
+<dd><p>Löwdin’s symmetric orthogonalization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>numpy.ndarray</em>) – tensor/matrix to be orthogonalized (e.g., Fock, density or Green’s function).
+It has shape (…, ns, nk, nao, nao)</p></li>
+<li><p><strong>S</strong> (<em>numpy.ndarray</em>) – overlap matrix</p></li>
+<li><p><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – ‘f’ for Fock and ‘g’ for Green’s function or density matrix, by default ‘f’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Orthogonalized matrix / tensor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if type of input is anything other than ‘g’ or ‘f’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.orth.transform">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.orth.</span></span><span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_inv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/orth.html#transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.orth.transform" title="Link to this definition">¶</a></dt>
+<dd><p>Transform Z into X basis using Z_X = X^* Z X</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Z</strong> (<em>numpy.ndarray</em>) – Object to be transformed</p></li>
+<li><p><strong>X</strong> (<em>numpy.ndarray</em>) – Transformation matrix</p></li>
+<li><p><strong>X_inv</strong> (<em>numpy.ndarray</em>) – Inverse transformation matrix (used to check the sanity of transformation)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Z in new basis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.orth.transform_per_k">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.orth.</span></span><span class="sig-name descname"><span class="pre">transform_per_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_inv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/orth.html#transform_per_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.orth.transform_per_k" title="Link to this definition">¶</a></dt>
+<dd><p>Transform Z into X basis as Z_X = X^* Z X for each k-point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Z</strong> (<em>numpy.ndarray</em>) – Object to be transformed</p></li>
+<li><p><strong>X</strong> (<em>numpy.ndarray</em>) – Transformation matrix</p></li>
+<li><p><strong>X_inv</strong> (<em>numpy.ndarray</em>) – Inverse transformation matrix (used to check the sanity of transformation)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Z in new basis for the given k-point</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="green-mbtools-pesto-pes-utils">
-<h2>green_mbtools.pesto.pes_utils<a class="headerlink" href="#green-mbtools-pesto-pes-utils" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.pes_utils">
+<span id="green-mbtools-pesto-pes-utils"></span><h2>green_mbtools.pesto.pes_utils<a class="headerlink" href="#module-green_mbtools.pesto.pes_utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.pes_utils.cvx_diag_projection">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.pes_utils.</span></span><span class="sig-name descname"><span class="pre">cvx_diag_projection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GM_diag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_real</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">201</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ofile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Giw'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SCS'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/pes_utils.html#cvx_diag_projection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.pes_utils.cvx_diag_projection" title="Link to this definition">¶</a></dt>
+<dd><p>Projection of noisy Green’s function diagonal data on to Nevanlinna manifold.
+Once this is performed, analytic continuation either using Nevanlinna
+or ES becomes easier.
+The main idea is to obtain a projected Matsubara Green’s function of the form</p>
+<blockquote>
+<div><p>G(iw_m) = sum_n P_n / (iw_m - w_n)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zM</strong> (<em>numpy.ndarray</em>) – n_imag number of imaginary frequency values</p></li>
+<li><p><strong>GM_matrix</strong> (<em>numpy.ndarray</em>) – Exact Matsubara Green’s function data in the shape (n_imag, n_orb, n_orb)</p></li>
+<li><p><strong>w_cut</strong> (<em>float</em><em>, </em><em>optional</em>) – cut-off to consider for real axis, by default 10.0</p></li>
+<li><p><strong>n_real</strong> (<em>int</em><em>, </em><em>optional</em>) – number of real frequencies to consider, by default 201</p></li>
+<li><p><strong>ofile</strong> (<em>str</em><em>, </em><em>optional</em>) – Output file in which the green’s function data will be dumped, by default ‘Giw’</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – CVXPy solver to use, by default ‘SCS’</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – dictionary of keyword arguments for CVXPy solver</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Projected Green’s function</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.pes_utils.cvx_gradient">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.pes_utils.</span></span><span class="sig-name descname"><span class="pre">cvx_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GM_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zM</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/pes_utils.html#cvx_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.pes_utils.cvx_gradient" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the gradient for top-level optimization of pole positions in ES analytic continuation
+i.e., d Err / d poles where,</p>
+<blockquote>
+<div><p><cite>Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||</cite></p>
+</div></blockquote>
+<p>Specifically, G_approx is defined as</p>
+<blockquote>
+<div><p><cite>G_approx = sum_m X_vec(:,:,m)/(1j*zM - poles(m))</cite>
+<cite>X_vec is shape (N_orb, N_orb, num_poles) and is just an array of</cite>
+<cite>optimized X_l matrices, for given vallue of pole positions poles</cite></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poles</strong> (<em>numpy.ndarray</em>) – pole positions</p></li>
+<li><p><strong>GM_matrix</strong> (<em>numpy.ndarray</em>) – Exact Matsubara Green’s function data in the shape (num_imag, num_orb, num_orb)</p></li>
+<li><p><strong>zM</strong> (<em>numpy.ndarray</em>) – Matsubara frequencies</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Gradient of E with respect to poles</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.pes_utils.cvx_matrix_projection">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.pes_utils.</span></span><span class="sig-name descname"><span class="pre">cvx_matrix_projection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GM_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_real</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">201</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ofile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Giw'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SCS'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/pes_utils.html#cvx_matrix_projection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.pes_utils.cvx_matrix_projection" title="Link to this definition">¶</a></dt>
+<dd><p>Projection of noisy Green’s function matrix data on to Nevanlinna manifold.
+Once this is performed, analytic continuation either using Nevanlinna
+or ES becomes easier.
+The main idea is to obtain a projected Matsubara Green’s function of the form</p>
+<blockquote>
+<div><p>G(iw_m) = sum_n P_n / (iw_m - w_n)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zM</strong> (<em>numpy.ndarray</em>) – n_imag number of imaginary frequency values</p></li>
+<li><p><strong>GM_matrix</strong> (<em>numpy.ndarray</em>) – Exact Matsubara Green’s function data in the shape (n_imag, n_orb, n_orb)</p></li>
+<li><p><strong>w_cut</strong> (<em>float</em><em>, </em><em>optional</em>) – cut-off to consider for real axis, by default 10.0</p></li>
+<li><p><strong>n_real</strong> (<em>int</em><em>, </em><em>optional</em>) – number of real frequencies to consider, by default 201</p></li>
+<li><p><strong>ofile</strong> (<em>str</em><em>, </em><em>optional</em>) – Output file in which the green’s function data will be dumped, by default ‘Giw’</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – CVXPy solver to use, by default ‘SCS’</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – dictionary of keyword arguments for CVXPy solver</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Projected Green’s function</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.pes_utils.cvx_optimize">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.pes_utils.</span></span><span class="sig-name descname"><span class="pre">cvx_optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GM_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SCS'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/pes_utils.html#cvx_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.pes_utils.cvx_optimize" title="Link to this definition">¶</a></dt>
+<dd><p>Top level target error function in the ES approach for matrix analytic continuation. It returns</p>
+<blockquote>
+<div><p>Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poles</strong> (<em>numpy.ndarray</em>) – 1D array of pole positions</p></li>
+<li><p><strong>GM_matrix</strong> (<em>numpy.ndarray</em>) – Exact Matsubara Green’s function data in the shape (num_imag, num_orb, num_orb)</p></li>
+<li><p><strong>zM</strong> (<em>numpy.ndarray</em>) – 1D Matsubara frequencies</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – CVXPy solver for semi-definite relaxation in the ES continuation, by default ‘SCS’</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – dictionary of keyword arguments for CVXPy solver</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>float</em> – Optimal value of error function Err (poles) for fixed poles</p></li>
+<li><p><em>numpy.ndarray</em> – optimal X_vec in the shape (num_poles, num_orb, num_orb)</p></li>
+<li><p><em>numpy.ndarray</em> – approximated optimal Green’s function for the specified Matsubara frequencies.
+The shape of the array is (num_imag, num_orb, num_orb)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.pes_utils.cvx_optimize_spectral">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.pes_utils.</span></span><span class="sig-name descname"><span class="pre">cvx_optimize_spectral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GM_diags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SCS'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/pes_utils.html#cvx_optimize_spectral"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.pes_utils.cvx_optimize_spectral" title="Link to this definition">¶</a></dt>
+<dd><p>Top level target error function in the ES approach for spectral analytic continuation. It returns</p>
+<blockquote>
+<div><p>Err (poles) = min_{X} || Diag(Gimag (iw) - Gapprox [poles, X] (iw)) ||</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poles</strong> (<em>numpy.ndarray</em>) – 1D array of pole positions</p></li>
+<li><p><strong>GM_diags</strong> (<em>numpy.ndarray</em>) – Exact Matsubara Green’s function diagonal data in the shape (num_imag, num_orb)</p></li>
+<li><p><strong>zM</strong> (<em>numpy.ndarray</em>) – 1D Matsubara frequencies</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – CVXPy solver for semi-definite relaxation in the ES continuation, by default ‘SCS’</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – dictionary of keyword arguments for CVXPy solver</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>float</em> – Optimal value of error function Err (poles) for fixed poles</p></li>
+<li><p><em>numpy.ndarray</em> – optimal X_vec in the shape (num_poles, num_orb)</p></li>
+<li><p><em>numpy.ndarray</em> – approximated optimal Green’s function diagonals for the specified Matsubara frequencies.
+The shape of the array is (num_imag, num_orb)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.pes_utils.run_es">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.pes_utils.</span></span><span class="sig-name descname"><span class="pre">run_es</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iw_vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G_iw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">re_w_vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_pol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ofile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Xw_real.txt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SCS'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/pes_utils.html#run_es"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.pes_utils.run_es" title="Link to this definition">¶</a></dt>
+<dd><p>Pole estimation and semi-definite (PES) relaation algorithm based on
+Huang, Gull and Lin, 10.1103/PhysRevB.107.075151. The output is saved in ofile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iw_vals</strong> (<em>numpy.ndarray</em>) – 1D array of imaginary frequency values (value only, without i)</p></li>
+<li><p><strong>G_iw</strong> (<em>numpy.ndarray</em>) – matsubara quantity to be analytically continued</p></li>
+<li><p><strong>re_w_vals</strong> (<em>numpy.ndarray</em>) – real frequency grid to perform continuation on</p></li>
+<li><p><strong>diag</strong> (<em>bool</em><em>, </em><em>optional</em>) – perform continuation for diagonal entries only if set to True, by default True</p></li>
+<li><p><strong>eta</strong> (<em>float</em><em>, </em><em>optional</em>) – broadening parameter, by default 0.01</p></li>
+<li><p><strong>eps_pol</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum imag part of the poles to be considered, by default 1</p></li>
+<li><p><strong>ofile</strong> (<em>str</em><em>, </em><em>optional</em>) – Path or name of output file for storing the continued data</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – CVXPy solver to use (options: SCS, MOSEK, CLARABEL, etc.), by default ‘SCS’</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – dictionary of keyword arguments for CVXPy solver</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="green-mbtools-pesto-quasiparticle">
 <h2>green_mbtools.pesto.quasiparticle<a class="headerlink" href="#green-mbtools-pesto-quasiparticle" title="Link to this heading">¶</a></h2>
 </section>
-<section id="green-mbtools-pesto-spectral">
-<h2>green_mbtools.pesto.spectral<a class="headerlink" href="#green-mbtools-pesto-spectral" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.spectral">
+<span id="green-mbtools-pesto-spectral"></span><h2>green_mbtools.pesto.spectral<a class="headerlink" href="#module-green_mbtools.pesto.spectral" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.spectral.compute_mo">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.spectral.</span></span><span class="sig-name descname"><span class="pre">compute_mo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">F</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/spectral.html#compute_mo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.spectral.compute_mo" title="Link to this definition">¶</a></dt>
+<dd><p>Solve the generalized eigen problem: FC = SCE</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>F</strong> (<em>numpy.ndarray</em>) – Fock matrix, dim = (ns, nk, nao, nao)</p></li>
+<li><p><strong>S</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – Overlap matrix, dim = (ns, nk, nao, nao), by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – molecular orbital energies</p></li>
+<li><p><em>numpy.ndarray</em> – molecular orbital coefficient in AO basis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.spectral.compute_no">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.spectral.</span></span><span class="sig-name descname"><span class="pre">compute_no</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/spectral.html#compute_no"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.spectral.compute_no" title="Link to this definition">¶</a></dt>
+<dd><p>Compute natural orbitals by diagonalizing density matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dm</strong> (<em>numpy.ndarray</em>) – density matrix of shape (ns, nk, nao, nao)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – natural orbital occupations</p></li>
+<li><p><em>numpy.ndarray</em> – natural orbital coefficients / vectors</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="green-mbtools-pesto-winter">
-<h2>green_mbtools.pesto.winter<a class="headerlink" href="#green-mbtools-pesto-winter" title="Link to this heading">¶</a></h2>
+<section id="module-green_mbtools.pesto.winter">
+<span id="green-mbtools-pesto-winter"></span><h2>green_mbtools.pesto.winter<a class="headerlink" href="#module-green_mbtools.pesto.winter" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.winter.interpolate">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.winter.</span></span><span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpts_inter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hermi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/winter.html#interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.winter.interpolate" title="Link to this definition">¶</a></dt>
+<dd><p>Perform Wannier interpolation for static quantities</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_k</strong> (<em>numpy.ndarray</em>) – input object on full Brillouin zone k-mesh, of shape (ns, nk, nao, nao)</p></li>
+<li><p><strong>kmesh</strong> (<em>numpy.ndarray</em>) – original k-mesh (in scaled units)</p></li>
+<li><p><strong>kpts_inter</strong> (<em>numpy.ndarray</em>) – k-points to interpolate on (in scaled units)</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – dimensionality of crystal (2D or 3D)</p></li>
+<li><p><strong>hermi</strong> (<em>bool</em><em>, </em><em>optional</em>) – set to True if the interpolated matrix Hermitian, by default False</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – set to True if debug information needs to be printed, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Interpolated tensor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <cite>dim</cite> other than 2 or 3 is specified</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.winter.interpolate_G">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.winter.</span></span><span class="sig-name descname"><span class="pre">interpolate_G</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Fk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Sigma_tk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Sk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpts_inter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hermi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/winter.html#interpolate_G"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.winter.interpolate_G" title="Link to this definition">¶</a></dt>
+<dd><p>Interpolate Green’s function from full BZ k-mesh to specified k-points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Fk</strong> (<em>numpy.ndarray</em>) – Fock matrix</p></li>
+<li><p><strong>Sigma_tk</strong> (<em>numpy.ndarray</em>) – Self-energy on imaginar time axis</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – Chemical potential</p></li>
+<li><p><strong>Sk</strong> (<em>numpy.ndarray</em>) – overlap matrix</p></li>
+<li><p><strong>kmesh</strong> (<em>numpy.ndarray</em>) – input k-mesh in the Brillouin zone</p></li>
+<li><p><strong>kpts_inter</strong> (<em>numpy.ndarray</em>) – interpolation k-points</p></li>
+<li><p><strong>ir</strong> (<a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory" title="green_mbtools.pesto.ir.IR_factory"><em>IR_factory</em></a>) – handler for Fourier transforms between imaginary time and Matsubara frequencies</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – dimensionality of latticej, by default 3</p></li>
+<li><p><strong>hermi</strong> (<em>bool</em><em>, </em><em>optional</em>) – Is Green’s function expected to be Hermitian, by default False</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – print extra messages for debugging, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Green’s function interpolated on k-points</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <cite>dim</cite> other than 2 or 3 is specified</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.pesto.winter.interpolate_tk_object">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.pesto.winter.</span></span><span class="sig-name descname"><span class="pre">interpolate_tk_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_tk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpts_inter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hermi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/pesto/winter.html#interpolate_tk_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.pesto.winter.interpolate_tk_object" title="Link to this definition">¶</a></dt>
+<dd><p>Perform Wannier interpolation for dynamic quantities</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_k</strong> (<em>numpy.ndarray</em>) – input object on full Brillouin zone k-mesh, of shape (ntau, ns, nk, nao, nao)</p></li>
+<li><p><strong>kmesh</strong> (<em>numpy.ndarray</em>) – original k-mesh (in scaled units)</p></li>
+<li><p><strong>kpts_inter</strong> (<em>numpy.ndarray</em>) – k-points to interpolate on (in scaled units)</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – dimensionality of crystal (2D or 3D)</p></li>
+<li><p><strong>hermi</strong> (<em>bool</em><em>, </em><em>optional</em>) – set to True if the interpolated matrix Hermitian, by default False</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – set to True if debug information needs to be printed, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Interpolated tensor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <cite>dim</cite> other than 2 or 3 is specified</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -340,18 +1160,77 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">green_mbtools.pesto</a><ul>
-<li><a class="reference internal" href="#green-mbtools-pesto-ac-utils">green_mbtools.pesto.ac_utils</a></li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.ac_utils">green_mbtools.pesto.ac_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.ac_utils.dump_input_caratheodory_data"><code class="docutils literal notranslate"><span class="pre">dump_input_caratheodory_data()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ac_utils.load_caratheodory_data"><code class="docutils literal notranslate"><span class="pre">load_caratheodory_data()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#green-mbtools-pesto-analyt-cont">green_mbtools.pesto.analyt_cont</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-cheby">green_mbtools.pesto.cheby</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-dyson">green_mbtools.pesto.dyson</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-ft">green_mbtools.pesto.ft</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-ir">green_mbtools.pesto.ir</a></li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.cheby">green_mbtools.pesto.cheby</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.cheby.get_Cheby"><code class="docutils literal notranslate"><span class="pre">get_Cheby()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.cheby.get_tau_mesh"><code class="docutils literal notranslate"><span class="pre">get_tau_mesh()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.cheby.iwmesh"><code class="docutils literal notranslate"><span class="pre">iwmesh()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.cheby.sigma_w_uniform"><code class="docutils literal notranslate"><span class="pre">sigma_w_uniform()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.cheby.sigma_zero"><code class="docutils literal notranslate"><span class="pre">sigma_zero()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.dyson">green_mbtools.pesto.dyson</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.dyson.solve_dyson"><code class="docutils literal notranslate"><span class="pre">solve_dyson()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.ft">green_mbtools.pesto.ft</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.ft.compute_fourier_coefficients"><code class="docutils literal notranslate"><span class="pre">compute_fourier_coefficients()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ft.construct_rmesh"><code class="docutils literal notranslate"><span class="pre">construct_rmesh()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ft.construct_symmetric_rmesh"><code class="docutils literal notranslate"><span class="pre">construct_symmetric_rmesh()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ft.k_to_real"><code class="docutils literal notranslate"><span class="pre">k_to_real()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ft.real_to_k"><code class="docutils literal notranslate"><span class="pre">real_to_k()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.ir">green_mbtools.pesto.ir</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory"><code class="docutils literal notranslate"><span class="pre">IR_factory</span></code></a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory.tau_to_w"><code class="docutils literal notranslate"><span class="pre">IR_factory.tau_to_w()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory.tau_to_w_other"><code class="docutils literal notranslate"><span class="pre">IR_factory.tau_to_w_other()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory.tauf_to_wb"><code class="docutils literal notranslate"><span class="pre">IR_factory.tauf_to_wb()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory.update"><code class="docutils literal notranslate"><span class="pre">IR_factory.update()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory.w_to_tau"><code class="docutils literal notranslate"><span class="pre">IR_factory.w_to_tau()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.IR_factory.wb_to_tauf"><code class="docutils literal notranslate"><span class="pre">IR_factory.wb_to_tauf()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.legacy_read_IR_matrices"><code class="docutils literal notranslate"><span class="pre">legacy_read_IR_matrices()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.ir.new_read_IR_matrices"><code class="docutils literal notranslate"><span class="pre">new_read_IR_matrices()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#green-mbtools-pesto-mb">green_mbtools.pesto.mb</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-orth">green_mbtools.pesto.orth</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-pes-utils">green_mbtools.pesto.pes_utils</a></li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.orth">green_mbtools.pesto.orth</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.orth.SAO_matrices"><code class="docutils literal notranslate"><span class="pre">SAO_matrices()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.orth.canonical_matrices"><code class="docutils literal notranslate"><span class="pre">canonical_matrices()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.orth.canonical_orth"><code class="docutils literal notranslate"><span class="pre">canonical_orth()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.orth.sao_orth"><code class="docutils literal notranslate"><span class="pre">sao_orth()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.orth.transform"><code class="docutils literal notranslate"><span class="pre">transform()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.orth.transform_per_k"><code class="docutils literal notranslate"><span class="pre">transform_per_k()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.pes_utils">green_mbtools.pesto.pes_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.pes_utils.cvx_diag_projection"><code class="docutils literal notranslate"><span class="pre">cvx_diag_projection()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.pes_utils.cvx_gradient"><code class="docutils literal notranslate"><span class="pre">cvx_gradient()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.pes_utils.cvx_matrix_projection"><code class="docutils literal notranslate"><span class="pre">cvx_matrix_projection()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.pes_utils.cvx_optimize"><code class="docutils literal notranslate"><span class="pre">cvx_optimize()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.pes_utils.cvx_optimize_spectral"><code class="docutils literal notranslate"><span class="pre">cvx_optimize_spectral()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.pes_utils.run_es"><code class="docutils literal notranslate"><span class="pre">run_es()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#green-mbtools-pesto-quasiparticle">green_mbtools.pesto.quasiparticle</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-spectral">green_mbtools.pesto.spectral</a></li>
-<li><a class="reference internal" href="#green-mbtools-pesto-winter">green_mbtools.pesto.winter</a></li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.spectral">green_mbtools.pesto.spectral</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.spectral.compute_mo"><code class="docutils literal notranslate"><span class="pre">compute_mo()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.spectral.compute_no"><code class="docutils literal notranslate"><span class="pre">compute_no()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.pesto.winter">green_mbtools.pesto.winter</a><ul>
+<li><a class="reference internal" href="#green_mbtools.pesto.winter.interpolate"><code class="docutils literal notranslate"><span class="pre">interpolate()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.winter.interpolate_G"><code class="docutils literal notranslate"><span class="pre">interpolate_G()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.pesto.winter.interpolate_tk_object"><code class="docutils literal notranslate"><span class="pre">interpolate_tk_object()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
