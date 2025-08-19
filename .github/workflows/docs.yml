@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
         
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -52,3 +54,6 @@ jobs:
           publish_dir: ./_build/$DOC_VERSION/html
           destination_dir: $DOC_VERSION
           keep_files: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          allow_empty_commit: true
