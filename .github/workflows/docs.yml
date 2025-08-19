@@ -38,8 +38,10 @@ jobs:
         with:
           python-version: 3.12
       
-      - name: Install Sphinx
-        run: pip install sphinx furo myst-parser sphinx-autodoc-typehints
+      - name: Install Sphinx and Green-MBTools
+        run: |
+          pip install sphinx furo myst-parser sphinx-autodoc-typehints
+          pip install .
 
       - name: Get version from tag
         run: echo "DOC_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
