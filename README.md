@@ -19,7 +19,7 @@ Python Tool Suite for Green's-function-based many-body calculations using Green 
 
 Package contains two main modules:
 
-   - mint (Mean-feald INput generation Toolkit): generates input files for Green/WeakCoupling using PySCF, ASE and SPGLib 
+   - mint (Mean-field INput generation Toolkit): generates input files for Green/WeakCoupling using PySCF, ASE and SPGLib 
    - pesto (Post-processing Evaluation Software TOols): provides access to various post-processing tools such as analytical continuation, and Mulliken analysis.
   
 Installation
@@ -40,7 +40,7 @@ Installation
 1. Python packages: `numpy`, `scipy`, `h5py`, `green-ac`, `pyscf`, `ase`, `spglib`, `irbasis`, `cvxpy`, and `baryrat`.
 2. C++ libraries: `Eigen`, `GMP`, `MPFR`
 3. `pytest` for testing
-4. [Maxent external C++ librar](https://github.com/CQMP/Maxent) needs to be built separately to run analytic continuation tasks using the maxent method.
+4. [Maxent external C++ library](https://github.com/CQMP/Maxent) needs to be built separately to run analytic continuation tasks using the maxent method.
 
 Features
 ----------
@@ -51,12 +51,12 @@ The `mbtools` package comes with two sub-packages: `mint` and `pesto`. The `mint
 
 On the other hand, the `pesto` sub-package, formerly known as the `mbanalysis` package, caters to:
 * Fourier transformation between real and reciprocal space.
-* Fourier transformation between imaginary-time and Matsuabara frequency domain on intermediate representation (IR) grids (see [Phys. Rev. B 101, 035144 (2020)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144) for further detail).
+* Fourier transformation between imaginary-time and Matsuabara frequency domain on intermediate representation (IR) grids (see [Phys. Rev. B 101, 035144 (2020)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144) for further details).
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 * Nevanlinna analytical continuation, based on Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
 * PES analytical continuation, based on [Phys. Rev. B 107, 075151 (2023)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.075151).
-* Caratheodory analytical continuation for complex valued matrices (External C++ library in `Caratheodory`, authored by Fei et.al. [Phys. Rev. B 104, 165111 (2021)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111).
+* Caratheodory analytical continuation for complex valued matrices, implemented as a C++ library based on Fei et.al. [Phys. Rev. B 104, 165111 (2021)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111).
 
 
 Contirbutions to the code
