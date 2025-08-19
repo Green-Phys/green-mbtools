@@ -18,7 +18,7 @@ f.close()
 
 # Here the H2 GW simulation uses lambda = 1e4
 ir_file = '../tests/test_data/ir_grid/1e4.h5'
-beta = tau_mesh[-1]
+beta = tau_mesh[-1]  # inverse temperature in simulation
 nts = tau_mesh.shape[0]
 my_ir = ir.IR_factory(beta, ir_file)
 

@@ -187,6 +187,7 @@ def main():
         cdag_s = np.einsum('skab, skbc -> skac', mo_vecs_adj, Sk_int)
         Gt_ortho = np.einsum('skab, wskbc, skcd -> wskad', cdag_s, G_tk_int, s_c, optimize=True)
     
+    noccs_orth = -np.einsum('skaa -> ska', Gt_ortho[-1])
     Gt_ortho_diag = np.einsum('tskii -> tski', Gt_ortho)
     if orth_ao == 'mo':
         orb_min = args.mo_range[0]
@@ -202,7 +203,7 @@ def main():
     iw_inp = mbo.ir.wsample[nw//2::1]
     Gw_inp = mbo.ir.tau_to_w(Gt_ortho_diag)[nw//2::1]
     freqs, A_w = analyt_cont.nevan_run(
-        Gw_inp, iw_inp, n_real=2001, w_min=-0.5, w_max=0.5, eta=0.001
+        Gw_inp, iw_inp, n_real=2001, w_min=-0.5, w_max=0.5, eta=args.eta
     )
     t4 = time.time()
     print("Time required for Nevanlinna AC: ", t4 - t3)
@@ -219,6 +220,7 @@ def main():
     f["iter"+str(it)+"/mu"] = mu
     f["nevanlinna/freqs"] = freqs
     f["nevanlinna/dos"] = A_w
+    f["occs"] = noccs_orth
     f.close()
 
     # Traced DOS
@@ -230,6 +232,7 @@ def main():
     f["iter"+str(it)+"/mu"] = mu
     f["nevanlinna/freqs"] = freqs
     f["nevanlinna/dos"] = np.einsum('wska -> wk', A_w)
+    f["occs"] = noccs_orth
     f.close()
 
 
