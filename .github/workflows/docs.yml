@@ -51,8 +51,8 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_build/$DOC_VERSION/html
-          destination_dir: $DOC_VERSION
+          publish_dir: ./_build/${{ env.DOC_VERSION }}/html
+          destination_dir: ${{ env.DOC_VERSION }}
           keep_files: true
           user_name: github-actions[bot]
           user_email: github-actions[bot]@users.noreply.github.com

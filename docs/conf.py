@@ -2,8 +2,8 @@ import os
 import sys
 
 
-# # add path for getting autodoc
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+# add path for getting autodoc
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 project = 'Green MBTools'
 html_title = 'Green MBTools'
