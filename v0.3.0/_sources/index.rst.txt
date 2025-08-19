@@ -89,6 +89,11 @@ and `@gauravharsha <https://github.com/gauravharsha>`_.
 Complete list of contributors is available on the `Github page <https://github.com/Green-Phys/green-mbtools/graphs/contributors>`_.
 
 
+Documentation for older versions
+--------------------------------
+
+* `0.3.0 (latest) <https://Green-Phys.github.io/green-mbtools>`_
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
