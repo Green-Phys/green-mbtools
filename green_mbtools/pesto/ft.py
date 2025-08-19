@@ -6,12 +6,12 @@ Fourier transform between real and reciprocal space
 
 
 def construct_rmesh(nkx, nky, nkz):
-    """Generate real-space mesh, in the units of lattice translation vectors.
-    e.g.:
-        if nk = 7
-        then 
-        L = 2
-        left = 1
+    """Generate real-space mesh, in the units of lattice translation vectors. e.g.,
+
+    .. code-block:: python
+
+        nkx = 6
+        L = (nkx - 1) // 2  # = 2
         rx = -2, -1, 0, 1, 2, 3
 
     Parameters
@@ -41,13 +41,13 @@ def construct_rmesh(nkx, nky, nkz):
 
 
 def construct_symmetric_rmesh(nkx, nky, nkz):
-    """Generate a real-space mesh that is symmetric along coordinate axes.
-    e.g.:
-        if nk = 6
-        then 
-        L = 2
-        left = 1
-        rx_symm = -3, -2, -1, 0, 1, 2, 3
+    """Generate a real-space mesh that is symmetric along coordinate axes. e.g.,
+
+    .. code-block:: python
+
+        nkx = 6
+        L = (nkx - 1) // 2  # = 2
+        rx = -3, -2, -1, 0, 1, 2, 3
 
     Parameters
     ----------
