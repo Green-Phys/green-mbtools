@@ -27,10 +27,10 @@ jobs:
             if [[ "$CIBW_PLATFORM" == "macos" ]]; then
               # Install openblas via brew on macOS
               brew update
-              brew install openblas
+              brew install openblas hdf5
             else
               # For Linux (manylinux docker container)
-              yum install -y openblas-devel
+              yum install -y openblas-devel hdf5-devel
               pip install --upgrade pip
               pip install meson
             fi
