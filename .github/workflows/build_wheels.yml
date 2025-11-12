@@ -17,11 +17,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux2_28"
           CIBW_ENVIRONMENT: >
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
           CIBW_BEFORE_BUILD: |
