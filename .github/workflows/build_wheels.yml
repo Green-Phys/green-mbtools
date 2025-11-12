@@ -31,7 +31,7 @@ jobs:
               brew install openblas
             else
               # For Linux (manylinux docker container)
-              yum install -y openblas-devel
+              yum install -y openblas-devel hdf5-devel
               pip install meson
             fi
         # env:
