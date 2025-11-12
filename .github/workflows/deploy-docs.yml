@@ -1,0 +1,32 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    tags:
+      - 'v*'  # triggers on tags like v0.3, v0.4, etc.
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      - name: Install Sphinx
+        run: pip install sphinx furo sphinx-multiversion
+
+      - name: Get version from tag
+        run: echo "DOC_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Build Sphinx docs
+        run: sphinx-build -b html docs/ _build/$DOC_VERSION/html
+
+      - name: Deploy to gh-docs branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_build/$DOC_VERSION/html
+          destination_dir: $DOC_VERSION
+          keep_files: true

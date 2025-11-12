@@ -19,6 +19,8 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         env:
+          # explicit manylinux image (safe, does not affect macOS builds)
+          CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux_2_28_x86_64:2025.11.09-2
           CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ENVIRONMENT: >
