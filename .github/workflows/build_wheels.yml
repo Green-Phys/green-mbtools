@@ -8,7 +8,6 @@ jobs:
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
         - { os: ubuntu-22.04, target: "", arch: x86_64}
         - { os: macos-14, target: "14.0" , arch: arm64}
@@ -22,6 +21,7 @@ jobs:
         env:
           CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux2_28"
           CIBW_ENVIRONMENT: >
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
           CIBW_BEFORE_BUILD: |
@@ -31,17 +31,10 @@ jobs:
               brew install openblas
             else
               # For Linux (manylinux docker container)
-              yum install -y blas-devel openblas-devel lapack-devel hdf5-devel
+              yum install -y openblas-devel
               pip install --upgrade pip
               pip install meson
             fi
-        # env:
-        #   CIBW_SOME_OPTION: value
-        #    ...
-        # with:
-        #   package-dir: .
-        #   output-dir: wheelhouse
-        #   config-file: "{package}/pyproject.toml"
 
       - uses: actions/upload-artifact@v4
         with:
