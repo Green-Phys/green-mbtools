@@ -32,7 +32,7 @@ jobs:
             else
               # For Linux (manylinux docker container)
               yum install -y blas-devel openblas-devel lapack-devel hdf5-devel
-              pip instlall --upgrade pip
+              pip install --upgrade pip
               pip install meson
             fi
         # env:
