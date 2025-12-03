@@ -65,7 +65,8 @@ class pyscf_pbc_init (pyscf_init):
     '''
     def __init__(self, args=None):
         super().__init__(comm.init_pbc_params() if args is None else args)
-        self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik = comm.init_k_mesh(self.args, self.cell)
+        self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik, self.kstruct = \
+            comm.init_k_mesh(self.args, self.cell)
 
     def mean_field_input(self, mydf=None):
         '''
@@ -135,6 +136,8 @@ class pyscf_pbc_init (pyscf_init):
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
         # Save data into Green Software package input format.
         comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
+        # Save symmetry operations info
+        comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 

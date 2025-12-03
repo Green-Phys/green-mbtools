@@ -388,6 +388,7 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S):
 
     return X_k, X_inv_k, S, F, T, hf_dm
 
+
 def add_common_params(parser):
     '''
     Define common command line arguments for Green python module
@@ -437,6 +438,7 @@ def add_pbc_params(parser):
     parser.add_argument("--finite_size_kind", choices=["ewald", "gf2", "gw", "gw_s", "coarse_grained"], default="ewald", nargs="+", 
                               help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.")
 
+
 def init_mol_params(params=None):
     '''
     Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for molecular calculations
@@ -468,6 +470,7 @@ def init_mol_params(params=None):
     args.center = [0.,0.,0.]
     return args
 
+
 def init_pbc_params(params=None):
     '''
     Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for periodic calculations
@@ -496,6 +499,7 @@ def init_pbc_params(params=None):
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
     return args
 
+
 def mol_cell(args):
     '''
     Initialize PySCF unit cell object for a given system
@@ -510,10 +514,12 @@ def mol_cell(args):
     )
     return c
 
+
 def pbc_cell(args):
     '''
     Initialize PySCF unit cell object for a given system
     '''
+    spg_symm = args.symm if args.x2c < 2 else False
     c = gto.M(
         a = args.a,
         atom = args.atom,
@@ -523,6 +529,7 @@ def pbc_cell(args):
         pseudo = args.pseudo,
         verbose = 7,
         spin = args.spin,
+        space_group_symmetry = spg_symm,
 #        exp_to_discard = args.diffuse_cutoff
     )
     _a = c.lattice_vectors()
@@ -531,6 +538,7 @@ def pbc_cell(args):
     if np.linalg.det(_a) < 0:
         raise "Lattice are not in right-handed coordinate system. Please correct your lattice vectors"
     return c
+
 
 def wrap_1stBZ(k):
     '''
@@ -542,6 +550,7 @@ def wrap_1stBZ(k):
     while (k - 4.9999999999e-1) > 0.0 :
         k = k - 1
     return k
+
 
 def init_k_mesh(args, mycell):
     """init k-points mesh for GDF
@@ -574,7 +583,18 @@ def init_k_mesh(args, mycell):
        args.center = [0,0,0]
     if args.shift is None:
        args.shift = [0,0,0]
-    kmesh = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center)
+    if args.x2c < 2:
+        # for normal and sfX2C1e calculations
+        kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
+                               space_group_symmetry=args.symm, time_reversal_symmetry=True)
+    else:
+        # for X2C1e calculations
+        print("X2C1e calculations do not support space group symmetry. Only time-reversal symmetry is used.")
+        print("Double group symmetry will be implemented in future releases.")
+        kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
+                               space_group_symmetry=False, time_reversal_symmetry=True)
+
+    kmesh = kstruct.kpts
     for i, kk in enumerate(kmesh):
         ki = kmesh[i]
         ki = mycell.get_scaled_kpts(ki) + args.shift
@@ -601,40 +621,25 @@ def init_k_mesh(args, mycell):
 
     logging.info("Compute irreducible k-points")
 
+    k_ibz = kstruct.kpts_ibz
+    nk = kstruct.nkpts
+    num_ik = kstruct.nkpts_ibz
+    ind = kstruct.bz2ibz
+    ir_list = kstruct.ibz2bz
+    conj_list = kstruct.time_reversal_symm_bz
+    # PySCF stores weight in fractions of 1/nk
+    weight = ind * 0
+    weight_ir_list = kstruct.weights_ibz
+    for i, irr_i in enumerate(ir_list):
+        weight[irr_i] = weight_ir_list[i] * nk
 
-    k_ibz = mycell.make_kpts([args.nk,args.nk,args.nk], scaled_center=args.center)
-    ind = np.arange(np.shape(k_ibz)[0])
-    weight = np.zeros(np.shape(k_ibz)[0])
+    # wrap IBZ k-points into 1st BZ
     for i, ki in enumerate(k_ibz):
         ki = mycell.get_scaled_kpts(ki)
         ki = [wrap_1stBZ(l) for l in ki]
         k_ibz[i] = ki
 
-    # Time-reversal symmetry
-    Inv = (-1) * np.identity(3)
-    for i, ki in enumerate(k_ibz):
-        ki = np.dot(Inv,ki)
-        ki = [wrap_1stBZ(l) for l in ki]
-        for l, kl in enumerate(k_ibz[:i]):
-            if np.allclose(ki,kl):
-                k_ibz[i] = kl
-                ind[i] = l
-                break
-
-    uniq = np.unique(ind, return_counts=True)
-    for i, k in enumerate(uniq[0]):
-        weight[k] = uniq[1][i]
-    ir_list = uniq[0]
-
-    # Mark down time-reversal-reduced k-points
-    conj_list = np.zeros(args.nk**3)
-    for i, k in enumerate(ind):
-        if i != k:
-            conj_list[i] = 1
-    num_ik = np.shape(uniq[0])[0]
-
     return kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik
-
 
 
 def read_dm(dm0, dm_file):
@@ -649,6 +654,7 @@ def read_dm(dm0, dm_file):
     f.close()
     dm_kpts = np.repeat(dm[:,None, :, :], nkpts, axis=1)
     return dm_kpts
+
 
 def solve_mean_field(args, mydf, mycell):
     '''
@@ -684,6 +690,7 @@ def solve_mean_field(args, mydf, mycell):
     if args.x2c < 2:
         mf.analyze()
     return mf
+
 
 def solve_mol_mean_field(args, mydf, mycell):
     '''
@@ -728,7 +735,34 @@ def solve_mol_mean_field(args, mydf, mycell):
     return mf
 
 
-def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik):
+def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
+    """Store symmetry operation information for k-points into a hdf5 file in Green'WeakCoupling format
+    """
+    nk = kmesh.shape[0]
+    # store index of symmetry operator that connects k-points in full BZ to irreducible BZ
+    inp_data = h5py.File(args.output_path, "a")
+    grid_grp = inp_data["grid"]
+    stars_ops = kstruct.stars_ops_bz
+    if "stars_ops" in grid_grp:
+        grid_grp["stars_ops"][...] = stars_ops
+    else:
+        grid_grp["stars_ops"] = stars_ops
+    # construct symmetry operators in AO basis
+    from symmetry_utils import _get_rotation_mat
+    nao = mycell.nao_nr()
+    kspace_orep = np.zeros((nk, kstruct.nop, nao, nao), dtype=np.complex128)
+    for ik in range(nk):
+        for iop in range(kstruct.nop):
+            mat_ao = _get_rotation_mat(mycell, kstruct.kpts_scaled[ik], kstruct.ops[iop], kstruct.Dmats[iop])
+            kspace_orep[ik, iop] = mat_ao
+    if "kspace_orep" in grid_grp:
+        grid_grp["kspace_orep"][...] = kspace_orep
+    else:
+        grid_grp["kspace_orep"] = kspace_orep
+    inp_data.close()
+
+
+def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik, kstruct=None):
     '''
     Store reciprocal space information into a hdf5 file in Green'WeakCoupling format
     '''
@@ -749,7 +783,11 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
             grid_grp[name][...] = data[i]
         else:
             grid_grp[name] = data[i]
+    # Store operators for symmetry operations
+    if kstruct is not None:
+        store_kstruct_ops_info(args, mycell, kmesh, kstruct)
     inp_data.close()
+
 
 def construct_mol_gdf(args, mycell):
     '''
@@ -801,6 +839,7 @@ def compute_ewald_correction(args, cell, kmesh, filename):
         mydf.mesh = [args.Nk, args.Nk, args.Nk]
     int_utils.compute_ewald_correction(args, mydf, kmesh, cell.nao_nr(), filename)
 
+
 def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):
     """Generate density-fitting integrals for correlated methods using q-averaging over the super-lattice points to compensate finite-size error
     
@@ -839,4 +878,3 @@ def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):
     int_utils.compute_integrals(mycell, mydf, kmesh, nao, X_k, args.hf_int_path, "cderi_dca.h5", False)
 
     tools.get_coulG = old_get_coulG
-
