@@ -229,6 +229,32 @@ def kpair_reduced_lists(kptis, kptjs, kptij_idx, kmesh, a):
     return conj_list, trans_list
 
 
+def make_gdf_kptij_lst_jk(kstruct):
+    '''
+    [WIP]
+    Build GDF k-point-pair list for get_jk
+    All combinations:
+        k_ibz != k_bz
+        k_bz  == k_bz
+    '''
+    from pyscf.pbc.lib.kpts_helper import member
+    kptij_lst = [(kstruct.kpts[i], kstruct.kpts[i]) for i in range(kstruct.nkpts)]
+    kptij_idx_lst = [(i, i) for i in range(kstruct.nkpts)]
+    for i in range(kstruct.nkpts_ibz):
+        ki = kstruct.kpts_ibz[i]
+        where = member(ki, kstruct.kpts)
+        for j in range(kstruct.nkpts):
+            kj = kstruct.kpts[j]
+            if j not in where:
+                kptij_lst.extend([(ki,kj)])
+                kptij_idx_lst.extend([(i,j)])
+    kptij_lst = np.asarray(kptij_lst)
+    kptij_idx_lst = np.asarray(kptij_idx_lst)
+    # dummy lists for kij_conj and kij_trans
+    # kptij_conjlist = 
+    return kptij_lst, kptij_idx_lst
+
+
 def integrals_grid(mycell, kmesh):
     a_lattice = mycell.lattice_vectors() / (2*np.pi)
     kptij_lst = [(ki, kmesh[j]) for i, ki in enumerate(kmesh) for j in range(i+1)]
@@ -241,6 +267,7 @@ def integrals_grid(mycell, kmesh):
     kpair_irre_list = np.argwhere(kij_conj == kij_trans)[:,0]
     num_kpair_stored = len(kpair_irre_list)
     return kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs
+
 
 def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_int", cderi_name="cderi.h5", keep=True, keep_after=False, cderi_name2="cderi_ewald.h5"):
 

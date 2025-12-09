@@ -617,16 +617,19 @@ def init_k_mesh(args, mycell):
         conj_list = np.zeros(nkpts)
         k_ibz = np.copy(kmesh)
         num_ik = nkpts
-        return kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik
+        kstruct = None
+        return kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik, kstruct
 
     logging.info("Compute irreducible k-points")
 
     k_ibz = kstruct.kpts_ibz
     nk = kstruct.nkpts
     num_ik = kstruct.nkpts_ibz
-    ind = kstruct.bz2ibz
     ir_list = kstruct.ibz2bz
     conj_list = kstruct.time_reversal_symm_bz
+    ind = kstruct.bz2ibz  # gives index of ir_list to which each k-point belongs
+    # but we want ind to be the index in the main list of k-points
+    ind = ir_list[ind]
     # PySCF stores weight in fractions of 1/nk
     weight = ind * 0
     weight_ir_list = kstruct.weights_ibz
@@ -639,7 +642,7 @@ def init_k_mesh(args, mycell):
         ki = [wrap_1stBZ(l) for l in ki]
         k_ibz[i] = ki
 
-    return kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik
+    return kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik, kstruct
 
 
 def read_dm(dm0, dm_file):
@@ -748,7 +751,7 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     else:
         grid_grp["stars_ops"] = stars_ops
     # construct symmetry operators in AO basis
-    from symmetry_utils import _get_rotation_mat
+    from .symmetry_utils import _get_rotation_mat
     nao = mycell.nao_nr()
     kspace_orep = np.zeros((nk, kstruct.nop, nao, nao), dtype=np.complex128)
     for ik in range(nk):
@@ -759,6 +762,11 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
         grid_grp["kspace_orep"][...] = kspace_orep
     else:
         grid_grp["kspace_orep"] = kspace_orep
+    n_ops = kstruct.nop
+    if "n_ops" in grid_grp:
+        grid_grp["n_ops"][...] = n_ops
+    else:
+        grid_grp["n_ops"] = n_ops
     inp_data.close()
 
 
