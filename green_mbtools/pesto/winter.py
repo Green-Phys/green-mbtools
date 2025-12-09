@@ -43,18 +43,16 @@ def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
         # rmesh = ft.construct_symmetric_rmesh(nk, nk, 1)
         rmesh = ft.construct_rmesh(nk, nk, 1)
     else:
-        raise ValueError(
-            "Wannier interpolation only supports 3D and 2D systems."
-        )
+        raise ValueError("Wannier interpolation only supports 3D and 2D systems.")
 
     fkr, frk = ft.compute_fourier_coefficients(kmesh, rmesh)
     weights = [1] * kmesh.shape[0]
     obj_i = np.array([ft.k_to_real(frk, obj_k[s], weights) for s in range(ns)])
     if debug:
-        center = np.where(np.all(rmesh == (0., 0., 0.), axis=1))[0][0]
+        center = np.where(np.all(rmesh == (0.0, 0.0, 0.0), axis=1))[0][0]
         for i in range(nk):
-            print("obj_i[", i-nk//2, ", 0, 0] = ")
-            print(np.diag(obj_i[0, center - nk//2+i].real))
+            print("obj_i[", i - nk // 2, ", 0, 0] = ")
+            print(np.diag(obj_i[0, center - nk // 2 + i].real))
 
     fkr_int, frk_int = ft.compute_fourier_coefficients(kpts_inter, rmesh)
     obj_k_int = np.array([ft.real_to_k(fkr_int, obj_i[s]) for s in range(ns)])
@@ -112,22 +110,19 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=F
         # rmesh = ft.construct_symmetric_rmesh(nk, nk, 1)
         rmesh = ft.construct_rmesh(nk, nk, 1)
     else:
-        raise ValueError(
-            "Wannier interpolation only supports 3D and 2D systems."
-        )
+        raise ValueError("Wannier interpolation only supports 3D and 2D systems.")
     fkr, frk = ft.compute_fourier_coefficients(kmesh, rmesh)
-    weights = [1]*kmesh.shape[0]
+    weights = [1] * kmesh.shape[0]
     obj_ti = np.array(
         [
-            ft.k_to_real(
-                frk, obj_tk[it, s],
-                weights
-            ) for it in range(nts) for s in range(ns)
+            ft.k_to_real(frk, obj_tk[it, s], weights)
+            for it in range(nts)
+            for s in range(ns)
         ]
     )
 
     if debug:
-        center = np.where(np.all(rmesh == (0., 0., 0.), axis=1))[0][0]
+        center = np.where(np.all(rmesh == (0.0, 0.0, 0.0), axis=1))[0][0]
         for i in range(nk):
             print("obj_i[", i - nk // 2, ", 0, 0] = ")
             print(np.diag(obj_ti[0, center - nk // 2 + i].real))
@@ -139,7 +134,7 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=F
 
     if hermi:
         error = 0.0
-        for its in range(nts*ns):
+        for its in range(nts * ns):
             for ik in range(kpts_inter.shape[0]):
                 obj = obj_tk_int[its, ik]
                 obj_sym = 0.5 * (obj + obj.conj().T)
@@ -153,8 +148,7 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=F
 
 # Only work for full_bz object
 def interpolate_G(
-    Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, dim=3,
-    hermi=False, debug=False
+    Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, dim=3, hermi=False, debug=False
 ):
     """Interpolate Green's function from full BZ k-mesh to specified k-points
 
@@ -190,17 +184,14 @@ def interpolate_G(
     ------
     ValueError
         if `dim` other than 2 or 3 is specified
-    """    
+    """
     ns, Nk, nao = Fk.shape[:3]
     if dim != 3 and dim != 2:
-        raise ValueError(
-            "Wannier interpolation only supports 3D and 2D systems."
-        )
+        raise ValueError("Wannier interpolation only supports 3D and 2D systems.")
     nts = ir.nts
 
     if Sigma_tk is not None:
-        assert nts == Sigma_tk.shape[0], \
-            "Number of imaginary time points mismatches."
+        assert nts == Sigma_tk.shape[0], "Number of imaginary time points mismatches."
 
     if Sk is not None:
         print("Interpolating overlap...")

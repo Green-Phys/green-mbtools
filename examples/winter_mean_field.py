@@ -33,19 +33,20 @@ alpha, beta, gamma = 90, 90, 90
 group = 221
 
 cc = crystal(
-    symbols=['H', 'H'],
+    symbols=["H", "H"],
     basis=[(-0.25, -0.25, -0.25), (0.25, 0.25, 0.25)],
     spacegroup=group,
-    cellpar=[a, b, c, alpha, beta, gamma], primitive_cell=True
+    cellpar=[a, b, c, alpha, beta, gamma],
+    primitive_cell=True,
 )
 
-path = cc.cell.bandpath('GXMGR', npoints=100)
+path = cc.cell.bandpath("GXMGR", npoints=100)
 kpts_inter = path.kpts
 
 # Input files
-data_dir = '../tests/test_data'
-input_path = data_dir + '/H2_GW/input.h5'
-ir_file = data_dir + '/ir_grid/1e4.h5'
+data_dir = "../tests/test_data"
+input_path = data_dir + "/H2_GW/input.h5"
+ir_file = data_dir + "/ir_grid/1e4.h5"
 
 # Output file
 bands_output = "bands.npy"
@@ -57,7 +58,7 @@ output = "H2_LDA_GXMGR.h5"
 #
 ##################
 
-f = h5py.File(input_path, 'r')
+f = h5py.File(input_path, "r")
 kmesh_scaled = f["/grid/k_mesh_scaled"][()]
 nk = f["HF/nk"][()]
 Fk = f["HF/Fock-k"][()].view(complex)
@@ -75,10 +76,14 @@ f.close()
 
 # MB_post class.
 # Input data e.g. fock, sigma, gtau, S have to be in full BZ.
-MB = mb.MB_post(fock=Fk, sigma=None, mu=mu, S=Sk, kmesh=kmesh_scaled, beta=T_inv, ir_file=ir_file)
+MB = mb.MB_post(
+    fock=Fk, sigma=None, mu=mu, S=Sk, kmesh=kmesh_scaled, beta=T_inv, ir_file=ir_file
+)
 # Wannier interpolation for basis defined by MB_post.S.
 # Emperically, AO basis seems to be much more localized than SAO.
-G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(kpts_inter, hermi=True, debug=debug)
+G_tk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = MB.wannier_interpolation(
+    kpts_inter, hermi=True, debug=debug
+)
 
 # Solve the generalized eigenvalue problems
 ns = Fk_int.shape[0]
@@ -89,13 +94,13 @@ for s in range(ns):
 np.save(bands_output, evals)
 
 
-f = h5py.File(output, 'w')
+f = h5py.File(output, "w")
 it = 0
 f["S-k"] = Sk_int
 f["kpts_interpolate"] = kpts_inter
 f["iter"] = it
-f["iter"+str(it)+"/Fock-k"] = Fk_int
-f["iter"+str(it)+"/G_tau/data"] = G_tk_int
-f["iter"+str(it)+"/G_tau/mesh"] = tau_mesh
-f["iter"+str(it)+"/mu"] = mu
+f["iter" + str(it) + "/Fock-k"] = Fk_int
+f["iter" + str(it) + "/G_tau/data"] = G_tk_int
+f["iter" + str(it) + "/G_tau/mesh"] = tau_mesh
+f["iter" + str(it) + "/mu"] = mu
 f.close()

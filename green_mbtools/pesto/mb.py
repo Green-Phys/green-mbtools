@@ -11,12 +11,19 @@ from . import analyt_cont as AC
 
 
 class MB_post(object):
-    """Many-body analysis class for post processing of GREEN data.
-    """
+    """Many-body analysis class for post processing of GREEN data."""
 
     def __init__(
-        self, fock, sigma=None, mu=None, gtau=None, S=None, kmesh=None,
-        beta=None, ir_file=None, legacy_ir=False
+        self,
+        fock,
+        sigma=None,
+        mu=None,
+        gtau=None,
+        S=None,
+        kmesh=None,
+        beta=None,
+        ir_file=None,
+        legacy_ir=False,
     ):
         """Initialize MB_post class for post processing of GREEN data.
 
@@ -94,10 +101,10 @@ class MB_post(object):
                 S = S.reshape((1,) + S.shape)
         else:
             raise ValueError(
-                'Incorrect dimensions of self-energy or Fock. Acceptable \
+                "Incorrect dimensions of self-energy or Fock. Acceptable \
                 shapes are (nts, ns, nk, nao, nao) or (nts, nk, nao, nao) \
                 for self energy and (ns, nk, nao, nao) or (nk, nao, nao) \
-                for Fock matrix.'
+                for Fock matrix."
             )
 
         if mu is None:
@@ -107,8 +114,10 @@ class MB_post(object):
             self._mu = mu
 
         if beta is None:
-            print("Warning: Inverse temperature is set to the default value\
-                1000 a.u.^{-1}.")
+            print(
+                "Warning: Inverse temperature is set to the default value\
+                1000 a.u.^{-1}."
+            )
             self._beta = 1000
         else:
             self._beta = beta
@@ -221,23 +230,22 @@ class MB_post(object):
         return -1.0 * self.gtau[-1]
 
     def __str__(self):
-        return "######### MBPT analysis class #########\n" \
-            "nts  = {} \n" \
-            "ns   = {}\n" \
-            "nk   = {}\n" \
-            "nao  = {}\n" \
-            "mu   = {}\n" \
-            "beta = {}\n" \
+        return (
+            "######### MBPT analysis class #########\n"
+            "nts  = {} \n"
+            "ns   = {}\n"
+            "nk   = {}\n"
+            "nao  = {}\n"
+            "mu   = {}\n"
+            "beta = {}\n"
             "#######################################".format(
                 self._nts, self._ns, self._ink, self._nao, self.mu, self.beta
             )
+        )
 
     def solve_dyson(self):
-        """Compute Green's function through Dyson's equation and update self.gtau and self.dm
-        """
-        self.gtau = dyson.solve_dyson(
-            self.fock, self.S, self.sigma, self.mu, self.ir
-        )
+        """Compute Green's function through Dyson's equation and update self.gtau and self.dm"""
+        self.gtau = dyson.solve_dyson(self.fock, self.S, self.sigma, self.mu, self.ir)
 
     def eigh_canonical(self, F, S, thr=1e-7):
         # S: m*m, x =: m*n, xFx: n*n, c: n*n, e: n, xc: m*n
@@ -246,7 +254,7 @@ class MB_post(object):
         vecs = np.zeros((ns, nk, nao, nao), dtype=complex)
         for s in range(ns):
             for k in range(nk):
-                x = orth.canonical_matrices(S[s, k], thr, 'f')
+                x = orth.canonical_matrices(S[s, k], thr, "f")
                 xFx = reduce(np.dot, (x.T.conj(), F[s, k], x))
                 e, c = LA.eigh(xFx)
                 c = np.dot(x, c)
@@ -307,11 +315,9 @@ class MB_post(object):
             orbitals = np.arange(self._nao)
         occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=complex)
         if self.S is not None:
-            occupations = np.einsum(
-                'k,skij,skji->si', self._weight, self.dm, self.S
-            )
+            occupations = np.einsum("k,skij,skji->si", self._weight, self.dm, self.S)
         else:
-            occupations = np.einsum('k,skii->si', self._weight, self.dm)
+            occupations = np.einsum("k,skii->si", self._weight, self.dm)
         num_k = len(self._weight)
         occupations /= num_k
 
@@ -344,18 +350,27 @@ class MB_post(object):
             if the MB_post object has no attribute for kmesh
         """
         if self.kmesh is None:
-            raise ValueError(
-                "kmesh of input data is unknown. Please provide it."
-            )
+            raise ValueError("kmesh of input data is unknown. Please provide it.")
         Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = winter.interpolate_G(
-            self.fock, self.sigma, self.mu, self.S,
-            self.kmesh, kpts_inter, self.ir, hermi=hermi, debug=debug
+            self.fock,
+            self.sigma,
+            self.mu,
+            self.S,
+            self.kmesh,
+            kpts_inter,
+            self.ir,
+            hermi=hermi,
+            debug=debug,
         )
         return Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int
 
     def AC_maxent(
-        self, error=5e-3, maxent_exe='maxent', params='green.param',
-        outdir='Maxent', gtau_orth=None
+        self,
+        error=5e-3,
+        maxent_exe="maxent",
+        params="green.param",
+        outdir="Maxent",
+        gtau_orth=None,
     ):
         """Perform Maxent analytic continuation
 
@@ -373,9 +388,11 @@ class MB_post(object):
             Green's function in orthonormal basis, by default None
         """
         if gtau_orth is None:
-            gtau_orth = orth.sao_orth(
-                self.gtau, self.S, type='g'
-            ) if self.S is not None else self.gtau
+            gtau_orth = (
+                orth.sao_orth(self.gtau, self.S, type="g")
+                if self.S is not None
+                else self.gtau
+            )
             gtau_inp = np.einsum("...ii->...i", gtau_orth)
         else:
             gtau_inp = gtau_orth
@@ -384,7 +401,7 @@ class MB_post(object):
         AC.maxent_run(gtau_inp, tau_mesh, error, params, maxent_exe, outdir)
 
     def AC_nevanlinna(
-        self, gtau_orth=None, n_real=10001, w_min=-10., w_max=10., eta=0.01
+        self, gtau_orth=None, n_real=10001, w_min=-10.0, w_max=10.0, eta=0.01
     ):
         """Perform Nevanlinna analytic continuation
 
@@ -409,17 +426,24 @@ class MB_post(object):
             spectral function for the given Green's function
         """
         if gtau_orth is None:
-            gtau_orth = orth.sao_orth(
-                self.gtau, self.S, type='g'
-            ) if self.S is not None else self.gtau
+            gtau_orth = (
+                orth.sao_orth(self.gtau, self.S, type="g")
+                if self.S is not None
+                else self.gtau
+            )
             gtau_orth = np.einsum("...ii->...i", gtau_orth)
         nw = self.ir.wsample.shape[0]
-        Gw_inp = self.ir.tau_to_w(gtau_orth)[nw//2:]
+        Gw_inp = self.ir.tau_to_w(gtau_orth)[nw // 2 :]
 
-        wsample = self.ir.wsample[nw//2:]
+        wsample = self.ir.wsample[nw // 2 :]
         freqs, A_w = AC.nevan_run(
-            Gw_inp, wsample, n_real=n_real,
-            w_min=w_min, w_max=w_max, eta=eta, spectral=True
+            Gw_inp,
+            wsample,
+            n_real=n_real,
+            w_min=w_min,
+            w_max=w_max,
+            eta=eta,
+            spectral=True,
         )
 
         return freqs, A_w
@@ -449,9 +473,7 @@ def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
         Y = Y.reshape((-1,) + Y.shape[k_ind:])
         X = X.reshape((-1,) + X.shape[k_ind:])
         for i in range(Y.shape[0]):
-            Y[i, ik] = minus_k_to_k_TRsym(
-                X[i, k]
-            ) if conj_list[ik] else X[i, k]
+            Y[i, ik] = minus_k_to_k_TRsym(X[i, k]) if conj_list[ik] else X[i, k]
         Y = Y.reshape(new_shape)
         X = X.reshape(old_shape)
 
@@ -491,11 +513,9 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
         if k_ind == 0:
             Y[ik, ::] = X[k, ::].conj() if conj_list[ik] else X[k, ::]
         elif k_ind == 1:
-            Y[:, ik, ::] = X[:, k, ::].conj() \
-                if conj_list[ik] else X[:, k, ::]
+            Y[:, ik, ::] = X[:, k, ::].conj() if conj_list[ik] else X[:, k, ::]
         elif k_ind == 2:
-            Y[:, :, ik, ::] = X[:, :, k, ::].conj() \
-                if conj_list[ik] else X[:, :, k, ::]
+            Y[:, :, ik, ::] = X[:, :, k, ::].conj() if conj_list[ik] else X[:, :, k, ::]
     return Y
 
 
@@ -522,29 +542,30 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
         analytic cotninuation, orthogonalization, etc.
     """
     import h5py
-    f = h5py.File(sim_path, 'r')
+
+    f = h5py.File(sim_path, "r")
     it = f["iter"][()]
-    Sigma1r = f["iter"+str(it)+"/Sigma1"][()].view(complex)
-    Sigmar = f["iter"+str(it)+"/Selfenergy/data"][()].view(complex)
-    Gr = f["iter"+str(it)+"/G_tau/data"][()].view(complex)
-    tau_mesh = f["iter"+str(it)+"/G_tau/mesh"][()]
+    Sigma1r = f["iter" + str(it) + "/Sigma1"][()].view(complex)
+    Sigmar = f["iter" + str(it) + "/Selfenergy/data"][()].view(complex)
+    Gr = f["iter" + str(it) + "/G_tau/data"][()].view(complex)
+    tau_mesh = f["iter" + str(it) + "/G_tau/mesh"][()]
     beta = tau_mesh[-1]
-    mu = f["iter"+str(it)+"/mu"][()]
+    mu = f["iter" + str(it) + "/mu"][()]
     f.close()
 
-    f = h5py.File(input_path, 'r')
-    S = f['HF/S-k'][()].view(complex)
+    f = h5py.File(input_path, "r")
+    S = f["HF/S-k"][()].view(complex)
     S = S.reshape(S.shape[:-1])
-    H0 = f['HF/H-k'][()].view(complex)
+    H0 = f["HF/H-k"][()].view(complex)
     H0 = H0.reshape(H0.shape[:-1])
     ir_list = f["/grid/ir_list"][()]
     index = f["/grid/index"][()]
     conj_list = f["grid/conj_list"][()]
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
-    ns = f['params/ns'][()]
+    ns = f["params/ns"][()]
     x2c = False
-    if nso == 2*nao:
+    if nso == 2 * nao:
         x2c = True
     f.close()
 
@@ -567,6 +588,12 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
 
     # Standard way to initialize
     return MB_post(
-        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, ir_file=ir_file,
-        legacy_ir=legacy_ir
+        fock=F,
+        sigma=Sigma,
+        mu=mu,
+        gtau=G,
+        S=S,
+        beta=beta,
+        ir_file=ir_file,
+        legacy_ir=legacy_ir,
     )

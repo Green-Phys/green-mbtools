@@ -21,14 +21,14 @@ from . import integral_utils as int_utils
 
 def extract_ase_data(a, atoms):
     """For a given data in XYZ format generate parameters in ASE format
-    
+
     Parameters
     ----------
     a : str
         string containing lattice vectros in XYZ format
     atoms: str
         string containin atoms positions in XYZ format
-    
+
     Returns
     -------
     tuple
@@ -36,9 +36,7 @@ def extract_ase_data(a, atoms):
     """
     symbols = []
     positions = []
-    lattice_vectors = np.genfromtxt(
-        StringIO(a.replace(',', ' ')), dtype=np.float64
-    )
+    lattice_vectors = np.genfromtxt(StringIO(a.replace(",", " ")), dtype=np.float64)
     for atom in atoms.splitlines():
         if len(atom) == 0 or len(atom.split()) != 4:
             continue
@@ -60,8 +58,11 @@ def print_high_symmetry_points(args):
         simulation parameters
     """
     import ase.spacegroup
+
     lattice_vectors, symbols, positions = extract_ase_data(args.a, args.atom)
-    cc = ase.spacegroup.crystal(symbols, positions, cellpar=ase.geometry.cell_to_cellpar(lattice_vectors))
+    cc = ase.spacegroup.crystal(
+        symbols, positions, cellpar=ase.geometry.cell_to_cellpar(lattice_vectors)
+    )
     lat = cc.cell.get_bravais_lattice()
     special_points = lat.get_special_points()
     print("List of special points: {}".format(special_points))
@@ -78,9 +79,12 @@ def check_high_symmetry_path(args):
     if args.high_symmetry_path is None:
         return
     import ase.spacegroup
+
     lattice_vectors, symbols, positions = extract_ase_data(args.a, args.atom)
     logging.info(f"parse: {lattice_vectors} {symbols} {positions}")
-    cc = ase.spacegroup.crystal(symbols, positions, cellpar=ase.geometry.cell_to_cellpar(lattice_vectors))
+    cc = ase.spacegroup.crystal(
+        symbols, positions, cellpar=ase.geometry.cell_to_cellpar(lattice_vectors)
+    )
     lat = cc.cell.get_bravais_lattice()
     special_points = lat.get_special_points()
     path = args.high_symmetry_path
@@ -88,8 +92,12 @@ def check_high_symmetry_path(args):
         path = path.replace(sp, "")
     path = path.replace(",", "")
     if path != "":
-        raise RuntimeError(("Chosen high symmetry path {} has invalid special points {}. Valid "
-                            "special points are {} ").format(args.high_symmetry_path, path, special_points.keys()))
+        raise RuntimeError(
+            (
+                "Chosen high symmetry path {} has invalid special points {}. Valid "
+                "special points are {} "
+            ).format(args.high_symmetry_path, path, special_points.keys())
+        )
 
 
 def high_symmetry_path(cell, args):
@@ -101,7 +109,7 @@ def high_symmetry_path(cell, args):
         unit-cell object
     args : map
         simulation parameters
-    
+
     Returns
     -------
     tuple
@@ -112,10 +120,10 @@ def high_symmetry_path(cell, args):
     if args.high_symmetry_path is None:
         return [None, None, None]
     import ase
+
     lattice_vectors, _, _ = extract_ase_data(args.a, args.atom)
     kpath = ase.dft.kpoints.bandpath(
-        args.high_symmetry_path, lattice_vectors,
-        npoints=args.high_symmetry_path_points
+        args.high_symmetry_path, lattice_vectors, npoints=args.high_symmetry_path_points
     )
     kmesh = cell.get_abs_kpts(kpath.kpts)
     if args.x2c == 2:
@@ -147,7 +155,7 @@ def transform(Z, X, X_inv):
         Transformation matrix
     X_inv : numpy.ndarray
         Inverse transformation matrix
-    
+
     Returns
     -------
     numpy.ndarray
@@ -157,14 +165,18 @@ def transform(Z, X, X_inv):
     maxdiff = -1
     for ss in range(Z.shape[0]):
         for ik in range(Z.shape[1]):
-            Z_X[ss,ik] = np.einsum('ij,jk...,kl->il...', X[ik], Z[ss, ik], X[ik].T.conj())
+            Z_X[ss, ik] = np.einsum(
+                "ij,jk...,kl->il...", X[ik], Z[ss, ik], X[ik].T.conj()
+            )
 
             Z_restore = np.dot(X_inv[ik], np.dot(Z_X[ss, ik], X_inv[ik].conj().T))
             diff = np.max(np.abs(Z[ss, ik] - Z_restore))
             maxdiff = max(maxdiff, diff)
 
-            if not np.allclose(Z[ss, ik], Z_restore, atol=1e-12, rtol=1e-12) :
-                error = "Orthogonal transformation failed. Max difference between origin and restored quantity is {}".format(np.max(np.abs(Z[ss,ik] - Z_restore)))
+            if not np.allclose(Z[ss, ik], Z_restore, atol=1e-12, rtol=1e-12):
+                error = "Orthogonal transformation failed. Max difference between origin and restored quantity is {}".format(
+                    np.max(np.abs(Z[ss, ik] - Z_restore))
+                )
                 raise RuntimeError(error)
     logging.info(f"Maximum difference between Z and Z_restore {maxdiff}")
     return Z_X
@@ -190,14 +202,14 @@ def fold_back_to_1stBZ(kpts):
 
 
 def inversion_sym(kmesh_scaled):
-    """For a given list of the scaled k-points in the full Brillouin zone select k-points that are 
+    """For a given list of the scaled k-points in the full Brillouin zone select k-points that are
     equivalent by the time-reversal symmetry and return them and their corresponding weight and index
 
     Parameters
     ----------
     kpts : numpy.ndarray
         list of scaled k-points
-    
+
     Returns
     -------
     numpy.ndarray
@@ -218,10 +230,10 @@ def inversion_sym(kmesh_scaled):
     # Time-reversal symmetry
     Inv = (-1) * np.identity(3)
     for i, ki in enumerate(kmesh_scaled):
-        ki = np.dot(Inv,ki)
+        ki = np.dot(Inv, ki)
         ki = [wrap_1stBZ(l) for l in ki]
         for l, kl in enumerate(kmesh_scaled[:i]):
-            if np.allclose(ki,kl):
+            if np.allclose(ki, kl):
                 ind[i] = l
                 break
 
@@ -240,9 +252,9 @@ def inversion_sym(kmesh_scaled):
 
 
 def wrap_k(k):
-    while k < 0 :
+    while k < 0:
         k = 1 + k
-    while (k - 9.9999999999e-1) > 0.0 :
+    while (k - 9.9999999999e-1) > 0.0:
         k = k - 1
     return k
 
@@ -254,7 +266,7 @@ def parse_basis(basis_list):
     ----------
     basis_list : str
         basis-set information
-    
+
     Returns
     -------
     list
@@ -265,7 +277,7 @@ def parse_basis(basis_list):
         b = {}
         for atom_i in range(0, len(basis_list), 2):
             bas_i = basis_list[atom_i + 1]
-            if os.path.exists(bas_i) :
+            if os.path.exists(bas_i):
                 with open(bas_i) as bfile:
                     bas = mgto.parse(bfile.read())
             # if basis specified as a standard basis
@@ -278,10 +290,9 @@ def parse_basis(basis_list):
 
 
 def parse_geometry(g):
-    """Parse geometry of the system
-    """
+    """Parse geometry of the system"""
     res = ""
-    if os.path.exists(g) :
+    if os.path.exists(g):
         with open(g) as gf:
             res = gf.read()
     else:
@@ -289,11 +300,33 @@ def parse_geometry(g):
     return res
 
 
-def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm, madelung, Zs, last_ao):
-    '''
+def save_data(
+    args,
+    mycell,
+    mf,
+    kmesh,
+    ind,
+    weight,
+    num_ik,
+    ir_list,
+    conj_list,
+    Nk,
+    nk,
+    NQ,
+    F,
+    S,
+    T,
+    hf_dm,
+    madelung,
+    Zs,
+    last_ao,
+):
+    """
     Save data in Green/WeakCoupling format into a hdf5 file
-    '''
-    kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = int_utils.integrals_grid(mycell, kmesh)
+    """
+    kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = (
+        int_utils.integrals_grid(mycell, kmesh)
+    )
     logging.info(f"number of reduced k-pairs: {num_kpair_stored}")
     inp_data = h5py.File(args.output_path, "w")
     inp_data["grid/k_mesh"] = kmesh
@@ -313,11 +346,17 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["HF/nk"] = nk
     inp_data["HF/Energy"] = mf.e_tot
     inp_data["HF/Energy_nuc"] = mf.energy_nuc()
-    inp_data["HF/Fock-k"] = F.view(np.float64).reshape(F.shape[0], F.shape[1], F.shape[2], F.shape[3], 2)
+    inp_data["HF/Fock-k"] = F.view(np.float64).reshape(
+        F.shape[0], F.shape[1], F.shape[2], F.shape[3], 2
+    )
     inp_data["HF/Fock-k"].attrs["__complex__"] = np.int8(1)
-    inp_data["HF/S-k"] = S.view(np.float64).reshape(S.shape[0], S.shape[1], S.shape[2], S.shape[3], 2)
+    inp_data["HF/S-k"] = S.view(np.float64).reshape(
+        S.shape[0], S.shape[1], S.shape[2], S.shape[3], 2
+    )
     inp_data["HF/S-k"].attrs["__complex__"] = np.int8(1)
-    inp_data["HF/H-k"] = T.view(np.float64).reshape(T.shape[0], T.shape[1], T.shape[2], T.shape[3], 2)
+    inp_data["HF/H-k"] = T.view(np.float64).reshape(
+        T.shape[0], T.shape[1], T.shape[2], T.shape[3], 2
+    )
     inp_data["HF/H-k"].attrs["__complex__"] = np.int8(1)
     inp_data["HF/madelung"] = madelung
     inp_data["HF/mo_energy"] = mf.mo_energy
@@ -333,17 +372,19 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data.attrs["__green_version__"] = imd.version("green_mbtools")
     inp_data.close()
     chk.save(args.output_path, "Cell", mycell.dumps())
-    inp_data = h5py.File(os.path.join(os.path.dirname(args.output_path),"dm.h5"), "w")
-    inp_data["HF/dm-k"] = hf_dm.view(np.float64).reshape(hf_dm.shape[0], hf_dm.shape[1], hf_dm.shape[2], hf_dm.shape[3], 2)
+    inp_data = h5py.File(os.path.join(os.path.dirname(args.output_path), "dm.h5"), "w")
+    inp_data["HF/dm-k"] = hf_dm.view(np.float64).reshape(
+        hf_dm.shape[0], hf_dm.shape[1], hf_dm.shape[2], hf_dm.shape[3], 2
+    )
     inp_data["HF/dm-k"].attrs["__complex__"] = np.int8(1)
     inp_data["dm_gamma"] = hf_dm[:, 0, :, :]
     inp_data.close()
 
 
 def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S):
-    '''
+    """
     Transform Fock-matrix, non-interacting Hamiltonian, density matrix and overlap matrix into an orthogonal basis
-    '''
+    """
     maxdiff = -1
     old_shape = [-1, -1]
     for ik, k in enumerate(mydf.kpts):
@@ -362,7 +403,9 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S):
         x = (s_eb[:, istart:].conj() * 1 / s_sqrtev).T
         n_ortho, n_nonortho = x.shape
         if old_shape[0] >= 0 and n_ortho != old_shape[0] and n_nonortho != old_shape[1]:
-            raise RuntimeError("Error!!! Different k-point have different number of orthogonal basis.")
+            raise RuntimeError(
+                "Error!!! Different k-point have different number of orthogonal basis."
+            )
 
         old_shape[0] = n_ortho
         old_shape[1] = n_nonortho
@@ -388,60 +431,237 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S):
 
     return X_k, X_inv_k, S, F, T, hf_dm
 
+
 def add_common_params(parser):
-    '''
+    """
     Define common command line arguments for Green python module
-    '''
-    parser.add_argument("--atom", type=parse_geometry, help="poistions of atoms", required=True)
-    parser.add_argument("--Nk", type=int, default=0, help="number of plane-waves in each direction for integral evaluation")
-    parser.add_argument("--basis", type=str, nargs="*", help="basis sets definition. First specify atom then basis for this atom", required=True)
-    parser.add_argument("--auxbasis", type=str, nargs="*", default=[None], help="auxiliary basis")
-    parser.add_argument("--ecp", type=str, nargs="*", default=[None], help="effective core potentials")
-    parser.add_argument("--xc", type=str, nargs="*", default=[None], help="XC functional")
-    parser.add_argument("--dm0", type=str, default=None, help="initial guess for density matrix")
-    parser.add_argument("--df_int", type=int, default=1, help="prepare density fitting integrals or not")
-    parser.add_argument("--int_path", type=str, default="df_int", help="path to store ewald corrected integrals")
-    parser.add_argument("--hf_int_path", type=str, default="df_hf_int", help="path to store hf integrals")
-    parser.add_argument("--output_path", type=str, default="input.h5", help="output file with initial data")
-    parser.add_argument("--orth", type=int, default=0, help="Transform to orthogonal basis or not. 0 - no orthogonal transformation, 1 - data is in orthogonal basis.")
-    parser.add_argument("--beta", type=float, default=None, help="Emperical parameter for even-Gaussian auxiliary basis")
-    parser.add_argument("--active_space", type=int, nargs='+', default=None, help="active space orbitals")
-    parser.add_argument("--spin", type=int, default=0, help="Local spin")
-    parser.add_argument("--restricted", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Spin restricted calculations.")
-    parser.add_argument("--memory", type=int, default=700, help="Memory bound for integral chunk in MB")
-    parser.add_argument("--grid_only", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Only recompute k-grid points")
-    parser.add_argument("--diffuse_cutoff", type=float, default=0.0, help="Remove the diffused Gaussians whose exponents are less than the cutoff")
-    parser.add_argument("--damping", type=float, default=0.0, help="Damping factor for mean-field iterations")
-    parser.add_argument("--max_iter", type=int, default=100, help="Maximum number of iterations in the SCF loop")
-    parser.add_argument("--keep_cderi", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='false', help="Keep generated cderi files.")
-    parser.add_argument("--job", choices=["init", "sym_path", "ewald_corr"], default="init", nargs="+")
+    """
     parser.add_argument(
-        "--x2c", type=int, default=0, choices=[0, 1, 2],
-        help="enable X2C calculations (0: non-rel., 1: sfX2C1e, 2: X2C1e)"
+        "--atom",
+        type=parse_geometry,
+        help="poistions of atoms",
+        required=True
+    )
+    parser.add_argument(
+        "--Nk",
+        type=int,
+        default=0,
+        help="number of plane-waves in each direction for integral evaluation",
+    )
+    parser.add_argument(
+        "--basis",
+        type=str,
+        nargs="*",
+        help="basis sets definition. First specify atom then basis for this atom",
+        required=True,
+    )
+    parser.add_argument(
+        "--auxbasis",
+        type=str,
+        nargs="*",
+        default=[None], 
+        help="auxiliary basis"
+    )
+    parser.add_argument(
+        "--ecp",
+        type=str,
+        nargs="*",
+        default=[None],
+        help="effective core potentials"
+    )
+    parser.add_argument(
+        "--xc",
+        type=str,
+        nargs="*",
+        default=[None],
+        help="XC functional"
+    )
+    parser.add_argument(
+        "--dm0",
+        type=str,
+        default=None,
+        help="initial guess for density matrix"
+    )
+    parser.add_argument(
+        "--df_int",
+        type=int,
+        default=1,
+        help="prepare density fitting integrals or not"
+    )
+    parser.add_argument(
+        "--int_path",
+        type=str,
+        default="df_int",
+        help="path to store ewald corrected integrals",
+    )
+    parser.add_argument(
+        "--hf_int_path",
+        type=str,
+        default="df_hf_int",
+        help="path to store hf integrals",
+    )
+    parser.add_argument(
+        "--output_path",
+        type=str,
+        default="input.h5",
+        help="output file with initial data",
+    )
+    parser.add_argument(
+        "--orth",
+        type=int,
+        default=0,
+        help="Transform to orthogonal basis or not. 0 - no orthogonal transformation, 1 - data is in orthogonal basis.",
+    )
+    parser.add_argument(
+        "--beta",
+        type=float,
+        default=None,
+        help="Emperical parameter for even-Gaussian auxiliary basis",
+    )
+    parser.add_argument(
+        "--active_space",
+        type=int,
+        nargs="+",
+        default=None,
+        help="active space orbitals",
+    )
+    parser.add_argument(
+        "--spin",
+        type=int,
+        default=0,
+        help="Local spin"
+    )
+    parser.add_argument(
+        "--restricted",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default="false",
+        help="Spin restricted calculations.",
+    )
+    parser.add_argument(
+        "--memory",
+        type=int,
+        default=700,
+        help="Memory bound for integral chunk in MB"
+    )
+    parser.add_argument(
+        "--grid_only",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default="false",
+        help="Only recompute k-grid points",
+    )
+    parser.add_argument(
+        "--diffuse_cutoff",
+        type=float,
+        default=0.0,
+        help="Remove the diffused Gaussians whose exponents are less than the cutoff",
+    )
+    parser.add_argument(
+        "--damping",
+        type=float,
+        default=0.0,
+        help="Damping factor for mean-field iterations",
+    )
+    parser.add_argument(
+        "--max_iter",
+        type=int,
+        default=100,
+        help="Maximum number of iterations in the SCF loop",
+    )
+    parser.add_argument(
+        "--keep_cderi",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default="false",
+        help="Keep generated cderi files.",
+    )
+    parser.add_argument(
+        "--job", 
+        choices=["init", "sym_path", "ewald_corr"], 
+        default="init", 
+        nargs="+"
+    )
+    parser.add_argument(
+        "--x2c",
+        type=int,
+        default=0,
+        choices=[0, 1, 2],
+        help="enable X2C calculations (0: non-rel., 1: sfX2C1e, 2: X2C1e)",
+    )
+    parser.add_argument(
+        "--conv_tol",
+        type=float,
+        default=1e-7,
+        help="Convergence tolerance for mean-field calculations",
+    )
+    parser.add_argument(
+        "--block_dim",
+        type=int,
+        default=None,
+        help="Block dimension for density fitting integral evaluation PySCF default is 240",
+    )
+    parser.add_argument(
+        "--smearing",
+        type=float,
+        default=None,
+        help="Smearing width for Fermi-Dirac smearing",
     )
 
 
 def add_pbc_params(parser):
-    '''
+    """
     Define PBC-specific command line arguments for Green python module
-    '''
-    parser.add_argument("--a", type=parse_geometry, help="lattice geometry", required=True)
-    parser.add_argument("--nk", type=int, help="number of k-points in each direction", required=True)
-    parser.add_argument("--pseudo", type=str, nargs="*", default=[None], help="pseudopotential")
-    parser.add_argument("--shift", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh shift")
-    parser.add_argument("--center", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh center")
-    parser.add_argument("--symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use inversion symmetry")
-    parser.add_argument("--print_high_symmetry_points", default=False, action='store_true', help="Print available high symmetry points for current system and exit.")
-    parser.add_argument("--high_symmetry_path", type=str, default=None, help="High symmetry path")
-    parser.add_argument("--high_symmetry_path_points", type=int, default=0, help="Number of points for high symmetry path")
-    parser.add_argument("--finite_size_kind", choices=["ewald", "gf2", "gw", "gw_s", "coarse_grained"], default="ewald", nargs="+", 
-                              help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.")
+    """
+    parser.add_argument(
+        "--a", type=parse_geometry, help="lattice geometry", required=True
+    )
+    parser.add_argument(
+        "--nk", type=int, help="number of k-points in each direction", required=True
+    )
+    parser.add_argument(
+        "--pseudo", type=str, nargs="*", default=[None], help="pseudopotential"
+    )
+    parser.add_argument(
+        "--shift", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh shift"
+    )
+    parser.add_argument(
+        "--center", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh center"
+    )
+    parser.add_argument(
+        "--symm",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default="true",
+        help="Use inversion symmetry",
+    )
+    parser.add_argument(
+        "--print_high_symmetry_points",
+        default=False,
+        action="store_true",
+        help="Print available high symmetry points for current system and exit.",
+    )
+    parser.add_argument(
+        "--high_symmetry_path", type=str, default=None, help="High symmetry path"
+    )
+    parser.add_argument(
+        "--high_symmetry_path_points",
+        type=int,
+        default=0,
+        help="Number of points for high symmetry path",
+    )
+    parser.add_argument(
+        "--finite_size_kind",
+        choices=["ewald", "gf2", "gw", "gw_s", "coarse_grained"],
+        default="ewald",
+        nargs="+",
+        help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.",
+    )
+
 
 def init_mol_params(params=None):
-    '''
+    """
     Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for molecular calculations
-    '''
-    parser = argparse.ArgumentParser(description="Green/WeakCoupling initialization script")
+    """
+    parser = argparse.ArgumentParser(
+        description="Green/WeakCoupling initialization script"
+    )
     add_common_params(parser)
     args = parser.parse_args(args=params)
     args.basis = parse_basis(args.basis)
@@ -462,17 +682,20 @@ def init_mol_params(params=None):
             args.mean_field = mscf.RHF if args.restricted else mscf.UHF
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
     # parameters needed to create empty grid
-    args.a = [[1,0,0],[0,1,0],[0,0,1]]
+    args.a = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     args.nk = 1
-    args.shift =  [0.,0.,0.]
-    args.center = [0.,0.,0.]
+    args.shift = [0.0, 0.0, 0.0]
+    args.center = [0.0, 0.0, 0.0]
     return args
 
+
 def init_pbc_params(params=None):
-    '''
+    """
     Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for periodic calculations
-    '''
-    parser = argparse.ArgumentParser(description="Green/WeakCoupling initialization script")
+    """
+    parser = argparse.ArgumentParser(
+        description="Green/WeakCoupling initialization script"
+    )
     add_common_params(parser)
     add_pbc_params(parser)
     args = parser.parse_args(args=params)
@@ -496,34 +719,36 @@ def init_pbc_params(params=None):
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
     return args
 
+
 def mol_cell(args):
-    '''
+    """
     Initialize PySCF unit cell object for a given system
-    '''
+    """
     c = mgto.M(
-        atom = args.atom,
-        unit = 'A',
-        basis = args.basis,
-        ecp = args.ecp,
-        verbose = 7,
-        spin = args.spin
+        atom=args.atom,
+        unit="A",
+        basis=args.basis,
+        ecp=args.ecp,
+        verbose=7,
+        spin=args.spin,
     )
     return c
 
+
 def pbc_cell(args):
-    '''
+    """
     Initialize PySCF unit cell object for a given system
-    '''
+    """
     c = gto.M(
-        a = args.a,
-        atom = args.atom,
-        unit = 'A',
-        basis = args.basis,
-        ecp = args.ecp,
-        pseudo = args.pseudo,
-        verbose = 7,
-        spin = args.spin,
-#        exp_to_discard = args.diffuse_cutoff
+        a=args.a,
+        atom=args.atom,
+        unit="A",
+        basis=args.basis,
+        ecp=args.ecp,
+        pseudo=args.pseudo,
+        verbose=7,
+        spin=args.spin,
+        #        exp_to_discard = args.diffuse_cutoff
     )
     _a = c.lattice_vectors()
     c.exp_to_discard = args.diffuse_cutoff
@@ -532,16 +757,18 @@ def pbc_cell(args):
         raise "Lattice are not in right-handed coordinate system. Please correct your lattice vectors"
     return c
 
+
 def wrap_1stBZ(k):
-    '''
+    """
     wrap scaled k into [-0.5,0.5) range
     :param k: value of k-point at some dimension
-    '''
-    while k < -0.5 :
+    """
+    while k < -0.5:
         k = k + 1
-    while (k - 4.9999999999e-1) > 0.0 :
+    while (k - 4.9999999999e-1) > 0.0:
         k = k - 1
     return k
+
 
 def init_k_mesh(args, mycell):
     """init k-points mesh for GDF
@@ -549,10 +776,10 @@ def init_k_mesh(args, mycell):
     Parameters
     ----------
     args : map
-        simulation parameters 
+        simulation parameters
     mycell : pyscf.pbc.Cell
         unit cell for simulation
-    
+
     Returns
     -------
     numpy.ndarray
@@ -571,9 +798,9 @@ def init_k_mesh(args, mycell):
         number of irreducible k-points
     """
     if args.center is None:
-       args.center = [0,0,0]
+        args.center = [0, 0, 0]
     if args.shift is None:
-       args.shift = [0,0,0]
+        args.shift = [0, 0, 0]
     kmesh = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center)
     for i, kk in enumerate(kmesh):
         ki = kmesh[i]
@@ -589,7 +816,7 @@ def init_k_mesh(args, mycell):
     logging.debug(kmesh)
     logging.info(mycell.get_scaled_kpts(kmesh))
 
-    if not args.symm :
+    if not args.symm:
         nkpts = kmesh.shape[0]
         weight = np.ones(nkpts)
         ir_list = np.array(range(nkpts))
@@ -601,8 +828,7 @@ def init_k_mesh(args, mycell):
 
     logging.info("Compute irreducible k-points")
 
-
-    k_ibz = mycell.make_kpts([args.nk,args.nk,args.nk], scaled_center=args.center)
+    k_ibz = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center)
     ind = np.arange(np.shape(k_ibz)[0])
     weight = np.zeros(np.shape(k_ibz)[0])
     for i, ki in enumerate(k_ibz):
@@ -613,10 +839,10 @@ def init_k_mesh(args, mycell):
     # Time-reversal symmetry
     Inv = (-1) * np.identity(3)
     for i, ki in enumerate(k_ibz):
-        ki = np.dot(Inv,ki)
+        ki = np.dot(Inv, ki)
         ki = [wrap_1stBZ(l) for l in ki]
         for l, kl in enumerate(k_ibz[:i]):
-            if np.allclose(ki,kl):
+            if np.allclose(ki, kl):
                 k_ibz[i] = kl
                 ind[i] = l
                 break
@@ -636,24 +862,24 @@ def init_k_mesh(args, mycell):
     return kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik
 
 
-
 def read_dm(dm0, dm_file):
-    '''
+    """
     Read density matrix from smaller kmesh
-    '''
-    nao  = dm0.shape[-1]
+    """
+    nao = dm0.shape[-1]
     nkpts = dm0.shape[1]
-    dm   = np.zeros((2,nao,nao),dtype=np.complex128)
-    f    = h5py.File(dm_file, 'r')
-    dm[:,:,:] = f['/dm_gamma'][:]
+    dm = np.zeros((2, nao, nao), dtype=np.complex128)
+    f = h5py.File(dm_file, "r")
+    dm[:, :, :] = f["/dm_gamma"][:]
     f.close()
-    dm_kpts = np.repeat(dm[:,None, :, :], nkpts, axis=1)
+    dm_kpts = np.repeat(dm[:, None, :, :], nkpts, axis=1)
     return dm_kpts
 
+
 def solve_mean_field(args, mydf, mycell):
-    '''
+    """
     Obtain pySCF mean-field solution for a given parameters, unit-cell object and density-fitting object
-    '''
+    """
     logging.info("Solve Mean-field")
     # prepare and solve DFT
     if args.x2c == 0:
@@ -664,16 +890,19 @@ def solve_mean_field(args, mydf, mycell):
         mf = args.mean_field(mycell, mydf.kpts).density_fit().x2c1e()
     if args.xc is not None:
         mf.xc = args.xc
-    #mf.max_memory = 10000
+    # mf.max_memory = 10000
+    if args.smearing is not None:
+        mf = scf.addons.smearing_(mf, sigma=args.smearing, method="fermi")
     mydf._cderi = "cderi.h5"
     mf.kpts = mydf.kpts
+    mf.conv_tol = args.conv_tol
     mf.with_df = mydf
     mf.diis_space = 16
     mf.damp = args.damping
     mf.max_cycle = args.max_iter
-    mf.chkfile = 'tmp.chk'
+    mf.chkfile = "tmp.chk"
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk('tmp.chk')
+        init_dm = mf.from_chk("tmp.chk")
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
@@ -685,10 +914,11 @@ def solve_mean_field(args, mydf, mycell):
         mf.analyze()
     return mf
 
+
 def solve_mol_mean_field(args, mydf, mycell):
-    '''
+    """
     Obtain pySCF mean-field solution for a given parameters, unit-cell object and density-fitting object
-    '''
+    """
     logging.info("Solve LDA")
     # prepare and solve DFT
 
@@ -703,7 +933,11 @@ def solve_mol_mean_field(args, mydf, mycell):
     # mf.max_memory = 10000
     # mydf._cderi = "cderi.h5"
     if args.x2c == 2:
-        tmp_mf = mscf.RHF(mycell).density_fit() if args.restricted else mscf.UHF(mycell).density_fit()
+        tmp_mf = (
+            mscf.RHF(mycell).density_fit()
+            if args.restricted
+            else mscf.UHF(mycell).density_fit()
+        )
         tmp_mf.with_df._cderi_to_save = "cderi_mol.h5"
         tmp_mf.with_df.build()
         tmp_mf = None
@@ -712,10 +946,11 @@ def solve_mol_mean_field(args, mydf, mycell):
         mf.with_df.build()
     mf.diis_space = 16
     mf.damp = args.damping
+    mf.conv_tol = args.conv_tol
     mf.max_cycle = args.max_iter
-    mf.chkfile = 'tmp.chk'
+    mf.chkfile = "tmp.chk"
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk('tmp.chk')
+        init_dm = mf.from_chk("tmp.chk")
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
@@ -729,21 +964,49 @@ def solve_mol_mean_field(args, mydf, mycell):
 
 
 def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik):
-    '''
+    """
     Store reciprocal space information into a hdf5 file in Green'WeakCoupling format
-    '''
+    """
     inp_data = h5py.File(args.output_path, "a")
     nk = kmesh.shape[0]
     ink = k_ibz.shape[0]
-    kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = int_utils.integrals_grid(mycell, kmesh)
+    kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = (
+        int_utils.integrals_grid(mycell, kmesh)
+    )
     logging.info(f"number of reduced k-pairs: {num_kpair_stored}")
     if not "grid" in inp_data:
         inp_data.create_group("grid")
     grid_grp = inp_data["grid"]
-    data = [kmesh, mycell.get_scaled_kpts(kmesh), ind, weight, num_ik, nk, ir_list, conj_list,
-               kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored]
-    names = ["k_mesh", "k_mesh_scaled", "index", "weight", "ink", "nk", "ir_list", "conj_list",
-                "conj_pairs_list", "trans_pairs_list", "kpair_irre_list", "kpair_idx", "num_kpair_stored" ]
+    data = [
+        kmesh,
+        mycell.get_scaled_kpts(kmesh),
+        ind,
+        weight,
+        num_ik,
+        nk,
+        ir_list,
+        conj_list,
+        kij_conj,
+        kij_trans,
+        kpair_irre_list,
+        kptij_idx,
+        num_kpair_stored,
+    ]
+    names = [
+        "k_mesh",
+        "k_mesh_scaled",
+        "index",
+        "weight",
+        "ink",
+        "nk",
+        "ir_list",
+        "conj_list",
+        "conj_pairs_list",
+        "trans_pairs_list",
+        "kpair_irre_list",
+        "kpair_idx",
+        "num_kpair_stored",
+    ]
     for i, name in enumerate(names):
         if name in grid_grp:
             grid_grp[name][...] = data[i]
@@ -751,11 +1014,12 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
             grid_grp[name] = data[i]
     inp_data.close()
 
+
 def construct_mol_gdf(args, mycell):
-    '''
+    """
     Construct Gaussian Density Fitting obejct for a given parameters and unit cell.
     We make sure to disable range-separeting implementation
-    '''
+    """
     # Use gaussian density fitting to get fitted densities
     mydf = df.GDF(mycell, mycell.kpts)
     if args.auxbasis is not None:
@@ -769,18 +1033,20 @@ def construct_mol_gdf(args, mycell):
 
 
 def construct_gdf(args, mycell, kmesh=None):
-    '''
+    """
     Construct Gaussian Density Fitting obejct for a given parameters and unit cell.
     We make sure to disable range-separeting implementation
-    '''
+    """
     # Use gaussian density fitting to get fitted densities
     mydf = df.GDF(mycell)
     if hasattr(mydf, "_prefer_ccdf"):
-        mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions 
+        mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
     if args.auxbasis is not None:
         mydf.auxbasis = args.auxbasis
     elif args.beta is not None:
         mydf.auxbasis = df.aug_etb(mycell, beta=args.beta)
+    if args.block_dim is not None:
+        mydf.blockdim = args.block_dim
     # Coulomb kernel mesh
     if args.Nk > 0:
         mydf.mesh = [args.Nk, args.Nk, args.Nk]
@@ -801,9 +1067,10 @@ def compute_ewald_correction(args, cell, kmesh, filename):
         mydf.mesh = [args.Nk, args.Nk, args.Nk]
     int_utils.compute_ewald_correction(args, mydf, kmesh, cell.nao_nr(), filename)
 
+
 def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):
     """Generate density-fitting integrals for correlated methods using q-averaging over the super-lattice points to compensate finite-size error
-    
+
     Parameters
     ----------
     args : map
@@ -824,19 +1091,27 @@ def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):
         return
     mydf = construct_gdf(args, mycell, kmesh)
     # Use Ewald for divergence treatment
-    mydf.exxdiv = 'ewald'
+    mydf.exxdiv = "ewald"
     weighted_coulG_old = df.GDF.weighted_coulG
     df.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
     old_get_coulG = tools.get_coulG
-    tools.get_coulG = lambda cell, k=np.zeros(3), exx=False, mf=None, mesh=None, Gv=None, wrap_around=True, omega=None, **kwargs: int_utils.get_coarsegrained_coulG(lattice_kmesh, cell, k, exx, mf, mesh, Gv,
-              wrap_around, omega, **kwargs)
+    tools.get_coulG = lambda cell, k=np.zeros(
+        3
+    ), exx=False, mf=None, mesh=None, Gv=None, wrap_around=True, omega=None, **kwargs: int_utils.get_coarsegrained_coulG(
+        lattice_kmesh, cell, k, exx, mf, mesh, Gv, wrap_around, omega, **kwargs
+    )
 
-    kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored = int_utils.compute_integrals(mycell, mydf, kmesh, nao, X_k, args.int_path, "cderi_ewald_dca.h5", False)
+    kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored = (
+        int_utils.compute_integrals(
+            mycell, mydf, kmesh, nao, X_k, args.int_path, "cderi_ewald_dca.h5", False
+        )
+    )
 
     mydf = None
     mydf = construct_gdf(args, mycell, kmesh)
     df.GDF.weighted_coulG = weighted_coulG_old
-    int_utils.compute_integrals(mycell, mydf, kmesh, nao, X_k, args.hf_int_path, "cderi_dca.h5", False)
+    int_utils.compute_integrals(
+        mycell, mydf, kmesh, nao, X_k, args.hf_int_path, "cderi_dca.h5", False
+    )
 
     tools.get_coulG = old_get_coulG
-
