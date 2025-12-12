@@ -741,15 +741,31 @@ def solve_mol_mean_field(args, mydf, mycell):
 def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     """Store symmetry operation information for k-points into a hdf5 file in Green'WeakCoupling format
     """
+    # extract symmetry operation information from kstruct
     nk = kmesh.shape[0]
-    # store index of symmetry operator that connects k-points in full BZ to irreducible BZ
     inp_data = h5py.File(args.output_path, "a")
     grid_grp = inp_data["grid"]
     stars_ops = kstruct.stars_ops_bz
+    stars = kstruct.stars
+    n_stars = len(stars)
+    # store index of symmetry operator that connects k-points in full BZ to irreducible BZ
     if "stars_ops" in grid_grp:
         grid_grp["stars_ops"][...] = stars_ops
     else:
         grid_grp["stars_ops"] = stars_ops
+    # store number of stars for the k-mesh / k-struct
+    if "n_stars" in grid_grp:
+        grid_grp["n_stars"][...] = n_stars
+    else:
+        grid_grp["n_stars"] = n_stars
+    # store stars themselves
+    if "stars" in grid_grp:
+        for i in range(n_stars):
+            grid_grp["stars/{}" .format(i)][...] = stars[i]
+    else:
+        star_grp = grid_grp.create_group("stars")
+        for i in range(n_stars):
+            star_grp["{}" .format(i)] = stars[i]
     # construct symmetry operators in AO basis
     from .symmetry_utils import _get_rotation_mat
     nao = mycell.nao_nr()
