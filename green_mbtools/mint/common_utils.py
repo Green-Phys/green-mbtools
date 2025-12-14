@@ -593,12 +593,6 @@ def add_common_params(parser):
         help="Convergence tolerance for mean-field calculations",
     )
     parser.add_argument(
-        "--block_dim",
-        type=int,
-        default=None,
-        help="Block dimension for density fitting integral evaluation PySCF default is 240",
-    )
-    parser.add_argument(
         "--smearing",
         type=float,
         default=None,
@@ -1045,8 +1039,6 @@ def construct_gdf(args, mycell, kmesh=None):
         mydf.auxbasis = args.auxbasis
     elif args.beta is not None:
         mydf.auxbasis = df.aug_etb(mycell, beta=args.beta)
-    if args.block_dim is not None:
-        mydf.blockdim = args.block_dim
     # Coulomb kernel mesh
     if args.Nk > 0:
         mydf.mesh = [args.Nk, args.Nk, args.Nk]
