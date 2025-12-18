@@ -213,23 +213,31 @@ class pyscf_pbc_init(pyscf_init):
         # Use Ewald for divergence treatment
         mydf.exxdiv = "ewald"
         import importlib.util as iu
-
-        new_pyscf = iu.find_spec("pyscf.pbc.df.gdf_builder") is not None
-        if not new_pyscf:
+        new_pyscf = iu.find_spec('pyscf.pbc.df.gdf_builder') is not None
+        if new_pyscf :
+            import pyscf.pbc.df.gdf_builder as gdf
+            weighted_coulG_old = gdf._CCGDFBuilder.weighted_coulG
+            gdf._CCGDFBuilder.weighted_coulG = int_utils.weighted_coulG_ewald
+        else:
             from pyscf.pbc import df as gdf
-
             weighted_coulG_old = gdf.GDF.weighted_coulG
-        from pyscf.pbc import df as gdf
-        import green_igen.df as gggdf
+            gdf.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
 
-        auxcell = gggdf.make_modrho_basis(mydf.cell, mydf.auxbasis, mydf.exp_to_discard)
-
-        kptij_lst = [(ki, ki) for i, ki in enumerate(self.kmesh)]
-        kptij_lst = np.asarray(kptij_lst)
-        gdf.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
-        gggdf._make_j3c(mydf, self.cell, auxcell, kptij_lst, "cderi_ewald.h5")
-        # weighted_coulG_old = gdf.GDF.weighted_coulG
-        gdf.GDF.weighted_coulG2 = None
+        #new_pyscf = iu.find_spec("pyscf.pbc.df.gdf_builder") is not None
+        #if not new_pyscf:
+        #    from pyscf.pbc import df as gdf
+        #    weighted_coulG_old = gdf.GDF.weighted_coulG
+        #from pyscf.pbc import df as gdf
+        #import green_igen.df as gggdf
+        #auxcell = gggdf.make_modrho_basis(mydf.cell, mydf.auxbasis, mydf.exp_to_discard)
+        #kptij_lst = [(ki, ki) for i, ki in enumerate(self.kmesh)]
+        #kptij_lst = np.asarray(kptij_lst)
+        #gdf.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
+        #logging.info("Generating Ewald corrected 3-center integrals...")
+        #gggdf._make_j3c(mydf, self.cell, auxcell, kptij_lst, "cderi_ewald.h5")
+        #gdf.GDF.weighted_coulG = None
+        #if not new_pyscf:
+        #    gdf.GDF.weighted_coulG = weighted_coulG_old
 
         # kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored =
         int_utils.compute_integrals(
@@ -240,12 +248,14 @@ class pyscf_pbc_init(pyscf_init):
             nao,
             X_k,
             self.args.int_path,
-            "cderi.h5",
+            "cderi_ewald.h5",
             True,
             self.args.keep_cderi,
             cderi_name2="cderi_ewald.h5",
         )
-        if not new_pyscf:
+        if new_pyscf :
+            gdf._CCGDFBuilder.weighted_coulG = weighted_coulG_old
+        else:
             gdf.GDF.weighted_coulG = weighted_coulG_old
 
     def evaluate_high_symmetry_path(self):
