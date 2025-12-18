@@ -40,6 +40,23 @@ def main():
     )
     parser.add_argument("--orth", type=str, default='sao', help="Choice of orthonormal basis (sao or co)")
     parser.add_argument("--mo_range", type=int, nargs=2, default=[0, -1], help="MO range for analytic continuation")
+    parser.add_argument(
+        "--nw_real", type=int, default=1001,
+        help="Number of real frequency points."
+    )
+    parser.add_argument(
+        "--e_max", type=float, default=2.0,
+        help="Maximum energy limit for extrapolation in eV."
+    )
+    parser.add_argument(
+        "--e_min", type=int, default=-2.0,
+        help="Minimal energy limit for extrapolation in eV."
+    )
+    parser.add_argument(
+        "--eta", type=int, default=0.005,
+        help="Broadening factor."
+    )
+    
     args = parser.parse_args()
     
     #
@@ -57,6 +74,10 @@ def main():
     ir_file = args.ir_file
     output = args.out
     orth_ao = args.orth
+    nw_real = args.nw_real
+    e_max = args.e_max
+    e_min = args.e_min
+    eta = args.eta
     
     
     #
@@ -203,7 +224,7 @@ def main():
     iw_inp = mbo.ir.wsample[nw//2::1]
     Gw_inp = mbo.ir.tau_to_w(Gt_ortho_diag)[nw//2::1]
     freqs, A_w = analyt_cont.nevan_run(
-        Gw_inp, iw_inp, n_real=2001, w_min=-0.5, w_max=0.5, eta=args.eta
+        Gw_inp, iw_inp, n_real=nw_real, w_min=e_min, w_max=e_max, eta=eta
     )
     t4 = time.time()
     print("Time required for Nevanlinna AC: ", t4 - t3)
