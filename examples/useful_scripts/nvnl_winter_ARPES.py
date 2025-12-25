@@ -119,7 +119,10 @@ def main():
     nev_outdir = args.nev_outdir
     orth_ao = args.orth
     molecule = args.mol
-    hardy = args.hardy
+    nw_real = args.nw_real
+    e_max = args.e_max
+    e_min = args.e_min
+    eta = args.eta
 
 
     def mesh_bandpath(cell, kptlist, a_vecs, num_total):
@@ -357,7 +360,7 @@ def main():
         t3 = time.time()
         freqs, A_w = mbo.AC_nevanlinna(
             outdir=nev_outdir, gtau_orth=Gt_ortho_diag,
-            n_real=n_real, w_min=-0.7, w_max=0.3, eta=0.005
+            n_real=nw_real, w_min=e_min, w_max=e_max, eta=eta
         )
         t4 = time.time()
         print("Time required for Nevanlinna AC: ", t4 - t3)

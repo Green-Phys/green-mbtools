@@ -248,7 +248,7 @@ class pyscf_pbc_init(pyscf_init):
             nao,
             X_k,
             self.args.int_path,
-            "cderi_ewald.h5",
+            "cderi.h5",
             True,
             self.args.keep_cderi,
             cderi_name2="cderi_ewald.h5",

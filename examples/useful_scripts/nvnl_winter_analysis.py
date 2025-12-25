@@ -49,12 +49,8 @@ def main():
         help="Maximum energy limit for extrapolation in eV."
     )
     parser.add_argument(
-        "--e_min", type=int, default=-2.0,
+        "--e_min", type=float, default=-2.0,
         help="Minimal energy limit for extrapolation in eV."
-    )
-    parser.add_argument(
-        "--eta", type=int, default=0.005,
-        help="Broadening factor."
     )
     
     args = parser.parse_args()
