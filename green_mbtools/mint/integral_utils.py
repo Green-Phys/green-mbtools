@@ -8,7 +8,7 @@ import h5py
 import numpy as np
 from numba import jit
 from pyscf.df import addons
-from pyscf.pbc import df, tools
+from pyscf.pbc import gto, df, tools
 
 
 def compute_kG(k, Gv, wrap_around, mesh, cell):
@@ -518,3 +518,41 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     os.remove(cderi_file_1)
     os.remove(cderi_file_2)
     print("Ewald correction has been computed and stored into {}".format(filename))
+
+
+def store_j2c(mydf: df.GDF, auxcell: gto.Cell, kstruct):
+    """Compute the 2-center Coulomb integrals between auxiliary basis functions.
+
+    Parameters
+    ----------
+    mydf : df.GDF
+        The density fitting object.
+    auxcell : gto.Cell
+        The auxiliary basis cell.
+    kstruct : object
+        PySCF's k-point structure object that contains kmesh and symmetry information.
+    
+    Returns
+    -------
+    j2c : np.ndarray
+        The 2-center Coulomb integrals in the auxiliary basis for kmesh.
+    """
+    # unique kpts
+    mycell = mydf.cell
+    uniq_kpts = np.array([kstruct.kpts[i] for i in kstruct.ibz2bz])
+    uniq_kpts = mycell.get_abs_kpts(uniq_kpts)
+
+    from pyscf.pbc.df.gdf_builder import _CCGDFBuilder as ccdf
+    dfbuilder = ccdf(mycell, auxcell, kpts=uniq_kpts)
+    dfbuilder.mesh = mydf.mesh
+    dfbuilder.linear_dep_threshold = mydf.linear_dep_threshold
+    dfbuilder.build()
+    print("DEBUG: uniq_kpts.shape =", uniq_kpts.shape)
+    j2c = dfbuilder.get_2c2e(uniq_kpts)
+    fj2c = h5py.File('j2c_info.h5', 'w')
+    for ik, kpt_idx in enumerate(kstruct.ibz2bz):
+        if j2c[ik].dtype == np.float64:
+            j2c[ik] = j2c[ik] + 0.j
+        fj2c["j2c/{}".format(kpt_idx)] = j2c[ik]
+    fj2c.close()
+    # return j2c

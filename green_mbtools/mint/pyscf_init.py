@@ -3,6 +3,7 @@ import os
 import h5py
 import logging
 import numpy as np
+import time
 from pyscf.df import addons
 from pyscf.pbc import tools, gto
 
@@ -61,22 +62,23 @@ class pyscf_init:
 
 
 class pyscf_pbc_init (pyscf_init):
-    '''Initialization class for periodic / solid-state systems for the Green project
-    '''
+    """Initialization class for periodic / solid-state systems for the Green project
+    """
     def __init__(self, args=None):
         super().__init__(comm.init_pbc_params() if args is None else args)
         self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik, self.kstruct = \
             comm.init_k_mesh(self.args, self.cell)
 
     def mean_field_input(self, mydf=None):
-        '''
-        Solve a give mean-field problem and store the solution in the Green/WeakCoupling format
+        """Solve a give mean-field problem and store the solution in the Green/WeakCoupling format
         
         Parameters
         ----------
         mydf : pyscf.pbc.df
             pyscf density-fitting object, will be generated if None
-        '''
+        """
+
+        # Generate integrals for DFT and MBPT calculations
         if mydf is None:
             mydf = self.df_object()
 
@@ -108,8 +110,28 @@ class pyscf_pbc_init (pyscf_init):
         '''
         Generate integrals for mean-field calculations
         '''
+        spg_symm = self.args.symm if self.args.x2c < 2 else False
+        aux_pcell = gto.M(
+            a = self.args.a,
+            atom = self.args.atom,
+            unit = 'A',
+            basis = mydf.auxbasis,
+            verbose = 1,
+            spin = self.args.spin,
+            space_group_symmetry = spg_symm,
+        )
+        aux_pcell.build()
+        auxcell_kinfo = comm.init_k_mesh(self.args, aux_pcell)
+        auxcell_kstruct = auxcell_kinfo[-1]
+
         auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
         NQ = auxcell.nao_nr()
+        print("DEBUG: Computing j2c integrals...")
+        t1 = time.time()
+        int_utils.store_j2c(mydf, auxcell, self.kstruct)
+        t2 = time.time()
+        logging.info(f"Time to compute j2c integrals: {t2 - t1} seconds")
+        print("DEBUG: Finished computing j2c integrals.")
     
         mf = self.mf_object(mydf)
     
@@ -136,8 +158,9 @@ class pyscf_pbc_init (pyscf_init):
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
         # Save data into Green Software package input format.
         comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
-        # Save symmetry operations info
+        # Save symmetry operations info for main and auxiliary unit cells
         comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
+        comm.store_auxcell_kstruct_ops_info(self.args, aux_pcell, self.kmesh, auxcell_kstruct)
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 
