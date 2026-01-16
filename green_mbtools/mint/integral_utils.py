@@ -551,12 +551,22 @@ def store_j2c(mydf: df.GDF, auxcell: gto.Cell, kstruct):
     dfbuilder.linear_dep_threshold = mydf.linear_dep_threshold
     print("\n\nDEBUG: Building j2c integrals...\n\n")
     dfbuilder.build()
-    j2c = dfbuilder.get_2c2e(uniq_kpts)
+
+    # Build J2c for unique kpts
+    from pyscf.pbc.lib.kpts_helper import kk_adapted_iter
+    kpt_ij_iters = list(kk_adapted_iter(mycell, mydf.kpts, None, True))
+    j2c_uniq_kpts = np.asarray([s[0] for s in kpt_ij_iters])
+    print("DEBUG: j2c_uniq_kpts =", j2c_uniq_kpts)
+    print(j2c_uniq_kpts)
+
+    j2c = dfbuilder.get_2c2e(j2c_uniq_kpts)
     fj2c = h5py.File('j2c_info.h5', 'w')
-    for ik, kpt_idx in enumerate(kstruct.ibz2bz):
-        if j2c[ik].dtype == np.float64:
-            j2c[ik] = j2c[ik] + 0.j
-        fj2c["j2c/{}".format(kpt_idx)] = j2c[ik]
+    for k, j2c in enumerate(dfbuilder.get_2c2e(j2c_uniq_kpts)):
+        if j2c.dtype == np.complex128:
+            fj2c[f'j2c/{k}'] = j2c
+        else:
+            fj2c[f'j2c/{k}'] = j2c + 0.j
+        j2c = None
     fj2c.close()
     print("\n\nDEBUG: Finished building j2c integrals...\n\n")
     # return j2c
