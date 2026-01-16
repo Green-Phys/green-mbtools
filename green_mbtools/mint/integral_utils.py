@@ -9,6 +9,10 @@ import numpy as np
 from numba import jit
 from pyscf.df import addons
 from pyscf.pbc import gto, df, tools
+from pyscf.pbc.lib.kpts_helper import (is_zero, gamma_point, member, unique,
+                                       KPT_DIFF_TOL)
+from pyscf.pbc.df.rsdf_builder import _RSGDFBuilder
+from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
 
 
 def compute_kG(k, Gv, wrap_around, mesh, cell):
@@ -519,6 +523,58 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     os.remove(cderi_file_2)
     print("Ewald correction has been computed and stored into {}".format(filename))
 
+
+class GreenGDF(df.GDF):
+    def __init__(self, cell, kpts=np.zeros((1,3))):
+        super().__init__(cell, kpts)
+
+    def _make_j3c(self, cell=None, auxcell=None, kptij_lst=None, cderi_file=None):
+        """Customized ERI building to build and store j2c at the same time
+
+        Parameters
+        ----------
+        cell : pyscf.pbc.gto.Cell, optional
+            periodic cell, by default None
+        auxcell : pyscf.pbc.gto.Cell, optional
+            auxiliary basis cell, by default None
+        kptij_lst : list, optional
+            list of k-point pairs, by default None
+        cderi_file : str, optional
+            output file to store ERI, by default None
+        """
+        if cell is None: cell = self.cell
+        if auxcell is None: auxcell = self.auxcell
+        if cderi_file is None: cderi_file = self._cderi_to_save
+
+        # Remove duplicated k-points. Duplicated kpts may lead to a buffer
+        # located in incore.wrap_int3c larger than necessary. Integral code
+        # only fills necessary part of the buffer, leaving some space in the
+        # buffer unfilled.
+        if self.kpts_band is None:
+            kpts_union = self.kpts
+        else:
+            kpts_union = unique(np.vstack([self.kpts, self.kpts_band]))[0]
+
+        if self._prefer_ccdf or cell.omega > 0:
+            # For long-range integrals _CCGDFBuilder is the only option
+            dfbuilder = _CCGDFBuilder(cell, auxcell, kpts_union)
+            dfbuilder.eta = self.eta
+        else:
+            dfbuilder = _RSGDFBuilder(cell, auxcell, kpts_union)
+        dfbuilder.mesh = self.mesh
+        dfbuilder.linear_dep_threshold = self.linear_dep_threshold
+        j_only = self._j_only or len(kpts_union) == 1
+        dfbuilder.make_j3c(cderi_file, j_only=j_only, dataname=self._dataname,
+                           kptij_lst=kptij_lst)
+        # Update j2c
+        feri = h5py.File(cderi_file, 'a')
+        for k, j2c in enumerate(dfbuilder.get_2c2e(self.kpts)):
+            if j2c.dtype == np.complex128:
+                feri[f'j2c/{k}'] = j2c
+            else:
+                feri[f'j2c/{k}'] = j2c + 0.j
+            j2c = None
+        feri.close()
 
 def store_j2c(mydf: df.GDF, auxcell: gto.Cell, kstruct):
     """Compute the 2-center Coulomb integrals between auxiliary basis functions.

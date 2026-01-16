@@ -899,7 +899,7 @@ def construct_gdf(args, mycell, kmesh=None):
     We make sure to disable range-separeting implementation
     '''
     # Use gaussian density fitting to get fitted densities
-    mydf = df.GDF(mycell)
+    mydf = int_utils.GreenGDF(mycell)
     if hasattr(mydf, "_prefer_ccdf"):
         mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions 
     if args.auxbasis is not None:
@@ -916,7 +916,7 @@ def construct_gdf(args, mycell, kmesh=None):
 
 def compute_ewald_correction(args, cell, kmesh, filename):
     # Use gaussian density fitting to get fitted densities
-    mydf = df.GDF(cell)
+    mydf = int_utils.GreenGDF(cell)
     if args.auxbasis is not None:
         mydf.auxbasis = args.auxbasis
     elif args.beta is not None:
@@ -951,8 +951,8 @@ def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):
     mydf = construct_gdf(args, mycell, kmesh)
     # Use Ewald for divergence treatment
     mydf.exxdiv = 'ewald'
-    weighted_coulG_old = df.GDF.weighted_coulG
-    df.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
+    weighted_coulG_old = int_utils.GreenGDF.weighted_coulG
+    int_utils.GreenGDF.weighted_coulG = int_utils.weighted_coulG_ewald
     old_get_coulG = tools.get_coulG
     tools.get_coulG = lambda cell, k=np.zeros(3), exx=False, mf=None, mesh=None, Gv=None, wrap_around=True, omega=None, **kwargs: int_utils.get_coarsegrained_coulG(lattice_kmesh, cell, k, exx, mf, mesh, Gv,
               wrap_around, omega, **kwargs)
@@ -961,7 +961,7 @@ def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):
 
     mydf = None
     mydf = construct_gdf(args, mycell, kmesh)
-    df.GDF.weighted_coulG = weighted_coulG_old
+    int_utils.GreenGDF.weighted_coulG = weighted_coulG_old
     int_utils.compute_integrals(mycell, mydf, kmesh, nao, X_k, args.hf_int_path, "cderi_dca.h5", False)
 
     tools.get_coulG = old_get_coulG
