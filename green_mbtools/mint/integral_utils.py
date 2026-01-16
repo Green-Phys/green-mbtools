@@ -539,15 +539,18 @@ def store_j2c(mydf: df.GDF, auxcell: gto.Cell, kstruct):
     """
     # unique kpts
     mycell = mydf.cell
-    uniq_kpts = np.array([kstruct.kpts[i] for i in kstruct.ibz2bz])
-    uniq_kpts = mycell.get_abs_kpts(uniq_kpts)
+    # uniq_kpts = np.array([kstruct.kpts[i] for i in kstruct.ibz2bz])
+    # uniq_kpts = mycell.get_abs_kpts(uniq_kpts)
+    uniq_kpts = mydf.kpts
+    print("DEBUG: uniq_kpts.shape =", uniq_kpts.shape)
 
     from pyscf.pbc.df.gdf_builder import _CCGDFBuilder as ccdf
     dfbuilder = ccdf(mycell, auxcell, kpts=uniq_kpts)
     dfbuilder.mesh = mydf.mesh
+    dfbuilder.eta = mydf.eta
     dfbuilder.linear_dep_threshold = mydf.linear_dep_threshold
+    print("\n\nDEBUG: Building j2c integrals...\n\n")
     dfbuilder.build()
-    print("DEBUG: uniq_kpts.shape =", uniq_kpts.shape)
     j2c = dfbuilder.get_2c2e(uniq_kpts)
     fj2c = h5py.File('j2c_info.h5', 'w')
     for ik, kpt_idx in enumerate(kstruct.ibz2bz):
@@ -555,4 +558,5 @@ def store_j2c(mydf: df.GDF, auxcell: gto.Cell, kstruct):
             j2c[ik] = j2c[ik] + 0.j
         fj2c["j2c/{}".format(kpt_idx)] = j2c[ik]
     fj2c.close()
+    print("\n\nDEBUG: Finished building j2c integrals...\n\n")
     # return j2c
