@@ -126,12 +126,6 @@ class pyscf_pbc_init (pyscf_init):
 
         auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
         NQ = auxcell.nao_nr()
-        print("DEBUG: Computing j2c integrals...")
-        t1 = time.time()
-        int_utils.store_j2c(mydf, auxcell, self.kstruct)
-        t2 = time.time()
-        logging.info(f"Time to compute j2c integrals: {t2 - t1} seconds")
-        print("DEBUG: Finished computing j2c integrals.")
     
         mf = self.mf_object(mydf)
     

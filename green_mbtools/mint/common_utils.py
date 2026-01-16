@@ -827,7 +827,7 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh, aux_kstruct):
     # read j2c
     import scipy.linalg as LA
     irre_ind = aux_kstruct.ibz2bz[aux_kstruct.bz2ibz]
-    j2c_data = h5py.File('j2c_info.h5', 'r')
+    j2c_data = h5py.File('cderi.h5', 'r')
     for ik in range(nk):
         irre_k = irre_ind[ik]
         j2c_k = j2c_data['j2c/{}' .format(irre_k)][...]
@@ -840,6 +840,7 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh, aux_kstruct):
             # transform to j2c basis
             kspace_orep_j2c = np.dot(j2c_k_sqrt_inv, np.dot(kspace_orep[ik, iop], j2c_k_sqrt))
             kspace_orep[ik, iop] = kspace_orep_j2c
+    j2c_data.close()
     # transform ops using j2c metric
     if "kspace_orep_aux" in grid_grp:
         grid_grp["kspace_orep_aux"][...] = kspace_orep
