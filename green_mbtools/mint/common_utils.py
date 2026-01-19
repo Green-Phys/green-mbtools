@@ -831,17 +831,7 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     kstruct = auxcell_kinfo[-1]
     stars_ops = kstruct.stars_ops_bz
     nk = kmesh.shape[0]
-
-    # compute representation in the AO basis for each k-point and each symmetry operation
-    # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
-    from .symmetry_utils import _get_rotation_mat
     nao = auxcell.nao_nr()
-    kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
-    for ik in range(nk):
-        iop = stars_ops[ik]
-        irre_k = kstruct.bz2ibz[ik]
-        mat_ao = _get_rotation_mat(auxcell, kstruct.kpts_scaled[irre_k], kstruct.ops[iop], kstruct.Dmats[iop])
-        kspace_orep[ik] = mat_ao
 
     # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each irreducible k-point
     import scipy.linalg as LA
@@ -861,15 +851,19 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
         j2c_sqrt_inv[ik] = vecs @ np.diag(1.0/np.sqrt(eigs)) @ vecs.conj().T
     j2c_data.close()
 
-    # transform kspace_orep to j2c basis
-    irre_ind = kstruct.ibz2bz[kstruct.bz2ibz]
+    # compute representation in the AO basis for each k-point and each symmetry operation
+    # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
+    from .symmetry_utils import _get_rotation_mat
+    kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
-        irre_k = irre_ind[ik]
-        j2c_ik_sqrt = j2c_sqrt[ik]
-        j2c_irre_k_sqrt_inv = j2c_sqrt_inv[irre_k]
+        iop = stars_ops[ik]
+        irre_k = kstruct.bz2ibz[ik]
+        mat_ao = _get_rotation_mat(auxcell, kstruct.kpts_scaled[irre_k], kstruct.ops[iop], kstruct.Dmats[iop])
+        # transform kspace_orep to j2c basis
+        j2c_ik_sqrt = j2c_sqrt[irre_k]
+        j2c_irre_k_sqrt_inv = j2c_sqrt_inv[ik]
         # transform to j2c basis
-        kspace_orep_j2c = np.dot(j2c_irre_k_sqrt_inv, np.dot(kspace_orep[ik], j2c_ik_sqrt))
-        kspace_orep[ik] = kspace_orep_j2c
+        kspace_orep[ik] = np.dot(j2c_irre_k_sqrt_inv, np.dot(mat_ao, j2c_ik_sqrt))
 
     # Save transformed aux kspace_orep to hdf5 file
     inp_data = h5py.File(args.output_path, "a")
