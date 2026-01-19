@@ -142,7 +142,7 @@ class pyscf_pbc_init (pyscf_init):
         comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
         # Save symmetry operations info for main and auxiliary unit cells
         comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
-        comm.store_auxcell_kstruct_ops_info(self.args, auxcell.basis, self.kmesh)
+        comm.store_auxcell_kstruct_ops_info(self.args, mydf.auxbasis, self.kmesh)
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 

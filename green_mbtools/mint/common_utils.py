@@ -846,7 +846,7 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     import scipy.linalg as LA
     j2c_data = h5py.File('cderi.h5', 'r')
     nq = j2c_data['j2c/0'].shape[0]
-    assert nq == nao, f"number of AOs in auxcell ({nao}) and j2c data ({nq}) do not match"
+    assert nq == nao, "number of AOs in auxcell and j2c data do not match"
     j2c_sqrt = np.zeros((nk, nq, nq), dtype=np.complex128)
     j2c_sqrt_inv = np.zeros((nk, nq, nq), dtype=np.complex128)
     for ik in range(nk):
