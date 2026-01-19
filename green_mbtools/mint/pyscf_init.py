@@ -110,20 +110,6 @@ class pyscf_pbc_init (pyscf_init):
         '''
         Generate integrals for mean-field calculations
         '''
-        spg_symm = self.args.symm if self.args.x2c < 2 else False
-        aux_pcell = gto.M(
-            a = self.args.a,
-            atom = self.args.atom,
-            unit = 'A',
-            basis = mydf.auxbasis,
-            verbose = 1,
-            spin = self.args.spin,
-            space_group_symmetry = spg_symm,
-        )
-        aux_pcell.build()
-        auxcell_kinfo = comm.init_k_mesh(self.args, aux_pcell)
-        auxcell_kstruct = auxcell_kinfo[-1]
-
         auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
         NQ = auxcell.nao_nr()
     
@@ -154,7 +140,7 @@ class pyscf_pbc_init (pyscf_init):
         comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
         # Save symmetry operations info for main and auxiliary unit cells
         comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
-        comm.store_auxcell_kstruct_ops_info(self.args, aux_pcell, self.kmesh, auxcell_kstruct)
+        comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 

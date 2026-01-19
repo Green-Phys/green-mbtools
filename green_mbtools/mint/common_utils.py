@@ -780,11 +780,11 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     # construct symmetry operators in AO basis
     from .symmetry_utils import _get_rotation_mat
     nao = mycell.nao_nr()
-    kspace_orep = np.zeros((nk, kstruct.nop, nao, nao), dtype=np.complex128)
+    kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
-        for iop in range(kstruct.nop):
-            mat_ao = _get_rotation_mat(mycell, kstruct.kpts_scaled[ik], kstruct.ops[iop], kstruct.Dmats[iop])
-            kspace_orep[ik, iop] = mat_ao
+        iop = stars_ops[ik]
+        mat_ao = _get_rotation_mat(mycell, kstruct.kpts_scaled[ik], kstruct.ops[iop], kstruct.Dmats[iop])
+        kspace_orep[ik] = mat_ao
     if "kspace_orep" in grid_grp:
         grid_grp["kspace_orep"][...] = kspace_orep
     else:
@@ -797,7 +797,7 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     inp_data.close()
 
 
-def store_auxcell_kstruct_ops_info(args, auxcell, kmesh, aux_kstruct):
+def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     """Store symmetry operation information for k-points into hdf5 file in Green'WeakCoupling format
     for auxcell only case
 
@@ -805,48 +805,75 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh, aux_kstruct):
     ----------
     args : map
         simulation parameters 
-    auxcell : pyscf.pbc.Cell
+    auxbasis : str
         auxiliary unit cell for density-fitting
     kmesh : numpy.ndarray
         k-mesh for the Brillouin Zone
     aux_kstruct : pyscf.pbc.symm.KPointsSymmetry
         k-point symmetry structure for aux-basis
     """
-    # extract symmetry operation information from kstruct
+
+    # generate periodic cell for auxbasis
+    spg_symm = args.symm if args.x2c < 2 else False
+    auxcell = gto.M(
+        a = args.a,
+        atom = args.atom,
+        unit = 'A',
+        basis = auxbasis,
+        verbose = 1,
+        spin = args.spin,
+        space_group_symmetry = spg_symm,
+    )
+    auxcell.build()
+    auxcell_kinfo = init_k_mesh(args, auxcell)
+    aux_kstruct = auxcell_kinfo[-1]
+    stars_ops = aux_kstruct.stars_ops_bz
     nk = kmesh.shape[0]
-    inp_data = h5py.File(args.output_path, "a")
-    grid_grp = inp_data["grid"]
+
     # compute representation in the AO basis for each k-point and each symmetry operation
     from .symmetry_utils import _get_rotation_mat
     nao = auxcell.nao_nr()
-    kspace_orep = np.zeros((nk, aux_kstruct.nop, nao, nao), dtype=np.complex128)
+    kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
-        for iop in range(aux_kstruct.nop):
-            mat_ao = _get_rotation_mat(auxcell, aux_kstruct.kpts_scaled[ik], aux_kstruct.ops[iop], aux_kstruct.Dmats[iop])
-            kspace_orep[ik, iop] = mat_ao
-    # read j2c
+        iop = stars_ops[ik]
+        mat_ao = _get_rotation_mat(auxcell, aux_kstruct.kpts_scaled[ik], aux_kstruct.ops[iop], aux_kstruct.Dmats[iop])
+        kspace_orep[ik] = mat_ao
+
+    # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each irreducible k-point
     import scipy.linalg as LA
-    irre_ind = aux_kstruct.ibz2bz[aux_kstruct.bz2ibz]
     j2c_data = h5py.File('cderi.h5', 'r')
+    nk_red = len(j2c_data['j2c'].keys())
+    nq = j2c_data['j2c/0'].shape[0]
+    assert nk_red == len(aux_kstruct.ibz2bz), "number of irreducible k-points in aux_kstruct and j2c data do not match"
+    assert nq == nao, "number of AOs in auxcell and j2c data do not match"
+    j2c_sqrt = np.zeros((nk_red, nq, nq), dtype=np.complex128)
+    j2c_sqrt_inv = np.zeros((nk_red, nq, nq), dtype=np.complex128)
+    for ik in range(nk_red):
+        j2c_i = j2c_data['j2c/{}' .format(ik)][...]
+        assert np.all(j2c_i - j2c_i.conj().T < 1e-12), "j2c metric is not Hermitian"
+        eigs, vecs = LA.eigh(j2c_i)
+        assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
+        j2c_sqrt[ik] = vecs @ np.diag(np.sqrt(eigs)) @ vecs.conj().T
+        j2c_sqrt_inv[ik] = vecs @ np.diag(1.0/np.sqrt(eigs)) @ vecs.conj().T
+    j2c_data.close()
+
+    # transform kspace_orep to j2c basis
+    irre_ind = aux_kstruct.ibz2bz[aux_kstruct.bz2ibz]
     for ik in range(nk):
         irre_k = irre_ind[ik]
-        j2c_k = j2c_data['j2c/{}' .format(irre_k)][...]
-        assert np.all(j2c_k - j2c_k.conj().T < 1e-12), "j2c metric is not Hermitian"
-        eigs, vecs = LA.eigh(j2c_k)
-        assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
-        j2c_k_sqrt = vecs @ np.diag(np.sqrt(eigs)) @ vecs.conj().T
-        j2c_k_sqrt_inv = vecs @ np.diag(1.0/np.sqrt(eigs)) @ vecs.conj().T
-        for iop in range(aux_kstruct.nop):
-            # transform to j2c basis
-            kspace_orep_j2c = np.dot(j2c_k_sqrt_inv, np.dot(kspace_orep[ik, iop], j2c_k_sqrt))
-            kspace_orep[ik, iop] = kspace_orep_j2c
-    j2c_data.close()
-    # transform ops using j2c metric
+        j2c_ik_sqrt = j2c_sqrt[ik]
+        j2c_irre_k_sqrt_inv = j2c_sqrt_inv[irre_k]
+        # transform to j2c basis
+        kspace_orep_j2c = np.dot(j2c_irre_k_sqrt_inv, np.dot(kspace_orep[ik], j2c_ik_sqrt))
+        kspace_orep[ik] = kspace_orep_j2c
+
+    # Save transformed aux kspace_orep to hdf5 file
+    inp_data = h5py.File(args.output_path, "a")
+    grid_grp = inp_data["grid"]
     if "kspace_orep_aux" in grid_grp:
         grid_grp["kspace_orep_aux"][...] = kspace_orep
     else:
         grid_grp["kspace_orep_aux"] = kspace_orep
-    # Close file
     inp_data.close()
 
 
