@@ -778,12 +778,14 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
         for i in range(n_stars):
             star_grp["{}" .format(i)] = stars[i]
     # construct symmetry operators in AO basis
+    # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
     from .symmetry_utils import _get_rotation_mat
     nao = mycell.nao_nr()
     kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
         iop = stars_ops[ik]
-        mat_ao = _get_rotation_mat(mycell, kstruct.kpts_scaled[ik], kstruct.ops[iop], kstruct.Dmats[iop])
+        irre_k = kstruct.bz2ibz[ik]
+        mat_ao = _get_rotation_mat(mycell, kstruct.kpts_scaled[irre_k], kstruct.ops[iop], kstruct.Dmats[iop])
         kspace_orep[ik] = mat_ao
     if "kspace_orep" in grid_grp:
         grid_grp["kspace_orep"][...] = kspace_orep
@@ -826,17 +828,19 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     )
     auxcell.build()
     auxcell_kinfo = init_k_mesh(args, auxcell)
-    aux_kstruct = auxcell_kinfo[-1]
-    stars_ops = aux_kstruct.stars_ops_bz
+    kstruct = auxcell_kinfo[-1]
+    stars_ops = kstruct.stars_ops_bz
     nk = kmesh.shape[0]
 
     # compute representation in the AO basis for each k-point and each symmetry operation
+    # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
     from .symmetry_utils import _get_rotation_mat
     nao = auxcell.nao_nr()
     kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
         iop = stars_ops[ik]
-        mat_ao = _get_rotation_mat(auxcell, aux_kstruct.kpts_scaled[ik], aux_kstruct.ops[iop], aux_kstruct.Dmats[iop])
+        irre_k = kstruct.bz2ibz[ik]
+        mat_ao = _get_rotation_mat(auxcell, kstruct.kpts_scaled[irre_k], kstruct.ops[iop], kstruct.Dmats[iop])
         kspace_orep[ik] = mat_ao
 
     # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each irreducible k-point
@@ -844,7 +848,7 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     j2c_data = h5py.File('cderi.h5', 'r')
     nk_red = len(j2c_data['j2c'].keys())
     nq = j2c_data['j2c/0'].shape[0]
-    assert nk_red == len(aux_kstruct.ibz2bz), "number of irreducible k-points in aux_kstruct and j2c data do not match"
+    assert nk_red == len(kstruct.ibz2bz), "number of irreducible k-points in aux_kstruct and j2c data do not match"
     assert nq == nao, "number of AOs in auxcell and j2c data do not match"
     j2c_sqrt = np.zeros((nk_red, nq, nq), dtype=np.complex128)
     j2c_sqrt_inv = np.zeros((nk_red, nq, nq), dtype=np.complex128)
@@ -858,7 +862,7 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     j2c_data.close()
 
     # transform kspace_orep to j2c basis
-    irre_ind = aux_kstruct.ibz2bz[aux_kstruct.bz2ibz]
+    irre_ind = kstruct.ibz2bz[kstruct.bz2ibz]
     for ik in range(nk):
         irre_k = irre_ind[ik]
         j2c_ik_sqrt = j2c_sqrt[ik]
