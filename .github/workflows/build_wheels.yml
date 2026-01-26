@@ -11,7 +11,6 @@ jobs:
         # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
         - { os: ubuntu-22.04, target: "", arch: x86_64}
-        - { os: macos-13, target: "13.0" , arch: x86_64}
         - { os: macos-14, target: "14.0" , arch: arm64}
 
     steps:
@@ -28,10 +27,10 @@ jobs:
             if [[ "$CIBW_PLATFORM" == "macos" ]]; then
               # Install openblas via brew on macOS
               brew update
-              brew install openblas
+              brew install openblas hdf5
             else
               # For Linux (manylinux docker container)
-              yum install -y openblas-devel
+              yum install -y openblas-devel hdf5-devel
               pip install meson
             fi
         # env:
