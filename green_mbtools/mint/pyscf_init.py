@@ -3,7 +3,6 @@ import os
 import h5py
 import logging
 import numpy as np
-import time
 from pyscf.df import addons
 from pyscf.pbc import tools, gto
 
@@ -105,6 +104,9 @@ class pyscf_pbc_init (pyscf_init):
 
         if self.args.grid_only:
             comm.store_k_grid(self.args, self.cell, self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik)
+            auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
+            comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
+            comm.store_auxcell_kstruct_ops_info(self.args, auxcell.basis, self.kmesh)
             return
 
         '''
@@ -140,7 +142,7 @@ class pyscf_pbc_init (pyscf_init):
         comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
         # Save symmetry operations info for main and auxiliary unit cells
         comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
-        comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
+        comm.store_auxcell_kstruct_ops_info(self.args, auxcell.basis, self.kmesh)
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 

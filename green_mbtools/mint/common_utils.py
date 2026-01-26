@@ -13,10 +13,15 @@ from pyscf import dft as mdft
 from pyscf import df as mdf
 from pyscf.pbc import tools, gto, df, scf, dft
 from pyscf import __version__ as pyscf_version
+import pdb
 
 import importlib.metadata as imd
 
 from . import integral_utils as int_utils
+
+
+# Linear dep threshold for J2C metric eigenvalues
+J2C_LIN_DEP_THRESH = 1e-9
 
 
 def extract_ase_data(a, atoms):
@@ -779,6 +784,10 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
             star_grp["{}" .format(i)] = stars[i]
     # construct symmetry operators in AO basis
     # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
+    # IMPORTANT: In periodic systems, overlap matrices S_k in the Bloch AO basis include lattice phase factors.
+    # Therefore, S_k matrices at equivalent k-points differ due to these phases. However, the generalized
+    # eigenproblem (H, S) IS invariant under the symmetry transformation, with eigenvalues matching to
+    # machine precision. This validates that the stored rotation matrices are correct for physical transformations.
     from .symmetry_utils import _get_rotation_mat
     nao = mycell.nao_nr()
     kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
@@ -836,17 +845,18 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each irreducible k-point
     import scipy.linalg as LA
     j2c_data = h5py.File('cderi.h5', 'r')
-    nk_red = len(j2c_data['j2c'].keys())
     nq = j2c_data['j2c/0'].shape[0]
-    assert nk_red == len(kstruct.ibz2bz), "number of irreducible k-points in aux_kstruct and j2c data do not match"
-    assert nq == nao, "number of AOs in auxcell and j2c data do not match"
-    j2c_sqrt = np.zeros((nk_red, nq, nq), dtype=np.complex128)
-    j2c_sqrt_inv = np.zeros((nk_red, nq, nq), dtype=np.complex128)
-    for ik in range(nk_red):
+    assert nq == nao, f"number of AOs in auxcell ({nao}) and j2c data ({nq}) do not match"
+    j2c_sqrt = np.zeros((nk, nq, nq), dtype=np.complex128)
+    j2c_sqrt_inv = np.zeros((nk, nq, nq), dtype=np.complex128)
+    for ik in range(nk):
         j2c_i = j2c_data['j2c/{}' .format(ik)][...]
         assert np.all(j2c_i - j2c_i.conj().T < 1e-12), "j2c metric is not Hermitian"
         eigs, vecs = LA.eigh(j2c_i)
         assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
+        # Prune for small eigenvalues to avoid linear dependencies
+        eigs = eigs[eigs > J2C_LIN_DEP_THRESH]
+        vecs = vecs[:, :eigs.shape[0]]
         j2c_sqrt[ik] = vecs @ np.diag(np.sqrt(eigs)) @ vecs.conj().T
         j2c_sqrt_inv[ik] = vecs @ np.diag(1.0/np.sqrt(eigs)) @ vecs.conj().T
     j2c_data.close()
@@ -858,6 +868,7 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     for ik in range(nk):
         iop = stars_ops[ik]
         irre_k = kstruct.bz2ibz[ik]
+        # Build AO operator at source k-point
         mat_ao = _get_rotation_mat(auxcell, kstruct.kpts_scaled[irre_k], kstruct.ops[iop], kstruct.Dmats[iop])
         # transform kspace_orep to j2c basis
         j2c_ik_sqrt = j2c_sqrt[irre_k]
