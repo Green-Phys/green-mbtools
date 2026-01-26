@@ -8,10 +8,9 @@ jobs:
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
+        # macos-14 GitHub runner (Apple Silicon / arm64)
         plat: 
         - { os: ubuntu-22.04, target: "", arch: x86_64}
-        - { os: macos-13, target: "13.0" , arch: x86_64}
         - { os: macos-14, target: "14.0" , arch: arm64}
 
     steps:
@@ -24,14 +23,19 @@ jobs:
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ENVIRONMENT: >
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
+            OPENBLAS_NUM_THREADS=1
+            OMP_NUM_THREADS=1
+            MKL_NUM_THREADS=1
+            VECLIB_MAXIMUM_THREADS=1
+            NUMEXPR_NUM_THREADS=1
           CIBW_BEFORE_BUILD: |
             if [[ "$CIBW_PLATFORM" == "macos" ]]; then
               # Install openblas via brew on macOS
               brew update
-              brew install openblas
+              brew install openblas hdf5
             else
               # For Linux (manylinux docker container)
-              yum install -y openblas-devel
+              yum install -y openblas-devel hdf5-devel
               pip install meson
             fi
         # env:

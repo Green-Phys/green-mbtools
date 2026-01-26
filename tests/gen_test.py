@@ -21,8 +21,8 @@ def test_igen(data_path):
     args = comm.init_pbc_params(params=params)
     print(args)
 
-    pyscf_init = pymb.pyscf_pbc_init(args)
-    pyscf_init.mean_field_input()
+    pymb_system = pymb.pyscf_pbc_init(args)
+    pymb_system.mean_field_input()
     with h5py.File('/tmp/df_int/VQ_0.h5', "r") as f:
         data = f["0"][()]
 
