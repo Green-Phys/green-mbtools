@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
+        # macos-14 GitHub runner (Apple Silicon / arm64)
         plat: 
         - { os: ubuntu-22.04, target: "", arch: x86_64}
         - { os: macos-14, target: "14.0" , arch: arm64}
