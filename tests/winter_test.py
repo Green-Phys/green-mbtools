@@ -1,5 +1,5 @@
 import numpy as np
-from mbanalysis.winter import interpolate
+from green_mbtools.pesto.winter import interpolate
 import pytest
 
 

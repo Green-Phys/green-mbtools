@@ -1,5 +1,5 @@
-from mbanalysis.analyt_cont import caratheodory_run
-import mbanalysis.caratheodory as carath_exe
+from green_mbtools.pesto.analyt_cont import caratheodory_run
+import green_mbtools.pesto.caratheodory as carath_exe
 import numpy as np
 import pytest
 
