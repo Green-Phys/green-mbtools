@@ -1,4 +1,4 @@
-from mbanalysis.dyson import solve_dyson
+from green_mbtools.pesto.dyson import solve_dyson
 from numpy.linalg import norm
 
 #

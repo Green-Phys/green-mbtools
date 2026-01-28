@@ -14,13 +14,13 @@ version = "0.3.0"
 authors = [
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
-  { name="Sergei Iskakov", email="siskakov@umich.edu" },
+  { name="Sergei Iskakov", email="sergei@iskakov.org" },
   { name="Vibin Abraham", email="avibin@umich.edu" },
   { name="Pavel Pokhilko", email="pokhilko@umich.edu" },
 ]
 
 maintainers = [
-  { name="Sergei Iskakov", email="siskakov@umich.edu" },
+  { name="Sergei Iskakov", email="sergei@iskakov.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
   { name="Vibin Abraham", email="avibin@umich.edu" },
   { name="Pavel Pokhilko", email="pokhilko@umich.edu" }
@@ -34,7 +34,7 @@ description = "Collection of Python tools for quantum many-body simulation using
 readme = "README.md"
 requires-python = ">=3.8,<3.13"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX",
@@ -57,7 +57,7 @@ tests = [
 [tool.cibuildwheel]
 skip = ["*-musllinux*"]
 test-requires = "pytest"
-test-command = "pytest {project}/tests -k 'not test_projection_on_green'"
+test-command = "pytest {project}/tests"
 
 manylinux-x86_64-image = "manylinux_2_28"
 

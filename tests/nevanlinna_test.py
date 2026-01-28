@@ -1,4 +1,4 @@
-from mbanalysis.analyt_cont import nevan_run
+from green_mbtools.pesto.analyt_cont import nevan_run
 import numpy as np
 
 #

@@ -1,6 +1,6 @@
 import numpy as np
-from mbanalysis.analyt_cont import es_nevan_run, g_iw_projection
-from mbanalysis.orth import sao_orth
+from green_mbtools.pesto.analyt_cont import es_nevan_run, g_iw_projection
+from green_mbtools.pesto.orth import sao_orth
 import pytest
 
 
