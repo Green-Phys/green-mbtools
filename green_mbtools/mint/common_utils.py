@@ -843,22 +843,24 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     nao = auxcell.nao_nr()
 
     # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each irreducible k-point
+    # NOTE: these are not complete square root matrix or its inverse. These are only
+    #   factors that operate in the space of linearly independent aux basis.
     import scipy.linalg as LA
     j2c_data = h5py.File('cderi.h5', 'r')
     nq = j2c_data['j2c/0'].shape[0]
     assert nq == nao, "number of AOs in auxcell and j2c data do not match"
-    j2c_sqrt = np.zeros((nk, nq, nq), dtype=np.complex128)
-    j2c_sqrt_inv = np.zeros((nk, nq, nq), dtype=np.complex128)
+    j2c_sqrt = []
+    j2c_sqrt_inv = []
     for ik in range(nk):
         j2c_i = j2c_data['j2c/{}' .format(ik)][...]
         assert np.all(j2c_i - j2c_i.conj().T < 1e-12), "j2c metric is not Hermitian"
         eigs, vecs = LA.eigh(j2c_i)
         assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
         # Prune for small eigenvalues to avoid linear dependencies
-        eigs = eigs[eigs > J2C_LIN_DEP_THRESH]
-        vecs = vecs[:, :eigs.shape[0]]
-        j2c_sqrt[ik] = vecs @ np.diag(np.sqrt(eigs)) @ vecs.conj().T
-        j2c_sqrt_inv[ik] = vecs @ np.diag(1.0/np.sqrt(eigs)) @ vecs.conj().T
+        eigs_trim = eigs[eigs > J2C_LIN_DEP_THRESH]
+        vecs = vecs[:, eigs > J2C_LIN_DEP_THRESH]
+        j2c_sqrt_inv.append(vecs.conj().T / np.sqrt(eigs_trim).reshape(-1, 1))
+        j2c_sqrt.append(vecs * np.sqrt(eigs_trim).reshape(1, -1))
     j2c_data.close()
 
     # compute representation in the AO basis for each k-point and each symmetry operation
@@ -873,8 +875,11 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
         # transform kspace_orep to j2c basis
         j2c_ik_sqrt = j2c_sqrt[irre_k]
         j2c_irre_k_sqrt_inv = j2c_sqrt_inv[ik]
+        # get effective dimensions
+        neff_ik = j2c_ik_sqrt.shape[1]
+        neff_irre_k = j2c_irre_k_sqrt_inv.shape[0]
         # transform to j2c basis
-        kspace_orep[ik] = np.dot(j2c_irre_k_sqrt_inv, np.dot(mat_ao, j2c_ik_sqrt))
+        kspace_orep[ik, :neff_irre_k, :neff_ik] = np.dot(j2c_irre_k_sqrt_inv, np.dot(mat_ao, j2c_ik_sqrt))
 
     # Save transformed aux kspace_orep to hdf5 file
     inp_data = h5py.File(args.output_path, "a")
