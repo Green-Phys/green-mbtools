@@ -136,7 +136,7 @@ class IR_factory(object):
                 os.path.abspath(self.ir_file), self.beta, ptype='bose'
             )
         fir = h5py.File(self.ir_file, 'r')
-        Ttc_other_tmp = fir['fermi/other_uxl'][()]
+        Ttc_other_tmp = fir['fermi/uxl_other'][()]
         nx_b = fir['bose/nx'][()]
         fir.close()
         Ttc_other = Ttc_b @ Tct_b @ Ttc_other_tmp
