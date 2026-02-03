@@ -18,6 +18,7 @@ import pdb
 import importlib.metadata as imd
 
 from . import integral_utils as int_utils
+from .symmetry_utils import get_representation
 
 
 # Linear dep threshold for J2C metric eigenvalues
@@ -788,13 +789,12 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     # Therefore, S_k matrices at equivalent k-points differ due to these phases. However, the generalized
     # eigenproblem (H, S) IS invariant under the symmetry transformation, with eigenvalues matching to
     # machine precision. This validates that the stored rotation matrices are correct for physical transformations.
-    from .symmetry_utils import _get_rotation_mat
     nao = mycell.nao_nr()
     kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
         iop = stars_ops[ik]
         irre_k = kstruct.bz2ibz[ik]
-        mat_ao = _get_rotation_mat(mycell, kstruct.kpts_scaled[irre_k], kstruct.ops[iop], kstruct.Dmats[iop])
+        mat_ao = get_representation(ik, iop, mycell, kstruct)
         kspace_orep[ik] = mat_ao
     if "kspace_orep" in grid_grp:
         grid_grp["kspace_orep"][...] = kspace_orep
@@ -859,19 +859,22 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
         # Prune for small eigenvalues to avoid linear dependencies
         eigs_trim = eigs[eigs > J2C_LIN_DEP_THRESH]
         vecs = vecs[:, eigs > J2C_LIN_DEP_THRESH]
-        j2c_sqrt_inv.append(vecs.conj().T / np.sqrt(eigs_trim).reshape(-1, 1))
-        j2c_sqrt.append(vecs * np.sqrt(eigs_trim).reshape(1, -1))
+        j2c_sqrt_inv_i = vecs.conj().T
+        j2c_sqrt_inv_i /= np.sqrt(eigs_trim).reshape(-1, 1)
+        j2c_sqrt_i = vecs
+        j2c_sqrt_i *= np.sqrt(eigs_trim).reshape(1, -1)
+        j2c_sqrt_inv.append(j2c_sqrt_inv_i)
+        j2c_sqrt.append(j2c_sqrt_i)
     j2c_data.close()
 
     # compute representation in the AO basis for each k-point and each symmetry operation
     # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
-    from .symmetry_utils import _get_rotation_mat
     kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
         iop = stars_ops[ik]
         irre_k = kstruct.bz2ibz[ik]
         # Build AO operator at source k-point
-        mat_ao = _get_rotation_mat(auxcell, kstruct.kpts_scaled[irre_k], kstruct.ops[iop], kstruct.Dmats[iop])
+        mat_ao = get_representation(ik, iop, auxcell, kstruct)
         # transform kspace_orep to j2c basis
         j2c_ik_sqrt = j2c_sqrt[irre_k]
         j2c_irre_k_sqrt_inv = j2c_sqrt_inv[ik]
