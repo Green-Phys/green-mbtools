@@ -23,12 +23,13 @@ def fold_to_unit_cell(r_cart_scaled, mycell):
         The folded Cartesian coordinate within the unit cell (3,).
     """
     a = mycell.lattice_vectors()
-    cell_idx = np.floor(r_cart_scaled).astype(int)
-    r_rel = r_cart_scaled - cell_idx
-    return r_rel
+    frac = r_cart_scaled
+    # Wrap to [-0.5, 0.5) to match atom coordinate convention
+    frac = frac - np.round(frac)
+    return frac
 
 
-def generate_permutation_info(mycell, symm_op, tol=1e-10, verbose=False):
+def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
     """Generate permutation info for given symmetry operation on the atoms of unit cell.
 
     Parameters
@@ -69,9 +70,11 @@ def generate_permutation_info(mycell, symm_op, tol=1e-10, verbose=False):
 
         # Find the corresponding atom partner
         found_partner = False
+        min_distance = 1.0
         for j in range(n_atom):
             j_coord = coords_scaled[j]
             distance = np.linalg.norm(shift_pos - j_coord)
+            min_distance = min(min_distance, distance)
             if distance < tol:
                 if mycell.atom_symbol(i) != mycell.atom_symbol(j):
                     raise RuntimeError("point group maps atoms of different type onto each other")
@@ -86,10 +89,13 @@ def generate_permutation_info(mycell, symm_op, tol=1e-10, verbose=False):
         # Handle error
         if (not found_partner):
             print("atom position: ", coords_scaled[i])
+            print("shifted position: ", shift_pos)
             print("symmetry operation: ", symm_op)
             print("rotation: ", rot)
             print("translation vector: ", trans)
             print("transformed position: ", trans_pos)
+            print("Min distance: ", min_distance)
+            print("Available atom coordinates: ", coords_scaled)
             raise RuntimeError("symmetry analysis could not find partner.");
 
     return partner_idx, pos_diff

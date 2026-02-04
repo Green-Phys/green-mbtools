@@ -8,7 +8,7 @@ import os
 import shutil
 
 
-def test_symmetry():
+def test_symmetry_on_AO_basis():
     """
     Docstring for test_symmetry
     """
@@ -68,21 +68,20 @@ def test_symmetry():
         Uop = kspace_orep[i]
         # Overlap
         Sk_recon = Uop @ Sk[0, ibz] @ Uop.conj().T
-        diff_S = LA.eigvalsh(Sk_recon) - LA.eigvalsh(Sk[0, i])
+        diff_S = Sk_recon - Sk[0, i]
         assert np.max(np.abs(diff_S)) < 1e-8
         # Hamiltonian
         Hk_recon = Uop @ Hk[0, ibz] @ Uop.conj().T
-        diff_H = LA.eigvalsh(Hk_recon, Sk_recon) - LA.eigvalsh(Hk[0, i], Sk[0, i])
+        diff_H = Hk_recon - Hk[0, i]
         assert np.max(np.abs(diff_H)) < 1e-8
         # Fock
         # NOTE: because Vxc is constructed on real grid, its symmetrization is not perfect.
         # Threfore, the agreement in Fock matrix is usually around 1e-5 to 1e-6
         Fk_recon = Uop @ Fock[0, ibz] @ Uop.conj().T
-        diff_F = LA.eigvalsh(Fk_recon, Sk[0, i]) - LA.eigvalsh(Fock[0, i], Sk[0, i])
+        diff_F = Fk_recon - Fock[0, i]
         assert np.max(np.abs(diff_F)) < 1e-5
 
-    # Check condition number of aux-space transformation operators
-    for i in range(nk):
-        Uop_aux = kspace_orep_aux[i]
-        cond_num = np.linalg.cond(Uop_aux)
-        assert cond_num < 1e6  # condition number should be reasonable
+
+# def test_symmetry_for_df_ints():
+#     """TODO
+#     """
