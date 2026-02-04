@@ -51,8 +51,6 @@ def symmetrical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False
         avg(kpts, T_up)
         avg(kpts, T_dn)
 
-    dmmm = []
-
     # Compute transformation matrices
     for ik, k in enumerate(kmesh):
         # check whether matrices should be real by inversion symmetry
@@ -104,10 +102,6 @@ def symmetrical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False
                 X_inv_k[ik] = np.copy(X_inv_k[ikk].conj())
                 X_k[ik] = np.copy(X_k[ikk].conj())
                 continue
-
-    # save density matrix eigen values distribution per each k-point
-    np.savetxt("dm_k".format(ik), np.array(dmmm).T)
-    np.savetxt("dm_band_k".format(ik), np.array(dmmm))
     return X_inv_k, X_k
 
 def canonical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
@@ -136,8 +130,6 @@ def canonical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
         avg(kpts, F_dn)
         avg(kpts, T_up)
         avg(kpts, T_dn)
-
-    dmmm = []
 
     # Compute transformation matrices
     for ik, k in enumerate(kmesh):
@@ -197,9 +189,6 @@ def canonical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
                 X_k[ik] = np.copy(X_k[ikk].conj())
                 continue
 
-    # save density matrix eigen values distribution per each k-point
-    np.savetxt("dm_k".format(ik), np.array(dmmm).T)
-    np.savetxt("dm_band_k".format(ik), np.array(dmmm))
     return X_inv_k, X_k
 
 def natural_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
@@ -233,8 +222,6 @@ def natural_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
         avg(kpts, T_up)
         avg(kpts, T_dn)
 
-    dmmm = []
-
     # Compute transformation matrices
     for ik, k in enumerate(kmesh):
         # check whether matrices should be real by inversion symmetry
@@ -260,9 +247,6 @@ def natural_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
         else:
             pass
 
-        # save density matrix eigenvalues for future analysis
-        dmmm.append(np.diag(reduce(np.dot, (Sv, dm[ik], Sv.conj().T))).real)
-
         # here we assume that the direct transformation is for quantities like Self-energy and Fock matrix
         # and the inverse transformation if for quantities like density matrix and Green's function
         x_pinv = Sv
@@ -278,7 +262,4 @@ def natural_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
         X_inv_k.append(x_pinv.copy())
         X_k.append(x.copy())
 
-    # save density matrix eigen values distribution per each k-point
-    np.savetxt("dm_k".format(ik), np.array(dmmm).T)
-    np.savetxt("dm_band_k".format(ik), np.array(dmmm))
     return X_inv_k, X_k
