@@ -182,25 +182,53 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=
     aoslice = mycell.aoslice_by_atom()
     # starting index of each AO shell
     ao_loc = mycell.ao_loc
+    # get angular momentum info for each shell
+    ao_bas = np.zeros(len(ao_loc) - 1, dtype=int)
+    for ao_loc_idx in range(len(ao_loc) - 1):
+        ao_bas[ao_loc_idx] = mycell.bas_angular(ao_loc_idx)
 
     for i in range(n_atom):
         # phase
         target_atom = perm_atoms[i]
         phase = np.exp(1j * 2 * np.pi * bz_kvec.dot(pos_diff[i]))
-        # starting and ending index for AO blocks
+        # starting and ending index for AO shell indices
         loc_start_idx = aoslice[i][0]
         loc_end_idx = aoslice[i][1]
+        target_loc_start_idx = aoslice[target_atom][0]
+        
         # get matrix representation in orbital basis
-        for ao_loc_idx in range(loc_start_idx, loc_end_idx):
+        # Match shells by their order within each atom
+        for shell_offset, ao_loc_idx in enumerate(range(loc_start_idx, loc_end_idx)):
+            # Find corresponding shell in target atom by position
+            target_ao_loc_idx = target_loc_start_idx + shell_offset
+            
             # angular momentum for the block of AOs
-            L_value = mycell.bas_angular(ao_loc_idx)
+            L_value = ao_bas[ao_loc_idx]
+            target_L_value = ao_bas[target_ao_loc_idx]
+            
+            # Verify angular momentum matches
+            if L_value != target_L_value:
+                raise RuntimeError(f"Angular momentum mismatch: shell {ao_loc_idx} of atom {i} has L={L_value}, "
+                                   f"but shell {target_ao_loc_idx} of atom {target_atom} has L={target_L_value}")
+            
             multiplicity = 2 * L_value + 1
             n_orbs_for_L = ao_loc[ao_loc_idx + 1] - ao_loc[ao_loc_idx]
-            # number of principle quantum number shells in the block
+            target_n_orbs = ao_loc[target_ao_loc_idx + 1] - ao_loc[target_ao_loc_idx]
+            
+            # Verify orbital count matches
+            if n_orbs_for_L != target_n_orbs:
+                raise RuntimeError(f"Orbital count mismatch: shell {ao_loc_idx} has {n_orbs_for_L} orbitals, "
+                                   f"but shell {target_ao_loc_idx} has {target_n_orbs} orbitals")
+            
+            # number of radial shells in the block
             n_shells = n_orbs_for_L // multiplicity
+            
+            # Fill representation matrix for each radial shell
             for n_i in range(n_shells):
-                i_start, i_end = get_orbital_index(i, n_i, L_value, mycell)
-                j_start, j_end = get_orbital_index(target_atom, n_i, L_value, mycell)
+                i_start = ao_loc[ao_loc_idx] + n_i * multiplicity
+                i_end = i_start + multiplicity
+                j_start = ao_loc[target_ao_loc_idx] + n_i * multiplicity
+                j_end = j_start + multiplicity
                 repr_matrix[j_start:j_end, i_start:i_end] = phase * kstruct.Dmats[symm_op_idx][L_value]
 
     # info about symmetry operation
