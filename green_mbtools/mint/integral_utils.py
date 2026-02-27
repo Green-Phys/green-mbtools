@@ -9,8 +9,9 @@ import numpy as np
 from numba import jit
 from pyscf.df import addons
 from pyscf.pbc import gto, df, tools
-from pyscf.pbc.lib.kpts_helper import (is_zero, gamma_point, member, unique,
-                                       KPT_DIFF_TOL)
+from pyscf.lib import logger
+from pyscf.pbc.lib.kpts_helper import (is_zero, gamma_point, member, unique, KPT_DIFF_TOL,
+                                       unique_with_wrap_around, group_by_conj_pairs)
 from pyscf.pbc.df.rsdf_builder import _RSGDFBuilder
 from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
 
@@ -546,6 +547,9 @@ class GreenGDF(df.GDF):
         if auxcell is None: auxcell = self.auxcell
         if cderi_file is None: cderi_file = self._cderi_to_save
 
+        # Logger
+        log = logger.new_logger(self)
+
         # Remove duplicated k-points. Duplicated kpts may lead to a buffer
         # located in incore.wrap_int3c larger than necessary. Integral code
         # only fills necessary part of the buffer, leaving some space in the
@@ -568,10 +572,24 @@ class GreenGDF(df.GDF):
                            kptij_lst=kptij_lst)
         # Update j2c
         feri = h5py.File(cderi_file, 'a')
-        for k, j2c in enumerate(dfbuilder.get_2c2e(self.kpts)):
+        uniq_kpts, uniq_index, uniq_inverse = unique_with_wrap_around(
+            cell, (self.kpts[None, :, :] - self.kpts[:, None, :]).reshape(-1, 3))
+        scaled_uniq_kpts = cell.get_scaled_kpts(uniq_kpts).round(5)
+        log.debug('Num uniq kpts %d', len(uniq_kpts))
+        log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
+        kpts_idx_pairs = group_by_conj_pairs(cell, uniq_kpts)[0]
+        j2c_uniq_kpts = uniq_kpts[[k for k, _ in kpts_idx_pairs]]
+        for k, j2c in enumerate(dfbuilder.get_2c2e(uniq_kpts)):
             if j2c.dtype == np.complex128:
                 feri[f'j2c/{k}'] = j2c
             else:
                 feri[f'j2c/{k}'] = j2c + 0.j
             j2c = None
+        # Meta data
+        feri['j2c/uniq_kpts'] = uniq_kpts
+        feri['j2c/uniq_index'] = uniq_index
+        feri['j2c/uniq_inverse'] = uniq_inverse
+        feri['j2c/scaled_uniq_kpts'] = scaled_uniq_kpts
+        feri['j2c/j2c_uniq_kpts'] = j2c_uniq_kpts
+        feri['j2c/kpts_idx_pairs'] = np.asarray(kpts_idx_pairs, dtype=int)
         feri.close()
