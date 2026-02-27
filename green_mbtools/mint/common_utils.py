@@ -808,7 +808,7 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     inp_data.close()
 
 
-def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
+def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     """Store symmetry operation information for k-points into hdf5 file in Green'WeakCoupling format
     for auxcell only case
 
@@ -816,7 +816,7 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     ----------
     args : map
         simulation parameters 
-    auxbasis : str
+    auxcell : pyscf.pbc.gto.Cell
         auxiliary unit cell for density-fitting
     kmesh : numpy.ndarray
         k-mesh for the Brillouin Zone
@@ -825,16 +825,6 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
     """
 
     # generate periodic cell for auxbasis
-    spg_symm = args.symm if args.x2c < 2 else False
-    auxcell = gto.M(
-        a = args.a,
-        atom = args.atom,
-        unit = 'A',
-        basis = auxbasis,
-        verbose = 1,
-        spin = args.spin,
-        space_group_symmetry = spg_symm,
-    )
     auxcell.build()
     auxcell_kinfo = init_k_mesh(args, auxcell)
     kstruct = auxcell_kinfo[-1]
@@ -865,32 +855,42 @@ def store_auxcell_kstruct_ops_info(args, auxbasis, kmesh):
         j2c_sqrt_i *= np.sqrt(eigs_trim).reshape(1, -1)
         j2c_sqrt_inv.append(j2c_sqrt_inv_i)
         j2c_sqrt.append(j2c_sqrt_i)
+        assert np.allclose(
+            j2c_i, np.dot(j2c_sqrt_i, np.dot(j2c_sqrt_inv_i, j2c_i))
+        ), "j2c sqrt and j2c_sqrt_inv don't multiply to 1 does not reconstruct j2c"
     j2c_data.close()
 
     # compute representation in the AO basis for each k-point and each symmetry operation
     # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
-    kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
+    kspace_orep_aux_orig = np.zeros((nk, nao, nao), dtype=np.complex128)
+    kspace_orep_aux = np.zeros((nk, nao, nao), dtype=np.complex128)
+    
     for ik in range(nk):
         iop = stars_ops[ik]
         irre_k = kstruct.bz2ibz[ik]
-        # Build AO operator at source k-point
+        # Build AO operator at k-point ik
         mat_ao = get_representation(ik, iop, auxcell, kstruct)
-        # transform kspace_orep to j2c basis
-        j2c_ik_sqrt = j2c_sqrt[irre_k]
-        j2c_irre_k_sqrt_inv = j2c_sqrt_inv[ik]
+        # transform kspace_orep_aux to j2c basis
+        j2c_irre_k_sqrt = j2c_sqrt[irre_k]
+        j2c_ik_sqrt_inv = j2c_sqrt_inv[ik]
         # get effective dimensions
-        neff_ik = j2c_ik_sqrt.shape[1]
-        neff_irre_k = j2c_irre_k_sqrt_inv.shape[0]
+        neff_irre_k = j2c_irre_k_sqrt.shape[1]
+        neff_ik = j2c_ik_sqrt_inv.shape[0]
         # transform to j2c basis
-        kspace_orep[ik, :neff_irre_k, :neff_ik] = np.dot(j2c_irre_k_sqrt_inv, np.dot(mat_ao, j2c_ik_sqrt))
+        kspace_orep_aux[ik, :neff_ik, :neff_irre_k] = np.dot(j2c_ik_sqrt_inv, np.dot(mat_ao, j2c_irre_k_sqrt))
+        kspace_orep_aux_orig[ik] = mat_ao
 
-    # Save transformed aux kspace_orep to hdf5 file
+    # Save transformed aux kspace_orep_aux to hdf5 file
     inp_data = h5py.File(args.output_path, "a")
     grid_grp = inp_data["grid"]
     if "kspace_orep_aux" in grid_grp:
-        grid_grp["kspace_orep_aux"][...] = kspace_orep
+        grid_grp["kspace_orep_aux"][...] = kspace_orep_aux
     else:
-        grid_grp["kspace_orep_aux"] = kspace_orep
+        grid_grp["kspace_orep_aux"] = kspace_orep_aux
+    if "kspace_orep_aux_1" in grid_grp:
+        grid_grp["kspace_orep_aux_orig"][...] = kspace_orep_aux_orig
+    else:
+        grid_grp["kspace_orep_aux_orig"] = kspace_orep_aux_orig
     inp_data.close()
 
 
