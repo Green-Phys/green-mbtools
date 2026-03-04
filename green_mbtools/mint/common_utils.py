@@ -13,7 +13,7 @@ from pyscf import dft as mdft
 from pyscf import df as mdf
 from pyscf.pbc import tools, gto, df, scf, dft
 from pyscf import __version__ as pyscf_version
-import pdb
+from pyscf.pbc.lib import kpts as libkpts
 
 import importlib.metadata as imd
 
@@ -584,6 +584,8 @@ def init_k_mesh(args, mycell):
         inverse index, associating each k-point with its unique equivalent
     int
         number of irreducible k-points
+
+    # TODO: Add separate buttons / args for for space group and time reversal symmetries
     """
     if args.center is None:
        args.center = [0,0,0]
@@ -592,13 +594,16 @@ def init_k_mesh(args, mycell):
     if args.x2c < 2:
         # for normal and sfX2C1e calculations
         kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
-                               space_group_symmetry=args.symm, time_reversal_symmetry=True)
+                               space_group_symmetry=args.symm, time_reversal_symmetry=args.symm)
     else:
         # for X2C1e calculations
         print("X2C1e calculations do not support space group symmetry. Only time-reversal symmetry is used.")
         print("Double group symmetry will be implemented in future releases.")
         kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
-                               space_group_symmetry=False, time_reversal_symmetry=True)
+                               space_group_symmetry=False, time_reversal_symmetry=args.symm)
+
+    if not args.symm :
+        kstruct = libkpts.make_kpts(mycell, kstruct, space_group_symmetry=False, time_reversal_symmetry=False)
 
     kmesh = kstruct.kpts
     for i, kk in enumerate(kmesh):
@@ -614,17 +619,6 @@ def init_k_mesh(args, mycell):
 
     logging.debug(kmesh)
     logging.info(mycell.get_scaled_kpts(kmesh))
-
-    if not args.symm :
-        nkpts = kmesh.shape[0]
-        weight = np.ones(nkpts)
-        ir_list = np.array(range(nkpts))
-        ind = np.array(range(nkpts))
-        conj_list = np.zeros(nkpts)
-        k_ibz = np.copy(kmesh)
-        num_ik = nkpts
-        kstruct = None
-        return kmesh, k_ibz, ir_list, conj_list, weight, ind, num_ik, kstruct
 
     logging.info("Compute irreducible k-points")
 
