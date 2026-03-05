@@ -570,26 +570,37 @@ class GreenGDF(df.GDF):
         j_only = self._j_only or len(kpts_union) == 1
         dfbuilder.make_j3c(cderi_file, j_only=j_only, dataname=self._dataname,
                            kptij_lst=kptij_lst)
-        # Update j2c
+        # TODO: Revert to full k-point BZ j2c generation
+        # Old code that generated j2c on full k-point Brillouin zone
+        # uniq_kpts, uniq_index, uniq_inverse = unique_with_wrap_around(
+        #     cell, (self.kpts[None, :, :] - self.kpts[:, None, :]).reshape(-1, 3))
+        # scaled_uniq_kpts = cell.get_scaled_kpts(uniq_kpts).round(5)
+        # log.debug('Num uniq kpts %d', len(uniq_kpts))
+        # log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
+        # kpts_idx_pairs = group_by_conj_pairs(cell, uniq_kpts)[0]
+        # j2c_uniq_kpts = uniq_kpts[[k for k, _ in kpts_idx_pairs]]
+        # for k, j2c in enumerate(dfbuilder.get_2c2e(uniq_kpts)):
+        #     if j2c.dtype == np.complex128:
+        #         feri[f'j2c/{k}'] = j2c
+        #     else:
+        #         feri[f'j2c/{k}'] = j2c + 0.j
+        #     j2c = None
+        # # Meta data
+        # feri['j2c/uniq_kpts'] = uniq_kpts
+        # feri['j2c/uniq_index'] = uniq_index
+        # feri['j2c/uniq_inverse'] = uniq_inverse
+        # feri['j2c/scaled_uniq_kpts'] = scaled_uniq_kpts
+        # feri['j2c/j2c_uniq_kpts'] = j2c_uniq_kpts
+        # feri['j2c/kpts_idx_pairs'] = np.asarray(kpts_idx_pairs, dtype=int)
+        # feri.close()
+        
+        # Reverted: Generate j2c on full k-point BZ
         feri = h5py.File(cderi_file, 'a')
-        uniq_kpts, uniq_index, uniq_inverse = unique_with_wrap_around(
-            cell, (self.kpts[None, :, :] - self.kpts[:, None, :]).reshape(-1, 3))
-        scaled_uniq_kpts = cell.get_scaled_kpts(uniq_kpts).round(5)
-        log.debug('Num uniq kpts %d', len(uniq_kpts))
-        log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
-        kpts_idx_pairs = group_by_conj_pairs(cell, uniq_kpts)[0]
-        j2c_uniq_kpts = uniq_kpts[[k for k, _ in kpts_idx_pairs]]
-        for k, j2c in enumerate(dfbuilder.get_2c2e(uniq_kpts)):
+        for k, j2c in enumerate(dfbuilder.get_2c2e(self.kpts)):
             if j2c.dtype == np.complex128:
                 feri[f'j2c/{k}'] = j2c
             else:
                 feri[f'j2c/{k}'] = j2c + 0.j
             j2c = None
-        # Meta data
-        feri['j2c/uniq_kpts'] = uniq_kpts
-        feri['j2c/uniq_index'] = uniq_index
-        feri['j2c/uniq_inverse'] = uniq_inverse
-        feri['j2c/scaled_uniq_kpts'] = scaled_uniq_kpts
-        feri['j2c/j2c_uniq_kpts'] = j2c_uniq_kpts
-        feri['j2c/kpts_idx_pairs'] = np.asarray(kpts_idx_pairs, dtype=int)
+        feri['j2c/kpts'] = self.kpts
         feri.close()
