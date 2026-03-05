@@ -787,7 +787,6 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
     for ik in range(nk):
         iop = stars_ops[ik]
-        irre_k = kstruct.bz2ibz[ik]
         mat_ao = get_representation(ik, iop, mycell, kstruct)
         kspace_orep[ik] = mat_ao
     if "kspace_orep" in grid_grp:
@@ -861,11 +860,11 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     
     for ik in range(nk):
         iop = stars_ops[ik]
-        irre_k = kstruct.bz2ibz[ik]
+        irre_k = kstruct.ibz2bz[kstruct.bz2ibz[ik]]
         # Build AO operator at k-point ik
         mat_ao = get_representation(ik, iop, auxcell, kstruct)
         # transform kspace_orep_aux to j2c basis
-        j2c_irre_k_sqrt = j2c_sqrt[irre_k]
+        j2c_irre_k_sqrt = j2c_sqrt[kstruct.ibz2bz[irre_k]]
         j2c_ik_sqrt_inv = j2c_sqrt_inv[ik]
         # get effective dimensions
         neff_irre_k = j2c_irre_k_sqrt.shape[1]
@@ -881,7 +880,7 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         grid_grp["kspace_orep_aux"][...] = kspace_orep_aux
     else:
         grid_grp["kspace_orep_aux"] = kspace_orep_aux
-    if "kspace_orep_aux_1" in grid_grp:
+    if "kspace_orep_aux_orig" in grid_grp:
         grid_grp["kspace_orep_aux_orig"][...] = kspace_orep_aux_orig
     else:
         grid_grp["kspace_orep_aux_orig"] = kspace_orep_aux_orig
