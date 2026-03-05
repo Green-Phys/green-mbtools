@@ -864,7 +864,7 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         # Build AO operator at k-point ik
         mat_ao = get_representation(ik, iop, auxcell, kstruct)
         # transform kspace_orep_aux to j2c basis
-        j2c_irre_k_sqrt = j2c_sqrt[kstruct.ibz2bz[irre_k]]
+        j2c_irre_k_sqrt = j2c_sqrt[irre_k]
         j2c_ik_sqrt_inv = j2c_sqrt_inv[ik]
         # get effective dimensions
         neff_irre_k = j2c_irre_k_sqrt.shape[1]
