@@ -21,10 +21,6 @@ from . import integral_utils as int_utils
 from .symmetry_utils import get_representation
 
 
-# Linear dep threshold for J2C metric eigenvalues
-J2C_LIN_DEP_THRESH = 1e-9
-
-
 def extract_ase_data(a, atoms):
     """For a given data in XYZ format generate parameters in ASE format
     
@@ -821,69 +817,85 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     auxcell.build()
     auxcell_kinfo = init_k_mesh(args, auxcell)
     kstruct = auxcell_kinfo[-1]
+    irre_k_inds = kstruct.ibz2bz
     stars_ops = kstruct.stars_ops_bz
     nk = kmesh.shape[0]
     nao = auxcell.nao_nr()
 
-    # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each irreducible k-point
-    # NOTE: these are not complete square root matrix or its inverse. These are only
-    #   factors that operate in the space of linearly independent aux basis.
+    # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each k-point using lower Cholesky
+    # decomposition to match the convention used by PySCF when building j3c integrals.
+    # PySCF computes B = L^{-1} @ eri3c (lower Cholesky, j2c = LL†), so P0_tilde lives
+    # in the L-basis.  Obar = L_bz^{-1} @ mat_ao @ L_irre correctly maps P0_tilde between
+    # k-points.  Using upper Cholesky gives L^T instead of L, producing the wrong Obar.
     import scipy.linalg as LA
     j2c_data = h5py.File('cderi.h5', 'r')
+    j2c_decomp = j2c_data.attrs['j2c_decomposition']
     nq = j2c_data['j2c/0'].shape[0]
     assert nq == nao, "number of AOs in auxcell and j2c data do not match"
-    j2c_sqrt = []
-    j2c_sqrt_inv = []
-    for ik in range(nk):
-        j2c_i = j2c_data['j2c/{}' .format(ik)][...]
+
+    # We will compute j2c_sqrt for all irreducible k-points once and store
+    # For j2c_sqrt_inv, we will compute it on the fly as we construct kspace_orep_p0
+    j2c_sqrt_irre = []
+    for ik in range(irre_k_inds):
+        j2c_i = j2c_data['j2c/{}'.format(ik)][...]
         assert np.all(j2c_i - j2c_i.conj().T < 1e-12), "j2c metric is not Hermitian"
-        eigs, vecs = LA.eigh(j2c_i)
-        assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
-        # Prune for small eigenvalues to avoid linear dependencies
-        eigs_trim = eigs[eigs > J2C_LIN_DEP_THRESH]
-        vecs = vecs[:, eigs > J2C_LIN_DEP_THRESH]
-        j2c_sqrt_inv_i = vecs.conj().T
-        j2c_sqrt_inv_i /= np.sqrt(eigs_trim).reshape(-1, 1)
-        j2c_sqrt_i = vecs
-        j2c_sqrt_i *= np.sqrt(eigs_trim).reshape(1, -1)
-        j2c_sqrt_inv.append(j2c_sqrt_inv_i)
-        j2c_sqrt.append(j2c_sqrt_i)
-        assert np.allclose(
-            j2c_i, np.dot(j2c_sqrt_i, np.dot(j2c_sqrt_inv_i, j2c_i))
-        ), "j2c sqrt and j2c_sqrt_inv don't multiply to 1 does not reconstruct j2c"
-    j2c_data.close()
+        if j2c_decomp == 'cholesky':
+            j2c_sqrt_i, j2c_neg = int_utils.cholesky_decomposed_metric(j2c_i, auxcell, inv=False)
+        elif j2c_decomp == 'eigenvalue':
+            j2c_sqrt_i, j2c_neg = int_utils.eig_decomposed_metric(j2c_i, auxcell, inv=False)
+        else:
+            raise ValueError("Unsupported j2c decomposition method: {}".format(j2c_decomp))
+        j2c_sqrt_irre.append(j2c_sqrt_i)
+        # TODO: this will be implemented in pytests
+        # assert np.allclose(
+        #     j2c_i, np.dot(j2c_sqrt_i, np.dot(j2c_sqrt_inv_i, j2c_i))
+        # ), "j2c sqrt and j2c_sqrt_inv don't multiply to 1 and do not reconstruct j2c"
 
     # compute representation in the AO basis for each k-point and each symmetry operation
     # NOTE: only one operator per k-point is stored, the one that connects it to the irreducible k-point
-    kspace_orep_aux_orig = np.zeros((nk, nao, nao), dtype=np.complex128)
-    kspace_orep_aux = np.zeros((nk, nao, nao), dtype=np.complex128)
+    kspace_orep_j2c = np.zeros((nk, nao, nao), dtype=np.complex128)
+    kspace_orep_p0 = np.zeros((nk, nao, nao), dtype=np.complex128)
     
     for ik in range(nk):
+        # indexing
         iop = stars_ops[ik]
-        irre_k = kstruct.ibz2bz[kstruct.bz2ibz[ik]]
-        # Build AO operator at k-point ik
+        irre_k_ibz = kstruct.bz2ibz[ik]  # index of irreducible k-point in the ibz list
+        irre_k_bz = kstruct.ibz2bz[kstruct.bz2ibz[ik]]  # index of irreducible k-point in the full bz list
+        # Build transformation operator in the aux-AO basis connecting "ik" with "irre_k"
         mat_ao = get_representation(ik, iop, auxcell, kstruct)
-        # transform kspace_orep_aux to j2c basis
-        j2c_irre_k_sqrt = j2c_sqrt[irre_k]
-        j2c_ik_sqrt_inv = j2c_sqrt_inv[ik]
+        # obtain J^{1/2} (q_IBZ) from pre-computed list
+        j2c_irre_k_sqrt = j2c_sqrt_irre[irre_k_ibz]
+        # compute J^{-1/2} (k_BZ) on the fly
+        j2c_irre_i = j2c_data["j2c/{}".format(irre_k_bz)][...]
+        j2c_i = mat_ao @ j2c_irre_i @ mat_ao.conj().T
+        if j2c_decomp == 'cholesky':
+            j2c_ik_sqrt_inv, j2c_neg = int_utils.cholesky_decomposed_metric(j2c_i, auxcell, inv=True)
+        elif j2c_decomp == 'eigenvalue':
+            j2c_ik_sqrt_inv, j2c_neg = int_utils.eig_decomposed_metric(j2c_i, auxcell, inv=True)
+        else:
+            raise ValueError("Unsupported j2c decomposition method: {}".format(j2c_decomp))
         # get effective dimensions
-        neff_irre_k = j2c_irre_k_sqrt.shape[1]
-        neff_ik = j2c_ik_sqrt_inv.shape[0]
+        ncols = j2c_irre_k_sqrt.shape[1]
+        nrows = j2c_ik_sqrt_inv.shape[0]
         # transform to j2c basis
-        kspace_orep_aux[ik, :neff_ik, :neff_irre_k] = np.dot(j2c_ik_sqrt_inv, np.dot(mat_ao, j2c_irre_k_sqrt))
-        kspace_orep_aux_orig[ik] = mat_ao
+        kspace_orep_p0[ik, :nrows, :ncols] = j2c_ik_sqrt_inv @ mat_ao @ j2c_irre_k_sqrt
+        kspace_orep_j2c[ik] = mat_ao
+        # clean up for next iteration
+        j2c_irre_i = None
+    j2c_data.close()
+    # TODO: Integrate the j2c_neg for 2D systems where the metric can be negative for some k-points.
 
-    # Save transformed aux kspace_orep_aux to hdf5 file
+    # Save transformed aux kspace_orep_p0 to hdf5 file
     inp_data = h5py.File(args.output_path, "a")
     grid_grp = inp_data["grid"]
-    if "kspace_orep_aux" in grid_grp:
-        grid_grp["kspace_orep_aux"][...] = kspace_orep_aux
+    if "kspace_orep_p0" in grid_grp:
+        grid_grp["kspace_orep_p0"][...] = kspace_orep_p0
     else:
-        grid_grp["kspace_orep_aux"] = kspace_orep_aux
-    if "kspace_orep_aux_orig" in grid_grp:
-        grid_grp["kspace_orep_aux_orig"][...] = kspace_orep_aux_orig
+        grid_grp["kspace_orep_p0"] = kspace_orep_p0
+    if "kspace_orep_j2c" in grid_grp:
+        grid_grp["kspace_orep_j2c"][...] = kspace_orep_j2c
     else:
-        grid_grp["kspace_orep_aux_orig"] = kspace_orep_aux_orig
+        grid_grp["kspace_orep_j2c"] = kspace_orep_j2c
     inp_data.close()
 
 

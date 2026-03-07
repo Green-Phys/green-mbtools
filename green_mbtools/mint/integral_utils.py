@@ -14,6 +14,11 @@ from pyscf.pbc.lib.kpts_helper import (is_zero, gamma_point, member, unique, KPT
                                        unique_with_wrap_around, group_by_conj_pairs)
 from pyscf.pbc.df.rsdf_builder import _RSGDFBuilder
 from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
+import scipy.linalg as LA
+
+
+# Linear dep threshold for J2C metric eigenvalues
+J2C_LIN_DEP_THRESH = 1e-10
 
 
 def compute_kG(k, Gv, wrap_around, mesh, cell):
@@ -565,42 +570,93 @@ class GreenGDF(df.GDF):
             dfbuilder.eta = self.eta
         else:
             dfbuilder = _RSGDFBuilder(cell, auxcell, kpts_union)
+        dfbuilder.j2c_eig_always = True  # Force j2c inverses to be generated in eigenvalue form to maintain consistency 
         dfbuilder.mesh = self.mesh
         dfbuilder.linear_dep_threshold = self.linear_dep_threshold
         j_only = self._j_only or len(kpts_union) == 1
         dfbuilder.make_j3c(cderi_file, j_only=j_only, dataname=self._dataname,
                            kptij_lst=kptij_lst)
-        # TODO: Revert to full k-point BZ j2c generation
-        # Old code that generated j2c on full k-point Brillouin zone
-        # uniq_kpts, uniq_index, uniq_inverse = unique_with_wrap_around(
-        #     cell, (self.kpts[None, :, :] - self.kpts[:, None, :]).reshape(-1, 3))
-        # scaled_uniq_kpts = cell.get_scaled_kpts(uniq_kpts).round(5)
-        # log.debug('Num uniq kpts %d', len(uniq_kpts))
-        # log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
-        # kpts_idx_pairs = group_by_conj_pairs(cell, uniq_kpts)[0]
-        # j2c_uniq_kpts = uniq_kpts[[k for k, _ in kpts_idx_pairs]]
-        # for k, j2c in enumerate(dfbuilder.get_2c2e(uniq_kpts)):
-        #     if j2c.dtype == np.complex128:
-        #         feri[f'j2c/{k}'] = j2c
-        #     else:
-        #         feri[f'j2c/{k}'] = j2c + 0.j
-        #     j2c = None
-        # # Meta data
-        # feri['j2c/uniq_kpts'] = uniq_kpts
-        # feri['j2c/uniq_index'] = uniq_index
-        # feri['j2c/uniq_inverse'] = uniq_inverse
-        # feri['j2c/scaled_uniq_kpts'] = scaled_uniq_kpts
-        # feri['j2c/j2c_uniq_kpts'] = j2c_uniq_kpts
-        # feri['j2c/kpts_idx_pairs'] = np.asarray(kpts_idx_pairs, dtype=int)
-        # feri.close()
-        
-        # Reverted: Generate j2c on full k-point BZ
+        # j2c on irreducible BZ
+        uniq_kpts, uniq_index, uniq_inverse = unique_with_wrap_around(
+            cell, (self.kpts[None, :, :] - self.kpts[:, None, :]).reshape(-1, 3)
+        )
+        scaled_uniq_kpts = cell.get_scaled_kpts(uniq_kpts).round(5)
+        log.debug('Num uniq kpts %d', len(uniq_kpts))
+        log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
+        kpts_idx_pairs = group_by_conj_pairs(cell, uniq_kpts)[0]
+        j2c_uniq_kpts = uniq_kpts[[k for k, _ in kpts_idx_pairs]]
         feri = h5py.File(cderi_file, 'a')
-        for k, j2c in enumerate(dfbuilder.get_2c2e(self.kpts)):
+        all_j2c = list(dfbuilder.get_2c2e(uniq_kpts))
+        for j2c_idx, (k_idx, _) in enumerate(kpts_idx_pairs):
+            j2c = all_j2c[j2c_idx]
             if j2c.dtype == np.complex128:
-                feri[f'j2c/{k}'] = j2c
+                feri[f'j2c/{k_idx}'] = j2c
             else:
-                feri[f'j2c/{k}'] = j2c + 0.j
+                feri[f'j2c/{k_idx}'] = j2c + 0.j
             j2c = None
-        feri['j2c/kpts'] = self.kpts
+        # Meta data
+        feri['j2c/uniq_kpts'] = uniq_kpts
+        feri['j2c/uniq_index'] = uniq_index
+        feri['j2c/uniq_inverse'] = uniq_inverse
+        feri['j2c/scaled_uniq_kpts'] = scaled_uniq_kpts
+        feri['j2c/j2c_uniq_kpts'] = j2c_uniq_kpts
+        feri['j2c/kpts_idx_pairs'] = np.asarray(kpts_idx_pairs, dtype=int)
+        feri['j2c'].attrs['j2c_decomposition'] = 'eigenvalue' if dfbuilder.j2c_eig_always else 'cholesky'
         feri.close()
+
+
+def cholesky_decomposed_metric(j2c_k, cell, inv=False):
+    """Calculate the Cholesky decomposition of the j2c metric for a given k-point, or its inverse if requested.
+
+    Parameters
+    ----------
+    j2c_k : _type_
+        j2c metric for a specific k-point.
+    cell : _type_
+        information about the unit cell, used for error handling and potential adjustments based on dimensionality.
+    inv : bool, optional
+        Whether to return the inverse of the Cholesky decomposition, by default False
+
+    Returns
+    -------
+    j2c_sqrt_k or j2c_sqrt_inv_k : ndarray
+        Cholesky decomposition of the j2c metric (lower triangular matrix L such that j2c_k = L @ L†) or
+        its inverse (L⁻¹), depending on the value of `inv`.
+    j2c_negative : ndarray or None
+        If the j2c metric has negative eigenvalues (which can occur in 2D systems with certain Fourier 
+        transform conventions), this will contain the corresponding eigenvectors. Otherwise, it will be None.
+    """
+    # Cholesky: j2c = LL†  (L lower triangular).  PySCF computes B = L⁻¹ @ eri3c
+    # (by solving L†x = eri3c, i.e., x = L⁻¹ @ eri3c), so P0_tilde lives in the
+    # L-basis.  Obar = L_bz⁻¹ @ mat_ao @ L_irre correctly maps P0_tilde between
+    # k-points.  Using upper Cholesky (lower=False) gives the wrong convention.
+    nQ = j2c_k.shape[0]
+    try:
+        j2c_negative = None
+        j2c_sqrt_k = LA.cholesky(j2c_k, lower=True)
+        if inv:
+            # this is actually the inverse and not just the sqrt
+            j2c_sqrt_k = LA.solve_triangular(  # = L^{-1}
+                j2c_sqrt_k, np.eye(nQ, dtype=np.complex128), lower=True
+            )
+    except LA.LinAlgError:
+        j2c_sqrt_k, j2c_negative = eigenvalue_decomposed_metric(j2c_k, cell, inv)
+    return j2c_sqrt_k, j2c_negative
+
+
+def eigenvalue_decomposed_metric(j2c_k, cell, inv=False):
+    eigs, vecs = LA.eigh(j2c_k)
+    assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
+    eigs_trim = eigs[eigs > J2C_LIN_DEP_THRESH]
+    if inv:
+        j2c_sqrt_k = vecs[:, eigs > J2C_LIN_DEP_THRESH].conj().T / np.sqrt(eigs_trim).reshape(-1, 1)
+    else:
+        j2c_sqrt_k = vecs[:, eigs > J2C_LIN_DEP_THRESH] * np.sqrt(eigs_trim).reshape(1, -1)
+    # negative eigenvalues can occur in 2D systems with certain Fourier transform conventions,
+    # but we can still use the corresponding eigenvectors to define a "negative" subspace for the J2C metric
+    if cell.dimension == 2 and cell.low_dim_ft_type != 'inf_vacuum':
+        idx = np.where(eigs < -J2C_LIN_DEP_THRESH)[0]
+        if len(idx) > 0:
+            j2c_negative = (vecs[:, idx] / np.sqrt(-eigs[idx])).conj().T
+
+    return j2c_sqrt_k, j2c_negative
