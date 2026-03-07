@@ -586,7 +586,7 @@ class GreenGDF(df.GDF):
         kpts_idx_pairs = group_by_conj_pairs(cell, uniq_kpts)[0]
         j2c_uniq_kpts = uniq_kpts[[k for k, _ in kpts_idx_pairs]]
         feri = h5py.File(cderi_file, 'a')
-        all_j2c = list(dfbuilder.get_2c2e(uniq_kpts))
+        all_j2c = list(dfbuilder.get_2c2e(j2c_uniq_kpts))
         for j2c_idx, (k_idx, _) in enumerate(kpts_idx_pairs):
             j2c = all_j2c[j2c_idx]
             if j2c.dtype == np.complex128:
@@ -645,6 +645,7 @@ def cholesky_decomposed_metric(j2c_k, cell, inv=False):
 
 
 def eigenvalue_decomposed_metric(j2c_k, cell, inv=False):
+    j2c_negative = None
     eigs, vecs = LA.eigh(j2c_k)
     assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
     eigs_trim = eigs[eigs > J2C_LIN_DEP_THRESH]

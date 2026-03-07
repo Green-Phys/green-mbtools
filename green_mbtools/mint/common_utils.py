@@ -829,20 +829,21 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     # k-points.  Using upper Cholesky gives L^T instead of L, producing the wrong Obar.
     import scipy.linalg as LA
     j2c_data = h5py.File('cderi.h5', 'r')
-    j2c_decomp = j2c_data.attrs['j2c_decomposition']
-    nq = j2c_data['j2c/0'].shape[0]
+    j2c_decomp = j2c_data['j2c'].attrs['j2c_decomposition']
+    first_j2c_key = str(kstruct.ibz2bz[0])
+    nq = j2c_data[f'j2c/{first_j2c_key}'].shape[0]
     assert nq == nao, "number of AOs in auxcell and j2c data do not match"
 
     # We will compute j2c_sqrt for all irreducible k-points once and store
     # For j2c_sqrt_inv, we will compute it on the fly as we construct kspace_orep_p0
     j2c_sqrt_irre = []
-    for ik in range(irre_k_inds):
-        j2c_i = j2c_data['j2c/{}'.format(ik)][...]
+    for irre_k_bz in irre_k_inds:
+        j2c_i = j2c_data[f'j2c/{irre_k_bz}'][...]
         assert np.all(j2c_i - j2c_i.conj().T < 1e-12), "j2c metric is not Hermitian"
         if j2c_decomp == 'cholesky':
             j2c_sqrt_i, j2c_neg = int_utils.cholesky_decomposed_metric(j2c_i, auxcell, inv=False)
         elif j2c_decomp == 'eigenvalue':
-            j2c_sqrt_i, j2c_neg = int_utils.eig_decomposed_metric(j2c_i, auxcell, inv=False)
+            j2c_sqrt_i, j2c_neg = int_utils.eigenvalue_decomposed_metric(j2c_i, auxcell, inv=False)
         else:
             raise ValueError("Unsupported j2c decomposition method: {}".format(j2c_decomp))
         j2c_sqrt_irre.append(j2c_sqrt_i)
@@ -871,7 +872,7 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         if j2c_decomp == 'cholesky':
             j2c_ik_sqrt_inv, j2c_neg = int_utils.cholesky_decomposed_metric(j2c_i, auxcell, inv=True)
         elif j2c_decomp == 'eigenvalue':
-            j2c_ik_sqrt_inv, j2c_neg = int_utils.eig_decomposed_metric(j2c_i, auxcell, inv=True)
+            j2c_ik_sqrt_inv, j2c_neg = int_utils.eigenvalue_decomposed_metric(j2c_i, auxcell, inv=True)
         else:
             raise ValueError("Unsupported j2c decomposition method: {}".format(j2c_decomp))
         # get effective dimensions
