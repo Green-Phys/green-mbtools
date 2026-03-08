@@ -1,4 +1,5 @@
 from functools import reduce
+import warnings
 import numpy as np
 import scipy.linalg as LA
 
@@ -537,9 +538,29 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     S = S.reshape(S.shape[:-1])
     H0 = f['HF/H-k'][()].view(complex)
     H0 = H0.reshape(H0.shape[:-1])
-    ir_list = f["/grid/ir_list"][()]
-    index = f["/grid/index"][()]
-    conj_list = f["grid/conj_list"][()]
+
+    _legacy_grid_warned = False
+
+    def _read_grid_dataset(h5f, *paths):
+        nonlocal _legacy_grid_warned
+        for i, path in enumerate(paths):
+            if path in h5f:
+                if i > 0 and not _legacy_grid_warned:
+                    warnings.warn(
+                        "Detected deprecated flat grid datasets under 'grid/*'. Support for this layout "
+                        "will be removed in a future green_mbtools release; please migrate to 'grid/k/*' "
+                        "(and 'grid/q/*' where applicable).",
+                        FutureWarning,
+                        stacklevel=2,
+                    )
+                    _legacy_grid_warned = True
+                return h5f[path][()]
+        raise KeyError(f"None of the dataset paths exist: {paths}")
+
+    # Support both legacy (/grid/*) and structured (/grid/k/*) layouts.
+    ir_list = _read_grid_dataset(f, "grid/k/ir_list", "grid/ir_list")
+    index = _read_grid_dataset(f, "grid/k/index", "grid/index")
+    conj_list = _read_grid_dataset(f, "grid/k/conj_list", "grid/conj_list")
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     ns = f['params/ns'][()]
