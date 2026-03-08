@@ -9,9 +9,10 @@ import numpy as np
 from numba import jit
 from pyscf.df import addons
 from pyscf.pbc import gto, df, tools
+from pyscf.pbc.lib import kpts as libkpts
 from pyscf.lib import logger
 from pyscf.pbc.lib.kpts_helper import (is_zero, gamma_point, member, unique, KPT_DIFF_TOL,
-                                       unique_with_wrap_around, group_by_conj_pairs)
+                                       unique_with_wrap_around)
 from pyscf.pbc.df.rsdf_builder import _RSGDFBuilder
 from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
 import scipy.linalg as LA
@@ -533,6 +534,8 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
 class GreenGDF(df.GDF):
     def __init__(self, cell, kpts=np.zeros((1,3))):
         super().__init__(cell, kpts)
+        self.symm = True
+        self.x2c = 0
 
     def _make_j3c(self, cell=None, auxcell=None, kptij_lst=None, cderi_file=None):
         """Customized ERI building to build and store j2c at the same time
@@ -576,31 +579,44 @@ class GreenGDF(df.GDF):
         j_only = self._j_only or len(kpts_union) == 1
         dfbuilder.make_j3c(cderi_file, j_only=j_only, dataname=self._dataname,
                            kptij_lst=kptij_lst)
-        # j2c on irreducible BZ
-        uniq_kpts, uniq_index, uniq_inverse = unique_with_wrap_around(
-            cell, (self.kpts[None, :, :] - self.kpts[:, None, :]).reshape(-1, 3)
-        )
+        # Build q = k1-k2 and reduce to a unique wrapped q-mesh.
+        q_mesh = (self.kpts[None, :, :] - self.kpts[:, None, :]).reshape(-1, 3)
+        uniq_kpts, uniq_index, uniq_inverse = unique_with_wrap_around(cell, q_mesh)
         scaled_uniq_kpts = cell.get_scaled_kpts(uniq_kpts).round(5)
         log.debug('Num uniq kpts %d', len(uniq_kpts))
         log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
-        kpts_idx_pairs = group_by_conj_pairs(cell, uniq_kpts)[0]
-        j2c_uniq_kpts = uniq_kpts[[k for k, _ in kpts_idx_pairs]]
+
+        # Build a q-structure and use its IBZ representatives to define j2c storage order.
+        use_symm = bool(getattr(self, 'symm', True))
+        use_x2c = int(getattr(self, 'x2c', 0))
+        qstruct = libkpts.make_kpts(
+            cell,
+            uniq_kpts,
+            space_group_symmetry=(use_symm and use_x2c < 2),
+            time_reversal_symmetry=use_symm,
+        )
+
+        # Group k-points into conjugate pairs and build a mapping from the original q-mesh to the unique q-mesh.
+        # qstruct.ibz2bz are the full-BZ indices of irreducible q-points.
+        # Store j2c strictly for q_IBZ representatives in this order.
+        q_ibz2bz = np.asarray(qstruct.ibz2bz, dtype=int)
+        j2c_uniq_kpts = uniq_kpts[q_ibz2bz]
         feri = h5py.File(cderi_file, 'a')
         all_j2c = list(dfbuilder.get_2c2e(j2c_uniq_kpts))
-        for j2c_idx, (k_idx, _) in enumerate(kpts_idx_pairs):
+        for j2c_idx in q_ibz2bz:
             j2c = all_j2c[j2c_idx]
             if j2c.dtype == np.complex128:
-                feri[f'j2c/{k_idx}'] = j2c
+                feri[f'j2c/{j2c_idx}'] = j2c
             else:
-                feri[f'j2c/{k_idx}'] = j2c + 0.j
+                feri[f'j2c/{j2c_idx}'] = j2c + 0.j
             j2c = None
         # Meta data
-        feri['j2c/uniq_kpts'] = uniq_kpts
-        feri['j2c/uniq_index'] = uniq_index
-        feri['j2c/uniq_inverse'] = uniq_inverse
-        feri['j2c/scaled_uniq_kpts'] = scaled_uniq_kpts
+        feri['j2c/qmesh'] = uniq_kpts
+        feri['j2c/scaled_qmesh'] = scaled_uniq_kpts
         feri['j2c/j2c_uniq_kpts'] = j2c_uniq_kpts
-        feri['j2c/kpts_idx_pairs'] = np.asarray(kpts_idx_pairs, dtype=int)
+        # Compatibility metadata: pair each stored q_IBZ representative with itself.
+        feri['j2c/q_ibz2bz'] = q_ibz2bz
+        feri['j2c/q_bz2ibz'] = np.asarray(qstruct.bz2ibz, dtype=int)
         feri['j2c'].attrs['j2c_decomposition'] = 'eigenvalue' if dfbuilder.j2c_eig_always else 'cholesky'
         feri.close()
 
