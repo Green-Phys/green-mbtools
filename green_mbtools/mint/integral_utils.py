@@ -603,8 +603,8 @@ class GreenGDF(df.GDF):
         j2c_uniq_kpts = uniq_kpts[q_ibz2bz]
         feri = h5py.File(cderi_file, 'a')
         all_j2c = list(dfbuilder.get_2c2e(j2c_uniq_kpts))
-        for j2c_idx in q_ibz2bz:
-            j2c = all_j2c[j2c_idx]
+        for i, j2c_idx in enumerate(q_ibz2bz):
+            j2c = all_j2c[i]
             if j2c.dtype == np.complex128:
                 feri[f'j2c/{j2c_idx}'] = j2c
             else:

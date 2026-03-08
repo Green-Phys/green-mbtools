@@ -708,17 +708,28 @@ def init_q_mesh(args, mycell, k_mesh, save_data=True):
     if save_data:
         inp_data = h5py.File(args.output_path, "a")
         grid = inp_data["grid"]
-        if "q" in grid:
+        if "q" not in grid:
             grid.create_group("q")
+        qgrid = grid["q"]
 
-        inp_data["grid/q/mesh"][...] = q_mesh
-        inp_data["grid/q/mesh_scaled"][...] = mycell.get_scaled_kpts(q_mesh)
-        inp_data["grid/q/index"][...] = ind
-        inp_data["grid/q/weight"][...] = weight
-        inp_data["grid/q/inq"][...] = num_iq
-        inp_data["grid/q/nq"][...] = nq
-        inp_data["grid/q/ir_list"][...] = ir_list
-        inp_data["grid/q/conj_list"][...] = conj_list
+        if "mesh" in qgrid:
+            qgrid["mesh"][...] = q_mesh
+            qgrid["mesh_scaled"][...] = mycell.get_scaled_kpts(q_mesh)
+            qgrid["index"][...] = ind
+            qgrid["weight"][...] = weight
+            qgrid["inq"][...] = num_iq
+            qgrid["nq"][...] = nq
+            qgrid["ir_list"][...] = ir_list
+            qgrid["conj_list"][...] = conj_list
+        else:
+            qgrid["mesh"] = q_mesh
+            qgrid["mesh_scaled"] = mycell.get_scaled_kpts(q_mesh)
+            qgrid["index"] = ind
+            qgrid["weight"] = weight
+            qgrid["inq"] = num_iq
+            qgrid["nq"] = nq
+            qgrid["ir_list"] = ir_list
+            qgrid["conj_list"] = conj_list
         inp_data.close()
 
     return qstruct
