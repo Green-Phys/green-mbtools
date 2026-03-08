@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import warnings
 
 import h5py
 import numpy as np
@@ -307,6 +308,17 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["grid/k/nk"] = nk
     inp_data["grid/k/ir_list"] = ir_list
     inp_data["grid/k/conj_list"] = conj_list
+    # Backward-compatibility aliases used by green_mbtools.pesto readers.
+    warnings.warn(
+        "Legacy flat grid datasets under 'grid/*' are deprecated and will be removed in a future "
+        "green_mbtools release. Use the structured layout under 'grid/k/*' and 'grid/q/*'.",
+        FutureWarning,
+        stacklevel=2,
+    )
+    inp_data["grid/index"] = ind
+    inp_data["grid/ir_list"] = ir_list
+    inp_data["grid/conj_list"] = conj_list
+    # k-point pairs for integrals
     inp_data["grid/pairs/conj_pairs_list"] = kij_conj
     inp_data["grid/pairs/trans_pairs_list"] = kij_trans
     inp_data["grid/pairs/kpair_irre_list"] = kpair_irre_list
