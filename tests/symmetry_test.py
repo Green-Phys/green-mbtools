@@ -76,6 +76,14 @@ def _read_j2c_by_numeric_key(cderi_path: Path):
     return matrices
 
 
+def _read_first_existing(h5file, *paths):
+    """Return dataset content for the first existing HDF5 path."""
+    for path in paths:
+        if path in h5file:
+            return h5file[path][()]
+    raise KeyError(f"None of the HDF5 paths exist: {paths}")
+
+
 @pytest.fixture(scope="module")
 def generated_cases(tmp_path_factory):
     """Generate one symmetric and one full-BZ case for reuse across tests."""
@@ -122,11 +130,14 @@ def test_symmetry_on_ao_basis(generated_cases):
     fock, overlap, hcore = _load_reference_hf_data()
 
     with h5py.File(output_h5, "r") as fout:
-        group = fout["grid"]
-        nk = group["nk"][()]
-        ink = group["ink"][()]
-        bz_to_ibz_index = group["index"][()]
-        kspace_orep = group["kspace_orep"][()]
+        nk = _read_first_existing(fout, "grid/k/nk", "grid/nk")
+        ink = _read_first_existing(fout, "grid/k/ink", "grid/ink")
+        bz_to_ibz_index = _read_first_existing(fout, "grid/k/index", "grid/index")
+        kspace_orep = _read_first_existing(
+            fout,
+            "symmetry/k/k_sym_transform_ao",
+            "grid/kspace_orep",
+        )
 
     assert ink == 6
 
@@ -151,25 +162,28 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases):
     full_j2c = _read_j2c_by_numeric_key(generated_cases["full_cderi"])
 
     with h5py.File(generated_cases["symm_output"], "r") as fs:
-        grid = fs["grid"]
-        index = grid["index"][()]
-        kspace_orep_j2c = grid["kspace_orep_j2c"][()]
+        index = _read_first_existing(fs, "grid/q/index", "grid/index")
+        kspace_orep_j2c = _read_first_existing(
+            fs,
+            "symmetry/q/k_sym_transform_j2c",
+            "grid/kspace_orep_j2c",
+        )
 
     ncomp = 0
-    for ik, ir_k_bz in enumerate(index):
+    for ik, ir_k_ibz in enumerate(index):
         ik = int(ik)
-        ir_k_bz = int(ir_k_bz)
-        if ik not in full_j2c or ir_k_bz not in symm_j2c:
+        ir_k_ibz = int(ir_k_ibz)
+        if ik not in full_j2c or ir_k_ibz not in symm_j2c:
             continue
         uop = kspace_orep_j2c[ik]
-        j2c_recon = uop @ symm_j2c[ir_k_bz] @ uop.conj().T
+        j2c_recon = uop @ symm_j2c[ir_k_ibz] @ uop.conj().T
         np.testing.assert_allclose(j2c_recon, full_j2c[ik], atol=1e-6, rtol=1e-6)
         ncomp += 1
 
     assert ncomp > 0, "No overlapping j2c keys found for IBZ->BZ transformation check"
 
 
-@pytest.mark.skip(reason="TODO: validate kspace_orep_p0 transformation against an independent real-data reference")
-def test_kspace_orep_p0_matches_metric_basis_transform(generated_cases):
+@pytest.mark.skip(reason="TODO: validate k_sym_transform_p0 transformation against an independent real-data reference")
+def test_k_sym_transform_p0_matches_metric_basis_transform(generated_cases):
     """TODO: replace implementation-coupled check with a real-data validation."""
     pass
