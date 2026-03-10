@@ -300,8 +300,8 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = int_utils.integrals_grid(mycell, kmesh)
     logging.info(f"number of reduced k-pairs: {num_kpair_stored}")
     inp_data = h5py.File(args.output_path, "w")
-    inp_data["grid/k/_mesh"] = kmesh
-    inp_data["grid/k/_mesh_scaled"] = mycell.get_scaled_kpts(kmesh)
+    inp_data["grid/k/mesh"] = kmesh
+    inp_data["grid/k/mesh_scaled"] = mycell.get_scaled_kpts(kmesh)
     inp_data["grid/k/index"] = ind
     inp_data["grid/k/weight"] = weight
     inp_data["grid/k/ink"] = num_ik
@@ -1021,8 +1021,8 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
             inp_data[path] = value
 
     # Structured grid layout (preferred).
-    _write("grid/k/_mesh", kmesh)
-    _write("grid/k/_mesh_scaled", mycell.get_scaled_kpts(kmesh))
+    _write("grid/k/mesh", kmesh)
+    _write("grid/k/mesh_scaled", mycell.get_scaled_kpts(kmesh))
     _write("grid/k/index", ind)
     _write("grid/k/weight", weight)
     _write("grid/k/ink", num_ik)
