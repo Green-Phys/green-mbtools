@@ -64,6 +64,7 @@ def test_meanfield_variants(data_path, extra_flags, subdir) -> None:
             "--output_path", str(output_h5),
             "--int_path", str(df_hf_int),
             "--hf_int_path",str(df_hf_int),
+            "--use_j2c_eig_decomposition", "false",
         ]
         params = base_params.copy()
         params.extend(extra_flags)

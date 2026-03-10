@@ -435,6 +435,16 @@ def add_common_params(parser):
         "--x2c", type=int, default=0, choices=[0, 1, 2],
         help="enable X2C calculations (0: non-rel., 1: sfX2C1e, 2: X2C1e)"
     )
+    advanced = parser.add_argument_group(
+        "Advanced options",
+        "Low-level knobs intended for expert users. Default values are appropriate for most calculations."
+    )
+    advanced.add_argument(
+        "--use_j2c_eig_decomposition",
+        type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+        default='true',
+        help="Use eigenvalue decomposition for j2c factors during DF build. Set false to force Cholesky-based path."
+    )
 
 
 def add_pbc_params(parser):
@@ -1046,8 +1056,9 @@ def construct_gdf(args, mycell, kmesh=None):
     '''
     # Use gaussian density fitting to get fitted densities
     mydf = int_utils.GreenGDF(mycell)
-    mydf.symm = bool(args.symm)
-    mydf.x2c = int(args.x2c)
+    mydf.symm = bool(getattr(args, "symm", False))
+    mydf.x2c = int(getattr(args, "x2c", 0))
+    mydf.use_j2c_eig_decomposition = bool(getattr(args, "use_j2c_eig_decomposition", True))
     if hasattr(mydf, "_prefer_ccdf"):
         mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions 
     if args.auxbasis is not None:
@@ -1067,6 +1078,7 @@ def compute_ewald_correction(args, cell, kmesh, filename):
     mydf = int_utils.GreenGDF(cell)
     mydf.symm = bool(args.symm)
     mydf.x2c = int(args.x2c)
+    mydf.use_j2c_eig_decomposition = bool(getattr(args, "use_j2c_eig_decomposition", True))
     if args.auxbasis is not None:
         mydf.auxbasis = args.auxbasis
     elif args.beta is not None:

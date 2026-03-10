@@ -536,6 +536,7 @@ class GreenGDF(df.GDF):
         super().__init__(cell, kpts)
         self.symm = True
         self.x2c = 0
+        self.use_j2c_eig_decomposition = True
 
     def _make_j3c(self, cell=None, auxcell=None, kptij_lst=None, cderi_file=None):
         """Customized ERI building to build and store j2c at the same time
@@ -573,7 +574,8 @@ class GreenGDF(df.GDF):
             dfbuilder.eta = self.eta
         else:
             dfbuilder = _RSGDFBuilder(cell, auxcell, kpts_union)
-        dfbuilder.j2c_eig_always = True  # Force j2c inverses to be generated in eigenvalue form to maintain consistency 
+        # Keep configurable to support both legacy-reference compatibility and systematic eigenvalue workflow.
+        dfbuilder.j2c_eig_always = bool(getattr(self, 'use_j2c_eig_decomposition', True))
         dfbuilder.mesh = self.mesh
         dfbuilder.linear_dep_threshold = self.linear_dep_threshold
         j_only = self._j_only or len(kpts_union) == 1
