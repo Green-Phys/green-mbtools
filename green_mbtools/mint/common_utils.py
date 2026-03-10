@@ -1011,21 +1011,43 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
     '''
     inp_data = h5py.File(args.output_path, "a")
     nk = kmesh.shape[0]
-    ink = k_ibz.shape[0]
     kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = int_utils.integrals_grid(mycell, kmesh)
     logging.info(f"number of reduced k-pairs: {num_kpair_stored}")
-    if not "grid" in inp_data:
-        inp_data.create_group("grid")
-    grid_grp = inp_data["grid"]
-    data = [kmesh, mycell.get_scaled_kpts(kmesh), ind, weight, num_ik, nk, ir_list, conj_list,
-               kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored]
-    names = ["k_mesh", "k_mesh_scaled", "index", "weight", "ink", "nk", "ir_list", "conj_list",
-                "conj_pairs_list", "trans_pairs_list", "kpair_irre_list", "kpair_idx", "num_kpair_stored" ]
-    for i, name in enumerate(names):
-        if name in grid_grp:
-            grid_grp[name][...] = data[i]
+
+    def _write(path, value):
+        if path in inp_data:
+            inp_data[path][...] = value
         else:
-            grid_grp[name] = data[i]
+            inp_data[path] = value
+
+    # Structured grid layout (preferred).
+    _write("grid/k/_mesh", kmesh)
+    _write("grid/k/_mesh_scaled", mycell.get_scaled_kpts(kmesh))
+    _write("grid/k/index", ind)
+    _write("grid/k/weight", weight)
+    _write("grid/k/ink", num_ik)
+    _write("grid/k/nk", nk)
+    _write("grid/k/ir_list", ir_list)
+    _write("grid/k/conj_list", conj_list)
+
+    # Backward-compatibility aliases used by green_mbtools.pesto readers.
+    warnings.warn(
+        "Legacy flat grid datasets under 'grid/*' are deprecated and will be removed in a future "
+        "green_mbtools release. Use the structured layout under 'grid/k/*' and 'grid/q/*'.",
+        FutureWarning,
+        stacklevel=2,
+    )
+    _write("grid/index", ind)
+    _write("grid/ir_list", ir_list)
+    _write("grid/conj_list", conj_list)
+
+    # k-point pairs for integrals.
+    _write("grid/pairs/conj_pairs_list", kij_conj)
+    _write("grid/pairs/trans_pairs_list", kij_trans)
+    _write("grid/pairs/kpair_irre_list", kpair_irre_list)
+    _write("grid/pairs/kpair_idx", kptij_idx)
+    _write("grid/pairs/num_kpair_stored", num_kpair_stored)
+
     # Store operators for symmetry operations
     if kstruct is not None:
         store_kstruct_ops_info(args, mycell, kmesh, kstruct)
