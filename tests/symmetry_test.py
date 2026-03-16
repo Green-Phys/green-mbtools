@@ -38,7 +38,7 @@ def _load_reference_hf_data():
     )
 
 
-def _run_grid_only_case(run_dir: Path, symm: bool, nk: int = 3):
+def _run_grid_only_case(run_dir: Path, space_symm: bool, tr_symm: bool, nk: int = 3):
     """Run one grid-only generation and return output and cderi paths."""
     run_dir.mkdir(parents=True, exist_ok=True)
     old_cwd = Path.cwd()
@@ -55,7 +55,8 @@ def _run_grid_only_case(run_dir: Path, symm: bool, nk: int = 3):
             "--nk", str(nk),
             "--grid_only", "true",
             "--keep_cderi", "true",
-            "--symm", "true" if symm else "false",
+            "--space_symm", "true" if space_symm else "false",
+            "--tr_symm", "true" if tr_symm else "false",
         ]
         args = comm.init_pbc_params(params=params)
         pyscf_init = pyscf_pbc_init(args)
@@ -76,25 +77,20 @@ def _read_j2c_by_numeric_key(cderi_path: Path):
     return matrices
 
 
-def _read_first_existing(h5file, *paths):
-    """Return dataset content for the first existing HDF5 path."""
-    for path in paths:
-        if path in h5file:
-            return h5file[path][()]
-    raise KeyError(f"None of the HDF5 paths exist: {paths}")
-
-
 @pytest.fixture(scope="module")
 def generated_cases(tmp_path_factory):
     """Generate one symmetric and one full-BZ case for reuse across tests."""
     base = tmp_path_factory.mktemp("symmetry_cases")
-    symm_output, symm_cderi = _run_grid_only_case(base / "symm_true", symm=True, nk=3)
-    full_output, full_cderi = _run_grid_only_case(base / "symm_false", symm=False, nk=3)
+    symm_output, symm_cderi = _run_grid_only_case(base / "spacce_and_tr_symm_true", space_symm=True, tr_symm=True, nk=3)
+    trs_output, trs_cderi = _run_grid_only_case(base / "tr_symm_true", space_symm=False, tr_symm=True, nk=3)
+    full_output, full_cderi = _run_grid_only_case(base / "symm_false", space_symm=False, tr_symm=False, nk=3)
     return {
         "symm_output": symm_output,
         "symm_cderi": symm_cderi,
-        "full_output": full_output,
-        "full_cderi": full_cderi,
+        "trs_output": trs_output,
+        "trs_cderi": trs_cderi,
+        "full_output" : full_output,
+        "full_cderi" : full_cderi
     }
 
 
@@ -124,50 +120,69 @@ def test_j2c_cholesky_and_eigh_decomposition():
     np.testing.assert_allclose(emat_inv @ j2c @ emat_inv.conj().T, np.eye(emat_inv.shape[0]), atol=1e-8, rtol=1e-8)
 
 
-def test_symmetry_on_ao_basis(generated_cases):
-    """Check AO-space symmetry transformation against reference HF matrices."""
-    output_h5 = generated_cases["symm_output"]
+@pytest.mark.parametrize(
+    "case_key",
+    ["symm_output", "trs_output", "full_output"],
+)
+def test_symmetry_on_ao_basis(generated_cases, case_key):
+    """Check AO-space transformation against reference HF matrices for all generated cases."""
+    output_h5 = generated_cases[case_key]
     fock, overlap, hcore = _load_reference_hf_data()
 
     with h5py.File(output_h5, "r") as fout:
-        nk = _read_first_existing(fout, "grid/k/nk", "grid/nk")
-        ink = _read_first_existing(fout, "grid/k/ink", "grid/ink")
-        bz_to_ibz_index = _read_first_existing(fout, "grid/k/index", "grid/index")
-        kspace_orep = _read_first_existing(
-            fout,
-            "symmetry/k/k_sym_transform_ao",
-            "grid/kspace_orep",
-        )
+        nk = fout["symmetry/k/nk"][()]
+        ink = fout["symmetry/k/ink"][()]
+        bz_to_ibz_index = fout["symmetry/k/index"][()]
+        kspace_orep = fout["symmetry/k/k_sym_transform_ao"][()]
+        conj_list = fout["symmetry/k/conj_list"][()]
+    assert nk == overlap.shape[1]
+    assert len(bz_to_ibz_index) == nk
 
-    assert ink == 6
+    if case_key == "symm_output":
+        assert ink == 6  # known/expected value
+    elif case_key == "trs_output":
+        assert ink == 14  # known/expected value
+    else:
+        assert ink == nk
 
     for ik in range(nk):
         ibz = bz_to_ibz_index[ik]
         uop = kspace_orep[ik]
+        do_conj = int(conj_list[ik]) != 0
 
         overlap_recon = uop @ overlap[0, ibz] @ uop.conj().T
+        if do_conj:
+            overlap_recon = overlap_recon.conjugate()
         np.testing.assert_allclose(overlap_recon, overlap[0, ik], atol=1e-8, rtol=1e-8)
 
         hcore_recon = uop @ hcore[0, ibz] @ uop.conj().T
+        if do_conj:
+            hcore_recon = hcore_recon.conjugate()
         np.testing.assert_allclose(hcore_recon, hcore[0, ik], atol=1e-8, rtol=1e-8)
 
         # Vxc is built on a real-space grid, so Fock symmetrization is looser than H/S.
         fock_recon = uop @ fock[0, ibz] @ uop.conj().T
+        if do_conj:
+            fock_recon = fock_recon.conjugate()
         np.testing.assert_allclose(fock_recon, fock[0, ik], atol=1e-5, rtol=1e-5)
 
 
-def test_j2c_ibz_to_full_bz_transformation(generated_cases):
-    """Validate j2c transfer from IBZ representatives to full BZ via stored operators."""
-    symm_j2c = _read_j2c_by_numeric_key(generated_cases["symm_cderi"])
+@pytest.mark.parametrize(
+    "symm_case_key,symm_output_key",
+    [
+        ("symm_cderi", "symm_output"),
+        ("trs_cderi", "trs_output"),
+    ],
+)
+def test_j2c_ibz_to_full_bz_transformation(generated_cases, symm_case_key, symm_output_key):
+    """Validate j2c transfer from each reduced case to full BZ via stored operators."""
+    symm_j2c = _read_j2c_by_numeric_key(generated_cases[symm_case_key])
     full_j2c = _read_j2c_by_numeric_key(generated_cases["full_cderi"])
 
-    with h5py.File(generated_cases["symm_output"], "r") as fs:
-        index = _read_first_existing(fs, "grid/q/index", "grid/index")
-        kspace_orep_j2c = _read_first_existing(
-            fs,
-            "symmetry/q/k_sym_transform_j2c",
-            "grid/kspace_orep_j2c",
-        )
+    with h5py.File(generated_cases[symm_output_key], "r") as fs:
+        index = fs["symmetry/q/index"][()]
+        conj_list = fs["symmetry/q/conj_list"][()]
+        kspace_orep_j2c = fs["symmetry/q/k_sym_transform_j2c"][()]
 
     ncomp = 0
     for ik, ir_k_ibz in enumerate(index):
@@ -177,6 +192,8 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases):
             continue
         uop = kspace_orep_j2c[ik]
         j2c_recon = uop @ symm_j2c[ir_k_ibz] @ uop.conj().T
+        if conj_list[ik] != 0:
+            j2c_recon = j2c_recon.conj()
         np.testing.assert_allclose(j2c_recon, full_j2c[ik], atol=1e-6, rtol=1e-6)
         ncomp += 1
 

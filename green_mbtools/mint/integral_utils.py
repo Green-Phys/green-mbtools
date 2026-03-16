@@ -534,7 +534,8 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
 class GreenGDF(df.GDF):
     def __init__(self, cell, kpts=np.zeros((1,3))):
         super().__init__(cell, kpts)
-        self.symm = True
+        self.space_symm = True
+        self.tr_symm = True
         self.x2c = 0
         self.use_j2c_eig_decomposition = True
 
@@ -589,13 +590,14 @@ class GreenGDF(df.GDF):
         log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
 
         # Build a q-structure and use its IBZ representatives to define j2c storage order.
-        use_symm = bool(getattr(self, 'symm', True))
+        use_space_symm = bool(getattr(self, 'space_symm', True))
+        use_tr_symm = bool(getattr(self, 'tr_symm', True))
         use_x2c = int(getattr(self, 'x2c', 0))
         qstruct = libkpts.make_kpts(
             cell,
             uniq_kpts,
-            space_group_symmetry=(use_symm and use_x2c < 2),
-            time_reversal_symmetry=use_symm,
+            space_group_symmetry=(use_space_symm and use_x2c < 2),
+            time_reversal_symmetry=use_tr_symm,
         )
 
         # Group k-points into conjugate pairs and build a mapping from the original q-mesh to the unique q-mesh.

@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-import warnings
 
 import h5py
 import numpy as np
@@ -300,30 +299,20 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = int_utils.integrals_grid(mycell, kmesh)
     logging.info(f"number of reduced k-pairs: {num_kpair_stored}")
     inp_data = h5py.File(args.output_path, "w")
-    inp_data["grid/k/mesh"] = kmesh
-    inp_data["grid/k/mesh_scaled"] = mycell.get_scaled_kpts(kmesh)
-    inp_data["grid/k/index"] = ind
-    inp_data["grid/k/weight"] = weight
-    inp_data["grid/k/ink"] = num_ik
-    inp_data["grid/k/nk"] = nk
-    inp_data["grid/k/ir_list"] = ir_list
-    inp_data["grid/k/conj_list"] = conj_list
-    # Backward-compatibility aliases used by green_mbtools.pesto readers.
-    warnings.warn(
-        "Legacy flat grid datasets under 'grid/*' are deprecated and will be removed in a future "
-        "green_mbtools release. Use the structured layout under 'grid/k/*' and 'grid/q/*'.",
-        FutureWarning,
-        stacklevel=2,
-    )
-    inp_data["grid/index"] = ind
-    inp_data["grid/ir_list"] = ir_list
-    inp_data["grid/conj_list"] = conj_list
+    inp_data["symmetry/k/mesh"] = kmesh
+    inp_data["symmetry/k/mesh_scaled"] = mycell.get_scaled_kpts(kmesh)
+    inp_data["symmetry/k/index"] = ind
+    inp_data["symmetry/k/weight"] = weight
+    inp_data["symmetry/k/ink"] = num_ik
+    inp_data["symmetry/k/nk"] = nk
+    inp_data["symmetry/k/ir_list"] = ir_list
+    inp_data["symmetry/k/conj_list"] = conj_list
     # k-point pairs for integrals
-    inp_data["grid/pairs/conj_pairs_list"] = kij_conj
-    inp_data["grid/pairs/trans_pairs_list"] = kij_trans
-    inp_data["grid/pairs/kpair_irre_list"] = kpair_irre_list
-    inp_data["grid/pairs/kpair_idx"] = kptij_idx
-    inp_data["grid/pairs/num_kpair_stored"] = num_kpair_stored
+    inp_data["symmetry/pairs/conj_pairs_list"] = kij_conj
+    inp_data["symmetry/pairs/trans_pairs_list"] = kij_trans
+    inp_data["symmetry/pairs/kpair_irre_list"] = kpair_irre_list
+    inp_data["symmetry/pairs/kpair_idx"] = kptij_idx
+    inp_data["symmetry/pairs/num_kpair_stored"] = num_kpair_stored
     inp_data["HF/Nk"] = Nk
     inp_data["HF/nk"] = nk
     inp_data["HF/Energy"] = mf.e_tot
@@ -456,7 +445,8 @@ def add_pbc_params(parser):
     parser.add_argument("--pseudo", type=str, nargs="*", default=[None], help="pseudopotential")
     parser.add_argument("--shift", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh shift")
     parser.add_argument("--center", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh center")
-    parser.add_argument("--symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use inversion symmetry")
+    parser.add_argument("--space_symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use space group symmetry")
+    parser.add_argument("--tr_symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use time-reversal symmetry")
     parser.add_argument("--print_high_symmetry_points", default=False, action='store_true', help="Print available high symmetry points for current system and exit.")
     parser.add_argument("--high_symmetry_path", type=str, default=None, help="High symmetry path")
     parser.add_argument("--high_symmetry_path_points", type=int, default=0, help="Number of points for high symmetry path")
@@ -544,7 +534,7 @@ def pbc_cell(args):
     '''
     Initialize PySCF unit cell object for a given system
     '''
-    spg_symm = args.symm if args.x2c < 2 else False
+    spg_symm = args.space_symm if args.x2c < 2 else False
     c = gto.M(
         a = args.a,
         atom = args.atom,
@@ -604,7 +594,6 @@ def init_k_mesh(args, mycell):
     int
         number of irreducible k-points
 
-    # TODO: Add separate buttons / args for for space group and time reversal symmetries
     """
     if args.center is None:
        args.center = [0,0,0]
@@ -613,15 +602,15 @@ def init_k_mesh(args, mycell):
     if args.x2c < 2:
         # for normal and sfX2C1e calculations
         kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
-                               space_group_symmetry=args.symm, time_reversal_symmetry=args.symm)
+                               space_group_symmetry=args.space_symm, time_reversal_symmetry=args.tr_symm)
     else:
         # for X2C1e calculations
         print("X2C1e calculations do not support space group symmetry. Only time-reversal symmetry is used.")
         print("Double group symmetry will be implemented in future releases.")
         kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
-                               space_group_symmetry=False, time_reversal_symmetry=args.symm)
+                               space_group_symmetry=False, time_reversal_symmetry=args.tr_symm)
 
-    if not args.symm :
+    if not (args.space_symm or args.tr_symm):
         kstruct = libkpts.make_kpts(mycell, kstruct, space_group_symmetry=False, time_reversal_symmetry=False)
 
     kmesh = kstruct.kpts
@@ -696,9 +685,9 @@ def init_q_mesh(args, mycell, k_mesh, save_data=True):
 
     # get all info same as k-grid
     if args.x2c < 2:
-        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=args.symm, time_reversal_symmetry=args.symm)
+        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=args.space_symm, time_reversal_symmetry=args.tr_symm)
     else:
-        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=False, time_reversal_symmetry=args.symm)
+        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=False, time_reversal_symmetry=args.tr_symm)
 
     # Obtain all info to save
     nq = qstruct.nkpts
@@ -717,7 +706,7 @@ def init_q_mesh(args, mycell, k_mesh, save_data=True):
     # Save q-grid info to output file
     if save_data:
         inp_data = h5py.File(args.output_path, "a")
-        grid = inp_data["grid"]
+        grid = inp_data["symmetry"]
         if "q" not in grid:
             grid.create_group("q")
         qgrid = grid["q"]
@@ -892,10 +881,13 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
         iop = stars_ops[ik]
         mat_ao = get_representation(ik, iop, mycell, kstruct)
         kspace_orep[ik] = mat_ao
+    kspace_orep = kspace_orep.astype(np.complex128)
     if "k_sym_transform_ao" in symm_grp:
-        symm_grp["k_sym_transform_ao"][...] = kspace_orep
+        symm_grp["k_sym_transform_ao"][...] = kspace_orep  # .view(np.float64).reshape(kspace_orep.shape + (2,))
+        # symm_grp["k_sym_transform_ao"].attrs["__complex__"] = np.int8(1)
     else:
-        symm_grp["k_sym_transform_ao"] = kspace_orep
+        symm_grp["k_sym_transform_ao"] = kspace_orep  # .view(np.float64).reshape(kspace_orep.shape + (2,))
+        # symm_grp["k_sym_transform_ao"].attrs["__complex__"] = np.int8(1)
     inp_data.close()
 
 
@@ -922,6 +914,10 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     stars_ops = qstruct.stars_ops_bz
     nk = qstruct.nkpts
     nao = auxcell.nao_nr()
+    # star data for qstruct
+    stars_ops = qstruct.stars_ops_bz
+    stars = qstruct.stars
+    n_stars = len(stars)
 
     # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each k-point using lower Cholesky
     # decomposition to match the convention used by PySCF when building j3c integrals.
@@ -994,14 +990,33 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     else:
         symm_grp.create_group("q")
         symm_grp = symm_grp["q"]
+    # Store kspace transformation matrices
+    kspace_orep_p0 = kspace_orep_p0.astype(np.complex128)
+    kspace_orep_j2c = kspace_orep_j2c.astype(np.complex128)
     if "k_sym_transform_p0" in symm_grp:
-        symm_grp["k_sym_transform_p0"][...] = kspace_orep_p0
+        symm_grp["k_sym_transform_p0"][...] = kspace_orep_p0  # .view(np.float64).reshape(kspace_orep_p0.shape + (2,))
+        # symm_grp["k_sym_transform_p0"].attrs["__complex__"] = np.int8(1)
     else:
-        symm_grp["k_sym_transform_p0"] = kspace_orep_p0
+        symm_grp["k_sym_transform_p0"] = kspace_orep_p0  # .view(np.float64).reshape(kspace_orep_j2c.shape + (2,))
+        # symm_grp["k_sym_transform_p0"].attrs["__complex__"] = np.int8(1)
     if "k_sym_transform_j2c" in symm_grp:
-        symm_grp["k_sym_transform_j2c"][...] = kspace_orep_j2c
+        symm_grp["k_sym_transform_j2c"][...] = kspace_orep_j2c  # view(np.float64).reshape(kspace_orep_j2c.shape + (2,))
+        # symm_grp["k_sym_transform_j2c"].attrs["__complex__"] = np.int8(1)
     else:
-        symm_grp["k_sym_transform_j2c"] = kspace_orep_j2c
+        symm_grp["k_sym_transform_j2c"] = kspace_orep_j2c  # .view(np.float64).reshape(kspace_orep_j2c.shape + (2,))
+        # symm_grp["k_sym_transform_j2c"].attrs["__complex__"] = np.int8(1)
+    if "n_stars" in symm_grp:
+        symm_grp["n_stars"][...] = n_stars
+    else:
+        symm_grp["n_stars"] = n_stars
+    # store stars themselves
+    if "stars" in symm_grp:
+        for i in range(n_stars):
+            symm_grp["stars/{}" .format(i)][...] = stars[i]
+    else:
+        star_grp = symm_grp.create_group("stars")
+        for i in range(n_stars):
+            star_grp["{}" .format(i)] = stars[i]
     inp_data.close()
 
 
@@ -1021,32 +1036,21 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
             inp_data[path] = value
 
     # Structured grid layout (preferred).
-    _write("grid/k/mesh", kmesh)
-    _write("grid/k/mesh_scaled", mycell.get_scaled_kpts(kmesh))
-    _write("grid/k/index", ind)
-    _write("grid/k/weight", weight)
-    _write("grid/k/ink", num_ik)
-    _write("grid/k/nk", nk)
-    _write("grid/k/ir_list", ir_list)
-    _write("grid/k/conj_list", conj_list)
-
-    # Backward-compatibility aliases used by green_mbtools.pesto readers.
-    warnings.warn(
-        "Legacy flat grid datasets under 'grid/*' are deprecated and will be removed in a future "
-        "green_mbtools release. Use the structured layout under 'grid/k/*' and 'grid/q/*'.",
-        FutureWarning,
-        stacklevel=2,
-    )
-    _write("grid/index", ind)
-    _write("grid/ir_list", ir_list)
-    _write("grid/conj_list", conj_list)
+    _write("symmetry/k/mesh", kmesh)
+    _write("symmetry/k/mesh_scaled", mycell.get_scaled_kpts(kmesh))
+    _write("symmetry/k/index", ind)
+    _write("symmetry/k/weight", weight)
+    _write("symmetry/k/ink", num_ik)
+    _write("symmetry/k/nk", nk)
+    _write("symmetry/k/ir_list", ir_list)
+    _write("symmetry/k/conj_list", conj_list)
 
     # k-point pairs for integrals.
-    _write("grid/pairs/conj_pairs_list", kij_conj)
-    _write("grid/pairs/trans_pairs_list", kij_trans)
-    _write("grid/pairs/kpair_irre_list", kpair_irre_list)
-    _write("grid/pairs/kpair_idx", kptij_idx)
-    _write("grid/pairs/num_kpair_stored", num_kpair_stored)
+    _write("symmetry/pairs/conj_pairs_list", kij_conj)
+    _write("symmetry/pairs/trans_pairs_list", kij_trans)
+    _write("symmetry/pairs/kpair_irre_list", kpair_irre_list)
+    _write("symmetry/pairs/kpair_idx", kptij_idx)
+    _write("symmetry/pairs/num_kpair_stored", num_kpair_stored)
 
     # Store operators for symmetry operations
     if kstruct is not None:
@@ -1078,7 +1082,8 @@ def construct_gdf(args, mycell, kmesh=None):
     '''
     # Use gaussian density fitting to get fitted densities
     mydf = int_utils.GreenGDF(mycell)
-    mydf.symm = bool(getattr(args, "symm", False))
+    mydf.space_symm = bool(getattr(args, "space_symm", False))
+    mydf.tr_symm = bool(getattr(args, "tr_symm", False))
     mydf.x2c = int(getattr(args, "x2c", 0))
     mydf.use_j2c_eig_decomposition = bool(getattr(args, "use_j2c_eig_decomposition", True))
     if hasattr(mydf, "_prefer_ccdf"):
@@ -1098,7 +1103,8 @@ def construct_gdf(args, mycell, kmesh=None):
 def compute_ewald_correction(args, cell, kmesh, filename):
     # Use gaussian density fitting to get fitted densities
     mydf = int_utils.GreenGDF(cell)
-    mydf.symm = bool(args.symm)
+    mydf.space_symm = bool(args.space_symm)
+    mydf.tr_symm = bool(args.tr_symm)
     mydf.x2c = int(args.x2c)
     mydf.use_j2c_eig_decomposition = bool(getattr(args, "use_j2c_eig_decomposition", True))
     if args.auxbasis is not None:
