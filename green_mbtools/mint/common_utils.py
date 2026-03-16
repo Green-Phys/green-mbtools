@@ -876,11 +876,22 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
     # eigenproblem (H, S) IS invariant under the symmetry transformation, with eigenvalues matching to
     # machine precision. This validates that the stored rotation matrices are correct for physical transformations.
     nao = mycell.nao_nr()
-    kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
-    for ik in range(nk):
-        iop = stars_ops[ik]
-        mat_ao = get_representation(ik, iop, mycell, kstruct)
-        kspace_orep[ik] = mat_ao
+    if args.x2c < 2:
+        kspace_orep = np.zeros((nk, nao, nao), dtype=np.complex128)
+        # Non-relativistic calculations, where nso = nao (i.e. AO space representation is correct)
+        for ik in range(nk):
+            iop = stars_ops[ik]
+            mat_ao = get_representation(ik, iop, mycell, kstruct)
+            kspace_orep[ik] = mat_ao
+    else:
+        # Relativistic (X2C1e) case
+        # TODO: Need to implement and integrate magnetic and spin symmetry groups
+        # TODO: Implement tests
+        nso = nao * 2
+        kspace_orep = np.zeros((nk, nso, nso), dtype=np.complex128)
+        nso_eye = np.eye(nso) + 0j
+        for ik in range(nk):
+            kspace_orep[ik] = nso_eye
     kspace_orep = kspace_orep.astype(np.complex128)
     if "k_sym_transform_ao" in symm_grp:
         symm_grp["k_sym_transform_ao"][...] = kspace_orep  # .view(np.float64).reshape(kspace_orep.shape + (2,))

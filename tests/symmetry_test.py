@@ -38,7 +38,7 @@ def _load_reference_hf_data():
     )
 
 
-def _run_grid_only_case(run_dir: Path, space_symm: bool, tr_symm: bool, nk: int = 3):
+def _run_grid_only_case(run_dir: Path, space_symm: bool, tr_symm: bool, nk: int = 3, x2c: int = 0):
     """Run one grid-only generation and return output and cderi paths."""
     run_dir.mkdir(parents=True, exist_ok=True)
     old_cwd = Path.cwd()
@@ -57,6 +57,7 @@ def _run_grid_only_case(run_dir: Path, space_symm: bool, tr_symm: bool, nk: int 
             "--keep_cderi", "true",
             "--space_symm", "true" if space_symm else "false",
             "--tr_symm", "true" if tr_symm else "false",
+            "--x2c", str(x2c),
         ]
         args = comm.init_pbc_params(params=params)
         pyscf_init = pyscf_pbc_init(args)
@@ -198,6 +199,58 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases, symm_case_key, symm_
         ncomp += 1
 
     assert ncomp > 0, "No overlapping j2c keys found for IBZ->BZ transformation check"
+
+
+def test_x2c_space_symm_not_supported(tmp_path):
+    """For X2C1e, space symmetry is ignored and AO k-space transforms are identity."""
+    out_space_true, _ = _run_grid_only_case(
+        tmp_path / "x2c_space_true",
+        space_symm=True,
+        tr_symm=True,
+        nk=3,
+        x2c=2,
+    )
+    out_space_false, _ = _run_grid_only_case(
+        tmp_path / "x2c_space_false",
+        space_symm=False,
+        tr_symm=True,
+        nk=3,
+        x2c=2,
+    )
+
+    with h5py.File(out_space_true, "r") as f_true, h5py.File(out_space_false, "r") as f_false:
+        nk_true = int(f_true["symmetry/k/nk"][()])
+        nk_false = int(f_false["symmetry/k/nk"][()])
+        ink_true = int(f_true["symmetry/k/ink"][()])
+        ink_false = int(f_false["symmetry/k/ink"][()])
+
+        idx_true = f_true["symmetry/k/index"][()]
+        idx_false = f_false["symmetry/k/index"][()]
+        ir_true = f_true["symmetry/k/ir_list"][()]
+        ir_false = f_false["symmetry/k/ir_list"][()]
+        conj_true = f_true["symmetry/k/conj_list"][()]
+        conj_false = f_false["symmetry/k/conj_list"][()]
+
+        kops_true = f_true["symmetry/k/k_sym_transform_ao"][()]
+        kops_false = f_false["symmetry/k/k_sym_transform_ao"][()]
+
+    # X2C disables space-group symmetry, so both runs should match TR-only reduction.
+    assert nk_true == nk_false
+    assert ink_true == ink_false
+    np.testing.assert_array_equal(idx_true, idx_false)
+    np.testing.assert_array_equal(ir_true, ir_false)
+    np.testing.assert_array_equal(conj_true, conj_false)
+
+    # With TR enabled, we still expect a reduced IBZ for nk > 1.
+    if nk_true > 1:
+        assert ink_true < nk_true
+
+    # In current X2C path, AO-space symmetry transforms are identity matrices.
+    nso = kops_true.shape[1]
+    eye = np.eye(nso, dtype=np.complex128)
+    eye_stack = np.broadcast_to(eye, kops_true.shape)
+    np.testing.assert_allclose(kops_true, eye_stack, atol=1e-12, rtol=0.0)
+    np.testing.assert_allclose(kops_false, eye_stack, atol=1e-12, rtol=0.0)
 
 
 @pytest.mark.skip(reason="TODO: validate k_sym_transform_p0 transformation against an independent real-data reference")
