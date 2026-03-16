@@ -301,12 +301,12 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data = h5py.File(args.output_path, "w")
     inp_data["symmetry/k/mesh"] = kmesh
     inp_data["symmetry/k/mesh_scaled"] = mycell.get_scaled_kpts(kmesh)
-    inp_data["symmetry/k/index"] = ind
-    inp_data["symmetry/k/weight"] = weight
+    inp_data["symmetry/k/bz2ibz"] = ind
+    inp_data["symmetry/k/weight_ibz"] = weight
     inp_data["symmetry/k/ink"] = num_ik
     inp_data["symmetry/k/nk"] = nk
-    inp_data["symmetry/k/ir_list"] = ir_list
-    inp_data["symmetry/k/conj_list"] = conj_list
+    inp_data["symmetry/k/ibz2bz"] = ir_list
+    inp_data["symmetry/k/tr_conj"] = conj_list
     # k-point pairs for integrals
     inp_data["symmetry/pairs/conj_pairs_list"] = kij_conj
     inp_data["symmetry/pairs/trans_pairs_list"] = kij_trans
@@ -711,24 +711,20 @@ def init_q_mesh(args, mycell, k_mesh, save_data=True):
             grid.create_group("q")
         qgrid = grid["q"]
 
-        if "mesh" in qgrid:
-            qgrid["mesh"][...] = q_mesh
-            qgrid["mesh_scaled"][...] = mycell.get_scaled_kpts(q_mesh)
-            qgrid["index"][...] = ind
-            qgrid["weight"][...] = weight
-            qgrid["inq"][...] = num_iq
-            qgrid["nq"][...] = nq
-            qgrid["ir_list"][...] = ir_list
-            qgrid["conj_list"][...] = conj_list
-        else:
-            qgrid["mesh"] = q_mesh
-            qgrid["mesh_scaled"] = mycell.get_scaled_kpts(q_mesh)
-            qgrid["index"] = ind
-            qgrid["weight"] = weight
-            qgrid["inq"] = num_iq
-            qgrid["nq"] = nq
-            qgrid["ir_list"] = ir_list
-            qgrid["conj_list"] = conj_list
+        def _write(path, value):
+            if path in qgrid:
+                qgrid[path][...] = value
+            else:
+                qgrid[path] = value
+
+        _write("mesh", q_mesh)
+        _write("mesh_scaled", mycell.get_scaled_kpts(q_mesh))
+        _write("bz2ibz", ind)
+        _write("weight_ibz", weight)
+        _write("inq", num_iq)
+        _write("nq", nq)
+        _write("ibz2bz", ir_list)
+        _write("tr_conj", conj_list)
         inp_data.close()
 
     return qstruct
@@ -1049,12 +1045,12 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
     # Structured grid layout (preferred).
     _write("symmetry/k/mesh", kmesh)
     _write("symmetry/k/mesh_scaled", mycell.get_scaled_kpts(kmesh))
-    _write("symmetry/k/index", ind)
-    _write("symmetry/k/weight", weight)
+    _write("symmetry/k/bz2ibz", ind)
+    _write("symmetry/k/weight_ibz", weight)
     _write("symmetry/k/ink", num_ik)
     _write("symmetry/k/nk", nk)
-    _write("symmetry/k/ir_list", ir_list)
-    _write("symmetry/k/conj_list", conj_list)
+    _write("symmetry/k/ibz2bz", ir_list)
+    _write("symmetry/k/tr_conj", conj_list)
 
     # k-point pairs for integrals.
     _write("symmetry/pairs/conj_pairs_list", kij_conj)

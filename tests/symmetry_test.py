@@ -133,9 +133,9 @@ def test_symmetry_on_ao_basis(generated_cases, case_key):
     with h5py.File(output_h5, "r") as fout:
         nk = fout["symmetry/k/nk"][()]
         ink = fout["symmetry/k/ink"][()]
-        bz_to_ibz_index = fout["symmetry/k/index"][()]
+        bz_to_ibz_index = fout["symmetry/k/bz2ibz"][()]
         kspace_orep = fout["symmetry/k/k_sym_transform_ao"][()]
-        conj_list = fout["symmetry/k/conj_list"][()]
+        conj_list = fout["symmetry/k/tr_conj"][()]
     assert nk == overlap.shape[1]
     assert len(bz_to_ibz_index) == nk
 
@@ -181,8 +181,8 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases, symm_case_key, symm_
     full_j2c = _read_j2c_by_numeric_key(generated_cases["full_cderi"])
 
     with h5py.File(generated_cases[symm_output_key], "r") as fs:
-        index = fs["symmetry/q/index"][()]
-        conj_list = fs["symmetry/q/conj_list"][()]
+        index = fs["symmetry/q/bz2ibz"][()]
+        conj_list = fs["symmetry/q/tr_conj"][()]
         kspace_orep_j2c = fs["symmetry/q/k_sym_transform_j2c"][()]
 
     ncomp = 0
@@ -224,12 +224,12 @@ def test_x2c_space_symm_not_supported(tmp_path):
         ink_true = int(f_true["symmetry/k/ink"][()])
         ink_false = int(f_false["symmetry/k/ink"][()])
 
-        idx_true = f_true["symmetry/k/index"][()]
-        idx_false = f_false["symmetry/k/index"][()]
-        ir_true = f_true["symmetry/k/ir_list"][()]
-        ir_false = f_false["symmetry/k/ir_list"][()]
-        conj_true = f_true["symmetry/k/conj_list"][()]
-        conj_false = f_false["symmetry/k/conj_list"][()]
+        idx_true = f_true["symmetry/k/bz2ibz"][()]
+        idx_false = f_false["symmetry/k/bz2ibz"][()]
+        ir_true = f_true["symmetry/k/ibz2bz"][()]
+        ir_false = f_false["symmetry/k/ibz2bz"][()]
+        conj_true = f_true["symmetry/k/tr_conj"][()]
+        conj_false = f_false["symmetry/k/tr_conj"][()]
 
         kops_true = f_true["symmetry/k/k_sym_transform_ao"][()]
         kops_false = f_false["symmetry/k/k_sym_transform_ao"][()]
