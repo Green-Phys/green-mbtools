@@ -16,10 +16,9 @@ from pyscf import __version__ as pyscf_version
 from pyscf.pbc.lib import kpts as libkpts
 from pyscf.pbc.lib.kpts_helper import unique_with_wrap_around
 
-import importlib.metadata as imd
-
 from . import integral_utils as int_utils
 from .symmetry_utils import get_representation
+from ..version import __version__
 
 
 def extract_ase_data(a, atoms):
@@ -334,7 +333,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["params/nel_cell"] = mycell.nelectron
     inp_data["params/nk"] = kmesh.shape[0]
     inp_data["params/NQ"] = NQ
-    inp_data.attrs["__green_version__"] = imd.version("green_mbtools")
+    inp_data.attrs["__green_version__"] = __version__
     inp_data.close()
     chk.save(args.output_path, "Cell", mycell.dumps())
     inp_data = h5py.File(os.path.join(os.path.dirname(args.output_path),"dm.h5"), "w")
