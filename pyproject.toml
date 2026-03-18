@@ -10,7 +10,7 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 
 [project]
 name = "green-mbtools"
-version = "0.3.0"
+dynamic = ["version"]
 authors = [
   { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
@@ -54,14 +54,14 @@ tests = [
   'pytest-benchmark[histogram]>=3.2.1',
 ]
 
+[tool.setuptools.dynamic]
+version = {attr = "green_mbtools.version.__version__"}
+
 [tool.cibuildwheel]
 skip = ["*-musllinux*"]
 test-requires = "pytest"
 test-command = "pytest {project}/tests"
-
 manylinux-x86_64-image = "manylinux_2_28"
-
-
 
 [tool.cibuildwheel.linux]
 before-all = "sed -i -e 's/mirrorlist/#mirrorlist/g' -e 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*; yum install -y eigen3-devel gmp-devel mpfr-devel fftw3-devel libjpeg-devel"
@@ -70,4 +70,3 @@ before-all = "sed -i -e 's/mirrorlist/#mirrorlist/g' -e 's|#baseurl=http://mirro
 [tool.cibuildwheel.macos]
 before-all = "brew install eigen gmp mpfr fftw"
 #test-command = "echo 'installed'"
-
