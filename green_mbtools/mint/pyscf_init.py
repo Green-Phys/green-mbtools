@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from pyscf.df import addons
 from pyscf.pbc import tools, gto
+from pyscf.pbc.lib import kpts as libkpts
 
 from . import gdf_s_metric as gdf_S
 from . import common_utils as comm
@@ -288,6 +289,7 @@ class pyscf_mol_init (pyscf_init):
         self.kcell.kpts = self.kcell.make_kpts([1, 1, 1])
         self.kcell.ecp = self.cell.ecp
         self.kcell.build()
+        self.kstruct = libkpts.make_kpts(self.kcell, self.kmesh, space_group_symmetry=False, time_reversal_symmetry=False)
 
     def mean_field_input(self, mydf=None):
         '''
@@ -356,6 +358,7 @@ class pyscf_mol_init (pyscf_init):
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
         # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is not long range divergence for molecule
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
+        comm.store_mol_symmetry_info(self.args, self.kcell, auxcell, self.kmesh)
         if bool(self.args.df_int):
             self.compute_df_int(nao, X_k)
 

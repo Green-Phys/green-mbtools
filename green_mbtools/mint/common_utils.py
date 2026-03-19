@@ -511,6 +511,17 @@ def init_pbc_params(params=None):
         else:
             args.mean_field = scf.KRHF if args.restricted else scf.KUHF
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
+
+    # GW and GW_s finite-size corrections rely on q-mesh/AqQ assumptions that are
+    # valid for at most time-reversal symmetry reduction (no space-group symmetry).
+    uses_gw_like_correction = any(kind in {"gw", "gw_s"} for kind in args.finite_size_kind)
+    if uses_gw_like_correction and bool(args.space_symm):
+        raise RuntimeError(
+            "Space-group symmetry (--space_symm true) is not supported when "
+            "using GW/GW_s finite-size corrections. Use at most time-reversal "
+            "symmetry: --space_symm false --tr_symm true."
+        )
+
     return args
 
 
@@ -682,11 +693,15 @@ def init_q_mesh(args, mycell, k_mesh, save_data=True):
         qi = [wrap_k(l) for l in qi]
         q_mesh[i] = mycell.get_abs_kpts(qi)
 
-    # get all info same as k-grid
+    # get time-reversal and space-symm info
+    # NOTE: we use the getattr function because "space_symm" and "tr_symm" CLI arguments are only available for periodic systems
+    tr_symm = bool(getattr(args, "tr_symm", True))
+    space_symm = bool(getattr(args, "space_symm", True))
+
     if args.x2c < 2:
-        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=args.space_symm, time_reversal_symmetry=args.tr_symm)
+        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=space_symm, time_reversal_symmetry=tr_symm)
     else:
-        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=False, time_reversal_symmetry=args.tr_symm)
+        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=False, time_reversal_symmetry=tr_symm)
 
     # Obtain all info to save
     nq = qstruct.nkpts
@@ -1023,6 +1038,80 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         star_grp = symm_grp.create_group("stars")
         for i in range(n_stars):
             star_grp["{}" .format(i)] = stars[i]
+    inp_data.close()
+
+
+def store_mol_symmetry_info(args, mycell, auxcell, kmesh=None):
+    """Store trivial symmetry information for molecular calculations.
+
+    Molecular cases use a single Gamma-point only, so the k- and q-mesh symmetry
+    datasets are all one-point identity mappings.
+    """
+
+    zero_mesh = np.zeros((1, 3), dtype=np.float64) if kmesh is None else np.asarray(kmesh, dtype=np.float64)
+    point_index = np.array([0], dtype=np.int64)
+    pair_index = np.array([[0, 0]], dtype=np.int64)
+    weight = np.array([1.0], dtype=np.float64)
+    tr_conj = np.array([0], dtype=np.int64)
+    star0 = np.array([0], dtype=np.int64)
+
+    nao = mycell.nao_nr()
+    nso = 2 * nao if args.x2c == 2 else nao
+    naux = auxcell.nao_nr()
+
+    k_sym_transform_ao = np.eye(nso, dtype=np.complex128).reshape(1, nso, nso)
+    q_sym_transform_j2c = np.eye(naux, dtype=np.complex128).reshape(1, naux, naux)
+    q_sym_transform_p0 = np.eye(naux, dtype=np.complex128).reshape(1, naux, naux)
+
+    inp_data = h5py.File(args.output_path, "a")
+
+    def _write(path, value):
+        if path in inp_data:
+            inp_data[path][...] = value
+        else:
+            inp_data[path] = value
+
+    _write("symmetry/k/mesh", zero_mesh)
+    _write("symmetry/k/mesh_scaled", zero_mesh)
+    _write("symmetry/k/bz2ibz", point_index)
+    _write("symmetry/k/weight_ibz", weight)
+    _write("symmetry/k/ink", 1)
+    _write("symmetry/k/nk", 1)
+    _write("symmetry/k/ibz2bz", point_index)
+    _write("symmetry/k/tr_conj", tr_conj)
+    _write("symmetry/k/n_stars", 1)
+    _write("symmetry/k/k_sym_transform_ao", k_sym_transform_ao)
+
+    if "symmetry/k/stars/0" in inp_data:
+        inp_data["symmetry/k/stars/0"][...] = star0
+    else:
+        inp_data.require_group("symmetry/k/stars")
+        inp_data["symmetry/k/stars/0"] = star0
+
+    _write("symmetry/q/mesh", zero_mesh)
+    _write("symmetry/q/mesh_scaled", zero_mesh)
+    _write("symmetry/q/bz2ibz", point_index)
+    _write("symmetry/q/weight_ibz", weight)
+    _write("symmetry/q/inq", 1)
+    _write("symmetry/q/nq", 1)
+    _write("symmetry/q/ibz2bz", point_index)
+    _write("symmetry/q/tr_conj", tr_conj)
+    _write("symmetry/q/n_stars", 1)
+    _write("symmetry/q/k_sym_transform_j2c", q_sym_transform_j2c)
+    _write("symmetry/q/k_sym_transform_p0", q_sym_transform_p0)
+
+    if "symmetry/q/stars/0" in inp_data:
+        inp_data["symmetry/q/stars/0"][...] = star0
+    else:
+        inp_data.require_group("symmetry/q/stars")
+        inp_data["symmetry/q/stars/0"] = star0
+
+    _write("symmetry/pairs/conj_pairs_list", point_index)
+    _write("symmetry/pairs/trans_pairs_list", point_index)
+    _write("symmetry/pairs/kpair_irre_list", point_index)
+    _write("symmetry/pairs/kpair_idx", pair_index)
+    _write("symmetry/pairs/num_kpair_stored", 1)
+
     inp_data.close()
 
 
