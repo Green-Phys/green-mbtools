@@ -233,10 +233,14 @@ class pyscf_pbc_init (pyscf_init):
             mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
         mydf.build()
 
-        j3c, kptij_lst, j2c_sqrt, uniq_kpts = gdf_S.make_j3c(mydf, self.cell, j2c_sqrt=True, exx=False)
+        # ? the construct_gdf function being called above uses Coulomb metric, but corrections here are in overlap metric
+        use_space_symm = self.args.space_symm and self.args.x2c < 2
+        j2c_sqrt, uniq_qpts = gdf_S.make_j2c_sqrt(mydf, self.cell, use_space_symm, self.args.tr_symm)
         
         ''' Transformation matrix from auxiliary basis to plane-wave '''
-        AqQ, q_reduced, q_scaled_reduced = gdf_S.transformation_PW_to_auxbasis(mydf, self.cell, j2c_sqrt, uniq_kpts)
+        AqQ, q_reduced, q_scaled_reduced = gdf_S.transformation_PW_to_auxbasis(
+            mydf, self.cell, j2c_sqrt, uniq_qpts, use_space_symm, self.args.tr_symm
+        )
         
         q_abs = np.array([np.linalg.norm(qq) for qq in q_reduced])
         q_abs = np.array([round(qq, 8) for qq in q_abs])
