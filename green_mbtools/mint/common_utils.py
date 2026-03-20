@@ -14,9 +14,9 @@ from pyscf import df as mdf
 from pyscf.pbc import tools, gto, df, scf, dft
 from pyscf import __version__ as pyscf_version
 from pyscf.pbc.lib import kpts as libkpts
-from pyscf.pbc.lib.kpts_helper import unique_with_wrap_around
 
 from . import integral_utils as int_utils
+from . import kpt_utils
 from .symmetry_utils import get_representation
 from ..version import __version__
 
@@ -512,16 +512,6 @@ def init_pbc_params(params=None):
             args.mean_field = scf.KRHF if args.restricted else scf.KUHF
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
 
-    # GW and GW_s finite-size corrections rely on q-mesh/AqQ assumptions that are
-    # valid for at most time-reversal symmetry reduction (no space-group symmetry).
-    uses_gw_like_correction = any(kind in {"gw", "gw_s"} for kind in args.finite_size_kind)
-    if uses_gw_like_correction and bool(args.space_symm):
-        raise RuntimeError(
-            "Space-group symmetry (--space_symm true) is not supported when "
-            "using GW/GW_s finite-size corrections. Use at most time-reversal "
-            "symmetry: --space_symm false --tr_symm true."
-        )
-
     return args
 
 
@@ -678,33 +668,18 @@ def init_q_mesh(args, mycell, k_mesh, save_data=True):
     pyscf.pbc.lib.kpts.KPoints
         q-mesh struct for the Brillouin Zone
     """
-    # Build q = k1 - k2 over the full k-mesh and remove duplicates with
-    # the same wrap-around convention as integral generation.
-    q_mesh = (k_mesh[None, :, :] - k_mesh[:, None, :]).reshape(-1, 3)
-    q_mesh, _, _ = unique_with_wrap_around(mycell, q_mesh)
-
-    # Use the same folding procedure as init_k_mesh.
-    for i, _ in enumerate(q_mesh):
-        qi = mycell.get_scaled_kpts(q_mesh[i])
-        qi = [wrap_k(l) for l in qi]
-        q_mesh[i] = mycell.get_abs_kpts(qi)
-    for i, _ in enumerate(q_mesh):
-        qi = mycell.get_scaled_kpts(q_mesh[i])
-        qi = [wrap_k(l) for l in qi]
-        q_mesh[i] = mycell.get_abs_kpts(qi)
-
-    # get time-reversal and space-symm info
     # NOTE: we use the getattr function because "space_symm" and "tr_symm" CLI arguments are only available for periodic systems
     tr_symm = bool(getattr(args, "tr_symm", True))
     space_symm = bool(getattr(args, "space_symm", True))
 
     if args.x2c < 2:
-        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=space_symm, time_reversal_symmetry=tr_symm)
+        qstruct = kpt_utils.build_q_struct(mycell, k_mesh, space_symm=space_symm, tr_symm=tr_symm)
     else:
-        qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=False, time_reversal_symmetry=tr_symm)
+        qstruct = kpt_utils.build_q_struct(mycell, k_mesh, space_symm=False, tr_symm=tr_symm)
 
     # Obtain all info to save
     nq = qstruct.nkpts
+    q_mesh = qstruct.kpts
     num_iq = qstruct.nkpts_ibz
     ir_list = qstruct.ibz2bz
     conj_list = qstruct.time_reversal_symm_bz
