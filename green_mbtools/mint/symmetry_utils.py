@@ -4,6 +4,9 @@
 # ------------------------------------------
 
 import numpy as np
+import h5py
+import logging
+import warnings
 
 
 def fold_to_unit_cell(r_cart_scaled, mycell):
@@ -233,3 +236,50 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=
 
     # info about symmetry operation
     return repr_matrix
+
+
+def check_kspace_symmetry_breaking(inp_file, datasets):
+    """Report symmetry reconstruction residuals for k-resolved matrix quantities.
+
+    Parameters
+    ----------
+    inp_file : string
+        Path to input.h5 file that contains all the output from initialization
+    datasets : list
+        List of datasets in the input file, for which symmetry checks need to be performed
+    """
+    finp = h5py.File(inp_file, 'r')
+    # get k-symmetry info
+    bz2ibz = finp['symmetry/k/bz2ibz'][()]
+    tr_conj = finp['symmetry/k/tr_conj'][()]
+    nk = finp['symmetry/k/nk/'][()]
+    k_sym_trans = finp['symmetry/k/k_sym_transform_ao'][()]
+
+    for dset in datasets:
+        X = finp[dset][()].view(complex)
+        X = X.reshape(X.shape[:-1])
+        ns = X.shape[0]
+
+        max_abs = 0.0
+        for s in range(ns):
+            for k in range(nk):
+                k_ir = int(bz2ibz[k])
+                Uk = k_sym_trans[k]
+                recon = Uk @ X[s, k_ir] @ Uk.conj().T
+                if int(tr_conj[k]) != 0:
+                    recon = recon.conjugate()
+                diff = np.max(np.abs(recon - X[s, k]))
+                if diff > max_abs:
+                    max_abs = diff
+
+        if max_abs > 1e-3:
+            warnings.warn(
+                f"Dataset '{dset}' is not symmetric under the stored k-point symmetry operations "
+                f"(max residual = {max_abs:.3e}). "
+                "The mean-field solution may have broken the assumed space-group symmetry. "
+                "Please rerun the initialization with '--grid_only' and '--space_symm=false' "
+                "to disable space-group symmetry and obtain a consistent set of k-points.",
+                UserWarning,
+                stacklevel=2,
+            )
+    finp.close()

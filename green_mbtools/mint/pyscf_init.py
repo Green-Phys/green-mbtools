@@ -10,6 +10,7 @@ from pyscf.pbc.lib import kpts as libkpts
 from . import gdf_s_metric as gdf_S
 from . import common_utils as comm
 from . import integral_utils as int_utils
+from . import symmetry_utils as symm_utils
 from ..pesto import ft
 
 
@@ -106,6 +107,7 @@ class pyscf_pbc_init (pyscf_init):
         if self.args.grid_only:
             comm.store_k_grid(self.args, self.cell, self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik)
             auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
+            # NOTE: if args.orth = 1, we will not be able to transform the k_sym_transform_ao yet.
             comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
             comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
             return
@@ -125,7 +127,7 @@ class pyscf_pbc_init (pyscf_init):
         if self.args.xc is not None:
             vhf = mf.get_veff().astype(dtype=np.complex128)
         else:
-            vhf = mf.get_veff(hf_dm).astype(dtype=np.complex128)
+            vhf = mf.get_veff(dm_kpts=hf_dm).astype(dtype=np.complex128)
         F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
     
         if len(F.shape) == 3:
@@ -140,10 +142,19 @@ class pyscf_pbc_init (pyscf_init):
         # Orthogonalization matrix
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
         # Save data into Green Software package input format.
-        comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
+        comm.save_data(
+            self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
+            Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao
+        )
         # Save symmetry operations info for main and auxiliary unit cells
-        comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
+        comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct, X_k=X_k, X_inv_k=X_inv_k,)
         comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
+
+        # Diagnose whether self-consistent quantities obey k-space symmetry.
+        if self.args.space_symm or self.args.tr_symm:
+            symm_utils.check_kspace_symmetry_breaking(self.args.output_path, ["HF/H-k", "HF/S-k", "HF/Fock-k"])
+
+        # Store density-fitted integrals
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 
