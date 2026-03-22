@@ -17,7 +17,9 @@ def test_igen(data_path):
     with h5py.File(data_dir + '/H2_int/VQ_0.h5', "r") as f:
         test_data = f["0"][()]
     params = ["--a", "0.0,  2.7155, 2.7155\n2.7155, 0.0,  2.7155\n2.7155, 2.7155, 0.0", "--atom", "H 0.0  0.0  0.0\nH 1.35775 1.35775 1.35775", 
-              "--nk", "2", "--basis", "sto3g", "--keep_cderi", "false", "--output_path", "/tmp/input.h5", "--int_path", "/tmp/df_int/", "--hf_int_path", "/tmp/df_hf_int/"]
+              "--nk", "2", "--basis", "sto3g", "--keep_cderi", "false", "--output_path", "/tmp/input.h5",
+              "--int_path", "/tmp/df_int/", "--hf_int_path", "/tmp/df_hf_int/",
+              "--use_j2c_eig_decomposition", "false", "--space_symm", "false"]
     args = comm.init_pbc_params(params=params)
     print(args)
 

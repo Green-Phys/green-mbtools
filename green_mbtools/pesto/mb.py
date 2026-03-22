@@ -1,5 +1,4 @@
 from functools import reduce
-import warnings
 import numpy as np
 import scipy.linalg as LA
 
@@ -459,7 +458,7 @@ def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
     return Y
 
 
-def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
+def to_full_bz(X, conj_list, ir_list, bz_index, k_ind, k_sym_trans):
     """Transform input quantity from irreducible number of k-points to full Brillouin zone.
 
     Parameters
@@ -474,29 +473,39 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
         irreducible k-index associated for every k-point in full Brillouin zone k-mesh
     k_ind : int
         location of k-index in the input array X.
+    k_sym_trans : numpy.ndarray
+        Symmetry transforms in AO basis for each full-BZ k-point with shape
+        (nk, nao, nao). If provided, reconstructed matrices are rotated as
+        U(k) X(k_ir) U(k)^dagger for k-resolved matrix data (k_ind in {1, 2}).
 
     Returns
     -------
     numpy.ndarray
         data on full Brillouin zone k-mesh
     """
-    index_list = np.zeros(bz_index.shape, dtype=int)
+    index_loc_in_ibz = np.zeros(bz_index.shape, dtype=int) - 1
     for i, irn in enumerate(ir_list):
-        index_list[irn] = i
+        index_loc_in_ibz[irn] = i
     old_shape = X.shape
     new_shape = np.copy(old_shape)
     new_shape[k_ind] = conj_list.shape[0]
     Y = np.zeros(new_shape, dtype=X.dtype)
     for ik, kk in enumerate(bz_index):
-        k = index_list[kk]
+        k = index_loc_in_ibz[kk]
         if k_ind == 0:
             Y[ik, ::] = X[k, ::].conj() if conj_list[ik] else X[k, ::]
         elif k_ind == 1:
-            Y[:, ik, ::] = X[:, k, ::].conj() \
-                if conj_list[ik] else X[:, k, ::]
+            Xk = X[:, k, ::].conj() if conj_list[ik] else X[:, k, ::]
+            Uk = k_sym_trans[ik]
+            Uk_dag = Uk.conj().T
+            Xk = np.einsum('ab,sbc,cd->sad', Uk, Xk, Uk_dag)
+            Y[:, ik, ::] = Xk
         elif k_ind == 2:
-            Y[:, :, ik, ::] = X[:, :, k, ::].conj() \
-                if conj_list[ik] else X[:, :, k, ::]
+            Xk = X[:, :, k, ::].conj() if conj_list[ik] else X[:, :, k, ::]
+            Uk = k_sym_trans[ik]
+            Uk_dag = Uk.conj().T
+            Xk = np.einsum('ab,tsbc,cd->tsad', Uk, Xk, Uk_dag)
+            Y[:, :, ik, ::] = Xk
     return Y
 
 
@@ -539,28 +548,10 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     H0 = f['HF/H-k'][()].view(complex)
     H0 = H0.reshape(H0.shape[:-1])
 
-    _legacy_grid_warned = False
-
-    def _read_grid_dataset(h5f, *paths):
-        nonlocal _legacy_grid_warned
-        for i, path in enumerate(paths):
-            if path in h5f:
-                if i > 0 and not _legacy_grid_warned:
-                    warnings.warn(
-                        "Detected deprecated flat grid datasets under 'grid/*'. Support for this layout "
-                        "will be removed in a future green_mbtools release; please migrate to 'grid/k/*' "
-                        "(and 'grid/q/*' where applicable).",
-                        FutureWarning,
-                        stacklevel=2,
-                    )
-                    _legacy_grid_warned = True
-                return h5f[path][()]
-        raise KeyError(f"None of the dataset paths exist: {paths}")
-
-    # Support both legacy (/grid/*) and structured (/grid/k/*) layouts.
-    ir_list = _read_grid_dataset(f, "grid/k/ir_list", "grid/ir_list")
-    index = _read_grid_dataset(f, "grid/k/index", "grid/index")
-    conj_list = _read_grid_dataset(f, "grid/k/conj_list", "grid/conj_list")
+    ir_list = f["symmetry/k/ibz2bz"][()]
+    index = f["symmetry/k/bz2ibz"][()]
+    conj_list = f["symmetry/k/tr_conj"][()]
+    k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     ns = f['params/ns'][()]
@@ -573,9 +564,9 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     All k-dependent matrices should lie on a full Monkhorst-Pack grid.
     """
     if not x2c:
-        Sigma1 = to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
-        Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-        G = to_full_bz(Gr, conj_list, ir_list, index, 2)
+        Sigma1 = to_full_bz(Sigma1r, conj_list, ir_list, index, 1, k_sym_trans)
+        Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2, k_sym_trans)
+        G = to_full_bz(Gr, conj_list, ir_list, index, 2, k_sym_trans)
     else:
         Sigma1 = to_full_bz_TRsym(Sigma1r, conj_list, ir_list, index, 1)
         Sigma = to_full_bz_TRsym(Sigmar, conj_list, ir_list, index, 2)
