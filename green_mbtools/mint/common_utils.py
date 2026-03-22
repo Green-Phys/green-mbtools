@@ -812,7 +812,7 @@ def solve_mol_mean_field(args, mydf, mycell):
     return mf
 
 
-def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
+def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None):
     """Store symmetry operation information for k-points into a hdf5 file in Green'WeakCoupling format
 
     Parameters
@@ -825,6 +825,34 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
         k-mesh for the Brillouin Zone
     kstruct : pyscf.pbc.symm.KPointsSymmetry
         k-point symmetry structure
+    X_k : numpy.ndarray, optional
+        Orthogonalization matrices in the full BZ, shape ``(nk, nao, nao)``
+        (or spin-orbital analog). Required together with ``X_inv_k`` when
+        ``args.orth == 1`` to rotate AO-space symmetry operators into the
+        orthogonalized basis.
+    X_inv_k : numpy.ndarray, optional
+        Inverse orthogonalization matrices on irreducible k-points, indexed by
+        ``kstruct.bz2ibz`` representatives. Used as
+        ``X_k[k] @ U_ao[k] @ X_inv_k[k_ir]``.
+
+    Notes
+    -----
+    The function writes/updates the following datasets under
+    ``/symmetry/k`` in ``args.output_path``:
+
+    - ``n_stars``: number of k-point stars.
+    - ``stars/<i>``: indices of BZ points in star ``i``.
+    - ``k_sym_transform_ao``: one AO-space symmetry transform per BZ k-point,
+      mapping each point to its representative irreducible k-point.
+
+    For ``args.x2c < 2``, ``k_sym_transform_ao`` is built from
+    ``get_representation``. For ``args.x2c == 2``, the current implementation
+    stores identity transforms in spin-orbital space as a placeholder.
+
+    Returns
+    -------
+    None
+        Data is written directly to the HDF5 file.
     """
     # extract symmetry operation information from kstruct
     nk = kmesh.shape[0]
@@ -878,6 +906,24 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct):
         for ik in range(nk):
             kspace_orep[ik] = nso_eye
     kspace_orep = kspace_orep.astype(np.complex128)
+
+    # If quantities are saved in an orthogonalized basis, rotate symmetry operators
+    # to the same basis so U(k) reconstructs H/F/G consistently.
+    if (args.orth == 1):
+        if (X_k is None or X_inv_k is None):
+            raise ValueError(
+                "Cannot transform symmetry operators to orthogonal basis: "
+                "missing transformation matrices X_k and/or X_inv_k. "
+                "(--orth=1 requires --grid_only=false to compute mean-field quantities)"
+            )
+        # get mapping from full BZ idx to idx (still in full BZ) of the corresponding irreducible point
+        bz2ibz = kstruct.ibz2bz[kstruct.bz2ibz]
+        kspace_orep_orth = np.zeros_like(kspace_orep)
+        for ik in range(nk):
+            ik_ir = bz2ibz[ik]
+            kspace_orep_orth[ik] = X_k[ik] @ kspace_orep[ik] @ X_inv_k[ik_ir]
+        kspace_orep = kspace_orep_orth
+
     if "k_sym_transform_ao" in symm_grp:
         symm_grp["k_sym_transform_ao"][...] = kspace_orep  # .view(np.float64).reshape(kspace_orep.shape + (2,))
         # symm_grp["k_sym_transform_ao"].attrs["__complex__"] = np.int8(1)
