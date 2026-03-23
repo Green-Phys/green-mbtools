@@ -39,10 +39,6 @@ def build_q_struct(mycell, k_mesh, space_symm=False, tr_symm=True):
         qi = mycell.get_scaled_kpts(q_mesh[i])
         qi = [wrap_k(l) for l in qi]
         q_mesh[i] = mycell.get_abs_kpts(qi)
-    for i, _ in enumerate(q_mesh):
-        qi = mycell.get_scaled_kpts(q_mesh[i])
-        qi = [wrap_k(l) for l in qi]
-        q_mesh[i] = mycell.get_abs_kpts(qi)
 
     qstruct = libkpts.make_kpts(mycell, q_mesh, space_group_symmetry=space_symm, time_reversal_symmetry=tr_symm)
 

@@ -29,7 +29,7 @@ ibz2bz = f["/symmetry/k/ibz2bz"][()]
 bz2ibz = f["/symmetry/k/bz2ibz"][()]
 weight_ibz = f["/symmetry/k/weight_ibz"][()]
 tr_conj = f["/symmetry/k/tr_conj"][()]
-k_sym_trans = f["/symmetry/k/k_sym_transform-ao"][()]
+k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
 f.close()
 
 ''' All k-dependent matrices should lie on a full Monkhorst-Pack grid. '''

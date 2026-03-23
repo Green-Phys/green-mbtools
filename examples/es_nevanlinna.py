@@ -55,7 +55,7 @@ if __name__ == "__main__":
     ibz2bz = f["/symmetry/k/ibz2bz"][()]
     bz2ibz = f["/symmetry/k/bz2ibz"][()]
     tr_conj = f["symmetry/k/tr_conj"][()]
-    k_sym_trans = f["symmetry/k/k_sym_transform-ao"][()]
+    k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
     f.close()
     print("Completed reading mean-field data.")
     

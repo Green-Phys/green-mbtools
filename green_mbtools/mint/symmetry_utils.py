@@ -1,16 +1,34 @@
-# -------------Ascknwledgements-------------
-# Adopted from Xinyang's implementation:
+# -------------Acknowledgements-------------
+# The functions "fold_to_unit_cell", "generate_permutation_info", "get_orbital_index" and
+# "get_representation" are adopted from Xinyang's implementation:
 # https://github.com/CQMP/MBSymmetry
 # ------------------------------------------
 
 import numpy as np
 import h5py
-import logging
 import warnings
 
 
-def fold_to_unit_cell(r_cart_scaled, mycell):
+def fold_to_unit_cell(r_cart_scaled):
     """
+    Fold a scaled (fractional) coordinate into the primary unit cell.
+
+    Parameters
+    ----------
+    r_cart_scaled : array_like
+        Scaled/fractional coordinate to be folded, shape (3,). This should be in
+        the same convention as ``Cell.get_scaled_atom_coords()`` (i.e. expressed
+        in units of the lattice vectors, not in Cartesian units). The parameter
+        name is historical and does not imply Cartesian coordinates.
+    mycell : pyscf.pbc.gto.cell.Cell
+        The unit cell object from PySCF.
+    Returns
+    -------
+    frac : ndarray
+        The folded scaled/fractional coordinate within the unit cell, shape (3,).
+        Each component is wrapped into the interval [-0.5, 0.5) to match the atom
+        coordinate convention used elsewhere in this module.
+
     Fold a Cartesian coordinate into the primary unit cell.
 
     Parameters:
@@ -25,7 +43,6 @@ def fold_to_unit_cell(r_cart_scaled, mycell):
     r_rel : ndarray
         The folded Cartesian coordinate within the unit cell (3,).
     """
-    a = mycell.lattice_vectors()
     frac = r_cart_scaled
     # Wrap to [-0.5, 0.5) to match atom coordinate convention
     frac = frac - np.round(frac)
@@ -68,7 +85,7 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
     for i in range(n_atom):
         i_coord = coords_scaled[i]
         trans_pos = np.dot(rot, i_coord) + trans
-        shift_pos = fold_to_unit_cell(trans_pos, mycell)
+        shift_pos = fold_to_unit_cell(trans_pos)
         pos_diff[i] = shift_pos - trans_pos
 
         # Find the corresponding atom partner
@@ -172,7 +189,7 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=
     Returns
     -------
     repr_matrix : ndarray
-        The representation matrix for the symmetry operation (n_atm, n_atm).
+        The representation matrix for the symmetry operation (nao, nao).
     """
     n_atom = mycell.natm
     nao = mycell.nao_nr()
@@ -252,7 +269,7 @@ def check_kspace_symmetry_breaking(inp_file, datasets):
     # get k-symmetry info
     bz2ibz = finp['symmetry/k/bz2ibz'][()]
     tr_conj = finp['symmetry/k/tr_conj'][()]
-    nk = finp['symmetry/k/nk/'][()]
+    nk = finp['symmetry/k/nk'][()]
     k_sym_trans = finp['symmetry/k/k_sym_transform_ao'][()]
 
     for dset in datasets:

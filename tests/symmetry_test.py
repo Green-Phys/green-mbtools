@@ -82,7 +82,7 @@ def _read_j2c_by_numeric_key(cderi_path: Path):
 def generated_cases(tmp_path_factory):
     """Generate one symmetric and one full-BZ case for reuse across tests."""
     base = tmp_path_factory.mktemp("symmetry_cases")
-    symm_output, symm_cderi = _run_grid_only_case(base / "spacce_and_tr_symm_true", space_symm=True, tr_symm=True, nk=3)
+    symm_output, symm_cderi = _run_grid_only_case(base / "space_and_tr_symm_true", space_symm=True, tr_symm=True, nk=3)
     trs_output, trs_cderi = _run_grid_only_case(base / "tr_symm_true", space_symm=False, tr_symm=True, nk=3)
     full_output, full_cderi = _run_grid_only_case(base / "symm_false", space_symm=False, tr_symm=False, nk=3)
     return {

@@ -134,7 +134,7 @@ def main():
         # find kpath indices
         sp_points_idx = []
         for p in sp_points:
-            idx = list(kpath).bz2ibz(p)
+            idx = list(kpath).index(p)
             sp_points_idx.append(idx)
 
         print(sp_points_idx)
