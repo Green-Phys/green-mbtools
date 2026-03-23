@@ -899,7 +899,6 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
     else:
         # Relativistic (X2C1e) case
         # TODO: Need to implement and integrate magnetic and spin symmetry groups
-        # TODO: Implement tests
         nso = nao * 2
         kspace_orep = np.zeros((nk, nso, nso), dtype=np.complex128)
         nso_eye = np.eye(nso) + 0j
