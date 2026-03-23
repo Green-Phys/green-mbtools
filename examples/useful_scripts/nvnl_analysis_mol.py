@@ -27,13 +27,6 @@ def parse_arguments():
 
 def read_h5_data(file_path):
     with h5py.File(file_path, 'r') as f:
-        kmesh_scaled = f["/grid/k_mesh_scaled"][()]
-        index = f["/grid/index"][()]
-        ir_list = f["/grid/ir_list"][()]
-        conj_list = f["/grid/conj_list"][()]
-
-        scfFk = f["/HF/Fock-k"][()].view(complex)
-        scfFk = scfFk.reshape(scfFk.shape[:-1])
         rSk = f["/HF/S-k"][()].view(complex)
         rSk = rSk.reshape(rSk.shape[:-1])
         rH0k = f["/HF/H-k"][()].view(complex)
@@ -41,8 +34,7 @@ def read_h5_data(file_path):
 
         print(rH0k.shape)
         print(rSk.shape)
-        print(scfFk.shape)
-    return kmesh_scaled, index, ir_list, conj_list, scfFk, rSk, rH0k
+    return rSk, rH0k
 
 
 def read_sim_data(sim_path, it):
@@ -61,8 +53,8 @@ def main():
     args = parse_arguments()
 
     print("Reading input file")
-    kmesh_scaled, index, _, _, _, rSk, rH0k = read_h5_data(args.input)
-    nk = index.shape[0]
+    rSk, rH0k = read_h5_data(args.input)
+    nk = 1  # molecular case
 
     print("Reading sim file")
     it, rVeffk, rGk, rSigmak, tau_mesh, mu = read_sim_data(args.sim, args.iter)
@@ -93,7 +85,7 @@ def main():
 
     # Initialize mbanalysis post processing
     mbo = mb.MB_post(
-        fock=Fk_mo, sigma=Sigma_tk_mo, mu=mu, S=Sk_mo, kmesh=kmesh_scaled,
+        fock=Fk_mo, sigma=Sigma_tk_mo, mu=mu, S=Sk_mo,
         beta=args.beta, ir_file=args.grid_file, legacy_ir=args.legacy_ir
     )
 

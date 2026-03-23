@@ -52,18 +52,19 @@ if __name__ == "__main__":
     Sk = f['HF/S-k'][()].view(complex)
     Sk = Sk.reshape(Sk.shape[:-1])
     mo_coeff = f["/HF/mo_coeff"][()]
-    ir_list = f["/grid/ir_list"][()]
-    index = f["/grid/index"][()]
-    conj_list = f["grid/conj_list"][()]
+    ibz2bz = f["/symmetry/k/ibz2bz"][()]
+    bz2ibz = f["/symmetry/k/bz2ibz"][()]
+    tr_conj = f["symmetry/k/tr_conj"][()]
+    k_sym_trans = f["symmetry/k/k_sym_transform-ao"][()]
     f.close()
     print("Completed reading mean-field data.")
     
     # All k-dependent matrices should lie on a full Monkhorst-Pack grid.
     # Transform from reduced BZ to full BZ
     print("Transforming data from reduced BZ to full BZ.")
-    Sigma1 = mb.to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
-    Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-    Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+    Sigma1 = mb.to_full_bz(Sigma1r, tr_conj, ibz2bz, bz2ibz, 1, k_sym_trans)
+    Sigmak = mb.to_full_bz(Sigmar, tr_conj, ibz2bz, bz2ibz, 2, k_sym_trans)
+    Gk = mb.to_full_bz(Gr, tr_conj, ibz2bz, bz2ibz, 2, k_sym_trans)
     Fk = Sigma1 + Hk
     print('Pre analysis complete')
     

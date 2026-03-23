@@ -58,7 +58,7 @@ output = "H2_LDA_GXMGR.h5"
 ##################
 
 f = h5py.File(input_path, 'r')
-kmesh_scaled = f["/grid/k_mesh_scaled"][()]
+kmesh_scaled = f["/symmetry/k/mesh_scaled"][()]
 nk = f["HF/nk"][()]
 Fk = f["HF/Fock-k"][()].view(complex)
 Sk = f["HF/S-k"][()].view(complex)
