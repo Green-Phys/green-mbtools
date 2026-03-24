@@ -20,10 +20,8 @@ authors = [
 ]
 
 maintainers = [
-  { name="Sergei Iskakov", email="sergei@iskakov.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
-  { name="Vibin Abraham", email="avibin@umich.edu" },
-  { name="Pavel Pokhilko", email="pokhilko@umich.edu" }
+  { name="Emanuel Gull", email="egull@umich.edu" }
 ]
 
 dependencies = ["numpy", "ase", "spglib", "numba", "pyscf", "scipy", "h5py", "green-ac", "green-igen",

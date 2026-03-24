@@ -71,7 +71,7 @@ class pyscf_pbc_init (pyscf_init):
             comm.init_k_mesh(self.args, self.cell)
 
     def mean_field_input(self, mydf=None):
-        """Solve a give mean-field problem and store the solution in the Green/WeakCoupling format
+        """Solve a given mean-field problem and store the solution in the Green/WeakCoupling format
         
         Parameters
         ----------
