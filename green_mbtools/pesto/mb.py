@@ -16,7 +16,7 @@ class MB_post(object):
 
     def __init__(
         self, fock, sigma=None, mu=None, gtau=None, S=None, kmesh=None,
-        beta=None, ir_file=None, legacy_ir=False
+        beta=None, weight_ibz=None, ir_file=None, legacy_ir=False
     ):
         """Initialize MB_post class for post processing of GREEN data.
 
@@ -38,6 +38,8 @@ class MB_post(object):
             Brillouin-zone kmesh, by default None
         beta : float, optional
             Inverse temperature, by default None
+        weight_ibz : 1D-list or array, optional
+            weight for each k-vector in the k-grid
         ir_file : string, optional
             Path to IR-grid file, by default None
         legacy_ir : bool, optional
@@ -65,8 +67,8 @@ class MB_post(object):
         self._ns = None
         self._ink = None
         self._nao = None
-        self._ir_list = None
-        self._weight = None
+        self._ibz2bz = None
+        self._weight_ibz = None
         self.ir = None
         self._ir_file = None
         self._beta = None
@@ -123,8 +125,10 @@ class MB_post(object):
 
         self._ink = fock.shape[1]
         self._nao = fock.shape[2]
-        self._ir_list = np.arange(self._ink)
-        self._weight = np.array([1 for i in range(self._ink)])
+        if weight_ibz is None:
+            self._weight_ibz = np.array([1 for i in range(self._ink)])
+        else:
+            self._weight_ibz = weight_ibz
 
         self.fock = fock.copy()
         if sigma is not None:
@@ -308,11 +312,11 @@ class MB_post(object):
         occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=complex)
         if self.S is not None:
             occupations = np.einsum(
-                'k,skij,skji->si', self._weight, self.dm, self.S
+                'k,skij,skji->si', self._weight_ibz, self.dm, self.S
             )
         else:
-            occupations = np.einsum('k,skii->si', self._weight, self.dm)
-        num_k = len(self._weight)
+            occupations = np.einsum('k,skii->si', self._weight_ibz, self.dm)
+        num_k = len(self._weight_ibz)
         occupations /= num_k
 
         # Check imaginary part
@@ -436,15 +440,15 @@ def minus_k_to_k_TRsym(X):
     return Y
 
 
-def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
-    index_list = np.zeros(bz_index.shape, dtype=int)
-    for i, irn in enumerate(ir_list):
+def to_full_bz_TRsym(X, conj_list, ibz2bz, bz2ibz, k_ind):
+    index_list = np.zeros(bz2ibz.shape, dtype=int)
+    for i, irn in enumerate(ibz2bz):
         index_list[irn] = i
     old_shape = X.shape
     new_shape = np.copy(old_shape)
     new_shape[k_ind] = conj_list.shape[0]
     Y = np.zeros(new_shape, dtype=X.dtype)
-    for ik, kk in enumerate(bz_index):
+    for ik, kk in enumerate(bz2ibz):
         k = index_list[kk]
         Y = Y.reshape((-1,) + Y.shape[k_ind:])
         X = X.reshape((-1,) + X.shape[k_ind:])
@@ -458,7 +462,7 @@ def to_full_bz_TRsym(X, conj_list, ir_list, bz_index, k_ind):
     return Y
 
 
-def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
+def to_full_bz(X, conj_list, ibz2bz, bz2ibz, k_ind, k_sym_trans):
     """Transform input quantity from irreducible number of k-points to full Brillouin zone.
 
     Parameters
@@ -467,35 +471,45 @@ def to_full_bz(X, conj_list, ir_list, bz_index, k_ind):
         input quantity that needs to be transformed
     conj_list : numpy.ndarray
         truth table for indices compressed based on complex conjugation (k -> -k)
-    ir_list : numpy.ndarray
+    ibz2bz : numpy.ndarray
         list of unique or irreducible k-indices
-    bz_index : numpy.ndarray
+    bz2ibz : numpy.ndarray
         irreducible k-index associated for every k-point in full Brillouin zone k-mesh
     k_ind : int
         location of k-index in the input array X.
+    k_sym_trans : numpy.ndarray
+        Symmetry transforms in AO basis for each full-BZ k-point with shape
+        (nk, nao, nao). If provided, reconstructed matrices are rotated as
+        U(k) X(k_ir) U(k)^dagger for k-resolved matrix data (k_ind in {1, 2}).
 
     Returns
     -------
     numpy.ndarray
         data on full Brillouin zone k-mesh
     """
-    index_list = np.zeros(bz_index.shape, dtype=int)
-    for i, irn in enumerate(ir_list):
-        index_list[irn] = i
+    index_loc_in_ibz = np.zeros(bz2ibz.shape, dtype=int) - 1
+    for i, irn in enumerate(ibz2bz):
+        index_loc_in_ibz[irn] = i
     old_shape = X.shape
     new_shape = np.copy(old_shape)
     new_shape[k_ind] = conj_list.shape[0]
     Y = np.zeros(new_shape, dtype=X.dtype)
-    for ik, kk in enumerate(bz_index):
-        k = index_list[kk]
+    for ik, kk in enumerate(bz2ibz):
+        k = index_loc_in_ibz[kk]
         if k_ind == 0:
             Y[ik, ::] = X[k, ::].conj() if conj_list[ik] else X[k, ::]
         elif k_ind == 1:
-            Y[:, ik, ::] = X[:, k, ::].conj() \
-                if conj_list[ik] else X[:, k, ::]
+            Xk = X[:, k, ::].conj() if conj_list[ik] else X[:, k, ::]
+            Uk = k_sym_trans[ik]
+            Uk_dag = Uk.conj().T
+            Xk = np.einsum('ab,sbc,cd->sad', Uk, Xk, Uk_dag)
+            Y[:, ik, ::] = Xk
         elif k_ind == 2:
-            Y[:, :, ik, ::] = X[:, :, k, ::].conj() \
-                if conj_list[ik] else X[:, :, k, ::]
+            Xk = X[:, :, k, ::].conj() if conj_list[ik] else X[:, :, k, ::]
+            Uk = k_sym_trans[ik]
+            Uk_dag = Uk.conj().T
+            Xk = np.einsum('ab,tsbc,cd->tsad', Uk, Xk, Uk_dag)
+            Y[:, :, ik, ::] = Xk
     return Y
 
 
@@ -537,9 +551,11 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     S = S.reshape(S.shape[:-1])
     H0 = f['HF/H-k'][()].view(complex)
     H0 = H0.reshape(H0.shape[:-1])
-    ir_list = f["/grid/ir_list"][()]
-    index = f["/grid/index"][()]
-    conj_list = f["grid/conj_list"][()]
+
+    ibz2bz = f["symmetry/k/ibz2bz"][()]
+    index = f["symmetry/k/bz2ibz"][()]
+    conj_list = f["symmetry/k/tr_conj"][()]
+    k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     ns = f['params/ns'][()]
@@ -552,13 +568,13 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     All k-dependent matrices should lie on a full Monkhorst-Pack grid.
     """
     if not x2c:
-        Sigma1 = to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
-        Sigma = to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-        G = to_full_bz(Gr, conj_list, ir_list, index, 2)
+        Sigma1 = to_full_bz(Sigma1r, conj_list, ibz2bz, index, 1, k_sym_trans)
+        Sigma = to_full_bz(Sigmar, conj_list, ibz2bz, index, 2, k_sym_trans)
+        G = to_full_bz(Gr, conj_list, ibz2bz, index, 2, k_sym_trans)
     else:
-        Sigma1 = to_full_bz_TRsym(Sigma1r, conj_list, ir_list, index, 1)
-        Sigma = to_full_bz_TRsym(Sigmar, conj_list, ir_list, index, 2)
-        G = to_full_bz_TRsym(Gr, conj_list, ir_list, index, 2)
+        Sigma1 = to_full_bz_TRsym(Sigma1r, conj_list, ibz2bz, index, 1)
+        Sigma = to_full_bz_TRsym(Sigmar, conj_list, ibz2bz, index, 2)
+        G = to_full_bz_TRsym(Gr, conj_list, ibz2bz, index, 2)
     F = H0 + Sigma1
 
     """

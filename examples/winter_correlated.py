@@ -58,13 +58,15 @@ Sk = f["HF/S-k"][()].view(complex)
 Sk = Sk.reshape(Sk.shape[:-1])
 Hk = f["HF/H-k"][()].view(complex)
 Hk = Hk.reshape(Hk.shape[:-1])
-kmesh_scaled = f["/grid/k_mesh_scaled"][()]
-index = f["grid/index"][()]
-ir_list = f["/grid/ir_list"][()]
-conj_list = f["grid/conj_list"][()]
-reduced_kmesh_scaled = kmesh_scaled[ir_list]
-nk = index.shape[0]
-ink = ir_list.shape[0]
+kmesh_scaled = f["/symmetry/k/mesh_scaled"][()]
+ibz2bz = f["/symmetry/k/ibz2bz"][()]
+bz2ibz = f["/symmetry/k/bz2ibz"][()]
+weight_ibz = f["/symmetry/k/weight_ibz"][()]
+tr_conj = f["/symmetry/k/tr_conj"][()]
+k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
+reduced_kmesh_scaled = kmesh_scaled[ibz2bz]
+nk = bz2ibz.shape[0]
+ink = ibz2bz.shape[0]
 f.close()
 
 f = h5py.File(GW_path, 'r')
@@ -78,8 +80,8 @@ nao = rSigma1.shape[-1]
 nts = rSigmak.shape[0]
 f.close()
 
-Sigma1 = mb.to_full_bz(rSigma1, conj_list, ir_list, index, 1)
-Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
+Sigma1 = mb.to_full_bz(rSigma1, tr_conj, ibz2bz, bz2ibz, 1, k_sym_trans)
+Sigma_tk = mb.to_full_bz(rSigmak, tr_conj, ibz2bz, bz2ibz, 2, k_sym_trans)
 del rSigma1, rSigmak
 
 Fk = Hk + Sigma1

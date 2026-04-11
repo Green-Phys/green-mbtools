@@ -32,18 +32,20 @@ def compare_datasets(
 @pytest.mark.parametrize(
     "extra_flags, subdir",
     [
-        ([], "UHF"),
-        (["--restricted", "1"], "RHF"),
-        (["--x2c", "2"], "GHF"),
-        (["--xc", "lda"], "UKS"),
-        (["--xc", "lda", "--restricted", "1"], "RKS"),
-        (["--xc", "lda", "--x2c", "2"], "GKS"),
+        (["--basis", "gth-dzvp-molopt-sr", "--pseudo", "gth-pbe"], "UHF"),
+        (["--basis", "gth-dzvp-molopt-sr", "--pseudo", "gth-pbe", "--restricted", "1"], "RHF"),
+        (["--basis", "gth-dzvp-molopt-sr", "--pseudo", "gth-pbe", "--xc", "PBE"], "UKS"),
+        (["--basis", "gth-dzvp-molopt-sr", "--pseudo", "gth-pbe", "--xc", "PBE", "--restricted", "1"], "RKS"),
+        (["--basis", "cc-pvdz", "--x2c", "1"], "UHF_sfx2c"),
+        (["--basis", "cc-pvdz", "--xc", "PBE", "--x2c", "1"], "UKS_sfx2c"),
+        (["--basis", "cc-pvdz", "--x2c", "2"], "GHF"),
+        (["--basis", "cc-pvdz", "--xc", "PBE", "--x2c", "2"], "GKS"),
     ],
 )
 def test_meanfield_variants(data_path, extra_flags, subdir) -> None:
     import os
 
-    test_data_dir = Path(pytest.test_data_dir) / "H2_mol"
+    test_data_dir = Path(pytest.test_data_dir) / "H2_pbc"
     tmp_dir = Path(__file__).parent / "tmp"
 
     # ensure a clean slate
@@ -54,24 +56,23 @@ def test_meanfield_variants(data_path, extra_flags, subdir) -> None:
     os.chdir(tmp_dir)
     # prepare scratch locations
     output_h5 = tmp_dir / "input.h5"
-    df_hf_int = tmp_dir / "df_hf_int"
 
     try:
         # build parameters
         base_params = [
             "--atom", "H -0.25 -0.25 -0.25\nH  0.25  0.25  0.25",
-            "--basis", "sto3g",
+            "--a", "4.0655, 0.0,    0.0\n0.0,    4.0655, 0.0\n0.0,    0.0,    4.0655\n",
             "--output_path", str(output_h5),
-            "--int_path", str(df_hf_int),
-            "--hf_int_path",str(df_hf_int),
+            "--df_int", "0",
+            "--nk", "3",
             "--use_j2c_eig_decomposition", "false",
         ]
         params = base_params.copy()
         params.extend(extra_flags)
 
         # run mean‑field generation
-        args = comm.init_mol_params(params=params)
-        pyscf_init = pymb.pyscf_mol_init(args)
+        args = comm.init_pbc_params(params=params)
+        pyscf_init = pymb.pyscf_pbc_init(args)
         pyscf_init.mean_field_input()
 
         # compare key HF datasets

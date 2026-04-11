@@ -5,10 +5,12 @@ import logging
 import numpy as np
 from pyscf.df import addons
 from pyscf.pbc import tools, gto
+from pyscf.pbc.lib import kpts as libkpts
 
 from . import gdf_s_metric as gdf_S
 from . import common_utils as comm
 from . import integral_utils as int_utils
+from . import symmetry_utils as symm_utils
 from ..pesto import ft
 
 
@@ -61,21 +63,23 @@ class pyscf_init:
 
 
 class pyscf_pbc_init (pyscf_init):
-    '''Initialization class for periodic / solid-state systems for the Green project
-    '''
+    """Initialization class for periodic / solid-state systems for the Green project
+    """
     def __init__(self, args=None):
         super().__init__(comm.init_pbc_params() if args is None else args)
-        self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik = comm.init_k_mesh(self.args, self.cell)
+        self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik, self.kstruct = \
+            comm.init_k_mesh(self.args, self.cell)
 
     def mean_field_input(self, mydf=None):
-        '''
-        Solve a give mean-field problem and store the solution in the Green/WeakCoupling format
+        """Solve a given mean-field problem and store the solution in the Green/WeakCoupling format
         
         Parameters
         ----------
         mydf : pyscf.pbc.df
             pyscf density-fitting object, will be generated if None
-        '''
+        """
+
+        # Generate integrals for DFT and MBPT calculations
         if mydf is None:
             mydf = self.df_object()
 
@@ -102,6 +106,10 @@ class pyscf_pbc_init (pyscf_init):
 
         if self.args.grid_only:
             comm.store_k_grid(self.args, self.cell, self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik)
+            auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
+            # NOTE: if args.orth = 1, we will not be able to transform the k_sym_transform_ao yet.
+            comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
+            comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
             return
 
         '''
@@ -119,7 +127,7 @@ class pyscf_pbc_init (pyscf_init):
         if self.args.xc is not None:
             vhf = mf.get_veff().astype(dtype=np.complex128)
         else:
-            vhf = mf.get_veff(hf_dm).astype(dtype=np.complex128)
+            vhf = mf.get_veff(dm_kpts=hf_dm).astype(dtype=np.complex128)
         F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
     
         if len(F.shape) == 3:
@@ -134,7 +142,19 @@ class pyscf_pbc_init (pyscf_init):
         # Orthogonalization matrix
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
         # Save data into Green Software package input format.
-        comm.save_data(self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao)
+        comm.save_data(
+            self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
+            Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao
+        )
+        # Save symmetry operations info for main and auxiliary unit cells
+        comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct, X_k=X_k, X_inv_k=X_inv_k,)
+        comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
+
+        # Diagnose whether self-consistent quantities obey k-space symmetry.
+        if self.args.space_symm or self.args.tr_symm:
+            symm_utils.check_kspace_symmetry_breaking(self.args.output_path, ["HF/H-k", "HF/S-k", "HF/Fock-k"])
+
+        # Store density-fitted integrals
         if bool(self.args.df_int) :
             self.compute_df_int(nao, X_k)
 
@@ -224,10 +244,14 @@ class pyscf_pbc_init (pyscf_init):
             mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
         mydf.build()
 
-        j3c, kptij_lst, j2c_sqrt, uniq_kpts = gdf_S.make_j3c(mydf, self.cell, j2c_sqrt=True, exx=False)
+        # ? the construct_gdf function being called above uses Coulomb metric, but corrections here are in overlap metric
+        use_space_symm = self.args.space_symm and self.args.x2c < 2
+        j2c_sqrt, uniq_qpts = gdf_S.make_j2c_sqrt(mydf, self.cell, use_space_symm, self.args.tr_symm)
         
         ''' Transformation matrix from auxiliary basis to plane-wave '''
-        AqQ, q_reduced, q_scaled_reduced = gdf_S.transformation_PW_to_auxbasis(mydf, self.cell, j2c_sqrt, uniq_kpts)
+        AqQ, q_reduced, q_scaled_reduced = gdf_S.transformation_PW_to_auxbasis(
+            mydf, self.cell, j2c_sqrt, uniq_qpts, use_space_symm, self.args.tr_symm
+        )
         
         q_abs = np.array([np.linalg.norm(qq) for qq in q_reduced])
         q_abs = np.array([round(qq, 8) for qq in q_abs])
@@ -280,6 +304,7 @@ class pyscf_mol_init (pyscf_init):
         self.kcell.kpts = self.kcell.make_kpts([1, 1, 1])
         self.kcell.ecp = self.cell.ecp
         self.kcell.build()
+        self.kstruct = libkpts.make_kpts(self.kcell, self.kmesh, space_group_symmetry=False, time_reversal_symmetry=False)
 
     def mean_field_input(self, mydf=None):
         '''
@@ -348,6 +373,7 @@ class pyscf_mol_init (pyscf_init):
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
         # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is not long range divergence for molecule
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
+        comm.store_mol_symmetry_info(self.args, self.kcell, auxcell, self.kmesh)
         if bool(self.args.df_int):
             self.compute_df_int(nao, X_k)
 

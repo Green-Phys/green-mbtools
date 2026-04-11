@@ -66,14 +66,12 @@ def main():
     print("Reading input file")
     f = h5py.File(input_path, 'r')
     cell = f["Cell"][()]
-    kmesh_abs = f["/grid/k_mesh"][()]
-    kmesh_scaled = f["/grid/k_mesh_scaled"][()]
-    index = f["/grid/index"][()]
-    ir_list = f["/grid/ir_list"][()]
-    conj_list = f["/grid/conj_list"][()]
-    reduced_kmesh_scaled = kmesh_scaled[ir_list]
-    nk = index.shape[0]
-    ink = ir_list.shape[0]
+    kmesh_abs = f["/symmetry/k/mesh"][()]
+    kmesh_scaled = f["/symmetry/k/mesh_scaled"][()]
+    ibz2bz = f["/symmetry/k/ibz2bz"][()]
+    bz2ibz = f["/symmetry/k/bz2ibz"][()]
+    tr_conj = f["/symmetry/k/tr_conj"][()]
+    k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
     Sk = f['HF/S-k'][()]
     Hk = f['HF/H-k'][()].view(complex)
     Hk = Hk.reshape(Hk.shape[:-1])
@@ -105,13 +103,13 @@ def main():
     
     print("Transfrom quantities to full BZ")
     if args.x2c:
-        Sigma_inf_k = mb.to_full_bz_TRsym(rSigma_inf, conj_list, ir_list, index, 1)
-        G_tk = mb.to_full_bz_TRsym(rGk, conj_list, ir_list, index, 2)
-        Sigma_tk = mb.to_full_bz_TRsym(rSigmak, conj_list, ir_list, index, 2)
+        Sigma_inf_k = mb.to_full_bz_TRsym(rSigma_inf, tr_conj, ibz2bz, bz2ibz, 1)
+        G_tk = mb.to_full_bz_TRsym(rGk, tr_conj, ibz2bz, bz2ibz, 2)
+        Sigma_tk = mb.to_full_bz_TRsym(rSigmak, tr_conj, ibz2bz, bz2ibz, 2)
     else:
-        Sigma_inf_k = mb.to_full_bz(rSigma_inf, conj_list, ir_list, index, 1)
-        G_tk = mb.to_full_bz(rGk, conj_list, ir_list, index, 2)
-        Sigma_tk = mb.to_full_bz(rSigmak, conj_list, ir_list, index, 2)
+        Sigma_inf_k = mb.to_full_bz(rSigma_inf, tr_conj, ibz2bz, bz2ibz, 1, k_sym_trans)
+        G_tk = mb.to_full_bz(rGk, tr_conj, ibz2bz, bz2ibz, 2, k_sym_trans)
+        Sigma_tk = mb.to_full_bz(rSigmak, tr_conj, ibz2bz, bz2ibz, 2, k_sym_trans)
     
     # Build Fock
     Fk = Hk + Sigma_inf_k

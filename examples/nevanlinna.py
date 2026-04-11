@@ -51,9 +51,10 @@ if __name__ == "__main__":
     Sk = f['HF/S-k'][()].view(complex)
     Sk = Sk.reshape(Sk.shape[:-1])
     mo_coeff = f["/HF/mo_coeff"][()]
-    ir_list = f["/grid/ir_list"][()]
-    index = f["/grid/index"][()]
-    conj_list = f["grid/conj_list"][()]
+    ibz2bz = f["/symmetry/k/ibz2bz"][()]
+    bz2ibz = f["/symmetry/k/bz2ibz"][()]
+    tr_conj_list = f["symmetry/k/tr_conj"][()]
+    k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     x2c = 0
@@ -66,13 +67,13 @@ if __name__ == "__main__":
     # Transform from reduced BZ to full BZ
     print("Transforming data from reduced BZ to full BZ.")
     if x2c:
-        Sigma1 = mb.to_full_bz_TRsym(Sigma1r, conj_list, ir_list, index, 1)
-        Sigmak = mb.to_full_bz_TRsym(Sigmar, conj_list, ir_list, index, 2)
-        Gk = mb.to_full_bz_TRsym(Gr, conj_list, ir_list, index, 2)
+        Sigma1 = mb.to_full_bz_TRsym(Sigma1r, tr_conj_list, ibz2bz, bz2ibz, 1)
+        Sigmak = mb.to_full_bz_TRsym(Sigmar, tr_conj_list, ibz2bz, bz2ibz, 2)
+        Gk = mb.to_full_bz_TRsym(Gr, tr_conj_list, ibz2bz, bz2ibz, 2)
     else:
-        Sigma1 = mb.to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
-        Sigmak = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-        Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+        Sigma1 = mb.to_full_bz(Sigma1r, tr_conj_list, ibz2bz, bz2ibz, 1, k_sym_trans)
+        Sigmak = mb.to_full_bz(Sigmar, tr_conj_list, ibz2bz, bz2ibz, 2, k_sym_trans)
+        Gk = mb.to_full_bz(Gr, tr_conj_list, ibz2bz, bz2ibz, 2, k_sym_trans)
     Fk = Hk + Sigma1
     print('Pre analysis complete')
 

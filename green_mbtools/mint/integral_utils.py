@@ -8,7 +8,18 @@ import h5py
 import numpy as np
 from numba import jit
 from pyscf.df import addons
-from pyscf.pbc import df, tools
+from pyscf.pbc import gto, df, tools
+from pyscf.pbc.lib import kpts as libkpts
+from pyscf.lib import logger
+from pyscf.pbc.lib.kpts_helper import unique
+from pyscf.pbc.df.rsdf_builder import _RSGDFBuilder
+from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
+import scipy.linalg as LA
+
+from . import kpt_utils
+
+# Linear dep threshold for J2C metric eigenvalues
+J2C_LIN_DEP_THRESH = 1e-10
 
 
 def compute_kG(k, Gv, wrap_around, mesh, cell):
@@ -229,6 +240,32 @@ def kpair_reduced_lists(kptis, kptjs, kptij_idx, kmesh, a):
     return conj_list, trans_list
 
 
+def make_gdf_kptij_lst_jk(kstruct):
+    '''
+    [WIP]
+    Build GDF k-point-pair list for get_jk
+    All combinations:
+        k_ibz != k_bz
+        k_bz  == k_bz
+    '''
+    from pyscf.pbc.lib.kpts_helper import member
+    kptij_lst = [(kstruct.kpts[i], kstruct.kpts[i]) for i in range(kstruct.nkpts)]
+    kptij_idx_lst = [(i, i) for i in range(kstruct.nkpts)]
+    for i in range(kstruct.nkpts_ibz):
+        ki = kstruct.kpts_ibz[i]
+        where = member(ki, kstruct.kpts)
+        for j in range(kstruct.nkpts):
+            kj = kstruct.kpts[j]
+            if j not in where:
+                kptij_lst.extend([(ki,kj)])
+                kptij_idx_lst.extend([(i,j)])
+    kptij_lst = np.asarray(kptij_lst)
+    kptij_idx_lst = np.asarray(kptij_idx_lst)
+    # dummy lists for kij_conj and kij_trans
+    # kptij_conjlist = 
+    return kptij_lst, kptij_idx_lst
+
+
 def integrals_grid(mycell, kmesh):
     a_lattice = mycell.lattice_vectors() / (2*np.pi)
     kptij_lst = [(ki, kmesh[j]) for i, ki in enumerate(kmesh) for j in range(i+1)]
@@ -241,6 +278,7 @@ def integrals_grid(mycell, kmesh):
     kpair_irre_list = np.argwhere(kij_conj == kij_trans)[:,0]
     num_kpair_stored = len(kpair_irre_list)
     return kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs
+
 
 def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_int", cderi_name="cderi.h5", keep=True, keep_after=False, cderi_name2="cderi_ewald.h5"):
 
@@ -491,3 +529,148 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     os.remove(cderi_file_1)
     os.remove(cderi_file_2)
     print("Ewald correction has been computed and stored into {}".format(filename))
+
+
+class GreenGDF(df.GDF):
+    def __init__(self, cell, kpts=np.zeros((1,3))):
+        super().__init__(cell, kpts)
+        self.space_symm = True
+        self.tr_symm = True
+        self.x2c = 0
+        self.use_j2c_eig_decomposition = True
+
+    def _make_j3c(self, cell=None, auxcell=None, kptij_lst=None, cderi_file=None):
+        """Customized ERI building to build and store j2c at the same time
+
+        Parameters
+        ----------
+        cell : pyscf.pbc.gto.Cell, optional
+            periodic cell, by default None
+        auxcell : pyscf.pbc.gto.Cell, optional
+            auxiliary basis cell, by default None
+        kptij_lst : list, optional
+            list of k-point pairs, by default None
+        cderi_file : str, optional
+            output file to store ERI, by default None
+        """
+        if cell is None: cell = self.cell
+        if auxcell is None: auxcell = self.auxcell
+        if cderi_file is None: cderi_file = self._cderi_to_save
+
+        # Logger
+        log = logger.new_logger(self)
+
+        # Remove duplicated k-points. Duplicated kpts may lead to a buffer
+        # located in incore.wrap_int3c larger than necessary. Integral code
+        # only fills necessary part of the buffer, leaving some space in the
+        # buffer unfilled.
+        if self.kpts_band is None:
+            kpts_union = self.kpts
+        else:
+            kpts_union = unique(np.vstack([self.kpts, self.kpts_band]))[0]
+
+        if self._prefer_ccdf or cell.omega > 0:
+            # For long-range integrals _CCGDFBuilder is the only option
+            dfbuilder = _CCGDFBuilder(cell, auxcell, kpts_union)
+            dfbuilder.eta = self.eta
+        else:
+            dfbuilder = _RSGDFBuilder(cell, auxcell, kpts_union)
+        # Keep configurable to support both legacy-reference compatibility and systematic eigenvalue workflow.
+        dfbuilder.j2c_eig_always = bool(getattr(self, 'use_j2c_eig_decomposition', True))
+        dfbuilder.mesh = self.mesh
+        dfbuilder.linear_dep_threshold = self.linear_dep_threshold
+        j_only = self._j_only or len(kpts_union) == 1
+        dfbuilder.make_j3c(cderi_file, j_only=j_only, dataname=self._dataname,
+                           kptij_lst=kptij_lst)
+
+        # Build q = k1-k2 and reduce to a unique wrapped q-mesh, then construct a q-structure and use its functionalities
+        use_space_symm = bool(getattr(self, 'space_symm', True))
+        use_tr_symm = bool(getattr(self, 'tr_symm', True))
+        use_x2c = int(getattr(self, 'x2c', 0))
+        qstruct = kpt_utils.build_q_struct(cell, self.kpts, space_symm=(use_space_symm and use_x2c < 2), tr_symm=use_tr_symm)
+        uniq_qpts = qstruct.kpts
+        scaled_uniq_kpts = qstruct.kpts_scaled.round(5)
+        log.debug('Num uniq kpts %d', len(uniq_qpts))
+        log.debug2('scaled unique kpts %s', scaled_uniq_kpts)
+
+        # Group k-points into conjugate pairs and build a mapping from the original q-mesh to the unique q-mesh.
+        # qstruct.ibz2bz are the full-BZ indices of irreducible q-points.
+        # Store j2c strictly for q_IBZ representatives in this order.
+        q_ibz2bz = np.asarray(qstruct.ibz2bz, dtype=int)
+        j2c_uniq_kpts = uniq_qpts[q_ibz2bz]
+        feri = h5py.File(cderi_file, 'a')
+        all_j2c = list(dfbuilder.get_2c2e(j2c_uniq_kpts))
+        for i, j2c_idx in enumerate(q_ibz2bz):
+            j2c = all_j2c[i]
+            if j2c.dtype == np.complex128:
+                feri[f'j2c/{j2c_idx}'] = j2c
+            else:
+                feri[f'j2c/{j2c_idx}'] = j2c + 0.j
+            j2c = None
+        # Meta data
+        feri['j2c/qmesh'] = uniq_qpts
+        feri['j2c/scaled_qmesh'] = scaled_uniq_kpts
+        feri['j2c/j2c_uniq_kpts'] = j2c_uniq_kpts
+        # Compatibility metadata: pair each stored q_IBZ representative with itself.
+        feri['j2c/q_ibz2bz'] = q_ibz2bz
+        feri['j2c/q_bz2ibz'] = np.asarray(qstruct.bz2ibz, dtype=int)
+        feri['j2c'].attrs['j2c_decomposition'] = 'eigenvalue' if dfbuilder.j2c_eig_always else 'cholesky'
+        feri.close()
+
+
+def cholesky_decomposed_metric(j2c_k, cell, inv=False):
+    """Calculate the Cholesky decomposition of the j2c metric for a given k-point, or its inverse if requested.
+
+    Parameters
+    ----------
+    j2c_k : _type_
+        j2c metric for a specific k-point.
+    cell : _type_
+        information about the unit cell, used for error handling and potential adjustments based on dimensionality.
+    inv : bool, optional
+        Whether to return the inverse of the Cholesky decomposition, by default False
+
+    Returns
+    -------
+    j2c_sqrt_k or j2c_sqrt_inv_k : ndarray
+        Cholesky decomposition of the j2c metric (lower triangular matrix L such that j2c_k = L @ L†) or
+        its inverse (L⁻¹), depending on the value of `inv`.
+    j2c_negative : ndarray or None
+        If the j2c metric has negative eigenvalues (which can occur in 2D systems with certain Fourier 
+        transform conventions), this will contain the corresponding eigenvectors. Otherwise, it will be None.
+    """
+    # Cholesky: j2c = LL†  (L lower triangular).  PySCF computes B = L⁻¹ @ eri3c
+    # (by solving L†x = eri3c, i.e., x = L⁻¹ @ eri3c), so P0_tilde lives in the
+    # L-basis.  Obar = L_bz⁻¹ @ mat_ao @ L_irre correctly maps P0_tilde between
+    # k-points.  Using upper Cholesky (lower=False) gives the wrong convention.
+    nQ = j2c_k.shape[0]
+    try:
+        j2c_negative = None
+        j2c_sqrt_k = LA.cholesky(j2c_k, lower=True)
+        if inv:
+            # this is actually the inverse and not just the sqrt
+            j2c_sqrt_k = LA.solve_triangular(  # = L^{-1}
+                j2c_sqrt_k, np.eye(nQ, dtype=np.complex128), lower=True
+            )
+    except LA.LinAlgError:
+        j2c_sqrt_k, j2c_negative = eigenvalue_decomposed_metric(j2c_k, cell, inv)
+    return j2c_sqrt_k, j2c_negative
+
+
+def eigenvalue_decomposed_metric(j2c_k, cell, inv=False):
+    j2c_negative = None
+    eigs, vecs = LA.eigh(j2c_k)
+    assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
+    eigs_trim = eigs[eigs > J2C_LIN_DEP_THRESH]
+    if inv:
+        j2c_sqrt_k = vecs[:, eigs > J2C_LIN_DEP_THRESH].conj().T / np.sqrt(eigs_trim).reshape(-1, 1)
+    else:
+        j2c_sqrt_k = vecs[:, eigs > J2C_LIN_DEP_THRESH] * np.sqrt(eigs_trim).reshape(1, -1)
+    # negative eigenvalues can occur in 2D systems with certain Fourier transform conventions,
+    # but we can still use the corresponding eigenvectors to define a "negative" subspace for the J2C metric
+    if cell.dimension == 2 and cell.low_dim_ft_type != 'inf_vacuum':
+        idx = np.where(eigs < -J2C_LIN_DEP_THRESH)[0]
+        if len(idx) > 0:
+            j2c_negative = (vecs[:, idx] / np.sqrt(-eigs[idx])).conj().T
+
+    return j2c_sqrt_k, j2c_negative

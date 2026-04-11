@@ -28,6 +28,8 @@ def mbo(data_path):
     Sigma1r = f[iter_str + "/Sigma1"][()].view(complex)
     Sigmar = f[iter_str + "/Selfenergy/data"][()].view(complex)
     Gr = f[iter_str + "/G_tau/data"][()].view(complex)
+    tau_mesh = f[iter_str + "/G_tau/mesh"][()]
+    BETA = tau_mesh[-1]
     mu = f[iter_str + "/mu"][()]
     f.close()
 
@@ -37,21 +39,22 @@ def mbo(data_path):
     S = S.reshape(S.shape[:-1])
     H0 = f['HF/H-k'][()].view(complex)
     H0 = H0.reshape(H0.shape[:-1])
-    ir_list = f["/grid/ir_list"][()]
-    index = f["/grid/index"][()]
-    conj_list = f["grid/conj_list"][()]
+    ir_list = f["symmetry/k/ibz2bz"][()]
+    index = f["symmetry/k/bz2ibz"][()]
+    conj_list = f["symmetry/k/tr_conj"][()]
+    k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
     f.close()
 
     # ir grid file
     irf = data_dir + '/ir_grid/1e4.h5'
 
     # All k-dependent matrices should lie on a full Monkhorst-Pack grid.
-    Sigma1 = mb.to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
-    Sigma = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-    G = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+    Sigma1 = mb.to_full_bz(Sigma1r, conj_list, ir_list, index, 1, k_sym_trans)
+    Sigma = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2, k_sym_trans)
+    G = mb.to_full_bz(Gr, conj_list, ir_list, index, 2, k_sym_trans)
     F = H0 + Sigma1
 
     # Standard way to initialize
-    mbobj = mb.MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=1000, ir_file=irf)
+    mbobj = mb.MB_post(fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=BETA, ir_file=irf)
 
     return mbobj

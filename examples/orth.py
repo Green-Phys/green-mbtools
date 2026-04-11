@@ -25,15 +25,16 @@ Sk = f["HF/S-k"][()].view(complex)
 Sk = Sk.reshape(Sk.shape[:-1])
 Hk = f["HF/H-k"][()].view(complex)
 Hk = Hk.reshape(Hk.shape[:-1])
-ir_list = f["/grid/ir_list"][()]
-weight = f["/grid/weight"][()]
-index = f["/grid/index"][()]
-conj_list = f["grid/conj_list"][()]
+ibz2bz = f["/symmetry/k/ibz2bz"][()]
+bz2ibz = f["/symmetry/k/bz2ibz"][()]
+weight_ibz = f["/symmetry/k/weight_ibz"][()]
+tr_conj = f["/symmetry/k/tr_conj"][()]
+k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
 f.close()
 
 ''' All k-dependent matrices should lie on a full Monkhorst-Pack grid. '''
 # Transform from reduced BZ to full BZ
-Sigma1 = mb.to_full_bz(Sigma1r, conj_list, ir_list, index, 1)
+Sigma1 = mb.to_full_bz(Sigma1r, tr_conj, ibz2bz, bz2ibz, 1, k_sym_trans)
 Fk = Sigma1 + Hk
 
 # NOTE: type = 'f' denotes that the transoformation is for Fock-type objects

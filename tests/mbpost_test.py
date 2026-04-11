@@ -54,19 +54,24 @@ def test_to_full_bz(data_path):
 
     # input file (input.h5)
     f = h5py.File(data_dir + '/H2_GW/input.h5', 'r')
-    ir_list = f["/grid/ir_list"][()]
-    index = f["/grid/index"][()]
-    conj_list = f["grid/conj_list"][()]
+    ir_list = f["/symmetry/k/ibz2bz"][()]
+    index = f["/symmetry/k/bz2ibz"][()]
+    conj_list = f["symmetry/k/tr_conj"][()]
+    k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
     f.close()
 
     # reduced k-points (for 3x3x3)
     ink = Gr.shape[2]
-    assert ink == 14
+    assert ink == 6
 
     # Transform to full BZ
-    Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+    Gk = mb.to_full_bz(Gr, conj_list, ir_list, index, 2, k_sym_trans)
     fullk = Gk.shape[2]
     assert fullk == 27
+
+    # Re-extract irreducible k
+    Gk_ibz = Gk[:, :, ir_list, ::]
+    assert np.max(np.abs(Gk_ibz - Gr)) < 1e-10
 
     return
 

@@ -23,10 +23,11 @@ S = f['HF/S-k'][()].view(complex)
 S = S.reshape(S.shape[:-1])
 H0 = f['HF/H-k'][()].view(complex)
 H0 = H0.reshape(H0.shape[:-1])
-ir_list = f["/grid/ir_list"][()]
-weight = f["/grid/weight"][()]
-index = f["/grid/index"][()]
-conj_list = f["grid/conj_list"][()]
+ibz2bz = f["/symmetry/k/ibz2bz"][()]
+weight_ibz = f["/symmetry/k/weight_ibz"][()]
+bz2ibz = f["/symmetry/k/bz2ibz"][()]
+tr_conj_list = f["symmetry/k/tr_conj"][()]
+k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
 f.close()
 
 # GW data
@@ -47,9 +48,9 @@ ir_file = '../tests/test_data/ir_grid/1e4.h5'
 
 ''' All k-dependent matrices should lie on a full Monkhorst-Pack grid. '''
 # Transform from reduced BZ to full BZ
-Sigma_inf = mb.to_full_bz(Sigma_inf_r, conj_list, ir_list, index, 1)
-Sigma = mb.to_full_bz(Sigmar, conj_list, ir_list, index, 2)
-G = mb.to_full_bz(Gr, conj_list, ir_list, index, 2)
+Sigma_inf = mb.to_full_bz(Sigma_inf_r, tr_conj_list, ibz2bz, bz2ibz, 1, k_sym_trans)
+Sigma = mb.to_full_bz(Sigmar, tr_conj_list, ibz2bz, bz2ibz, 2, k_sym_trans)
+G = mb.to_full_bz(Gr, tr_conj_list, ibz2bz, bz2ibz, 2, k_sym_trans)
 F = H0 + Sigma_inf
 
 ##################
