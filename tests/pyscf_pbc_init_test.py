@@ -135,3 +135,16 @@ def test_anisotropic_nk_matches_symmetric(data_path) -> None:
     finally:
         os.chdir(old_cwd)
         shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+@pytest.mark.parametrize("bad_nk", [["2", "3"], ["1", "2", "3", "4"]])
+def test_invalid_nk_count_raises(bad_nk) -> None:
+    """Providing 2 or 4 values to --nk must raise a ValueError."""
+    params = [
+        "--atom", "H 0 0 0",
+        "--a", "5 0 0, 0 5 0, 0 0 5",
+        "--basis", "sto-3g",
+        "--nk", *bad_nk,
+    ]
+    with pytest.raises(ValueError, match="--nk must be given 1 or 3 integers"):
+        comm.init_pbc_params(params=params)
