@@ -72,7 +72,8 @@ def main():
     bz2ibz = f["/symmetry/k/bz2ibz"][()]
     tr_conj = f["/symmetry/k/tr_conj"][()]
     k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
-    Sk = f['HF/S-k'][()]
+    Sk = f['HF/S-k'][()].view(complex)
+    Sk = Sk.reshape(Sk.shape[:-1])
     Hk = f['HF/H-k'][()].view(complex)
     Hk = Hk.reshape(Hk.shape[:-1])
     f.close()
@@ -147,7 +148,7 @@ def main():
             Fk, kmesh_scaled, band_kpts, dim=3, hermi=True
         )
         Sigma_tk_int = winter.interpolate_tk_object(
-            Sigma_tk, kmesh_scaled, band_kpts, dim=3, hermi=True
+            Sigma_tk, kmesh_scaled, band_kpts, dim=3, hermi=False
         )
         # form G_tk by solving dyson
         print('Number of iw: ', mbo.ir.wsample.shape[0])
