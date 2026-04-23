@@ -440,7 +440,7 @@ def add_pbc_params(parser):
     Define PBC-specific command line arguments for Green python module
     '''
     parser.add_argument("--a", type=parse_geometry, help="lattice geometry", required=True)
-    parser.add_argument("--nk", type=int, help="number of k-points in each direction", required=True)
+    parser.add_argument("--nk", type=int, nargs='+', help="number of k-points in each direction. Provide 1 value for symmetric mesh or 3 values for anisotropic mesh.", required=True)
     parser.add_argument("--pseudo", type=str, nargs="*", default=[None], help="pseudopotential")
     parser.add_argument("--shift", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh shift")
     parser.add_argument("--center", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh center")
@@ -479,7 +479,7 @@ def init_mol_params(params=None):
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
     # parameters needed to create empty grid
     args.a = [[1,0,0],[0,1,0],[0,0,1]]
-    args.nk = 1
+    args.nk = [1, 1, 1]
     args.shift =  [0.,0.,0.]
     args.center = [0.,0.,0.]
     return args
@@ -493,6 +493,10 @@ def init_pbc_params(params=None):
     add_common_params(parser)
     add_pbc_params(parser)
     args = parser.parse_args(args=params)
+    if len(args.nk) == 1:
+        args.nk = [args.nk[0], args.nk[0], args.nk[0]]
+    elif len(args.nk) != 3:
+        raise ValueError("--nk must be given 1 or 3 integers, got {}".format(len(args.nk)))
     args.basis = parse_basis(args.basis)
     args.auxbasis = parse_basis(args.auxbasis)
     args.ecp = parse_basis(args.ecp)
@@ -601,13 +605,13 @@ def init_k_mesh(args, mycell):
        args.shift = [0,0,0]
     if args.x2c < 2:
         # for normal and sfX2C1e calculations
-        kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
+        kstruct = mycell.make_kpts(args.nk, scaled_center=args.center,
                                space_group_symmetry=args.space_symm, time_reversal_symmetry=args.tr_symm)
     else:
         # for X2C1e calculations
         print("X2C1e calculations do not support space group symmetry. Only time-reversal symmetry is used.")
         print("Double group symmetry will be implemented in future releases.")
-        kstruct = mycell.make_kpts([args.nk, args.nk, args.nk], scaled_center=args.center,
+        kstruct = mycell.make_kpts(args.nk, scaled_center=args.center,
                                space_group_symmetry=False, time_reversal_symmetry=args.tr_symm)
 
     if not (args.space_symm or args.tr_symm):
@@ -672,10 +676,8 @@ def init_q_mesh(args, mycell, k_mesh, save_data=True):
     tr_symm = bool(getattr(args, "tr_symm", True))
     space_symm = bool(getattr(args, "space_symm", True))
 
-    if args.x2c < 2:
-        qstruct = kpt_utils.build_q_struct(mycell, k_mesh, space_symm=space_symm, tr_symm=tr_symm)
-    else:
-        qstruct = kpt_utils.build_q_struct(mycell, k_mesh, space_symm=False, tr_symm=tr_symm)
+    # Unlike k-mesh, the presence or absence of relativity doesn't concern q_mesh structure
+    qstruct = kpt_utils.build_q_struct(mycell, k_mesh, space_symm=space_symm, tr_symm=tr_symm)
 
     # Obtain all info to save
     nq = qstruct.nkpts

@@ -469,7 +469,7 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     df1._cderi = cderi_file_1
     df1.kpts = kmesh
     df1.build()
-    nk = args.nk
+    _, nk2, nk3 = args.nk
 
     # We know that G=0 contribution diverge only when q = 0
     # so we loop over (k1,k1) pairs
@@ -509,13 +509,8 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
             buffer2[s1:s1+Lpq.shape[0], :, :] = Lpq_mo[0:Lpq.shape[0],:,:]
             s1 += Lpq.shape[0]
 
-        # i = k1 * nk * nk + k2 * nk + k3
-        k3 = int(i /(nk*nk))
-        k2 = int((i % (nk*nk))/nk)
-        k1 = int(i % nk)
-        k_fine = (k3) * (nk)*(nk) + (k2) * (nk) + (k1)
-        EW["{}".format(k_fine)] = (buffer1 - buffer2).view(np.float64)
-        EW_bar["{}".format(k_fine)] = buffer2.view(np.float64)
+        EW["{}".format(i)] = (buffer1 - buffer2).view(np.float64)
+        EW_bar["{}".format(i)] = buffer2.view(np.float64)
         buffer1[:] = 0.0
         buffer2[:] = 0.0
 

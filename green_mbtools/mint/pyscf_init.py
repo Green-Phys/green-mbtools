@@ -89,7 +89,7 @@ class pyscf_pbc_init (pyscf_init):
             mydf._cderi_to_save = "cderi.h5"
             mydf.build()
         # number of k-points in each direction for Coulomb integrals
-        nk       = self.args.nk ** 3
+        nk       = np.prod(self.args.nk)
         # number of k-points in each direction to evaluate Coulomb kernel
         Nk       = self.args.Nk
 
@@ -223,7 +223,7 @@ class pyscf_pbc_init (pyscf_init):
         logging.debug(kmesh_hs)
         logging.debug(self.cell.get_scaled_kpts(kmesh_hs))
         inp_data["high_symm_path/k_mesh"] = self.cell.get_scaled_kpts(kmesh_hs)
-        inp_data["high_symm_path/r_mesh"] = ft.construct_rmesh(self.args.nk, self.args.nk, self.args.nk)
+        inp_data["high_symm_path/r_mesh"] = ft.construct_rmesh(*self.args.nk)
         inp_data["high_symm_path/Hk"] = Hk_hs
         inp_data["high_symm_path/Sk"] = Sk_hs
         inp_data["high_symm_path/xpath"] = xpath
@@ -320,7 +320,7 @@ class pyscf_mol_init (pyscf_init):
 #comm.construct_gdf(self.args, self.cell, self.kmesh)
 
         # number of k-points in each direction for Coulomb integrals
-        nk       = self.args.nk ** 3
+        nk       = np.prod(self.args.nk)
         # number of k-points in each direction to evaluate Coulomb kernel
         Nk       = self.args.Nk
 
@@ -355,10 +355,11 @@ class pyscf_mol_init (pyscf_init):
         F = mf.get_fock(T,S,vhf,hf_dm).astype(dtype=np.complex128)
 
 
-        F = F.reshape((self.args.ns, self.args.nk, nso, nso))
-        hf_dm = hf_dm.reshape((self.args.ns, self.args.nk, nso, nso))
-        S = S.reshape((self.args.nk, nso, nso))
-        T = T.reshape((self.args.nk, nso, nso))
+        nk_tot = np.prod(self.args.nk)
+        F = F.reshape((self.args.ns, nk_tot, nso, nso))
+        hf_dm = hf_dm.reshape((self.args.ns, nk_tot, nso, nso))
+        S = S.reshape((nk_tot, nso, nso))
+        T = T.reshape((nk_tot, nso, nso))
     
         if len(F.shape) == 3:
             F     = F.reshape((1,) + F.shape)
