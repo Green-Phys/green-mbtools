@@ -194,8 +194,11 @@ class pyscf_pbc_init (pyscf_init):
             Always ``cell.nao_nr()`` regardless of the X2C level, because
             the Coulomb integrals are non-relativistic.
         X_k : list of ndarray
-            Per-k-point Löwdin orthogonalisation matrices X(k) = S(k)^{-1/2}.
-            Empty list when orthogonalisation is disabled (``args.orth == 0``).
+            Per-k-point orthogonalisation matrices X(k). For Löwdin
+            orthogonalisation, ``X(k) = S(k)^{-1/2}``. When
+            orthogonalisation is disabled (``args.orth == 0``), ``X_k``
+            contains identity transforms for each k-point rather than an
+            empty list.
         '''
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
