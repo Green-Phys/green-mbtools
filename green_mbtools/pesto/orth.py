@@ -143,7 +143,10 @@ def sao_orth(X, S, type=None):
             if type == 'g':
                 S12[s, ik] = LA.sqrtm(S[s, ik])
             elif type == 'f':
-                S12[s, ik] = np.linalg.inv(LA.sqrtm(S[s, ik]))
+                if S.dtype == np.complex128:
+                    S12[s, ik] = np.linalg.inv(LA.sqrtm(S[s, ik]).astype(np.complex128))
+                else:
+                    S12[s, ik] = np.linalg.inv(LA.sqrtm(S[s, ik]))
 
     for d in range(X.shape[0]):
         for s in range(ns):

@@ -166,8 +166,11 @@ def sqrt_j2c(mydf, j2c):
 
     return j2c, j2ctags
 
-def make_j2c_sqrt(mydf, cell):
-    make_j2c = _make_j2c_rsgdf
+def make_j2c_sqrt(mydf, cell, rsgdf=False):
+    if rsgdf:
+        make_j2c = _make_j2c_rsgdf
+    else:
+        make_j2c = _make_j2c_gdf
   
     kmesh_scaled = cell.get_scaled_kpts(mydf.kpts)
     kptij_lst = make_kptij_lst(kmesh_scaled)

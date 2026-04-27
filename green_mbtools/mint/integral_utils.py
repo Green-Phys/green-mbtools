@@ -472,12 +472,12 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
             s1 += Lpq.shape[0]
 
         # i = k1 * nk * nk + k2 * nk + k3
-        k3 = int(i /(nk*nk))
-        k2 = int((i % (nk*nk))/nk)
-        k1 = int(i % nk)
-        k_fine = (k3) * (nk)*(nk) + (k2) * (nk) + (k1)
-        EW["{}".format(k_fine)] = (buffer1 - buffer2).view(np.float64)
-        EW_bar["{}".format(k_fine)] = buffer2.view(np.float64)
+        #k3 = int(i /(nk*nk))
+        #k2 = int((i % (nk*nk))/nk)
+        #k1 = int(i % nk)
+        #k_fine = (k3) * (nk)*(nk) + (k2) * (nk) + (k1)
+        EW["{}".format(i)] = (buffer1 - buffer2).view(np.float64)
+        EW_bar["{}".format(i)] = buffer2.view(np.float64)
         buffer1[:] = 0.0
         buffer2[:] = 0.0
 
