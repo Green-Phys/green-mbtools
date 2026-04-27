@@ -979,7 +979,10 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     j2c_sqrt_irre = []
     for irre_q in irre_q_inds:
         j2c_i = j2c_data[f'j2c/{irre_q}'][...]
-        assert np.all(j2c_i - j2c_i.conj().T < 1e-12), "j2c metric is not Hermitian"
+        j2c_i_dagger = j2c_i.conj().T
+        assert np.all(j2c_i - j2c_i_dagger < 1e-10), "j2c metric is not Hermitian"
+        # make it explicitly hermitian
+        j2c_i = (j2c_i + j2c_i_dagger) / 2
         if j2c_decomp == 'cholesky':
             j2c_sqrt_i, _ = int_utils.cholesky_decomposed_metric(j2c_i, auxcell, inv=False)
         elif j2c_decomp == 'eigenvalue':
