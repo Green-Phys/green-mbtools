@@ -160,12 +160,49 @@ class pyscf_pbc_init (pyscf_init):
 
     def compute_df_int(self, nao, X_k):
         '''
-        Generate density-fitting integrals for correlated methods
+        Generate density-fitting (DF) three-center Coulomb integrals for correlated methods.
+
+        Two separate integral sets are produced and written to disk:
+
+        1. Mean-field integrals (written to ``args.hf_int_path``):
+           Standard DF integrals L^Q_{pq}(k_i, k_j) for all symmetry-
+           irreducible k-point pairs, computed with the bare Coulomb kernel.
+           These are used in the mean-field and Hartree-Fock steps.
+
+        2. Correlated integrals (written to ``args.int_path``):
+           Same DF integrals but with a finite-size correction applied to
+           the diagonal (k_i == k_j) pairs.  The correction strategy depends
+           on ``args.finite_size_kind``:
+
+           - ``gf2`` / ``gw`` / ``gw_s``: delegates to
+             ``compute_twobody_finitesize_correction()``, which uses the
+             GF2 Ewald subtraction scheme or the GW plane-wave transformation
+             respectively, then returns early.
+
+           - ``ewald`` (default): builds a second set of three-center integrals
+             with the Ewald Coulomb kernel via ``green_igen.df._make_j3c`` and
+             passes them to ``compute_integrals`` as ``cderi_name2``; the
+             diagonal pairs in the output are then replaced by the
+             Ewald-corrected values.
+
+        Parameters
+        ----------
+        nao : int
+            Number of non-relativistic atomic orbitals per k-point.
+            Always ``cell.nao_nr()`` regardless of the X2C level, because
+            the Coulomb integrals are non-relativistic.
+        X_k : list of ndarray
+            Per-k-point Löwdin orthogonalisation matrices X(k) = S(k)^{-1/2}.
+            Empty list when orthogonalisation is disabled (``args.orth == 0``).
         '''
+        # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, True)
         mydf = None
 
+        # --- Step 2: correlated integrals with finite-size correction --------
+        # GF2/GW corrections use a separate code path that handles the
+        # correction internally; the plain Ewald correction is handled below.
         if 'gf2' in self.args.finite_size_kind or 'gw' in self.args.finite_size_kind or 'gw_s' in self.args.finite_size_kind:
             self.compute_twobody_finitesize_correction()
             if not self.args.keep_cderi:
@@ -173,30 +210,34 @@ class pyscf_pbc_init (pyscf_init):
                 os.system("sync")
             return
 
-        mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
-        # Use Ewald for divergence treatment
-        mydf.exxdiv = 'ewald'
-        import importlib.util as iu
-        new_pyscf = iu.find_spec('pyscf.pbc.df.gdf_builder') is not None
-        if not new_pyscf :
-             from pyscf.pbc import df as gdf
-             weighted_coulG_old = gdf.GDF.weighted_coulG
+        # --- Step 3: Ewald correction via green_igen._make_j3c ---------------
+        # Build a second GDF object and construct three-center integrals with
+        # the Ewald Coulomb kernel for the diagonal k-pairs (k_i == k_j) only.
+        # These are written to cderi_ewald.h5 and later substituted for the
+        # diagonal entries in the correlated integral set.
+        #
+        # The Ewald kernel is installed by monkey-patching gdf.GDF.weighted_coulG
+        # on the class (not the instance) because green_igen._make_j3c resolves
+        # the method through the class hierarchy.  The original method is saved
+        # before the patch and unconditionally restored afterwards so that no
+        # subsequent GDF construction in this session is affected.
         from pyscf.pbc import df as gdf
         import green_igen.df as gggdf
-        auxcell = gggdf.make_modrho_basis(mydf.cell, mydf.auxbasis,
-                                             mydf.exp_to_discard)
 
-        kptij_lst = [(ki, ki) for i, ki in enumerate(self.kmesh)]
-        kptij_lst = np.asarray(kptij_lst)
+        mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
+        mydf.exxdiv = 'ewald'
+        auxcell = gggdf.make_modrho_basis(mydf.cell, mydf.auxbasis,
+                                          mydf.exp_to_discard)
+        kptij_lst = np.asarray([(ki, ki) for ki in self.kmesh])
+
+        # Save → patch → build → restore.
+        weighted_coulG_old = gdf.GDF.weighted_coulG
         gdf.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
         gggdf._make_j3c(mydf, self.cell, auxcell, kptij_lst, "cderi_ewald.h5")
-        #weighted_coulG_old = gdf.GDF.weighted_coulG
-        gdf.GDF.weighted_coulG2 = None
-    
-        #kij_conj, kij_trans, kpair_irre_list, kptij_idx, num_kpair_stored = 
+        gdf.GDF.weighted_coulG = weighted_coulG_old  # always restore
+
+        # Build correlated integrals; diagonal pairs come from cderi_ewald.h5.
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5")
-        if not new_pyscf :
-            gdf.GDF.weighted_coulG = weighted_coulG_old
 
     def evaluate_high_symmetry_path(self):
         if self.args.print_high_symmetry_points:
