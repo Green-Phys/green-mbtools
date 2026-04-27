@@ -195,19 +195,30 @@ class pyscf_pbc_init (pyscf_init):
             Per-k-point Löwdin orthogonalisation matrices X(k) = S(k)^{-1/2}.
             Empty list when orthogonalisation is disabled (``args.orth == 0``).
         '''
+        import datetime
+        def _ts(tag):
+            print(f"[{datetime.datetime.now().isoformat()}] compute_df_int: {tag}", flush=True)
+
+        _ts(f"ENTER — nao={nao}, finite_size_kind={self.args.finite_size_kind}, nk={len(self.kmesh)}")
+
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
+        _ts("STEP 1 — constructing GDF object for mean-field integrals")
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
+        _ts("STEP 1 — calling compute_integrals (bare Coulomb) → hf_int_path")
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, True)
         mydf = None
+        _ts("STEP 1 — done")
 
         # --- Step 2: correlated integrals with finite-size correction --------
         # GF2/GW corrections use a separate code path that handles the
         # correction internally; the plain Ewald correction is handled below.
         if 'gf2' in self.args.finite_size_kind or 'gw' in self.args.finite_size_kind or 'gw_s' in self.args.finite_size_kind:
+            _ts(f"STEP 2 — delegating to compute_twobody_finitesize_correction (finite_size_kind={self.args.finite_size_kind})")
             self.compute_twobody_finitesize_correction()
             if not self.args.keep_cderi:
                 os.remove("cderi.h5")
                 os.system("sync")
+            _ts("STEP 2 — done, returning early")
             return
 
         # --- Step 3: Ewald correction via green_igen._make_j3c ---------------
@@ -224,20 +235,26 @@ class pyscf_pbc_init (pyscf_init):
         from pyscf.pbc import df as gdf
         import green_igen.df as gggdf
 
+        _ts("STEP 3 — constructing GDF object for Ewald-corrected integrals")
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
         mydf.exxdiv = 'ewald'
         auxcell = gggdf.make_modrho_basis(mydf.cell, mydf.auxbasis,
                                           mydf.exp_to_discard)
         kptij_lst = np.asarray([(ki, ki) for ki in self.kmesh])
+        _ts(f"STEP 3 — auxcell built: naux={auxcell.nao_nr()}, kptij_lst shape={kptij_lst.shape}")
 
         # Save → patch → build → restore.
+        _ts("STEP 3 — patching weighted_coulG → Ewald kernel, calling _make_j3c")
         weighted_coulG_old = gdf.GDF.weighted_coulG
         gdf.GDF.weighted_coulG = int_utils.weighted_coulG_ewald
         gggdf._make_j3c(mydf, self.cell, auxcell, kptij_lst, "cderi_ewald.h5")
         gdf.GDF.weighted_coulG = weighted_coulG_old  # always restore
+        _ts("STEP 3 — _make_j3c done, weighted_coulG restored")
 
         # Build correlated integrals; diagonal pairs come from cderi_ewald.h5.
+        _ts("STEP 3 — calling compute_integrals (Ewald-corrected) → int_path")
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5")
+        _ts("STEP 3 — done, compute_df_int complete")
 
     def evaluate_high_symmetry_path(self):
         if self.args.print_high_symmetry_points:
