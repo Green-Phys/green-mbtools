@@ -162,28 +162,30 @@ class pyscf_pbc_init (pyscf_init):
         '''
         Generate density-fitting (DF) three-center Coulomb integrals for correlated methods.
 
-        Two separate integral sets are produced and written to disk:
+        This routine always produces the mean-field DF integral set written to
+        ``args.hf_int_path``. A second, correlated DF integral set written to
+        ``args.int_path`` is generated here only for the ``ewald`` finite-size
+        correction path.
 
         1. Mean-field integrals (written to ``args.hf_int_path``):
            Standard DF integrals L^Q_{pq}(k_i, k_j) for all symmetry-
            irreducible k-point pairs, computed with the bare Coulomb kernel.
            These are used in the mean-field and Hartree-Fock steps.
 
-        2. Correlated integrals (written to ``args.int_path``):
-           Same DF integrals but with a finite-size correction applied to
-           the diagonal (k_i == k_j) pairs.  The correction strategy depends
-           on ``args.finite_size_kind``:
+        2. Finite-size correction handling:
 
            - ``gf2`` / ``gw`` / ``gw_s``: delegates to
              ``compute_twobody_finitesize_correction()``, which uses the
              GF2 Ewald subtraction scheme or the GW plane-wave transformation
-             respectively, then returns early.
+             respectively, then returns early. In these branches,
+             ``compute_integrals(..., basename=args.int_path, ...)`` is not
+             called by this function.
 
            - ``ewald`` (default): builds a second set of three-center integrals
              with the Ewald Coulomb kernel via ``green_igen.df._make_j3c`` and
              passes them to ``compute_integrals`` as ``cderi_name2``; the
              diagonal pairs in the output are then replaced by the
-             Ewald-corrected values.
+             Ewald-corrected values and written to ``args.int_path``.
 
         Parameters
         ----------
