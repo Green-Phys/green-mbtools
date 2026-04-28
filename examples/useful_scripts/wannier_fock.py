@@ -57,11 +57,11 @@ x2c = args.x2c
 print("Reading input file")
 f = h5py.File(input_path, 'r')
 cell = f["Cell"][()]
-kmesh_abs = f["/grid/k_mesh"][()]
-kmesh_scaled = f["/grid/k_mesh_scaled"][()]
-index = f["/grid/index"][()]
-ir_list = f["/grid/ir_list"][()]
-conj_list = f["/grid/conj_list"][()]
+kmesh_abs = f["/symmetry/k/mesh"][()]
+kmesh_scaled = f["/symmetry/k/mesh_scaled"][()]
+index = f["/symmetry/k/bz2ibz"][()]
+ir_list = f["/symmetry/k/ibz2bz"][()]
+conj_list = f["/symmetry/k/tr_conj"][()]
 Fk = f["HF/Fock-k"][()].view(complex)
 Fk = Fk.reshape(Fk.shape[:-1])
 nk = index.shape[0]
