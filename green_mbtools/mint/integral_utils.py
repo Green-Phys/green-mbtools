@@ -654,13 +654,18 @@ def cholesky_decomposed_metric(j2c_k, cell, inv=False):
 
 def eigenvalue_decomposed_metric(j2c_k, cell, inv=False):
     j2c_negative = None
+    cond_num = np.linalg.cond(j2c_k)
+    if cond_num > 1e12:
+        raise UserWarning(f"Condition number of j2c_k ({cond_num}) is too large. Consider using a smallr aux. basis.")
+
     eigs, vecs = LA.eigh(j2c_k)
-    assert np.all(eigs > 0), "j2c metric has non-positive eigenvalues"
-    eigs_trim = eigs[eigs > J2C_LIN_DEP_THRESH]
+    assert np.all(eigs > -J2C_LIN_DEP_THRESH), "j2c metric has non-positive eigenvalues"
+    eig_mask = eigs > np.max(eigs) * J2C_LIN_DEP_THRESH
+    eigs_trim = eigs[eig_mask]
     if inv:
-        j2c_sqrt_k = vecs[:, eigs > J2C_LIN_DEP_THRESH].conj().T / np.sqrt(eigs_trim).reshape(-1, 1)
+        j2c_sqrt_k = vecs[:, eig_mask].conj().T / np.sqrt(eigs_trim).reshape(-1, 1)
     else:
-        j2c_sqrt_k = vecs[:, eigs > J2C_LIN_DEP_THRESH] * np.sqrt(eigs_trim).reshape(1, -1)
+        j2c_sqrt_k = vecs[:, eig_mask] * np.sqrt(eigs_trim).reshape(1, -1)
     # negative eigenvalues can occur in 2D systems with certain Fourier transform conventions,
     # but we can still use the corresponding eigenvectors to define a "negative" subspace for the J2C metric
     if cell.dimension == 2 and cell.low_dim_ft_type != 'inf_vacuum':
