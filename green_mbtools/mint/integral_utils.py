@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+import warnings
 import importlib.metadata as imd
 
 import h5py
@@ -656,7 +657,7 @@ def eigenvalue_decomposed_metric(j2c_k, cell, inv=False):
     j2c_negative = None
     cond_num = np.linalg.cond(j2c_k)
     if cond_num > 1e12:
-        raise UserWarning(f"Condition number of j2c_k ({cond_num}) is too large. Consider using a smallr aux. basis.")
+        warnings.warn(f"Condition number of j2c_k ({cond_num}) is too large. Consider using a smaller aux. basis.")
 
     eigs, vecs = LA.eigh(j2c_k)
     assert np.all(eigs > -J2C_LIN_DEP_THRESH), "j2c metric has non-positive eigenvalues"
