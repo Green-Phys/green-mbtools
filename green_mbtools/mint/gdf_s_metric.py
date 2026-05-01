@@ -50,6 +50,8 @@ def compute_j2c_sqrt(uniq_kptji_id, j2c, linear_dep_threshold=1e-9):
 def _make_j2c_rsgdf(mydf, cell, auxcell, uniq_kpts, exx=False):
     from pyscf.pbc.df import rsdf_helper
     from pyscf.pbc.df.rsdf import get_aux_chg
+
+
     nao, naux = cell.nao_nr(), auxcell.nao_nr()
     # get charge of auxbasis
     if cell.dimension == 3:

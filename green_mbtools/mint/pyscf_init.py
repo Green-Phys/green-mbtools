@@ -292,16 +292,16 @@ class pyscf_pbc_init(pyscf_init):
 
     def evaluate_gw_correction(self, mydf=None):
         if mydf is None:
-            mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
+            mydf = comm.construct_rsgdf(self.args, self.cell, self.kmesh)
         mydf.build()
 
-        #j3c, kptij_lst, j2c_sqrt, uniq_kpts = gdf_S.make_j3c(
-         #   mydf, self.cell, j2c_sqrt=True, exx=False
-        #)
+        j3c, kptij_lst, j2c_sqrt, uniq_kpts = gdf_S.make_j3c(
+            mydf, self.cell, j2c_sqrt=True, exx=False
+        )
         
         #*
-        j2c_sqrt, uniq_kpts = gdf_S.make_j2c_sqrt(mydf, self.cell)
-
+        #j2c_sqrt, uniq_kpts = gdf_S.make_j2c_sqrt(mydf, self.cell, rsgdf=True)
+                                                  
         """ Transformation matrix from auxiliary basis to plane-wave """
         AqQ, q_reduced, q_scaled_reduced = gdf_S.transformation_PW_to_auxbasis(
             mydf, self.cell, j2c_sqrt, uniq_kpts

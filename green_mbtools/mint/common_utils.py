@@ -1033,8 +1033,28 @@ def construct_gdf(args, mycell, kmesh=None):
     """
     # Use gaussian density fitting to get fitted densities
     mydf = df.GDF(mycell)
+    if hasattr(mydf, "_prefer_ccdf"):
+       mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
+    if args.auxbasis is not None:
+        mydf.auxbasis = args.auxbasis
+    elif args.beta is not None:
+        mydf.auxbasis = df.aug_etb(mycell, beta=args.beta)
+    # Coulomb kernel mesh
+    if args.Nk > 0:
+        mydf.mesh = [args.Nk, args.Nk, args.Nk]
+    if kmesh is not None:
+        mydf.kpts = kmesh
+    return mydf
+
+def construct_rsgdf(args, mycell, kmesh=None):
+    """
+    Construct Gaussian Density Fitting obejct for a given parameters and unit cell.
+    We make sure to disable range-separeting implementation
+    """
+    # Use gaussian density fitting to get fitted densities
+    mydf = df.RSGDF(mycell)
     #if hasattr(mydf, "_prefer_ccdf"):
-    #    mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
+    #   mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
     if args.auxbasis is not None:
         mydf.auxbasis = args.auxbasis
     elif args.beta is not None:
