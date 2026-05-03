@@ -758,7 +758,7 @@ def solve_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = 'tmp.chk'
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk('tmp.chk')
+        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
@@ -801,7 +801,7 @@ def solve_mol_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = 'tmp.chk'
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk('tmp.chk')
+        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
