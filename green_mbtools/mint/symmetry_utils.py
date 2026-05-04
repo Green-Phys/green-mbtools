@@ -43,9 +43,9 @@ def fold_to_unit_cell(r_cart_scaled):
     r_rel : ndarray
         The folded Cartesian coordinate within the unit cell (3,).
     """
-    frac = r_cart_scaled
+    frac = np.asarray(r_cart_scaled, dtype=float)
     # Wrap to [-0.5, 0.5) to match atom coordinate convention
-    frac = frac - np.round(frac)
+    frac = np.mod(frac + 0.5, 1.0) - 0.5
     return frac
 
 
@@ -81,6 +81,9 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
     partner_idx = np.zeros(n_atom, dtype=int)
     pos_diff = np.zeros((n_atom, 3))
     coords_scaled = mycell.get_scaled_atom_coords().reshape(-1,3)
+    # ensure scaled coordinates are in [-0.5, 0.5)
+    for i in range(coords_scaled.shape[0]):
+        coords_scaled[i] = fold_to_unit_cell(coords_scaled[i])
 
     for i in range(n_atom):
         i_coord = coords_scaled[i]
