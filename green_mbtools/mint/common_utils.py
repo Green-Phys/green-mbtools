@@ -598,6 +598,18 @@ def add_common_params(parser):
         default=None,
         help="Smearing width for Fermi-Dirac smearing",
     )
+    parser.add_argument(
+        "--use_rsgdf",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default="false",
+        help="Use range-separated Gaussian density fitting for integral evaluation. If false, use standard Gaussian density fitting",
+    )
+    parser.add_argument(
+        "--init_guess",
+        type=str,
+        default=None,
+        help="Initial guess for mean-field calculations. Can be 'minao', 'hcore', '1e', 'atom', or a path to a hdf5 file with initial density matrix stored in it.",
+    )
 
 
 def add_pbc_params(parser):
@@ -647,6 +659,7 @@ def add_pbc_params(parser):
         nargs="+",
         help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.",
     )
+    
 
 
 def init_mol_params(params=None):
@@ -896,12 +909,15 @@ def solve_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = "tmp.chk"
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk("tmp.chk")
+        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
         init_dm = read_dm(init_dm, args.dm0)
         mf.kernel(init_dm)
+    elif args.init_guess is not None:
+        mf.init_guess = args.init_guess
+        mf.kernel()
     else:
         mf.kernel()
     if args.x2c < 2:
@@ -944,7 +960,7 @@ def solve_mol_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = "tmp.chk"
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk("tmp.chk")
+        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
@@ -1034,7 +1050,8 @@ def construct_gdf(args, mycell, kmesh=None):
     # Use gaussian density fitting to get fitted densities
     mydf = df.GDF(mycell)
     if hasattr(mydf, "_prefer_ccdf"):
-       mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
+        if not args.use_rsgdf:
+            mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
     if args.auxbasis is not None:
         mydf.auxbasis = args.auxbasis
     elif args.beta is not None:
@@ -1053,8 +1070,8 @@ def construct_rsgdf(args, mycell, kmesh=None):
     """
     # Use gaussian density fitting to get fitted densities
     mydf = df.RSGDF(mycell)
-    if hasattr(mydf, "_prefer_ccdf"):
-       mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
+    #if hasattr(mydf, "_prefer_ccdf"):
+    #   mydf._prefer_ccdf = True  # Disable RS-GDF switch for new pyscf versions
     if args.auxbasis is not None:
         mydf.auxbasis = args.auxbasis
     elif args.beta is not None:
