@@ -8,8 +8,14 @@ Level 1 — kernel unit tests (no HDF5 build, <1 s each):
   test_nonzero_G_unchanged  : G!=0 values are identical to bare Coulomb
   test_patch_restore        : class attribute restored after patch context
 
+Level 2 — builder-level CDERI comparison (seconds each):
+  test_df1_ewald_cc_vs_rs              : Ewald df1 CDERIs agree CC-forced vs RS-aware
+  test_df2_bare_cc_vs_rs               : bare df2 CDERIs unchanged by removing _prefer_ccdf
+  test_ewald_correction_nonzero_and_consistent : df1-df2 nonzero and equal across paths
+
 Level 3 — full compute_ewald_correction comparison:
   test_ewald_correction_rs_vs_cc : old (CC-forced) vs new (RS) give identical EW tensors
+  test_patch_restore_after_compute : class methods restored after function returns
 """
 
 import os
@@ -151,6 +157,151 @@ class TestKernelLevel:
         _RSGDFBuilder.weighted_coulG = original
         assert _RSGDFBuilder.weighted_coulG is original, \
             "weighted_coulG not restored to original after patch/restore"
+
+
+# ─── Level 2 helpers ─────────────────────────────────────────────────────────
+
+def _build_df(cell, kmesh, auxbasis, mesh, ewald=False, prefer_cc=False,
+              patch_cc=False, patch_rs=False):
+    """Build a df.GDF object and return a dict of CDERIs read via sr_loop.
+
+    Returns {i: array(NQ, nao, nao, complex)} for each diagonal k-pair index i.
+    Patches are applied only during .build() and restored immediately after.
+    """
+    cc_old = _CCGDFBuilder.weighted_coulG
+    rs_old = _RSGDFBuilder.weighted_coulG
+    try:
+        if patch_cc:
+            _CCGDFBuilder.weighted_coulG = weighted_coulG_ewald_2nd
+        if patch_rs:
+            _RSGDFBuilder.weighted_coulG = weighted_coulG_rs_ewald
+
+        mydf = df.GDF(cell)
+        mydf.auxbasis = auxbasis
+        mydf.mesh = mesh
+        mydf.kpts = kmesh
+        mydf.verbose = 0
+        if ewald:
+            mydf.exxdiv = 'ewald'
+            mydf.cell.full_k_mesh = kmesh
+        if prefer_cc:
+            mydf._prefer_ccdf = True
+        f = tempfile.mktemp(suffix=".h5")
+        mydf._cderi_to_save = f
+        mydf._cderi = f
+        mydf.build()
+    finally:
+        _CCGDFBuilder.weighted_coulG = cc_old
+        _RSGDFBuilder.weighted_coulG = rs_old
+
+    nao = cell.nao_nr()
+    result = {}
+    for i, ki in enumerate(kmesh):
+        chunks = list(mydf.sr_loop((ki, ki), max_memory=4000, compact=False))
+        rows = [c[0] + 1j * c[1] for c in chunks]
+        NQ = rows[0].shape[1]
+        Lpq = np.vstack(rows).reshape(-1, nao, nao)
+        result[i] = Lpq
+    os.remove(f)
+    return result
+
+
+# ─── Level 2 tests ───────────────────────────────────────────────────────────
+
+class TestBuilderLevel:
+
+    @pytest.fixture(scope="class")
+    def cell_kmesh(self, h2_cell, kmesh_2x2x2):
+        return h2_cell, kmesh_2x2x2
+
+    @pytest.fixture(scope="class")
+    def reference_df(self, h2_cell, kmesh_2x2x2):
+        """Shared GDF built once to get auxbasis and mesh."""
+        mydf = df.GDF(h2_cell); mydf.kpts = kmesh_2x2x2; mydf.verbose = 0
+        f = tempfile.mktemp(suffix=".h5")
+        mydf._cderi_to_save = f; mydf._cderi = f; mydf.build()
+        auxbasis = mydf.auxbasis
+        mesh = mydf.mesh
+        os.remove(f)
+        return auxbasis, mesh
+
+    def test_df1_ewald_cc_vs_rs(self, h2_cell, kmesh_2x2x2, reference_df):
+        """Ewald-probed df1 CDERIs must agree between CC-forced and RS-aware builds."""
+        auxbasis, mesh = reference_df
+
+        cderi_cc = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                             ewald=True, prefer_cc=True,
+                             patch_cc=True, patch_rs=False)
+        cderi_rs = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                             ewald=True, prefer_cc=False,
+                             patch_cc=True, patch_rs=True)
+
+        for i in range(len(kmesh_2x2x2)):
+            np.testing.assert_allclose(
+                cderi_cc[i], cderi_rs[i], atol=1e-8,
+                err_msg=f"Ewald df1 CDERIs differ at k-pair {i}: "
+                        f"CC-forced vs RS-aware"
+            )
+
+    def test_df2_bare_cc_vs_rs(self, h2_cell, kmesh_2x2x2, reference_df):
+        """Bare df2 CDERIs must agree with and without _prefer_ccdf.
+
+        _CCGDFBuilder and _RSGDFBuilder use different numerical integration
+        paths (classical lattice sum vs range-separated FT), so they agree to
+        ~1e-8 in absolute value, not to machine precision.  This tolerance
+        corresponds to the documented "mathematically identical" claim.
+        """
+        auxbasis, mesh = reference_df
+
+        cderi_cc = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                             ewald=False, prefer_cc=True,
+                             patch_cc=False, patch_rs=False)
+        cderi_rs = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                             ewald=False, prefer_cc=False,
+                             patch_cc=False, patch_rs=False)
+
+        for i in range(len(kmesh_2x2x2)):
+            np.testing.assert_allclose(
+                cderi_cc[i], cderi_rs[i], atol=1e-8,
+                err_msg=f"Bare df2 CDERIs changed when _prefer_ccdf was removed "
+                        f"at k-pair {i}"
+            )
+
+    def test_ewald_correction_nonzero_and_consistent(self, h2_cell,
+                                                      kmesh_2x2x2, reference_df):
+        """df1 - df2 must be nonzero and the same for CC and RS paths.
+
+        Checks that the Ewald correction is actually present in df1 (not silently
+        dropped) and that both paths produce the same correction tensor.
+        """
+        auxbasis, mesh = reference_df
+
+        df1_cc = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                           ewald=True, prefer_cc=True,
+                           patch_cc=True, patch_rs=False)
+        df2_cc = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                           ewald=False, prefer_cc=True,
+                           patch_cc=False, patch_rs=False)
+        df1_rs = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                           ewald=True, prefer_cc=False,
+                           patch_cc=True, patch_rs=True)
+        df2_rs = _build_df(h2_cell, kmesh_2x2x2, auxbasis, mesh,
+                           ewald=False, prefer_cc=False,
+                           patch_cc=False, patch_rs=False)
+
+        for i in range(len(kmesh_2x2x2)):
+            ew_cc = df1_cc[i] - df2_cc[i]
+            ew_rs = df1_rs[i] - df2_rs[i]
+
+            # correction must be present (not silently zero)
+            assert np.abs(ew_rs).max() > 1e-10, \
+                f"EW correction is zero at k-pair {i}: RS path dropped the Ewald term"
+
+            # both paths must give the same correction
+            np.testing.assert_allclose(
+                ew_cc, ew_rs, atol=1e-8,
+                err_msg=f"EW correction differs between CC and RS paths at k-pair {i}"
+            )
 
 
 # ─── Level 3 test ────────────────────────────────────────────────────────────
