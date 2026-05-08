@@ -16,6 +16,14 @@ Level 2 — builder-level CDERI comparison (seconds each):
 Level 3 — full compute_ewald_correction comparison:
   test_ewald_correction_rs_vs_cc : old (CC-forced) vs new (RS) give identical EW tensors
   test_patch_restore_after_compute : class methods restored after function returns
+
+Level 4 — end-to-end exchange energy regression:
+  test_hf_energy_unchanged         : HF total energy unchanged after Ewald patch cycle
+  test_exchange_energy_correction  : ΔEx from EW tensors agrees to 1e-7 Ha between paths
+
+Level 5 — Option A vs Option B consistency:
+  test_option_a_vs_b_total_exchange : total Ewald exchange energy agrees between
+                                      RS-everywhere (A) and CC-everywhere (B) to 1e-6 Ha
 """
 
 import os
@@ -422,3 +430,236 @@ class TestEwaldCorrectionComparison:
             "_CCGDFBuilder.weighted_coulG not restored after compute_ewald_correction"
         assert _RSGDFBuilder.weighted_coulG is rs_before, \
             "_RSGDFBuilder.weighted_coulG not restored after compute_ewald_correction"
+
+
+# ─── Option B helper ──────────────────────────────────────────────────────────
+
+def _run_ewald_cc_consistent(cell, kmesh, maindf_cc, nao, filename):
+    """Option B: CC everywhere.
+
+    maindf_cc must be a df.GDF built with _prefer_ccdf=True so that the
+    production CDERIs use the CC metric.  The Ewald correction (df1 and df2
+    inside _run_ewald_old) also uses _CCGDFBuilder, making all three objects
+    (production, bare EW, Ewald-probed EW) self-consistent in the CC metric.
+    """
+    _run_ewald_old(cell, kmesh, maindf_cc, nao, filename)
+
+
+def _total_ex_from_ew_file(ew_file, dm, Nk, nao):
+    """Total Ewald exchange energy from a single EW file.
+
+    Reconstructs L_ew = EW_bar + EW (the full Ewald CDERI, both stored in the
+    file) and contracts with dm:
+        Ex = -(1/Nk) Σ_ki Tr[(Σ_Q L_ew_Q(ki) dm_k L_ew_Q†(ki)) dm_k]
+    """
+    Ex = 0.0
+    with h5py.File(ew_file, "r") as fh:
+        for i in range(Nk):
+            L_bare = fh["EW_bar"][str(i)][...].view(np.complex128).reshape(-1, nao, nao)
+            dL     = fh["EW"][str(i)][...].view(np.complex128).reshape(-1, nao, nao)
+            L_ew   = L_bare + dL
+            dm_k   = dm[i]
+            Sigma_x = -np.einsum('Qps,st,Qrt->pr', L_ew, dm_k, L_ew.conj())
+            Ex += np.trace(Sigma_x @ dm_k).real
+    return Ex / Nk
+
+
+# ─── Level 4 helpers ─────────────────────────────────────────────────────────
+
+def _exchange_energy_from_file(filename, dm, Nk, nao):
+    """Contract EW tensors in *filename* with density matrix *dm*.
+
+    Computes ΔEx = -(1/Nk) Σ_ki Tr[Σ_Q ΔL^Q(ki) γ(ki) ΔL^Q†(ki) γ(ki)]
+
+    Parameters
+    ----------
+    filename : str
+        Path to HDF5 file produced by _run_ewald_old / _run_ewald_new.
+        Must contain group ``EW`` with datasets ``"0"``..``"Nk-1"``.
+    dm : ndarray, shape (Nk, nao, nao)
+        k-space density matrix (both spins included, factor of 2 for RHF).
+    """
+    dEx = 0.0
+    with h5py.File(filename, "r") as fh:
+        for i in range(Nk):
+            # EW stored as float64 view of complex128 — recover complex
+            dL = fh["EW"][str(i)][...].view(np.complex128).reshape(-1, nao, nao)
+            dm_k = dm[i]
+            # exchange self-energy: Σ_x(ki)_pr = -Σ_Q ΔL^Q_ps γ_st ΔL^Q*_rt
+            Sigma_x = -np.einsum('Qps,st,Qrt->pr', dL, dm_k, dL.conj())
+            dEx += np.trace(Sigma_x @ dm_k).real
+    return dEx / Nk
+
+
+# ─── Level 4 tests ───────────────────────────────────────────────────────────
+
+class TestEndToEnd:
+    """Level 4: end-to-end exchange energy regression.
+
+    4a: HF total energy must be unchanged after the compute_ewald_correction
+        patch-and-restore cycle — confirms no class-level side effects survive.
+
+    4b: Exchange energy correction ΔEx is numerically identical between the
+        CC-forced (old) and RS-aware (new) Ewald paths to 1e-7 Ha.
+    """
+
+    @pytest.fixture(scope="class")
+    def hf_setup(self, h2_cell, kmesh_2x2x2):
+        """KRHF on H2 2×2×2 for density matrix and shared DF object."""
+        from pyscf.pbc.scf import KRHF
+        mydf = df.GDF(h2_cell)
+        mydf.kpts = kmesh_2x2x2
+        mydf.verbose = 0
+        mydf.build()
+
+        mf = KRHF(h2_cell, kmesh_2x2x2)
+        mf.with_df = mydf
+        mf.exxdiv = 'ewald'
+        mf.verbose = 0
+        e_hf = mf.kernel()
+
+        nao = h2_cell.nao_nr()
+        Nk = len(kmesh_2x2x2)
+        # KRHF: make_rdm1 → (Nk, nao, nao) with factor 2 for double occupation
+        dm = mf.make_rdm1()
+        return h2_cell, kmesh_2x2x2, mydf, nao, Nk, dm, e_hf
+
+    def test_hf_energy_unchanged(self, hf_setup, tmp_path):
+        """HF total energy must be identical before and after the Ewald patch cycle.
+
+        A fresh KRHF is run before and after calling compute_ewald_correction.
+        Any unreleased class-level monkey-patch would corrupt the second run.
+        """
+        cell, kmesh, maindf, nao, Nk, _, e_before = hf_setup
+
+        f_ew = str(tmp_path / "df_ewald_4a.h5")
+        _run_ewald_new(cell, kmesh, maindf, nao, f_ew)
+
+        from pyscf.pbc.scf import KRHF
+        mf_after = KRHF(cell, kmesh)
+        mf_after.with_df = df.GDF(cell)
+        mf_after.with_df.kpts = kmesh
+        mf_after.with_df.verbose = 0
+        mf_after.exxdiv = 'ewald'
+        mf_after.verbose = 0
+        e_after = mf_after.kernel()
+
+        np.testing.assert_allclose(
+            e_before, e_after, atol=1e-10,
+            err_msg=(
+                f"HF energy changed after compute_ewald_correction patch cycle: "
+                f"before={e_before:.10f}, after={e_after:.10f}"
+            )
+        )
+
+    def test_exchange_energy_correction(self, hf_setup, tmp_path):
+        """ΔEx from EW tensors must agree between CC-forced and RS-aware paths.
+
+        Both paths produce EW tensors stored in HDF5; we contract them with the
+        k-space density matrix and assert the resulting exchange energy corrections
+        agree to atol=1e-7 Ha.  We also assert the correction is nonzero so that
+        a silent Ewald dropout (correction set to zero) would be caught.
+        """
+        cell, kmesh, maindf, nao, Nk, dm, _ = hf_setup
+
+        f_old = str(tmp_path / "ewald_4b_old.h5")
+        f_new = str(tmp_path / "ewald_4b_new.h5")
+        _run_ewald_old(cell, kmesh, maindf, nao, f_old)
+        _run_ewald_new(cell, kmesh, maindf, nao, f_new)
+
+        dEx_old = _exchange_energy_from_file(f_old, dm, Nk, nao)
+        dEx_new = _exchange_energy_from_file(f_new, dm, Nk, nao)
+
+        assert abs(dEx_old) > 1e-12, \
+            "Old-path exchange correction is identically zero — correction silent dropped"
+        assert abs(dEx_new) > 1e-12, \
+            "New-path exchange correction is identically zero — correction silently dropped"
+
+        np.testing.assert_allclose(
+            dEx_old, dEx_new, atol=1e-7,
+            err_msg=(
+                f"Exchange energy correction differs between CC-forced and RS-aware paths: "
+                f"old={dEx_old:.10f} Ha, new={dEx_new:.10f} Ha"
+            )
+        )
+
+
+# ─── Level 5: Option A vs Option B consistency ───────────────────────────────
+
+class TestOptionBConsistency:
+    """Level 5: Option A (RS everywhere) vs Option B (CC everywhere).
+
+    Both options are internally self-consistent: Option A uses RS for all three
+    objects (production maindf, bare df2, Ewald-probed df1); Option B uses CC
+    for all three.  Since both compute the same physical Ewald-corrected Coulomb
+    integrals in different J2c bases, the total Ewald exchange energy must agree
+    to within CC vs RS numerical integration accuracy.
+    """
+
+    @pytest.fixture(scope="class")
+    def setup_both(self, h2_cell, kmesh_2x2x2):
+        from pyscf.pbc.scf import KRHF
+
+        # RS maindf — Option A production metric
+        maindf_rs = df.GDF(h2_cell)
+        maindf_rs.kpts = kmesh_2x2x2
+        maindf_rs.verbose = 0
+        f_rs = tempfile.mktemp(suffix=".h5")
+        maindf_rs._cderi_to_save = f_rs
+        maindf_rs._cderi = f_rs
+        maindf_rs.build()
+
+        # CC maindf — Option B production metric (same mesh for a fair comparison)
+        maindf_cc = df.GDF(h2_cell)
+        maindf_cc._prefer_ccdf = True
+        maindf_cc.mesh = maindf_rs.mesh
+        maindf_cc.kpts = kmesh_2x2x2
+        maindf_cc.verbose = 0
+        f_cc = tempfile.mktemp(suffix=".h5")
+        maindf_cc._cderi_to_save = f_cc
+        maindf_cc._cderi = f_cc
+        maindf_cc.build()
+
+        # Reference dm from KRHF with RS maindf
+        mf = KRHF(h2_cell, kmesh_2x2x2)
+        mf.with_df = maindf_rs
+        mf.exxdiv = 'ewald'
+        mf.verbose = 0
+        mf.kernel()
+        dm = mf.make_rdm1()
+
+        nao = h2_cell.nao_nr()
+        Nk  = len(kmesh_2x2x2)
+
+        yield h2_cell, kmesh_2x2x2, maindf_rs, maindf_cc, nao, Nk, dm
+
+        os.remove(f_rs)
+        os.remove(f_cc)
+
+    def test_option_a_vs_b_total_exchange(self, setup_both, tmp_path):
+        """Total Ewald exchange energy from Option A and B must agree to 1e-6 Ha.
+
+        The tolerance is 1e-6 (not 1e-7) because CC and RS 3-centre integrals
+        agree to ~1e-5, and the exchange energy inherits that numerical error.
+        """
+        cell, kmesh, maindf_rs, maindf_cc, nao, Nk, dm = setup_both
+
+        f_a = str(tmp_path / "ew_optA.h5")
+        f_b = str(tmp_path / "ew_optB.h5")
+
+        _run_ewald_new(cell, kmesh, maindf_rs, nao, f_a)            # Option A
+        _run_ewald_cc_consistent(cell, kmesh, maindf_cc, nao, f_b)  # Option B
+
+        Ex_A = _total_ex_from_ew_file(f_a, dm, Nk, nao)
+        Ex_B = _total_ex_from_ew_file(f_b, dm, Nk, nao)
+
+        assert abs(Ex_A) > 1e-12, "Option A total exchange energy is zero"
+        assert abs(Ex_B) > 1e-12, "Option B total exchange energy is zero"
+
+        np.testing.assert_allclose(
+            Ex_A, Ex_B, atol=1e-6,
+            err_msg=(
+                f"Total Ewald exchange energy differs between Option A (RS) and "
+                f"Option B (CC): A={Ex_A:.10f} Ha, B={Ex_B:.10f} Ha"
+            )
+        )
