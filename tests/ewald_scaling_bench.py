@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 """
-Scaling benchmark: compute_ewald_correction CC-forced (old) vs RS-aware (new).
+Scaling benchmark: Option A (RS everywhere) vs Option B (CC everywhere).
 
-Measures wall-clock time and max EW-tensor deviation for a periodic cell
-as a function of k-mesh size.
+Both options are internally self-consistent.  Option A uses _RSGDFBuilder for
+all three GDF objects (production maindf, bare df2, Ewald-probed df1); Option B
+uses _CCGDFBuilder for all three.
+
+The deviation metric is max|J_ew_A − J_ew_B| where J_ew = Σ_Q L_ew_Q L_ew_Q†
+is the Ewald-corrected Coulomb matrix (nao × nao, basis-invariant).  Both
+options must agree to within the CC vs RS integration accuracy (~1e-5).
 
 Usage
 -----
-    # H2, 1x1x1 through 3x3x3 (fast, ~10 s)
+    # H2, 1×1×1 through 3×3×3 (fast, ~10 s)
     python tests/ewald_scaling_bench.py
 
-    # Si with gth-szv, 2x2x2 through 4x4x4
+    # Si with gth-szv, 2×2×2 through 4×4×4
     python tests/ewald_scaling_bench.py --system si
 
     # Si with gth-dzvp (larger auxbasis, more realistic)
     python tests/ewald_scaling_bench.py --system si --basis gth-dzvp
 
-    # extend by one mesh (4x4x4 for H2, 5x5x5 for Si)
+    # extend by one mesh (4×4×4 for H2, 5×5×5 for Si)
     python tests/ewald_scaling_bench.py --system si --large
 
     # repeat each measurement N times and report median
@@ -24,7 +29,7 @@ Usage
 
 Output
 ------
-    ewald_scaling_<system>.png  (log-log timing + deviation)
+    ewald_scaling_<system>.png  (log-log timing + Coulomb-matrix deviation)
     table to stdout
 """
 
@@ -33,7 +38,6 @@ import os
 import sys
 import time
 import tempfile
-import shutil
 
 import numpy as np
 import h5py
@@ -61,8 +65,7 @@ def _make_h2_cell(basis="gth-szv"):
 
 
 def _make_si_cell(basis="gth-szv"):
-    # Diamond-cubic Si, a = 5.43 Å = 10.263 bohr
-    # FCC primitive vectors (in Å)
+    # Diamond-cubic Si, a = 5.43 Å; FCC primitive vectors (in Å)
     a = 2.715  # a/2
     cell = gto.Cell()
     cell.atom = "Si 0 0 0; Si 1.3575 1.3575 1.3575"
@@ -76,27 +79,55 @@ def _make_si_cell(basis="gth-szv"):
 
 SYSTEMS = {
     "h2": {
-        "factory":       _make_h2_cell,
+        "factory":        _make_h2_cell,
         "default_meshes": [(1, 1, 1), (2, 2, 2), (3, 3, 3)],
-        "large_mesh":    (4, 4, 4),
-        "label":         "H₂",
+        "large_mesh":     (4, 4, 4),
+        "label":          "H₂",
     },
     "si": {
-        "factory":       _make_si_cell,
+        "factory":        _make_si_cell,
         "default_meshes": [(2, 2, 2), (3, 3, 3), (4, 4, 4)],
-        "large_mesh":    (5, 5, 5),
-        "label":         "Si",
+        "large_mesh":     (5, 5, 5),
+        "label":          "Si",
     },
 }
+
+
+# ── deviation helper ──────────────────────────────────────────────────────────
+
+def _max_coulomb_deviation(f_a, f_b, Nk, nao):
+    """max_{ki,p,r} |J_ew_A(p,r;ki) − J_ew_B(p,r;ki)|
+
+    J_ew = Σ_Q L_ew_Q L_ew_Q†  with  L_ew = EW_bar + EW (stored in file).
+    This quantity is basis-invariant: it does not depend on the choice of
+    J2c decomposition, so it is the correct metric for comparing Option A
+    (RS metric) and Option B (CC metric).
+    """
+    max_dev = 0.0
+    with h5py.File(f_a, "r") as fa, h5py.File(f_b, "r") as fb:
+        for i in range(Nk):
+            def _lew(fh):
+                L_bare = fh["EW_bar"][str(i)][...].view(np.complex128).reshape(-1, nao, nao)
+                dL     = fh["EW"][str(i)][...].view(np.complex128).reshape(-1, nao, nao)
+                return L_bare + dL
+
+            L_ew_a = _lew(fa)
+            L_ew_b = _lew(fb)
+            # Coulomb matrices — einsum over Q and one orbital index
+            J_a = np.einsum('Qps,Qrs->pr', L_ew_a, L_ew_a.conj()).real
+            J_b = np.einsum('Qps,Qrs->pr', L_ew_b, L_ew_b.conj()).real
+            max_dev = max(max_dev, np.abs(J_a - J_b).max())
+    return max_dev
 
 
 # ── per-mesh benchmark ────────────────────────────────────────────────────────
 
 def _bench_one(cell, kmesh_dims, nreps=1, tmpdir=None):
-    """Time old and new Ewald paths; return timing and max EW-tensor deviation.
+    """Time Option A (RS) and Option B (CC); return timing and max J deviation.
 
-    tmpdir: directory for large intermediate HDF5 files (default: local ./bench_tmp).
-    Using a local directory avoids /var/folders space exhaustion on macOS.
+    Both maindfs are pre-built (untimed).  The deviation is max|J_ew_A − J_ew_B|,
+    which must be small (~1e-5) if both options correctly represent the same
+    physical Ewald-corrected Coulomb integrals.
     """
     if tmpdir is None:
         tmpdir = os.path.join(os.getcwd(), "bench_tmp")
@@ -106,49 +137,57 @@ def _bench_one(cell, kmesh_dims, nreps=1, tmpdir=None):
     Nk    = len(kmesh)
     nao   = cell.nao_nr()
 
-    # pre-build maindf — shared cost, not timed
-    f_main = tempfile.mktemp(dir=tmpdir, suffix="_main.h5")
-    maindf = df.GDF(cell)
-    maindf.kpts = kmesh
-    maindf.verbose = 0
-    maindf._cderi_to_save = f_main
-    maindf._cderi = f_main
-    maindf.build()
+    # Option A: RS maindf (untimed)
+    f_rs = tempfile.mktemp(dir=tmpdir, suffix="_rs.h5")
+    maindf_rs = df.GDF(cell)
+    maindf_rs.kpts = kmesh
+    maindf_rs.verbose = 0
+    maindf_rs._cderi_to_save = f_rs
+    maindf_rs._cderi = f_rs
+    maindf_rs.build()
 
-    t_old_runs, t_new_runs = [], []
+    # Option B: CC maindf — same mesh as RS for a fair comparison (untimed)
+    f_cc = tempfile.mktemp(dir=tmpdir, suffix="_cc.h5")
+    maindf_cc = df.GDF(cell)
+    maindf_cc._prefer_ccdf = True
+    maindf_cc.mesh = maindf_rs.mesh
+    maindf_cc.kpts = kmesh
+    maindf_cc.verbose = 0
+    maindf_cc._cderi_to_save = f_cc
+    maindf_cc._cderi = f_cc
+    maindf_cc.build()
+
+    t_a_runs, t_b_runs = [], []
     max_dev = 0.0
 
     try:
         for _ in range(nreps):
-            f_old = tempfile.mktemp(dir=tmpdir, suffix="_old.h5")
-            f_new = tempfile.mktemp(dir=tmpdir, suffix="_new.h5")
+            f_a = tempfile.mktemp(dir=tmpdir, suffix="_optA.h5")
+            f_b = tempfile.mktemp(dir=tmpdir, suffix="_optB.h5")
             try:
                 t0 = time.perf_counter()
-                _run_ewald_old(cell, kmesh, maindf, nao, f_old)
-                t_old_runs.append(time.perf_counter() - t0)
+                _run_ewald_new(cell, kmesh, maindf_rs, nao, f_a)   # Option A (RS)
+                t_a_runs.append(time.perf_counter() - t0)
 
                 t0 = time.perf_counter()
-                _run_ewald_new(cell, kmesh, maindf, nao, f_new)
-                t_new_runs.append(time.perf_counter() - t0)
+                _run_ewald_old(cell, kmesh, maindf_cc, nao, f_b)   # Option B (CC)
+                t_b_runs.append(time.perf_counter() - t0)
 
-                with h5py.File(f_old, "r") as fold, h5py.File(f_new, "r") as fnew:
-                    for i in range(Nk):
-                        ew_old = fold["EW"][str(i)][...].view(np.complex128)
-                        ew_new = fnew["EW"][str(i)][...].view(np.complex128)
-                        max_dev = max(max_dev, np.abs(ew_old - ew_new).max())
+                max_dev = max(max_dev, _max_coulomb_deviation(f_a, f_b, Nk, nao))
             finally:
-                for f in (f_old, f_new):
+                for f in (f_a, f_b):
                     if os.path.exists(f):
                         os.remove(f)
     finally:
-        if os.path.exists(f_main):
-            os.remove(f_main)
+        for f in (f_rs, f_cc):
+            if os.path.exists(f):
+                os.remove(f)
 
     return {
         "label":   "×".join(str(d) for d in kmesh_dims),
         "Nk":      Nk,
-        "t_old":   np.median(t_old_runs),
-        "t_new":   np.median(t_new_runs),
+        "t_a":     np.median(t_a_runs),
+        "t_b":     np.median(t_b_runs),
         "max_dev": max_dev,
     }
 
@@ -157,23 +196,28 @@ def _bench_one(cell, kmesh_dims, nreps=1, tmpdir=None):
 
 def _print_table(rows, system_label, basis):
     title = f"compute_ewald_correction — {system_label} / {basis}"
-    hdr = (f"{'k-mesh':>10}  {'Nk':>5}  {'t_old (s)':>10}  {'t_new (s)':>10}"
-           f"  {'speedup':>8}  {'max|ΔEW|':>12}  note")
+    hdr = (f"{'k-mesh':>10}  {'Nk':>5}  {'t_A/RS (s)':>11}  {'t_B/CC (s)':>11}"
+           f"  {'A/B':>6}  {'max|ΔJ_ew|':>12}  note")
     sep = "─" * len(hdr)
     print(f"\n{title}")
     print(sep)
     print(hdr)
     print(sep)
     for r in rows:
-        sp = r["t_old"] / r["t_new"] if r["t_new"] > 0 else float("nan")
-        # large deviation means old (CC-forced) method was inconsistent
-        note = "old-method error" if r["max_dev"] > 1e-3 else "✓ consistent"
-        print(f"{r['label']:>10}  {r['Nk']:>5d}  {r['t_old']:>10.3f}"
-              f"  {r['t_new']:>10.3f}  {sp:>8.2f}x  {r['max_dev']:>12.2e}  {note}")
+        sp   = r["t_a"] / r["t_b"] if r["t_b"] > 0 else float("nan")
+        if r["max_dev"] < 1e-4:
+            note = "✓ consistent"
+        else:
+            note = "CC lattice-sum failure"
+        print(f"{r['label']:>10}  {r['Nk']:>5d}  {r['t_a']:>11.3f}"
+              f"  {r['t_b']:>11.3f}  {sp:>6.2f}x  {r['max_dev']:>12.2e}  {note}")
     print(sep)
-    print("  note: max|ΔEW| = max absolute deviation between CC-forced (old) and")
-    print("        RS-aware (new) EW tensors.  Large values indicate the old CC")
-    print("        lattice-sum j2c metric was inconsistent; the new RS path is correct.")
+    print("  Option A (RS): _RSGDFBuilder for production, df2, and df1.")
+    print("  Option B (CC): _CCGDFBuilder for production, df2, and df1.")
+    print("  max|ΔJ_ew| = max |J_ew^A - J_ew^B| where J_ew = ΣQ L_ew L_ew† (basis-invariant).")
+    print("  Both options are self-consistent by construction.")
+    print("  Large deviations indicate _CCGDFBuilder (lattice sum) convergence failure for")
+    print("  this k-mesh geometry — not a bug in Option A.  Option A (RS) is robust.")
 
 
 # ── plot ──────────────────────────────────────────────────────────────────────
@@ -187,21 +231,21 @@ def _fit_slope(xvals, yvals):
 
 def _plot(rows, system_label, basis, outfile):
     Nk_vals  = np.array([r["Nk"]      for r in rows], dtype=float)
-    t_old    = np.array([r["t_old"]   for r in rows])
-    t_new    = np.array([r["t_new"]   for r in rows])
+    t_a      = np.array([r["t_a"]     for r in rows])
+    t_b      = np.array([r["t_b"]     for r in rows])
     max_devs = np.array([r["max_dev"] for r in rows])
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
     fig.suptitle(f"compute_ewald_correction — {system_label} / {basis}", fontsize=13)
 
     # ── left: timing ─────────────────────────────────────────────────────────
-    ax1.loglog(Nk_vals, t_old, "o-", color="tab:red",  lw=2, ms=7,
-               label="CC-forced (old)")
-    ax1.loglog(Nk_vals, t_new, "s-", color="tab:blue", lw=2, ms=7,
-               label="RS-aware (new)")
+    ax1.loglog(Nk_vals, t_a, "s-", color="tab:blue", lw=2, ms=7,
+               label="Option A — RS everywhere")
+    ax1.loglog(Nk_vals, t_b, "o-", color="tab:orange", lw=2, ms=7,
+               label="Option B — CC everywhere")
 
     xfit = np.linspace(Nk_vals.min(), Nk_vals.max(), 80)
-    for t_arr, color in [(t_old, "tab:red"), (t_new, "tab:blue")]:
+    for t_arr, color in [(t_a, "tab:blue"), (t_b, "tab:orange")]:
         if len(Nk_vals) >= 3:
             slope, intercept = _fit_slope(Nk_vals, t_arr)
             ax1.loglog(xfit, np.exp(intercept) * xfit**slope, "--",
@@ -214,17 +258,17 @@ def _plot(rows, system_label, basis, outfile):
     ax1.legend(fontsize=9)
     ax1.grid(True, which="both", ls=":", alpha=0.5)
 
-    # ── right: deviation ─────────────────────────────────────────────────────
+    # ── right: Coulomb-matrix deviation ──────────────────────────────────────
     ax2.loglog(Nk_vals, max_devs, "D-", color="tab:green", lw=2, ms=7,
-               label=r"max$|$EW$_{\rm CC}$ − EW$_{\rm RS}|$")
-    ax2.axhline(1e-8, color="gray", ls="--", lw=1,
-                label="H₂ tolerance (1e-8)")
-    ax2.axhline(1e-6, color="orange", ls=":", lw=1,
-                label="old-method error threshold")
+               label=r"max$|J_{\rm ew}^A - J_{\rm ew}^B|$")
+    ax2.axhline(1e-4, color="orange", ls=":", lw=1.5,
+                label="CC failure threshold (1e-4)")
+    ax2.axhline(1e-8, color="gray",   ls="--", lw=1,
+                label="numerical precision reference")
     ax2.set_xlabel("Number of k-points $N_k$")
-    ax2.set_ylabel("Max|EW$_{\\rm CC}$ − EW$_{\\rm RS}$|")
-    ax2.set_title("CC-forced vs RS-aware inconsistency\n"
-                  r"(large = old CC j2c was wrong)")
+    ax2.set_ylabel(r"max$|J_{\rm ew}^{\rm RS} - J_{\rm ew}^{\rm CC}|$")
+    ax2.set_title("Coulomb-matrix agreement: A (RS) vs B (CC)\n"
+                  r"large = CC lattice-sum convergence failure")
     ax2.legend(fontsize=8)
     ax2.grid(True, which="both", ls=":", alpha=0.5)
 
@@ -273,9 +317,9 @@ def main():
         print(f"  {'×'.join(str(d) for d in dims)}  ({Nk} k-pts) ...", flush=True)
         row = _bench_one(cell, dims, nreps=args.nreps, tmpdir=args.tmpdir)
         rows.append(row)
-        sp = row["t_old"] / row["t_new"]
-        print(f"    old={row['t_old']:.2f}s  new={row['t_new']:.2f}s  "
-              f"speedup={sp:.2f}x  max|ΔEW|={row['max_dev']:.2e}")
+        sp = row["t_a"] / row["t_b"] if row["t_b"] > 0 else float("nan")
+        print(f"    optA={row['t_a']:.2f}s  optB={row['t_b']:.2f}s  "
+              f"A/B={sp:.2f}x  max|ΔJ_ew|={row['max_dev']:.2e}")
 
     _print_table(rows, cfg["label"], basis)
     _plot(rows, cfg["label"], basis, outfile)
