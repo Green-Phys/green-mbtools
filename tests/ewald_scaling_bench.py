@@ -77,6 +77,19 @@ def _make_si_cell(basis="gth-szv"):
     return cell
 
 
+def _make_lih_cell(basis="gth-szv"):
+    # Rock-salt LiH, a = 4.08 Å; FCC primitive vectors (in Å)
+    a = 2.04  # a/2
+    cell = gto.Cell()
+    cell.atom = "Li 0 0 0; H 2.04 0 0"
+    cell.a = np.array([[0., a, a], [a, 0., a], [a, a, 0.]])
+    cell.basis = basis
+    cell.pseudo = "gth-pade"
+    cell.verbose = 0
+    cell.build()
+    return cell
+
+
 SYSTEMS = {
     "h2": {
         "factory":        _make_h2_cell,
@@ -89,6 +102,12 @@ SYSTEMS = {
         "default_meshes": [(2, 2, 2), (3, 3, 3), (4, 4, 4)],
         "large_mesh":     (5, 5, 5),
         "label":          "Si",
+    },
+    "lih": {
+        "factory":        _make_lih_cell,
+        "default_meshes": [(2, 2, 2), (3, 3, 3), (4, 4, 4)],
+        "large_mesh":     (5, 5, 5),
+        "label":          "LiH",
     },
 }
 
