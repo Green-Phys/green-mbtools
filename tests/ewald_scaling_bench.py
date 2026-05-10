@@ -290,6 +290,9 @@ def main():
                         help="override basis set (default: gth-szv)")
     parser.add_argument("--large",  action="store_true",
                         help="add one extra k-mesh beyond the default range")
+    parser.add_argument("--meshes", type=int, nargs="+", metavar="N",
+                        help="explicit list of N×N×N mesh sizes, e.g. --meshes 1 2 3 4 5"
+                             " (overrides --large and system defaults)")
     parser.add_argument("--nreps",  type=int, default=1,
                         help="timing repetitions per mesh (default: 1)")
     parser.add_argument("--output", default=None,
@@ -298,11 +301,14 @@ def main():
                         help="directory for large scratch HDF5 files (default: ./bench_tmp)")
     args = parser.parse_args()
 
-    cfg    = SYSTEMS[args.system]
-    basis  = args.basis or "gth-szv"
-    meshes = list(cfg["default_meshes"])
-    if args.large:
-        meshes.append(cfg["large_mesh"])
+    cfg   = SYSTEMS[args.system]
+    basis = args.basis or "gth-szv"
+    if args.meshes:
+        meshes = [(n, n, n) for n in args.meshes]
+    else:
+        meshes = list(cfg["default_meshes"])
+        if args.large:
+            meshes.append(cfg["large_mesh"])
     outfile = args.output or f"ewald_scaling_{args.system}.png"
 
     cell = cfg["factory"](basis=basis)
