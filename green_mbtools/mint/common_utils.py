@@ -758,7 +758,7 @@ def solve_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = 'tmp.chk'
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk('tmp.chk')
+        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
@@ -801,7 +801,7 @@ def solve_mol_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = 'tmp.chk'
     if os.path.exists("tmp.chk"):
-        init_dm = mf.from_chk('tmp.chk')
+        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
@@ -979,7 +979,10 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     j2c_sqrt_irre = []
     for irre_q in irre_q_inds:
         j2c_i = j2c_data[f'j2c/{irre_q}'][...]
-        assert np.all(j2c_i - j2c_i.conj().T < 1e-12), "j2c metric is not Hermitian"
+        j2c_i_dagger = j2c_i.conj().T
+        assert np.allclose(j2c_i, j2c_i_dagger, atol=1e-10, rtol=0), "j2c metric is not Hermitian"
+        # make it explicitly hermitian
+        j2c_i = (j2c_i + j2c_i_dagger) / 2
         if j2c_decomp == 'cholesky':
             j2c_sqrt_i, _ = int_utils.cholesky_decomposed_metric(j2c_i, auxcell, inv=False)
         elif j2c_decomp == 'eigenvalue':
