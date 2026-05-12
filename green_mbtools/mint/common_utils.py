@@ -1,4 +1,5 @@
 import argparse
+import inspect
 import logging
 import os
 
@@ -19,6 +20,19 @@ from . import integral_utils as int_utils
 from . import kpt_utils
 from .symmetry_utils import get_representation
 from ..version import __version__
+
+
+def _init_guess_from_chk(mf, cell, chkfile):
+    """Call mf.init_guess_by_chkfile compatibly across PySCF versions.
+
+    PySCF < ~2.1 signature: init_guess_by_chkfile(cell, chkfile_name, ...)
+    PySCF >= ~2.1 signature: init_guess_by_chkfile(chk=None, ...)  (uses self.cell)
+    """
+    first_param = next(iter(inspect.signature(mf.init_guess_by_chkfile).parameters))
+    if first_param == "chk":
+        return mf.init_guess_by_chkfile(chkfile)
+    else:
+        return mf.init_guess_by_chkfile(cell, chkfile)
 
 
 def extract_ase_data(a, atoms):
@@ -758,7 +772,7 @@ def solve_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = 'tmp.chk'
     if os.path.exists("tmp.chk"):
-        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
+        init_dm = _init_guess_from_chk(mf, mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
@@ -801,7 +815,7 @@ def solve_mol_mean_field(args, mydf, mycell):
     mf.max_cycle = args.max_iter
     mf.chkfile = 'tmp.chk'
     if os.path.exists("tmp.chk"):
-        init_dm = mf.init_guess_by_chkfile(mycell, mf.chkfile)
+        init_dm = _init_guess_from_chk(mf, mycell, mf.chkfile)
         mf.kernel(init_dm)
     elif args.dm0 is not None:
         init_dm = mf.get_init_guess()
