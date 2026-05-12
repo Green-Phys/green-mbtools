@@ -202,7 +202,15 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases, symm_case_key, symm_
 
 
 def test_x2c_tr_sym_transforms(tmp_path):
-    """For X2C1e, space symmetry is ignored and AO k-space transforms use Theta for TR k-points."""
+    """X2C1e k-space symmetry operators for TR-only and full double-group cases.
+
+    TR-only (space_symm=False):
+      - Non-TR k-points store I_nso; TR k-points store Theta = kron([[0,1],[-1,0]], I_nao).
+
+    Double-group (space_symm=True):
+      - Produces a strictly smaller IBZ than TR-only (space-group reduction active).
+      - Every k_sym_transform_ao matrix is unitary (spinor representation of a symmetry op).
+    """
     out_space_true, _ = _run_grid_only_case(
         tmp_path / "x2c_space_true",
         space_symm=True,
@@ -223,36 +231,34 @@ def test_x2c_tr_sym_transforms(tmp_path):
         nk_false = int(f_false["symmetry/k/nk"][()])
         ink_true = int(f_true["symmetry/k/ink"][()])
         ink_false = int(f_false["symmetry/k/ink"][()])
-
-        idx_true = f_true["symmetry/k/bz2ibz"][()]
-        idx_false = f_false["symmetry/k/bz2ibz"][()]
-        ir_true = f_true["symmetry/k/ibz2bz"][()]
-        ir_false = f_false["symmetry/k/ibz2bz"][()]
-        conj_true = f_true["symmetry/k/tr_conj"][()]
         conj_false = f_false["symmetry/k/tr_conj"][()]
-
         kops_true = f_true["symmetry/k/k_sym_transform_ao"][()]
         kops_false = f_false["symmetry/k/k_sym_transform_ao"][()]
 
-    # X2C disables space-group symmetry, so both runs should match TR-only reduction.
+    # Both runs cover the same full BZ.
     assert nk_true == nk_false
-    assert ink_true == ink_false
-    np.testing.assert_array_equal(idx_true, idx_false)
-    np.testing.assert_array_equal(ir_true, ir_false)
-    np.testing.assert_array_equal(conj_true, conj_false)
 
-    # With TR enabled, we still expect a reduced IBZ for nk > 1.
-    if nk_true > 1:
-        assert ink_true < nk_true
-
-    # Non-TR k-points get identity; TR k-points get Theta = iSigmaY x I_nao = [[0, I], [-I, 0]].
     nso = kops_true.shape[1]
     nao = nso // 2
     nso_eye = np.eye(nso, dtype=np.complex128)
     theta = np.kron(np.array([[0, 1], [-1, 0]], dtype=np.complex128), np.eye(nao))
-    expected = np.where(conj_true[:, None, None], theta, nso_eye)
-    np.testing.assert_allclose(kops_true, expected, atol=1e-12, rtol=0.0)
-    np.testing.assert_allclose(kops_false, expected, atol=1e-12, rtol=0.0)
+
+    # --- TR-only case --------------------------------------------------------
+    # Non-TR k-points get I_nso; TR k-points get Theta.
+    expected_false = np.where(conj_false[:, None, None], theta, nso_eye)
+    np.testing.assert_allclose(kops_false, expected_false, atol=1e-12, rtol=0.0)
+
+    # --- Double-group case ---------------------------------------------------
+    # Space-group reduction must give a strictly smaller IBZ than TR-only.
+    assert ink_true < ink_false
+
+    # Every stored operator must be unitary: U U† = I.
+    for ik in range(nk_true):
+        u = kops_true[ik]
+        np.testing.assert_allclose(
+            u @ u.conj().T, nso_eye, atol=1e-10, rtol=0.0,
+            err_msg=f"k_sym_transform_ao[{ik}] is not unitary"
+        )
 
 
 @pytest.mark.skip(reason="TODO: validate k_sym_transform_p0 transformation against an independent real-data reference")
