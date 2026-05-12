@@ -920,10 +920,11 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
         # with Uk=Theta gives [[Gbb*,-Gba*],[-Gab*,Gaa*]], matching assign_G_nso in the C++ solver.
         nso = nao * 2
         kspace_orep = np.zeros((nk, nso, nso), dtype=np.complex128)
+        nso_eye = np.eye(nso, dtype=np.complex128)
         theta = np.kron(np.array([[0, 1], [-1, 0]], dtype=np.complex128), np.eye(nao))
         tr_conj_bz = kstruct.time_reversal_symm_bz
         for ik in range(nk):
-            kspace_orep[ik] = theta if tr_conj_bz[ik] else np.eye(nso)
+            kspace_orep[ik] = theta if tr_conj_bz[ik] else nso_eye
     kspace_orep = kspace_orep.astype(np.complex128)
 
     # If quantities are saved in an orthogonalized basis, rotate symmetry operators

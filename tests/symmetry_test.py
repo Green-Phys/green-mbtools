@@ -245,15 +245,14 @@ def test_x2c_tr_sym_transforms(tmp_path):
     if nk_true > 1:
         assert ink_true < nk_true
 
-    # Non-TR k-points get identity; TR k-points get Theta = iσ_y ⊗ I_nao = [[0, I], [-I, 0]].
+    # Non-TR k-points get identity; TR k-points get Theta = iSigmaY x I_nao = [[0, I], [-I, 0]].
     nso = kops_true.shape[1]
     nao = nso // 2
-    eye = np.eye(nso, dtype=np.complex128)
+    nso_eye = np.eye(nso, dtype=np.complex128)
     theta = np.kron(np.array([[0, 1], [-1, 0]], dtype=np.complex128), np.eye(nao))
-    for ik in range(nk_true):
-        expected = theta if conj_true[ik] else eye
-        np.testing.assert_allclose(kops_true[ik], expected, atol=1e-12, rtol=0.0)
-        np.testing.assert_allclose(kops_false[ik], expected, atol=1e-12, rtol=0.0)
+    expected = np.where(conj_true[:, None, None], theta, nso_eye)
+    np.testing.assert_allclose(kops_true, expected, atol=1e-12, rtol=0.0)
+    np.testing.assert_allclose(kops_false, expected, atol=1e-12, rtol=0.0)
 
 
 @pytest.mark.skip(reason="TODO: validate k_sym_transform_p0 transformation against an independent real-data reference")
