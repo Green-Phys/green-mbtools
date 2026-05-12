@@ -258,6 +258,70 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=
     return repr_matrix
 
 
+def rotation_matrix_to_su2(R_cart):
+    """Return the SU(2) representative of a proper 3D Cartesian rotation matrix.
+
+    For a rotation by angle :math:`\\varphi` about unit axis :math:`\\hat{n}`:
+
+    .. math::
+        D^{1/2}(R) = \\cos(\\varphi/2)\\,I_2
+                    + i\\sin(\\varphi/2)\\,(\\hat{n}\\cdot\\boldsymbol{\\sigma})
+
+    Parameters
+    ----------
+    R_cart : (3, 3) float ndarray
+        Proper rotation matrix (``det = +1``) in Cartesian coordinates.
+
+    Returns
+    -------
+    su2 : (2, 2) complex ndarray
+    """
+    from scipy.spatial.transform import Rotation
+    rotvec = Rotation.from_matrix(R_cart).as_rotvec()
+    angle = np.linalg.norm(rotvec)
+    if angle < 1e-10:
+        return np.eye(2, dtype=np.complex128)
+    axis = rotvec / angle
+    sx = np.array([[0,  1 ], [1,  0 ]], dtype=np.complex128)
+    sy = np.array([[0, -1j], [1j, 0 ]], dtype=np.complex128)
+    sz = np.array([[1,  0 ], [0, -1 ]], dtype=np.complex128)
+    return (np.cos(angle / 2) * np.eye(2, dtype=np.complex128)
+            + 1j * np.sin(angle / 2) * (axis[0]*sx + axis[1]*sy + axis[2]*sz))
+
+
+def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=False):
+    """Double-group spinor AO representation :math:`D^{1/2}(R) \\otimes U_\\text{orbital}(R)`.
+
+    Reads the rotation directly from ``kstruct.ops[symm_op_idx]``, converts it
+    to a Cartesian rotation, lifts it to SU(2) via :func:`rotation_matrix_to_su2`,
+    and combines it with the orbital representation from :func:`get_representation`.
+
+    Parameters
+    ----------
+    bz_idx : int
+        Index of the BZ k-point.
+    symm_op_idx : int
+        Index of the symmetry operation in ``kstruct.ops``.
+    mycell : pyscf.pbc.gto.Cell
+        PySCF unit cell.
+    kstruct : pyscf.pbc.lib.kpts.KPoints
+        k-point symmetry structure from ``mycell.make_kpts(...)``.
+
+    Returns
+    -------
+    u_spinor : (nso, nso) complex ndarray
+        Full spinor AO representation, ``nso = 2 * nao``.
+    """
+    u_orbital = get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=tol, verbose=verbose)
+    rot_frac = np.array(kstruct.ops[symm_op_idx].rot, dtype=float)
+    a = mycell.lattice_vectors()
+    rot_cart = a.T @ rot_frac @ np.linalg.inv(a.T)
+    if np.linalg.det(rot_cart) < 0:   # improper: inversion is trivial on spinors
+        rot_cart = -rot_cart
+    su2 = rotation_matrix_to_su2(rot_cart)
+    return np.kron(su2, u_orbital)
+
+
 def check_kspace_symmetry_breaking(inp_file, datasets):
     """Report symmetry reconstruction residuals for k-resolved matrix quantities.
 
