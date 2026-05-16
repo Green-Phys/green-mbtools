@@ -171,7 +171,7 @@ def get_orbital_index(atom_idx, n_, L_, mycell):
     return orb_start, orb_end
 
 
-def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=False):
+def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=False):
     """Get the representation matrix for given symmetry operation on the atoms of unit cell.
 
     Parameters
@@ -185,6 +185,12 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=
     kstruct : pyscf.pbc.symm.KPointsSymmetry
         k-point symmetry structure for aux-basis
     tol : float, optional
+        Tolerance for atom-position matching in generate_permutation_info.
+        Default is 1e-5, matching generate_permutation_info's own default.
+        Note: PySCF stores fractional translations with ~6 decimal places
+        (e.g. 0.666667 instead of 2/3), introducing ~3e-7 residuals after
+        applying the operation. A tighter tol (e.g. 1e-10) would therefore
+        fail for any lattice whose space-group translations are not integers.
         Tolerance for numerical comparisons, by default 1e-10
     verbose : bool, optional
         If True, print detailed information, by default False
@@ -289,7 +295,7 @@ def rotation_matrix_to_su2(R_cart):
             + 1j * np.sin(angle / 2) * (axis[0]*sx + axis[1]*sy + axis[2]*sz))
 
 
-def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=False):
+def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=False):
     """Double-group spinor AO representation :math:`D^{1/2}(R) \\otimes U_\\text{orbital}(R)`.
 
     Reads the rotation directly from ``kstruct.ops[symm_op_idx]``, converts it
@@ -306,6 +312,11 @@ def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, v
         PySCF unit cell.
     kstruct : pyscf.pbc.lib.kpts.KPoints
         k-point symmetry structure from ``mycell.make_kpts(...)``.
+    tol : float, optional
+        Tolerance passed to get_representation for atom-position matching.
+        Default 1e-5 matches generate_permutation_info's own default and
+        accommodates PySCF's ~6 decimal-place translation precision (~3e-7
+        residuals). See get_representation for full discussion.
 
     Returns
     -------

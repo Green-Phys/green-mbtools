@@ -261,6 +261,50 @@ def test_x2c_tr_sym_transforms(tmp_path):
         )
 
 
+def test_x2c_fock_ibz_to_full_bz():
+    """Verify that X2C Fock at IBZ k-points reconstructs full BZ via k_sym_transform_ao.
+
+    Uses a precomputed KGHF Hubbard model (no Rashba, U=1, honeycomb, TR-only
+    symmetry, nk=10×10, nk=100, ink=52).  Checks:
+
+        F(k) = U_k @ F(k_ibz) @ U_k†   [non-TR: U = I_nso]
+        F(k) = (Θ @ F(k_ibz) @ Θ†)*    [TR: U = Θ = kron([[0,1],[-1,0]], I_nao)]
+
+    atol=1e-6: NN hopping imaginary parts nearly cancel at certain k-points
+    (~3e-8 residual); TR reconstruction is sensitive to the floating-point sign
+    of this residual.  1e-6 still catches a wrong k_sym_transform_ao — all-identity
+    produces O(1) reconstruction errors.
+    """
+    data_file = Path(__file__).parent / "test_data" / "Hubbard_x2c" / "input_x2c_hubbard.h5"
+
+    with h5py.File(data_file, "r") as f:
+        fock_raw = f["HF/Fock-k"][()]
+        bz2ibz   = f["symmetry/k/bz2ibz"][()]
+        k_sym_op = f["symmetry/k/k_sym_transform_ao"][()]
+        tr_conj  = f["symmetry/k/tr_conj"][()]
+        nk       = int(f["symmetry/k/nk"][()])
+
+    # (ns, nk, nao, nao, 2) float64 → (ns, nk, nao, nao) complex128
+    fock = fock_raw.view(complex).reshape(fock_raw.shape[:-1])
+
+    assert fock.shape[1] == nk
+    assert len(bz2ibz) == nk
+
+    for ik in range(nk):
+        ibz_k  = bz2ibz[ik]           # full-BZ index of the IBZ representative for k
+        U      = k_sym_op[ik]         # nso x nso unitary rotation
+        F_ibz  = fock[0, ibz_k]
+
+        F_recon = U @ F_ibz @ U.conj().T
+        if tr_conj[ik]:
+            F_recon = F_recon.conj()
+
+        np.testing.assert_allclose(
+            F_recon, fock[0, ik], atol=1e-6, rtol=0,
+            err_msg=f"Fock reconstruction failed at full-BZ k={ik} (IBZ representative={ibz_k})"
+        )
+
+
 @pytest.mark.skip(reason="TODO: validate k_sym_transform_p0 transformation against an independent real-data reference")
 def test_k_sym_transform_p0_matches_metric_basis_transform(generated_cases):
     """TODO: replace implementation-coupled check with a real-data validation."""
