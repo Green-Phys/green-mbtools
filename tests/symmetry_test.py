@@ -201,8 +201,8 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases, symm_case_key, symm_
     assert ncomp > 0, "No overlapping j2c keys found for IBZ->BZ transformation check"
 
 
-def test_x2c_space_symm_not_supported(tmp_path):
-    """For X2C1e, space symmetry is ignored and AO k-space transforms are identity."""
+def test_x2c_tr_sym_transforms(tmp_path):
+    """For X2C1e, space symmetry is ignored and AO k-space transforms use Theta for TR k-points."""
     out_space_true, _ = _run_grid_only_case(
         tmp_path / "x2c_space_true",
         space_symm=True,
@@ -245,12 +245,15 @@ def test_x2c_space_symm_not_supported(tmp_path):
     if nk_true > 1:
         assert ink_true < nk_true
 
-    # In current X2C path, AO-space symmetry transforms are identity matrices.
+    # Non-TR k-points get identity; TR k-points get Theta = iσ_y ⊗ I_nao = [[0, I], [-I, 0]].
     nso = kops_true.shape[1]
+    nao = nso // 2
     eye = np.eye(nso, dtype=np.complex128)
-    eye_stack = np.broadcast_to(eye, kops_true.shape)
-    np.testing.assert_allclose(kops_true, eye_stack, atol=1e-12, rtol=0.0)
-    np.testing.assert_allclose(kops_false, eye_stack, atol=1e-12, rtol=0.0)
+    theta = np.kron(np.array([[0, 1], [-1, 0]], dtype=np.complex128), np.eye(nao))
+    for ik in range(nk_true):
+        expected = theta if conj_true[ik] else eye
+        np.testing.assert_allclose(kops_true[ik], expected, atol=1e-12, rtol=0.0)
+        np.testing.assert_allclose(kops_false[ik], expected, atol=1e-12, rtol=0.0)
 
 
 @pytest.mark.skip(reason="TODO: validate k_sym_transform_p0 transformation against an independent real-data reference")
