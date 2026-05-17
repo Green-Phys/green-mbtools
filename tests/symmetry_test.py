@@ -201,6 +201,22 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases, symm_case_key, symm_
     assert ncomp > 0, "No overlapping j2c keys found for IBZ->BZ transformation check"
 
 
+def test_nk_list_stored_in_hdf5(generated_cases):
+    """Verify params/nk_list = [nkx, nky, nkz] is written and consistent with params/nk."""
+    for key in ("symm_output", "trs_output", "full_output"):
+        with h5py.File(generated_cases[key], "r") as f:
+            assert "params/nk_list" in f, f"{key}: params/nk_list missing from HDF5"
+            nk_list = f["params/nk_list"][()]
+            nk      = int(f["params/nk"][()])
+
+        assert nk_list.shape == (3,), f"{key}: nk_list shape {nk_list.shape} != (3,)"
+        assert np.prod(nk_list) == nk, (
+            f"{key}: prod(nk_list)={np.prod(nk_list)} != params/nk={nk}"
+        )
+        # All three generated cases use nk=3, so the grid must be 3x3x3.
+        np.testing.assert_array_equal(nk_list, [3, 3, 3])
+
+
 def test_x2c_tr_sym_transforms(tmp_path):
     """X2C1e k-space symmetry operators for TR-only and full double-group cases.
 

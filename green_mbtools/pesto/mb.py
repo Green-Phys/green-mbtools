@@ -59,6 +59,7 @@ class MB_post(object):
         self.fock = None
         self.S = None
         self.kmesh = None
+        self.nk_list = None  # [nkx, nky, nkz] from params/nk_list; None for legacy files
 
         # Private instance variables
         self._gtau = None
@@ -353,7 +354,8 @@ class MB_post(object):
             )
         Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int = winter.interpolate_G(
             self.fock, self.sigma, self.mu, self.S,
-            self.kmesh, kpts_inter, self.ir, hermi=hermi, debug=debug
+            self.kmesh, kpts_inter, self.ir, hermi=hermi, debug=debug,
+            nk_list=self.nk_list
         )
         return Gtk_int, Sigma_tk_int, tau_mesh, Fk_int, Sk_int
 
@@ -527,6 +529,7 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     ns = f['params/ns'][()]
+    nk_list = f["params/nk_list"][()] if "params/nk_list" in f else None
     f.close()
 
     """
@@ -544,7 +547,9 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     """
 
     # Standard way to initialize
-    return MB_post(
+    mb = MB_post(
         fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, ir_file=ir_file,
         legacy_ir=legacy_ir
     )
+    mb.nk_list = nk_list
+    return mb
