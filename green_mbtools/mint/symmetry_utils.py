@@ -191,7 +191,6 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=F
         (e.g. 0.666667 instead of 2/3), introducing ~3e-7 residuals after
         applying the operation. A tighter tol (e.g. 1e-10) would therefore
         fail for any lattice whose space-group translations are not integers.
-        Tolerance for numerical comparisons, by default 1e-10
     verbose : bool, optional
         If True, print detailed information, by default False
 

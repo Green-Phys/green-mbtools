@@ -264,16 +264,16 @@ def test_x2c_tr_sym_transforms(tmp_path):
 def test_x2c_fock_ibz_to_full_bz():
     """Verify that X2C Fock at IBZ k-points reconstructs full BZ via k_sym_transform_ao.
 
-    Uses a precomputed KGHF Hubbard model (no Rashba, U=1, honeycomb, TR-only
-    symmetry, nk=10×10, nk=100, ink=52).  Checks:
+    Uses a precomputed KGHF Hubbard model with Rashba SOC and full space-group
+    symmetry (2D 10×10 k-mesh: nk=100, ink=14, nao=2, nso=4).  Checks the
+    general reconstruction for all k-points:
 
-        F(k) = U_k @ F(k_ibz) @ U_k†   [non-TR: U = I_nso]
-        F(k) = (Θ @ F(k_ibz) @ Θ†)*    [TR: U = Θ = kron([[0,1],[-1,0]], I_nao)]
+        F(k) = U_k @ F(k_ibz) @ U_k†          [non-TR k-points]
+        F(k) = (U_k @ F(k_ibz) @ U_k†).conj() [TR k-points]
 
-    atol=1e-6: NN hopping imaginary parts nearly cancel at certain k-points
-    (~3e-8 residual); TR reconstruction is sensitive to the floating-point sign
-    of this residual.  1e-6 still catches a wrong k_sym_transform_ao — all-identity
-    produces O(1) reconstruction errors.
+    where U_k is the full nso×nso spinor rotation from k_sym_transform_ao.
+    atol=1e-6 is tight enough to catch a wrong k_sym_transform_ao (all-identity
+    produces O(1) errors) while accommodating floating-point residuals.
     """
     data_file = Path(__file__).parent / "test_data" / "Hubbard_x2c" / "input_x2c_hubbard.h5"
 

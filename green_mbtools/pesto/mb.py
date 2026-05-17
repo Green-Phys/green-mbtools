@@ -429,38 +429,6 @@ class MB_post(object):
         return freqs, A_w
 
 
-def minus_k_to_k_TRsym(X):
-    nso = X.shape[-1]
-    nao = nso // 2
-    Y = np.zeros(X.shape, dtype=X.dtype)
-    Y[:nao, :nao] = X[nao:, nao:].conj()
-    Y[nao:, nao:] = X[:nao, :nao].conj()
-    Y[:nao, nao:] = -1.0 * X[nao:, :nao].conj()
-    Y[nao:, :nao] = Y[:nao, nao:].conj().transpose()
-    return Y
-
-
-def to_full_bz_TRsym(X, conj_list, ibz2bz, bz2ibz, k_ind):
-    index_list = np.zeros(bz2ibz.shape, dtype=int)
-    for i, irn in enumerate(ibz2bz):
-        index_list[irn] = i
-    old_shape = X.shape
-    new_shape = np.copy(old_shape)
-    new_shape[k_ind] = conj_list.shape[0]
-    Y = np.zeros(new_shape, dtype=X.dtype)
-    for ik, kk in enumerate(bz2ibz):
-        k = index_list[kk]
-        Y = Y.reshape((-1,) + Y.shape[k_ind:])
-        X = X.reshape((-1,) + X.shape[k_ind:])
-        for i in range(Y.shape[0]):
-            Y[i, ik] = minus_k_to_k_TRsym(
-                X[i, k]
-            ) if conj_list[ik] else X[i, k]
-        Y = Y.reshape(new_shape)
-        X = X.reshape(old_shape)
-
-    return Y
-
 
 def to_full_bz(X, conj_list, ibz2bz, bz2ibz, k_ind, k_sym_trans):
     """Transform input quantity from irreducible number of k-points to full Brillouin zone.
@@ -559,22 +527,16 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     ns = f['params/ns'][()]
-    x2c = False
-    if nso == 2*nao:
-        x2c = True
     f.close()
 
     """
     All k-dependent matrices should lie on a full Monkhorst-Pack grid.
+    k_sym_transform_ao is nso x nso for X2C (double-group spinor rotation),
+    so to_full_bz applies U_k @ X @ U_k† correctly for both X2C and non-X2C.
     """
-    if not x2c:
-        Sigma1 = to_full_bz(Sigma1r, conj_list, ibz2bz, index, 1, k_sym_trans)
-        Sigma = to_full_bz(Sigmar, conj_list, ibz2bz, index, 2, k_sym_trans)
-        G = to_full_bz(Gr, conj_list, ibz2bz, index, 2, k_sym_trans)
-    else:
-        Sigma1 = to_full_bz_TRsym(Sigma1r, conj_list, ibz2bz, index, 1)
-        Sigma = to_full_bz_TRsym(Sigmar, conj_list, ibz2bz, index, 2)
-        G = to_full_bz_TRsym(Gr, conj_list, ibz2bz, index, 2)
+    Sigma1 = to_full_bz(Sigma1r, conj_list, ibz2bz, index, 1, k_sym_trans)
+    Sigma = to_full_bz(Sigmar, conj_list, ibz2bz, index, 2, k_sym_trans)
+    G = to_full_bz(Gr, conj_list, ibz2bz, index, 2, k_sym_trans)
     F = H0 + Sigma1
 
     """
