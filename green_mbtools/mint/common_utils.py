@@ -347,7 +347,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["params/nel_cell"] = mycell.nelectron
     inp_data["params/nk"] = kmesh.shape[0]
     nk_arr = np.atleast_1d(np.array(args.nk, dtype=int))
-    inp_data["params/nk_list"] = np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr
+    inp_data["symmetry/k/nk_list"] = np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr
     inp_data["params/NQ"] = NQ
     inp_data.attrs["__green_version__"] = __version__
     inp_data.close()
@@ -1186,9 +1186,9 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
     _write("symmetry/pairs/num_kpair_stored", num_kpair_stored)
 
     # Basic params needed by both grid-only and full MF consumers.
-    _write("params/nk",      nk)
+    _write("params/nk", nk)
     nk_arr = np.atleast_1d(np.array(args.nk, dtype=int))
-    _write("params/nk_list", np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr)
+    _write("symmetry/k/nk_list", np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr)
 
     # Store operators for symmetry operations
     if kstruct is not None:

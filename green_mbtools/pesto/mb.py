@@ -529,7 +529,7 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     nao = f["params/nao"][()]
     nso = f["params/nso"][()]
     ns = f['params/ns'][()]
-    nk_list = f["params/nk_list"][()] if "params/nk_list" in f else None
+    nk_list = f["symmetry/k/nk_list"][()] if "symmetry/k/nk_list" in f else None
     f.close()
 
     """

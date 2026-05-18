@@ -205,8 +205,8 @@ def test_nk_list_stored_in_hdf5(generated_cases):
     """Verify params/nk_list = [nkx, nky, nkz] is written and consistent with params/nk."""
     for key in ("symm_output", "trs_output", "full_output"):
         with h5py.File(generated_cases[key], "r") as f:
-            assert "params/nk_list" in f, f"{key}: params/nk_list missing from HDF5"
-            nk_list = f["params/nk_list"][()]
+            assert "symmetry/k/nk_list" in f, f"{key}: symmetry/k/nk_list missing from HDF5"
+            nk_list = f["symmetry/k/nk_list"][()]
             nk      = int(f["params/nk"][()])
 
         assert nk_list.shape == (3,), f"{key}: nk_list shape {nk_list.shape} != (3,)"
