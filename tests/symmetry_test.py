@@ -201,8 +201,32 @@ def test_j2c_ibz_to_full_bz_transformation(generated_cases, symm_case_key, symm_
     assert ncomp > 0, "No overlapping j2c keys found for IBZ->BZ transformation check"
 
 
+def test_nk_list_stored_in_hdf5(generated_cases):
+    """Verify params/nk_list = [nkx, nky, nkz] is written and consistent with params/nk."""
+    for key in ("symm_output", "trs_output", "full_output"):
+        with h5py.File(generated_cases[key], "r") as f:
+            assert "symmetry/k/nk_list" in f, f"{key}: symmetry/k/nk_list missing from HDF5"
+            nk_list = f["symmetry/k/nk_list"][()]
+            nk      = int(f["params/nk"][()])
+
+        assert nk_list.shape == (3,), f"{key}: nk_list shape {nk_list.shape} != (3,)"
+        assert np.prod(nk_list) == nk, (
+            f"{key}: prod(nk_list)={np.prod(nk_list)} != params/nk={nk}"
+        )
+        # All three generated cases use nk=3, so the grid must be 3x3x3.
+        np.testing.assert_array_equal(nk_list, [3, 3, 3])
+
+
 def test_x2c_tr_sym_transforms(tmp_path):
-    """For X2C1e, space symmetry is ignored and AO k-space transforms use Theta for TR k-points."""
+    """X2C1e k-space symmetry operators for TR-only and full double-group cases.
+
+    TR-only (space_symm=False):
+      - Non-TR k-points store I_nso; TR k-points store Theta = kron([[0,1],[-1,0]], I_nao).
+
+    Double-group (space_symm=True):
+      - Produces a strictly smaller IBZ than TR-only (space-group reduction active).
+      - Every k_sym_transform_ao matrix is unitary (spinor representation of a symmetry op).
+    """
     out_space_true, _ = _run_grid_only_case(
         tmp_path / "x2c_space_true",
         space_symm=True,
@@ -223,37 +247,78 @@ def test_x2c_tr_sym_transforms(tmp_path):
         nk_false = int(f_false["symmetry/k/nk"][()])
         ink_true = int(f_true["symmetry/k/ink"][()])
         ink_false = int(f_false["symmetry/k/ink"][()])
-
-        idx_true = f_true["symmetry/k/bz2ibz"][()]
-        idx_false = f_false["symmetry/k/bz2ibz"][()]
-        ir_true = f_true["symmetry/k/ibz2bz"][()]
-        ir_false = f_false["symmetry/k/ibz2bz"][()]
-        conj_true = f_true["symmetry/k/tr_conj"][()]
         conj_false = f_false["symmetry/k/tr_conj"][()]
-
         kops_true = f_true["symmetry/k/k_sym_transform_ao"][()]
         kops_false = f_false["symmetry/k/k_sym_transform_ao"][()]
 
-    # X2C disables space-group symmetry, so both runs should match TR-only reduction.
+    # Both runs cover the same full BZ.
     assert nk_true == nk_false
-    assert ink_true == ink_false
-    np.testing.assert_array_equal(idx_true, idx_false)
-    np.testing.assert_array_equal(ir_true, ir_false)
-    np.testing.assert_array_equal(conj_true, conj_false)
 
-    # With TR enabled, we still expect a reduced IBZ for nk > 1.
-    if nk_true > 1:
-        assert ink_true < nk_true
-
-    # Non-TR k-points get identity; TR k-points get Theta = iσ_y ⊗ I_nao = [[0, I], [-I, 0]].
     nso = kops_true.shape[1]
     nao = nso // 2
-    eye = np.eye(nso, dtype=np.complex128)
+    nso_eye = np.eye(nso, dtype=np.complex128)
     theta = np.kron(np.array([[0, 1], [-1, 0]], dtype=np.complex128), np.eye(nao))
+
+    # --- TR-only case --------------------------------------------------------
+    # Non-TR k-points get I_nso; TR k-points get Theta.
+    expected_false = np.where(conj_false[:, None, None], theta, nso_eye)
+    np.testing.assert_allclose(kops_false, expected_false, atol=1e-12, rtol=0.0)
+
+    # --- Double-group case ---------------------------------------------------
+    # Space-group reduction must give a strictly smaller IBZ than TR-only.
+    assert ink_true < ink_false
+
+    # Every stored operator must be unitary: U U† = I.
     for ik in range(nk_true):
-        expected = theta if conj_true[ik] else eye
-        np.testing.assert_allclose(kops_true[ik], expected, atol=1e-12, rtol=0.0)
-        np.testing.assert_allclose(kops_false[ik], expected, atol=1e-12, rtol=0.0)
+        u = kops_true[ik]
+        np.testing.assert_allclose(
+            u @ u.conj().T, nso_eye, atol=1e-10, rtol=0.0,
+            err_msg=f"k_sym_transform_ao[{ik}] is not unitary"
+        )
+
+
+def test_x2c_fock_ibz_to_full_bz():
+    """Verify that X2C Fock at IBZ k-points reconstructs full BZ via k_sym_transform_ao.
+
+    Uses a precomputed KGHF Hubbard model with Rashba SOC and full space-group
+    symmetry (2D 10×10 k-mesh: nk=100, ink=14, nao=2, nso=4).  Checks the
+    general reconstruction for all k-points:
+
+        F(k) = U_k @ F(k_ibz) @ U_k†          [non-TR k-points]
+        F(k) = (U_k @ F(k_ibz) @ U_k†).conj() [TR k-points]
+
+    where U_k is the full nso×nso spinor rotation from k_sym_transform_ao.
+    atol=1e-6 is tight enough to catch a wrong k_sym_transform_ao (all-identity
+    produces O(1) errors) while accommodating floating-point residuals.
+    """
+    data_file = Path(__file__).parent / "test_data" / "Hubbard_x2c" / "input_x2c_hubbard.h5"
+
+    with h5py.File(data_file, "r") as f:
+        fock_raw = f["HF/Fock-k"][()]
+        bz2ibz   = f["symmetry/k/bz2ibz"][()]
+        k_sym_op = f["symmetry/k/k_sym_transform_ao"][()]
+        tr_conj  = f["symmetry/k/tr_conj"][()]
+        nk       = int(f["symmetry/k/nk"][()])
+
+    # (ns, nk, nao, nao, 2) float64 → (ns, nk, nao, nao) complex128
+    fock = fock_raw.view(complex).reshape(fock_raw.shape[:-1])
+
+    assert fock.shape[1] == nk
+    assert len(bz2ibz) == nk
+
+    for ik in range(nk):
+        ibz_k  = bz2ibz[ik]           # full-BZ index of the IBZ representative for k
+        U      = k_sym_op[ik]         # nso x nso unitary rotation
+        F_ibz  = fock[0, ibz_k]
+
+        F_recon = U @ F_ibz @ U.conj().T
+        if tr_conj[ik]:
+            F_recon = F_recon.conj()
+
+        np.testing.assert_allclose(
+            F_recon, fock[0, ik], atol=1e-6, rtol=0,
+            err_msg=f"Fock reconstruction failed at full-BZ k={ik} (IBZ representative={ibz_k})"
+        )
 
 
 @pytest.mark.skip(reason="TODO: validate k_sym_transform_p0 transformation against an independent real-data reference")

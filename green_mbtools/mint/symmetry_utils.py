@@ -171,7 +171,7 @@ def get_orbital_index(atom_idx, n_, L_, mycell):
     return orb_start, orb_end
 
 
-def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=False):
+def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=False):
     """Get the representation matrix for given symmetry operation on the atoms of unit cell.
 
     Parameters
@@ -185,7 +185,12 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=
     kstruct : pyscf.pbc.symm.KPointsSymmetry
         k-point symmetry structure for aux-basis
     tol : float, optional
-        Tolerance for numerical comparisons, by default 1e-10
+        Tolerance for atom-position matching in generate_permutation_info.
+        Default is 1e-5, matching generate_permutation_info's own default.
+        Note: PySCF stores fractional translations with ~6 decimal places
+        (e.g. 0.666667 instead of 2/3), introducing ~3e-7 residuals after
+        applying the operation. A tighter tol (e.g. 1e-10) would therefore
+        fail for any lattice whose space-group translations are not integers.
     verbose : bool, optional
         If True, print detailed information, by default False
 
@@ -256,6 +261,75 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-10, verbose=
 
     # info about symmetry operation
     return repr_matrix
+
+
+def rotation_matrix_to_su2(R_cart):
+    """Return the SU(2) representative of a proper 3D Cartesian rotation matrix.
+
+    For a rotation by angle :math:`\\varphi` about unit axis :math:`\\hat{n}`:
+
+    .. math::
+        D^{1/2}(R) = \\cos(\\varphi/2)\\,I_2
+                    + i\\sin(\\varphi/2)\\,(\\hat{n}\\cdot\\boldsymbol{\\sigma})
+
+    Parameters
+    ----------
+    R_cart : (3, 3) float ndarray
+        Proper rotation matrix (``det = +1``) in Cartesian coordinates.
+
+    Returns
+    -------
+    su2 : (2, 2) complex ndarray
+    """
+    from scipy.spatial.transform import Rotation
+    rotvec = Rotation.from_matrix(R_cart).as_rotvec()
+    angle = np.linalg.norm(rotvec)
+    if angle < 1e-10:
+        return np.eye(2, dtype=np.complex128)
+    axis = rotvec / angle
+    sx = np.array([[0,  1 ], [1,  0 ]], dtype=np.complex128)
+    sy = np.array([[0, -1j], [1j, 0 ]], dtype=np.complex128)
+    sz = np.array([[1,  0 ], [0, -1 ]], dtype=np.complex128)
+    return (np.cos(angle / 2) * np.eye(2, dtype=np.complex128)
+            + 1j * np.sin(angle / 2) * (axis[0]*sx + axis[1]*sy + axis[2]*sz))
+
+
+def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=False):
+    """Double-group spinor AO representation :math:`D^{1/2}(R) \\otimes U_\\text{orbital}(R)`.
+
+    Reads the rotation directly from ``kstruct.ops[symm_op_idx]``, converts it
+    to a Cartesian rotation, lifts it to SU(2) via :func:`rotation_matrix_to_su2`,
+    and combines it with the orbital representation from :func:`get_representation`.
+
+    Parameters
+    ----------
+    bz_idx : int
+        Index of the BZ k-point.
+    symm_op_idx : int
+        Index of the symmetry operation in ``kstruct.ops``.
+    mycell : pyscf.pbc.gto.Cell
+        PySCF unit cell.
+    kstruct : pyscf.pbc.lib.kpts.KPoints
+        k-point symmetry structure from ``mycell.make_kpts(...)``.
+    tol : float, optional
+        Tolerance passed to get_representation for atom-position matching.
+        Default 1e-5 matches generate_permutation_info's own default and
+        accommodates PySCF's ~6 decimal-place translation precision (~3e-7
+        residuals). See get_representation for full discussion.
+
+    Returns
+    -------
+    u_spinor : (nso, nso) complex ndarray
+        Full spinor AO representation, ``nso = 2 * nao``.
+    """
+    u_orbital = get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=tol, verbose=verbose)
+    rot_frac = np.array(kstruct.ops[symm_op_idx].rot, dtype=float)
+    a = mycell.lattice_vectors()
+    rot_cart = a.T @ rot_frac @ np.linalg.inv(a.T)
+    if np.linalg.det(rot_cart) < 0:   # improper: inversion is trivial on spinors
+        rot_cart = -rot_cart
+    su2 = rotation_matrix_to_su2(rot_cart)
+    return np.kron(su2, u_orbital)
 
 
 def check_kspace_symmetry_breaking(inp_file, datasets):

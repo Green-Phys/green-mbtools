@@ -5,7 +5,7 @@ from . import dyson
 
 
 # Only work for full_bz object
-def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
+def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False, nk_list=None):
     """Perform Wannier interpolation for static quantities
 
     Parameters
@@ -17,11 +17,14 @@ def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
     kpts_inter : numpy.ndarray
         k-points to interpolate on (in scaled units)
     dim : int, optional
-        dimensionality of crystal (2D or 3D)
+        dimensionality of crystal (2D or 3D), used only when nk_list is not given
     hermi : bool, optional
         set to True if the interpolated matrix Hermitian, by default False
     debug : bool, optional
         set to True if debug information needs to be printed, by default False
+    nk_list : array-like of 3 ints, optional
+        k-mesh dimensions [nkx, nky, nkz] read from params/nk_list in the HDF5
+        input file.  Takes precedence over `dim` when provided.
 
     Returns
     -------
@@ -31,16 +34,18 @@ def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
     Raises
     ------
     ValueError
-        if `dim` other than 2 or 3 is specified
+        if `dim` other than 2 or 3 is specified and nk_list is not provided
     """
     ns, Nk, nao = obj_k.shape[:3]
-    if dim == 3:
+    if nk_list is not None:
+        nkx, nky, nkz = nk_list
+        rmesh = ft.construct_rmesh(nkx, nky, nkz)
+        nk = nkx
+    elif dim == 3:
         nk = int(np.cbrt(Nk))
-        # rmesh = ft.construct_symmetric_rmesh(nk, nk, nk)
         rmesh = ft.construct_rmesh(nk, nk, nk)
     elif dim == 2:
         nk = int(np.sqrt(Nk))
-        # rmesh = ft.construct_symmetric_rmesh(nk, nk, 1)
         rmesh = ft.construct_rmesh(nk, nk, 1)
     else:
         raise ValueError(
@@ -74,7 +79,7 @@ def interpolate(obj_k, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
 
 # Only work for full_bz object
 # TODO merge interpolate_tk_object and interpolate
-def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=False):
+def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=False, nk_list=None):
     """Perform Wannier interpolation for dynamic quantities
 
     Parameters
@@ -86,11 +91,14 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=F
     kpts_inter : numpy.ndarray
         k-points to interpolate on (in scaled units)
     dim : int, optional
-        dimensionality of crystal (2D or 3D)
+        dimensionality of crystal (2D or 3D), used only when nk_list is not given
     hermi : bool, optional
         set to True if the interpolated matrix Hermitian, by default False
     debug : bool, optional
         set to True if debug information needs to be printed, by default False
+    nk_list : array-like of 3 ints, optional
+        k-mesh dimensions [nkx, nky, nkz] read from params/nk_list in the HDF5
+        input file.  Takes precedence over `dim` when provided.
 
     Returns
     -------
@@ -100,16 +108,17 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=F
     Raises
     ------
     ValueError
-        if `dim` other than 2 or 3 is specified
+        if `dim` other than 2 or 3 is specified and nk_list is not provided
     """
     nts, ns, Nk, nao = obj_tk.shape[:4]
-    if dim == 3:
+    if nk_list is not None:
+        nkx, nky, nkz = nk_list
+        rmesh = ft.construct_rmesh(nkx, nky, nkz)
+    elif dim == 3:
         nk = int(np.cbrt(Nk))
-        # rmesh = ft.construct_symmetric_rmesh(nk, nk, nk)
         rmesh = ft.construct_rmesh(nk, nk, nk)
     elif dim == 2:
         nk = int(np.sqrt(Nk))
-        # rmesh = ft.construct_symmetric_rmesh(nk, nk, 1)
         rmesh = ft.construct_rmesh(nk, nk, 1)
     else:
         raise ValueError(
@@ -154,7 +163,7 @@ def interpolate_tk_object(obj_tk, kmesh, kpts_inter, dim=3, hermi=False, debug=F
 # Only work for full_bz object
 def interpolate_G(
     Fk, Sigma_tk, mu, Sk, kmesh, kpts_inter, ir, dim=3,
-    hermi=False, debug=False
+    hermi=False, debug=False, nk_list=None
 ):
     """Interpolate Green's function from full BZ k-mesh to specified k-points
 
@@ -175,11 +184,14 @@ def interpolate_G(
     ir : IR_factory
         handler for Fourier transforms between imaginary time and Matsubara frequencies
     dim : int, optional
-        dimensionality of latticej, by default 3
+        dimensionality of lattice, by default 3; used only when nk_list is not given
     hermi : bool, optional
         Is Green's function expected to be Hermitian, by default False
     debug : bool, optional
         print extra messages for debugging, by default False
+    nk_list : array-like of 3 ints, optional
+        k-mesh dimensions [nkx, nky, nkz] from params/nk_list in the HDF5 input.
+        Takes precedence over `dim` when provided.
 
     Returns
     -------
@@ -189,10 +201,10 @@ def interpolate_G(
     Raises
     ------
     ValueError
-        if `dim` other than 2 or 3 is specified
-    """    
+        if `dim` other than 2 or 3 is specified and nk_list is not provided
+    """
     ns, Nk, nao = Fk.shape[:3]
-    if dim != 3 and dim != 2:
+    if nk_list is None and dim != 3 and dim != 2:
         raise ValueError(
             "Wannier interpolation only supports 3D and 2D systems."
         )
@@ -204,17 +216,17 @@ def interpolate_G(
 
     if Sk is not None:
         print("Interpolating overlap...")
-        Sk_int = interpolate(Sk, kmesh, kpts_inter, dim, hermi, debug)
+        Sk_int = interpolate(Sk, kmesh, kpts_inter, dim, hermi, debug, nk_list=nk_list)
     else:
         Sk_int = None
 
     print("Interpolating Fock...")
-    Fk_int = interpolate(Fk, kmesh, kpts_inter, dim, hermi, debug)
+    Fk_int = interpolate(Fk, kmesh, kpts_inter, dim, hermi, debug, nk_list=nk_list)
     # FIXME Too memory demanding and too slow as well.
     if Sigma_tk is not None:
         print("Interpolating self-energy...")
         Sigma_tk_int = interpolate_tk_object(
-            Sigma_tk, kmesh, kpts_inter, dim, hermi, debug
+            Sigma_tk, kmesh, kpts_inter, dim, hermi, debug, nk_list=nk_list
         )
     else:
         Sigma_tk_int = None

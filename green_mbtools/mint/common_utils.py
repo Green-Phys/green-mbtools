@@ -18,7 +18,7 @@ from pyscf.pbc.lib import kpts as libkpts
 
 from . import integral_utils as int_utils
 from . import kpt_utils
-from .symmetry_utils import get_representation
+from .symmetry_utils import get_representation, get_spinor_representation
 from ..version import __version__
 
 
@@ -346,6 +346,8 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["params/ns"] = S.shape[0]
     inp_data["params/nel_cell"] = mycell.nelectron
     inp_data["params/nk"] = kmesh.shape[0]
+    nk_arr = np.atleast_1d(np.array(args.nk, dtype=int))
+    inp_data["symmetry/k/nk_list"] = np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr
     inp_data["params/NQ"] = NQ
     inp_data.attrs["__green_version__"] = __version__
     inp_data.close()
@@ -552,7 +554,7 @@ def pbc_cell(args):
     '''
     Initialize PySCF unit cell object for a given system
     '''
-    spg_symm = args.space_symm if args.x2c < 2 else False
+    spg_symm = args.space_symm
     c = gto.M(
         a = args.a,
         atom = args.atom,
@@ -617,16 +619,8 @@ def init_k_mesh(args, mycell):
        args.center = [0,0,0]
     if args.shift is None:
        args.shift = [0,0,0]
-    if args.x2c < 2:
-        # for normal and sfX2C1e calculations
-        kstruct = mycell.make_kpts(args.nk, scaled_center=args.center,
+    kstruct = mycell.make_kpts(args.nk, scaled_center=args.center,
                                space_group_symmetry=args.space_symm, time_reversal_symmetry=args.tr_symm)
-    else:
-        # for X2C1e calculations
-        print("X2C1e calculations do not support space group symmetry. Only time-reversal symmetry is used.")
-        print("Double group symmetry will be implemented in future releases.")
-        kstruct = mycell.make_kpts(args.nk, scaled_center=args.center,
-                               space_group_symmetry=False, time_reversal_symmetry=args.tr_symm)
 
     if not (args.space_symm or args.tr_symm):
         kstruct = libkpts.make_kpts(mycell, kstruct, space_group_symmetry=False, time_reversal_symmetry=False)
@@ -913,17 +907,18 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
             mat_ao = get_representation(ik, iop, mycell, kstruct)
             kspace_orep[ik] = mat_ao
     else:
-        # Relativistic (X2C1e) case — only TR symmetry is used (no space-group symmetry).
-        # TODO: Need to implement and integrate magnetic and spin symmetry groups
-        # For TR k-points, Uk = Theta = iσ_y ⊗ I_nao = [[0, I_nao], [-I_nao, 0]].
-        # check_kspace_symmetry_breaking reconstructs as (Uk @ G_ir @ Uk†).conj(), which
-        # with Uk=Theta gives [[Gbb*,-Gba*],[-Gab*,Gaa*]], matching assign_G_nso in the C++ solver.
+        # Relativistic (X2C1e): full double-group spinor representation.
+        # U_spinor(R) = D^{1/2}(R) ⊗ U_orbital(R); SU(2) lifted from kstruct.ops directly.
+        # For TR k-points the combined operator (U_spinor·Θ)* is stored so that
+        # the reconstruction X(k) = (Uk @ X_ir @ Uk†)* gives U·Θ·X_ir*·Θ†·U†.
         nso = nao * 2
         kspace_orep = np.zeros((nk, nso, nso), dtype=np.complex128)
         theta = np.kron(np.array([[0, 1], [-1, 0]], dtype=np.complex128), np.eye(nao))
         tr_conj_bz = kstruct.time_reversal_symm_bz
         for ik in range(nk):
-            kspace_orep[ik] = theta if tr_conj_bz[ik] else np.eye(nso)
+            iop = stars_ops[ik]
+            u_spinor = get_spinor_representation(ik, iop, mycell, kstruct)
+            kspace_orep[ik] = (u_spinor @ theta).conj() if tr_conj_bz[ik] else u_spinor
     kspace_orep = kspace_orep.astype(np.complex128)
 
     # If quantities are saved in an orthogonalized basis, rotate symmetry operators
@@ -1189,6 +1184,11 @@ def store_k_grid(args, mycell, kmesh, k_ibz, ir_list, conj_list, weight, ind, nu
     _write("symmetry/pairs/kpair_irre_list", kpair_irre_list)
     _write("symmetry/pairs/kpair_idx", kptij_idx)
     _write("symmetry/pairs/num_kpair_stored", num_kpair_stored)
+
+    # Basic params needed by both grid-only and full MF consumers.
+    _write("params/nk", nk)
+    nk_arr = np.atleast_1d(np.array(args.nk, dtype=int))
+    _write("symmetry/k/nk_list", np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr)
 
     # Store operators for symmetry operations
     if kstruct is not None:
