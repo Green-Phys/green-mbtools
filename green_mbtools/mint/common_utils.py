@@ -27,9 +27,10 @@ def _init_guess_from_chk(mf, cell, chkfile):
 
     PySCF < ~2.1 signature: init_guess_by_chkfile(cell, chkfile_name, ...)
     PySCF >= ~2.1 signature: init_guess_by_chkfile(chk=None, ...)  (uses self.cell)
+    GHF signature:           init_guess_by_chkfile(chkfile, project)
     """
     first_param = next(iter(inspect.signature(mf.init_guess_by_chkfile).parameters))
-    if first_param == "chk":
+    if first_param in ("chk", "chkfile"):
         return mf.init_guess_by_chkfile(chkfile)
     else:
         return mf.init_guess_by_chkfile(cell, chkfile)
