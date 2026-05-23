@@ -856,8 +856,9 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
       mapping each point to its representative irreducible k-point.
 
     For ``args.x2c < 2``, ``k_sym_transform_ao`` is built from
-    ``get_representation``. For ``args.x2c == 2``, the current implementation
-    stores identity transforms in spin-orbital space as a placeholder.
+    ``get_representation``. For ``args.x2c == 2``, the full double-group spinor
+    representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R)` is stored
+    via :func:`get_spinor_representation`.
 
     Returns
     -------
