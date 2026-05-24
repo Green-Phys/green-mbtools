@@ -1016,6 +1016,16 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         iop = stars_ops[ik]
         irre_q = qstruct.bz2ibz[ik]  # index of irreducible k-point in the ibz list
         irre_q_bz = qstruct.ibz2bz[irre_q]  # index of irreducible k-point in the full bz list
+        # Short-circuit when ik is its own IBZ representative: the q->q
+        # transformation must be identity. Computing it via L_bz^{-1} @ mat_ao @ L_irre
+        # can drift from identity (e.g., when stars_ops[ik] != identity but acts
+        # trivially on q, or when Cholesky/eigendecomp is recomputed independently
+        # from the pre-stored sqrt). The downstream GW kernel relies on U=I at IBZ
+        # reps in eval_p0_bz_from_ibz.
+        if ik == irre_q_bz:
+            kspace_orep_p0[ik]  = np.eye(nao, dtype=np.complex128)
+            kspace_orep_j2c[ik] = np.eye(nao, dtype=np.complex128)
+            continue
         # Build transformation operator in the aux-AO basis connecting "ik" with "irre_k"
         mat_ao = get_representation(ik, iop, auxcell, qstruct)
         # obtain J^{1/2} (q_IBZ) from pre-computed list
