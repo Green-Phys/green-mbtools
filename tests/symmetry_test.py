@@ -280,9 +280,9 @@ def test_x2c_tr_sym_transforms(tmp_path):
 def test_x2c_fock_ibz_to_full_bz():
     """Verify that X2C Fock at IBZ k-points reconstructs full BZ via k_sym_transform_ao.
 
-    Uses a precomputed KGHF Hubbard model with Rashba SOC and full space-group
-    symmetry (2D 10×10 k-mesh: nk=100, ink=14, nao=2, nso=4).  Checks the
-    general reconstruction for all k-points:
+    Uses a precomputed cubic Ar (def2-svp, --x2c 2) calculation with full
+    space-group + time-reversal symmetry (3D 2×2×2 k-mesh: nk=8, ink=4,
+    nao=14, nso=28).  Checks the general reconstruction for all k-points:
 
         F(k) = U_k @ F(k_ibz) @ U_k†          [non-TR k-points]
         F(k) = (U_k @ F(k_ibz) @ U_k†).conj() [TR k-points]
@@ -291,7 +291,7 @@ def test_x2c_fock_ibz_to_full_bz():
     atol=1e-6 is tight enough to catch a wrong k_sym_transform_ao (all-identity
     produces O(1) errors) while accommodating floating-point residuals.
     """
-    data_file = Path(__file__).parent / "test_data" / "Hubbard_x2c" / "input_x2c_hubbard.h5"
+    data_file = Path(__file__).parent / "test_data" / "Ar_x2c" / "input_full_symm.h5"
 
     with h5py.File(data_file, "r") as f:
         fock_raw = f["HF/Fock-k"][()]
