@@ -281,7 +281,7 @@ def test_x2c_fock_ibz_to_full_bz():
     """Verify that X2C Fock at IBZ k-points reconstructs full BZ via k_sym_transform_ao.
 
     Uses a precomputed cubic Ar (def2-svp, --x2c 2) calculation with full
-    space-group + time-reversal symmetry (3D 2×2×2 k-mesh: nk=8, ink=4,
+    space-group + time-reversal symmetry (3×3×1 k-mesh: nk=9, ink=3,
     nao=14, nso=28).  Checks the general reconstruction for all k-points:
 
         F(k) = U_k @ F(k_ibz) @ U_k†          [non-TR k-points]
