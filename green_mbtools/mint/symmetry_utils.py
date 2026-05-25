@@ -295,14 +295,14 @@ def rotation_matrix_to_su2(R_cart):
 
 
 def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=False):
-    """Double-group spinor AO representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R)`.
+    """Double-group spinor AO representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R^{-1})`.
 
     Reads the rotation directly from ``kstruct.ops[symm_op_idx]``, converts it
     to a Cartesian rotation, lifts it to SU(2) via :func:`rotation_matrix_to_su2`,
     and combines it with the orbital representation from :func:`get_representation`.
 
     PySCF's ``Dmats`` use the passive (inverse) convention :math:`D^L(R^{-1})`, so
-    :func:`get_representation` returns :math:`U_\\text{orbital}(R^{-1})`.  The matching
+    :func:`get_representation` returns :math:`U_\\text{orbital}(R^{-1})`. The matching
     SU(2) factor is therefore :math:`D^{1/2}(R^{-1}) = D^{1/2}(R)^\\dagger`, i.e. the
     conjugate transpose of the direct lift.
 

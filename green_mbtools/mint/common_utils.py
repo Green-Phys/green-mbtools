@@ -447,7 +447,7 @@ def add_common_params(parser):
     advanced.add_argument(
         "--use_j2c_eig_decomposition",
         type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
-        default='false',
+        default=False,
         help="Use eigenvalue decomposition for j2c factors during DF build. Set false to force Cholesky-based path."
     )
 
@@ -858,7 +858,7 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
 
     For ``args.x2c < 2``, ``k_sym_transform_ao`` is built from
     ``get_representation``. For ``args.x2c == 2``, the full double-group spinor
-    representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R)` is stored
+    representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R^{-1})` is stored
     via :func:`get_spinor_representation`.
 
     Returns
