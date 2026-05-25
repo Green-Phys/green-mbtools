@@ -447,7 +447,7 @@ def add_common_params(parser):
     advanced.add_argument(
         "--use_j2c_eig_decomposition",
         type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
-        default='true',
+        default='false',
         help="Use eigenvalue decomposition for j2c factors during DF build. Set false to force Cholesky-based path."
     )
 
