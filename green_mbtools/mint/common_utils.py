@@ -27,9 +27,10 @@ def _init_guess_from_chk(mf, cell, chkfile):
 
     PySCF < ~2.1 signature: init_guess_by_chkfile(cell, chkfile_name, ...)
     PySCF >= ~2.1 signature: init_guess_by_chkfile(chk=None, ...)  (uses self.cell)
+    GHF signature:           init_guess_by_chkfile(chkfile, project)
     """
     first_param = next(iter(inspect.signature(mf.init_guess_by_chkfile).parameters))
-    if first_param == "chk":
+    if first_param in ("chk", "chkfile"):
         return mf.init_guess_by_chkfile(chkfile)
     else:
         return mf.init_guess_by_chkfile(cell, chkfile)
@@ -446,7 +447,7 @@ def add_common_params(parser):
     advanced.add_argument(
         "--use_j2c_eig_decomposition",
         type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
-        default='true',
+        default=False,
         help="Use eigenvalue decomposition for j2c factors during DF build. Set false to force Cholesky-based path."
     )
 
@@ -856,8 +857,9 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
       mapping each point to its representative irreducible k-point.
 
     For ``args.x2c < 2``, ``k_sym_transform_ao`` is built from
-    ``get_representation``. For ``args.x2c == 2``, the current implementation
-    stores identity transforms in spin-orbital space as a placeholder.
+    ``get_representation``. For ``args.x2c == 2``, the full double-group spinor
+    representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R^{-1})` is stored
+    via :func:`get_spinor_representation`.
 
     Returns
     -------
@@ -1014,6 +1016,16 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         iop = stars_ops[ik]
         irre_q = qstruct.bz2ibz[ik]  # index of irreducible k-point in the ibz list
         irre_q_bz = qstruct.ibz2bz[irre_q]  # index of irreducible k-point in the full bz list
+        # Short-circuit when ik is its own IBZ representative: the q->q
+        # transformation must be identity. Computing it via L_bz^{-1} @ mat_ao @ L_irre
+        # can drift from identity (e.g., when stars_ops[ik] != identity but acts
+        # trivially on q, or when Cholesky/eigendecomp is recomputed independently
+        # from the pre-stored sqrt). The downstream GW kernel relies on U=I at IBZ
+        # reps in eval_p0_bz_from_ibz.
+        if ik == irre_q_bz:
+            kspace_orep_p0[ik]  = np.eye(nao, dtype=np.complex128)
+            kspace_orep_j2c[ik] = np.eye(nao, dtype=np.complex128)
+            continue
         # Build transformation operator in the aux-AO basis connecting "ik" with "irre_k"
         mat_ao = get_representation(ik, iop, auxcell, qstruct)
         # obtain J^{1/2} (q_IBZ) from pre-computed list
