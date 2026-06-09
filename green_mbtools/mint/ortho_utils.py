@@ -25,6 +25,48 @@ def avg(kpts, X):
     for ikk, kk in enumerate(kpts):
         X[kk] = (xxx if (ikk % 2) == 0 else xxx.conj())
 
+def lowdin_per_k(Sk, tol=1e-9):
+    '''
+    Symmetric (Löwdin) S^{-1/2} orthogonalization for a single k-point.
+
+    Returns ``(X, X_inv)`` in the convention used by
+    ``common_utils.transform`` (i.e. transforms apply as ``X Z X†``):
+        X     = S^{-1/2}   (shape (n_ortho, nao))
+        X_inv = S^{+1/2}   (shape (nao, n_ortho))
+    Eigenvalues of ``Sk`` below ``tol`` are discarded.
+    '''
+    s_ev, s_eb = np.linalg.eigh(Sk)
+    istart = s_ev.searchsorted(tol)
+    s_sqrtev = np.sqrt(s_ev[istart:])
+    x_pinv = s_eb[:, istart:] * s_sqrtev
+    x = (s_eb[:, istart:].conj() * (1.0 / s_sqrtev)).T
+    return x, x_pinv
+
+
+def mo_per_k(Sk, C_k):
+    '''
+    Canonical-MO basis for a single k-point from MO coefficients ``C_k``
+    satisfying ``C† S C = I``.
+
+    Returns ``(X = C†, X_inv = S C)`` in the ``X Z X†`` convention.
+    '''
+    C_k = np.asarray(C_k, dtype=np.complex128)
+    return C_k.conj().T, Sk @ C_k
+
+
+def natural_per_k(Sk, dmk):
+    '''
+    Natural-orbital basis for a single k-point from density matrix ``dmk``.
+
+    Solves the generalized eigenproblem ``dm v = S^{-1} v n`` and returns
+    ``(X, X_inv)`` in the ``X Z X†`` convention such that
+    ``X_inv @ dm @ X_inv†`` is diagonal (occupations on the diagonal).
+    '''
+    _, Sv = LA.eigh(dmk, np.linalg.inv(Sk))
+    Sv = Sv.conj().T.astype(np.complex128)
+    return LA.inv(Sv), Sv
+
+
 def symmetrical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
     X_k = []
     X_inv_k = []
@@ -64,9 +106,7 @@ def symmetrical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False
             Sk = S[ik]
 
 
-        x_pinv = LA.sqrtm(Sk)
-        x = LA.inv(x_pinv)
-
+        x, x_pinv = lowdin_per_k(Sk)
 
         n_ortho, n_nonortho = x.shape
 
@@ -144,17 +184,7 @@ def canonical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
             Sk = S[ik]
 
 
-        s_ev, s_eb = np.linalg.eigh(Sk)
-
-        # Remove all eigenvalues < threshold
-        istart = s_ev.searchsorted(1e-9)
-        s_sqrtev = np.sqrt(s_ev[istart:])
-
-        # Moore-Penrose pseudoinverse of X:  (X^+ * X)^(-1) * X^+
-        # TODO: use least squares instead
-        x_pinv = s_eb[:, istart:] * s_sqrtev
-        x = (s_eb[:, istart:].conj() * 1 / s_sqrtev).T
-        x = LA.inv(x_pinv)
+        x, x_pinv = lowdin_per_k(Sk)
 
         n_ortho, n_nonortho = x.shape
         if Debug_print:
@@ -233,9 +263,7 @@ def natural_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
             Sk = S[ik]
 
         # compute natural orbital basis
-        Sd, Sv = LA.eigh(dmk,np.linalg.inv(Sk))
-        Sv = Sv.conj().T.astype(np.complex128)
-        Svi = LA.inv(Sv)
+        Svi, Sv = natural_per_k(Sk, dmk)
 
         # Check that transformations for the inversion symmetries are consistent
         if ik != pairing[ik] and not np.allclose(reduce(np.dot, (Sv, dm[ik], Sv.conj().T)), reduce(np.dot, (Sv.conj(), dm[pairing[ik]], Sv.T)),

@@ -5,6 +5,7 @@ import os
 
 import h5py
 import numpy as np
+import scipy.linalg as LA
 import pyscf.lib.chkfile as chk
 from io import StringIO
 from numba import jit
@@ -18,6 +19,7 @@ from pyscf.pbc.lib import kpts as libkpts
 
 from . import integral_utils as int_utils
 from . import kpt_utils
+from . import ortho_utils
 from .symmetry_utils import get_representation, get_spinor_representation
 from ..version import __version__
 
@@ -360,26 +362,50 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data.close()
 
 
-def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S):
+def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None):
     '''
-    Transform Fock-matrix, non-interacting Hamiltonian, density matrix and overlap matrix into an orthogonal basis
+    Transform Fock-matrix, non-interacting Hamiltonian, density matrix and overlap matrix into an orthogonal basis.
+
+    ``orth`` selects the per-k transformation:
+      - "none"    : identity (AO basis preserved)
+      - "lowdin"  : symmetric S^{-1/2} orthogonalization
+      - "mo"      : canonical molecular orbitals from ``mf.mo_coeff``
+      - "natural" : natural orbitals from the mean-field density matrix
+
+    ``mf`` is required for "mo"; "natural" uses ``hf_dm``. Per-k basis
+    construction is delegated to ``ortho_utils.{lowdin,mo,natural}_per_k``.
     '''
+    if orth == "mo" and mf is None:
+        raise ValueError("orthogonalize: mf is required for orth='mo'.")
+
+    ns = hf_dm.shape[0]
     maxdiff = -1
     old_shape = [-1, -1]
     for ik, k in enumerate(mydf.kpts):
-        if orth == 0:
+        if orth == "none":
             X_inv_k.append(np.eye(F.shape[2], dtype=np.complex128))
             X_k.append(np.eye(F.shape[2], dtype=np.complex128))
             continue
 
-        s_ev, s_eb = np.linalg.eigh(S[0, ik])
+        Sk = S[0, ik]
+        if orth == "lowdin":
+            x, x_pinv = ortho_utils.lowdin_per_k(Sk)
+        elif orth == "mo":
+            # For ns == 2, no single C diagonalizes both F_alpha and F_beta;
+            # diagonalize the spin-averaged Fock against S to obtain a
+            # spin-symmetric MO basis. For ns == 1 use mf.mo_coeff directly.
+            if ns == 2:
+                F_bar = 0.5 * (F[0, ik] + F[1, ik])
+                _, C_k = LA.eigh(F_bar, Sk)
+            else:
+                C_k = mf.mo_coeff[ik]
+            x, x_pinv = ortho_utils.mo_per_k(Sk, C_k)
+        elif orth == "natural":
+            dmk = 0.5 * (hf_dm[0, ik] + hf_dm[1, ik]) if ns == 2 else hf_dm[0, ik]
+            x, x_pinv = ortho_utils.natural_per_k(Sk, dmk)
+        else:
+            raise ValueError(f"orthogonalize: unknown orth '{orth}'.")
 
-        # Remove all eigenvalues < threshold
-        istart = s_ev.searchsorted(1e-9)
-        s_sqrtev = np.sqrt(s_ev[istart:])
-
-        x_pinv = s_eb[:, istart:] * s_sqrtev
-        x = (s_eb[:, istart:].conj() * 1 / s_sqrtev).T
         n_ortho, n_nonortho = x.shape
         if old_shape[0] >= 0 and n_ortho != old_shape[0] and n_nonortho != old_shape[1]:
             raise RuntimeError("Error!!! Different k-point have different number of orthogonal basis.")
@@ -394,17 +420,21 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S):
         diff_max = np.max(np.abs(diff))
         maxdiff = max(maxdiff, diff_max)
     logging.info(f"max diff from identity {maxdiff}")
+
+    if orth == "none":
+        X_inv_k = np.asarray(X_inv_k).reshape(F.shape[1:])
+        X_k = np.asarray(X_k).reshape(F.shape[1:])
+        return X_k, X_inv_k, S, F, T, hf_dm
+
     X_inv_k = np.asarray(X_inv_k).reshape(F.shape[1:])
     X_k = np.asarray(X_k).reshape(F.shape[1:])
-    # Orthogonalization
-    if orth == 1:
-        F = transform(F, X_k, X_inv_k)
-        # S     = transform(S, X_k, X_inv_k)
-        T = transform(T, X_k, X_inv_k)
-        hf_dm = transform(hf_dm, X_inv_k, X_k)
 
-        S = np.array([np.eye(F.shape[-1], dtype=np.complex128)] * F.shape[1])
-        S = np.array([S, S])
+    F = transform(F, X_k, X_inv_k)
+    T = transform(T, X_k, X_inv_k)
+    hf_dm = transform(hf_dm, X_inv_k, X_k)
+
+    S = np.array([np.eye(F.shape[-1], dtype=np.complex128)] * F.shape[1])
+    S = np.array([S] * ns)
 
     return X_k, X_inv_k, S, F, T, hf_dm
 
@@ -424,7 +454,17 @@ def add_common_params(parser):
     parser.add_argument("--int_path", type=str, default="df_int", help="path to store ewald corrected integrals")
     parser.add_argument("--hf_int_path", type=str, default="df_hf_int", help="path to store hf integrals")
     parser.add_argument("--output_path", type=str, default="input.h5", help="output file with initial data")
-    parser.add_argument("--orth", type=int, default=0, help="Transform to orthogonal basis or not. 0 - no orthogonal transformation, 1 - data is in orthogonal basis.")
+    parser.add_argument(
+        "--orth", type=str, default="none",
+        choices=["none", "lowdin", "mo", "natural", "0", "1"],
+        help=(
+            "Orbital basis for stored quantities: "
+            "'none' = keep AO basis (legacy '0'); "
+            "'lowdin' = symmetric S^{-1/2} orthogonalization (legacy '1'); "
+            "'mo' = canonical MOs from mean-field; "
+            "'natural' = natural orbitals from mean-field density matrix."
+        ),
+    )
     parser.add_argument("--beta", type=float, default=None, help="Emperical parameter for even-Gaussian auxiliary basis")
     parser.add_argument("--active_space", type=int, nargs='+', default=None, help="active space orbitals")
     parser.add_argument("--spin", type=int, default=0, help="Local spin")
@@ -470,6 +510,9 @@ def add_pbc_params(parser):
                               help="Two body finite-size correction. Be default computes the second set of integrals that include simple ewald correction.")
 
 
+_ORTH_ALIASES = {"0": "none", "1": "lowdin"}
+
+
 def init_mol_params(params=None):
     '''
     Initialize argparse.ArgumentParser for Green/WeakCoupling python module and return a prased parameters map with parameters specific for molecular calculations
@@ -477,6 +520,7 @@ def init_mol_params(params=None):
     parser = argparse.ArgumentParser(description="Green/WeakCoupling initialization script")
     add_common_params(parser)
     args = parser.parse_args(args=params)
+    args.orth = _ORTH_ALIASES.get(args.orth, args.orth)
     args.basis = parse_basis(args.basis)
     args.auxbasis = parse_basis(args.auxbasis)
     args.ecp = parse_basis(args.ecp)
@@ -510,6 +554,7 @@ def init_pbc_params(params=None):
     add_common_params(parser)
     add_pbc_params(parser)
     args = parser.parse_args(args=params)
+    args.orth = _ORTH_ALIASES.get(args.orth, args.orth)
     if len(args.nk) == 1:
         args.nk = [args.nk[0], args.nk[0], args.nk[0]]
     elif len(args.nk) != 3:
@@ -839,7 +884,7 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
     X_k : numpy.ndarray, optional
         Orthogonalization matrices in the full BZ, shape ``(nk, nao, nao)``
         (or spin-orbital analog). Required together with ``X_inv_k`` when
-        ``args.orth == 1`` to rotate AO-space symmetry operators into the
+        ``args.orth != "none"`` to rotate AO-space symmetry operators into the
         orthogonalized basis.
     X_inv_k : numpy.ndarray, optional
         Inverse orthogonalization matrices on irreducible k-points, indexed by
@@ -925,12 +970,12 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
 
     # If quantities are saved in an orthogonalized basis, rotate symmetry operators
     # to the same basis so U(k) reconstructs H/F/G consistently.
-    if (args.orth == 1):
+    if args.orth != "none":
         if (X_k is None or X_inv_k is None):
             raise ValueError(
                 "Cannot transform symmetry operators to orthogonal basis: "
                 "missing transformation matrices X_k and/or X_inv_k. "
-                "(--orth=1 requires --grid_only=false to compute mean-field quantities)"
+                f"(--orth={args.orth} requires --grid_only=false to compute mean-field quantities)"
             )
         # get mapping from full BZ idx to idx (still in full BZ) of the corresponding irreducible point
         bz2ibz = kstruct.ibz2bz[kstruct.bz2ibz]

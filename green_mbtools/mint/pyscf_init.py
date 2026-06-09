@@ -107,7 +107,7 @@ class pyscf_pbc_init (pyscf_init):
         if self.args.grid_only:
             comm.store_k_grid(self.args, self.cell, self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik)
             auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
-            # NOTE: if args.orth = 1, we will not be able to transform the k_sym_transform_ao yet.
+            # NOTE: if args.orth != "none", we will not be able to transform the k_sym_transform_ao yet.
             comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
             comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
             return
@@ -140,7 +140,7 @@ class pyscf_pbc_init (pyscf_init):
         X_inv_k = []
 
         # Orthogonalization matrix
-        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
@@ -194,11 +194,12 @@ class pyscf_pbc_init (pyscf_init):
             Always ``cell.nao_nr()`` regardless of the X2C level, because
             the Coulomb integrals are non-relativistic.
         X_k : list of ndarray
-            Per-k-point orthogonalisation matrices X(k). For Löwdin
-            orthogonalisation, ``X(k) = S(k)^{-1/2}``. When
-            orthogonalisation is disabled (``args.orth == 0``), ``X_k``
-            contains identity transforms for each k-point rather than an
-            empty list.
+            Per-k-point orthogonalisation matrices X(k). The specific form
+            depends on ``args.orth``: Löwdin (``X(k) = S(k)^{-1/2}``),
+            canonical MOs (``X(k) = C(k)†``), or natural orbitals
+            (``X(k) = inv(Sv(k))``). When orthogonalisation is disabled
+            (``args.orth == "none"``), ``X_k`` contains identity transforms
+            for each k-point rather than an empty list.
         '''
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
@@ -417,7 +418,7 @@ class pyscf_mol_init (pyscf_init):
         X_inv_k = []
 
         # Orthogonalization matrix
-        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
         # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is not long range divergence for molecule
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
         comm.store_mol_symmetry_info(self.args, self.kcell, auxcell, self.kmesh)
