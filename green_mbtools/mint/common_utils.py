@@ -1295,7 +1295,7 @@ def construct_gdf(args, mycell, kmesh=None):
     return mydf
 
 
-def compute_ewald_correction(args, cell, kmesh, filename):
+def compute_ewald_correction(args, cell, kmesh, filename, X_k=None):
     # Use gaussian density fitting to get fitted densities
     mydf = int_utils.GreenGDF(cell)
     mydf.space_symm = bool(args.space_symm)
@@ -1309,7 +1309,7 @@ def compute_ewald_correction(args, cell, kmesh, filename):
     # Coulomb kernel mesh
     if args.Nk > 0:
         mydf.mesh = [args.Nk, args.Nk, args.Nk]
-    int_utils.compute_ewald_correction(args, mydf, kmesh, cell.nao_nr(), filename)
+    int_utils.compute_ewald_correction(args, mydf, kmesh, cell.nao_nr(), filename, X_k=X_k)
 
 
 def compute_df_int_dca(args, mycell, kmesh, lattice_kmesh, nao, X_k):

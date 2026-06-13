@@ -210,7 +210,7 @@ class pyscf_pbc_init (pyscf_init):
         # GF2/GW corrections use a separate code path that handles the
         # correction internally; the plain Ewald correction is handled below.
         if 'gf2' in self.args.finite_size_kind or 'gw' in self.args.finite_size_kind or 'gw_s' in self.args.finite_size_kind:
-            self.compute_twobody_finitesize_correction()
+            self.compute_twobody_finitesize_correction(X_k=X_k)
             if not self.args.keep_cderi:
                 os.remove("cderi.h5")
                 os.system("sync")
@@ -277,12 +277,20 @@ class pyscf_pbc_init (pyscf_init):
         inp_data["high_symm_path/special_points"] = special_points
         inp_data["high_symm_path/special_labels"] = special_labels
 
-    def compute_twobody_finitesize_correction(self, mydf=None):
+    def compute_twobody_finitesize_correction(self, mydf=None, X_k=None):
         if not os.path.exists(self.args.hf_int_path):
             os.mkdir(self.args.hf_int_path)
         if 'gf2' in self.args.finite_size_kind :
-            comm.compute_ewald_correction(self.args, self.cell, self.kmesh, self.args.hf_int_path + "/df_ewald.h5")
+            comm.compute_ewald_correction(
+                self.args, self.cell, self.kmesh,
+                self.args.hf_int_path + "/df_ewald.h5",
+                X_k=X_k,
+            )
         if 'gw' in self.args.finite_size_kind :
+            # AqQ is a plane-wave ↔ aux-basis map with no AO indices, so it
+            # does not need the AO→ortho rotation that the Coulomb integrals
+            # require. The mbpt GW correction consumes AqQ together with the
+            # already-rotated V on disk.
             self.evaluate_gw_correction(mydf)
             
     
