@@ -96,15 +96,13 @@ def test_natural_per_k_diagonalizes_dm(rng):
 
     X, X_inv = ortho_utils.natural_per_k(S, dm)
 
-    # left-inverse
+    # left-inverse and S-orthogonalisation
     assert np.allclose(X @ X_inv, np.eye(n), atol=_TOL)
-    # X_inv dm X_inv†  is diagonal (NO occupations on diagonal)
-    D = X_inv @ dm @ X_inv.conj().T
+    assert np.allclose(X @ S @ X.conj().T, np.eye(n), atol=_TOL)
+    # X dm X†  is diagonal (NO occupations on diagonal in the operator
+    # convention; mirrors mo_per_k's shape contract X = C_NO†, X_inv = S·C_NO)
+    D = X @ dm @ X.conj().T
     assert np.allclose(D, np.diag(np.diag(D)), atol=_TOL)
-    # the eigh(dm, S^{-1}) formulation gives V s.t. V† S^{-1} V = I,
-    # i.e. X_inv @ inv(S) @ X_inv† = I  (not X S X†)
-    S_inv = np.linalg.inv(S)
-    assert np.allclose(X_inv @ S_inv @ X_inv.conj().T, np.eye(n), atol=_TOL)
 
 
 def test_helpers_return_complex128(rng):

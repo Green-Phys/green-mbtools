@@ -55,32 +55,51 @@ def mo_per_k(Sk, C_k):
     return C_k.conj().T, Sk @ C_k
 
 
+def _S_inv_half(Sk):
+    '''
+    Return ``S^{-1/2}`` via Hermitian eigendecomposition of S.
+    '''
+    s_ev, s_eb = np.linalg.eigh(Sk)
+    return (s_eb / np.sqrt(s_ev)) @ s_eb.conj().T
+
+
 def natural_per_k(Sk, dmk):
     '''
-    Natural-orbital basis for a single k-point from density matrix ``dmk``.
+    Natural-orbital basis at one k-point from density matrix ``dmk``.
 
-    Solves the generalized eigenproblem ``dm v = S^{-1} v n`` and returns
-    ``(X, X_inv)`` in the ``X Z X†`` convention such that
-    ``X_inv @ dm @ X_inv†`` is diagonal (occupations on the diagonal).
+    Diagonalises ``S^{-1/2} dm S^{-1/2}`` to obtain S-orthonormal
+    natural orbitals ``C_NO = S^{-1/2} u`` (columns) with
+    ``C_NO† S C_NO = I`` and ``C_NO† dm C_NO = diag(occ)``. Returns
+    ``(X, X_inv)`` in the same ``X Z X†`` convention as ``mo_per_k``:
+
+        X     = C_NO†      (shape (n_ortho, nao))
+        X_inv = S @ C_NO   (shape (nao, n_ortho))
     '''
-    _, Sv = LA.eigh(dmk, np.linalg.inv(Sk))
-    Sv = Sv.conj().T.astype(np.complex128)
-    return LA.inv(Sv), Sv
+    S_inv_half = _S_inv_half(Sk)
+    M = S_inv_half @ dmk @ S_inv_half
+    M = 0.5 * (M + M.conj().T)
+    _, u = np.linalg.eigh(M)
+    C_NO = (S_inv_half @ u).astype(np.complex128)
+    return C_NO.conj().T, Sk @ C_NO
 
 
 def _natural_per_k_with_fock_tiebreak(Sk, dmk, Fk, tol_degen=1e-8):
     '''
     Natural orbitals at one k-point with Fock-within-block tie-breaking.
 
-    Diagonalizes ``dmk`` against ``Sk`` to obtain occupations ``n`` and
-    eigenvectors ``V`` (columns) with ``V† S V = I``. Within each block
-    of columns whose occupations agree to ``tol_degen``, additionally
-    diagonalizes the block-projected Fock ``V_B† F V_B`` and rotates the
-    block accordingly. Returns ``(X, X_inv)`` in the ``X Z X†`` convention.
+    Same S-orthonormal convention as ``natural_per_k``: diagonalises
+    ``S^{-1/2} dm S^{-1/2}`` to obtain occupations and orbitals in the
+    ``S^{-1/2}`` frame, then for each block of columns whose occupations
+    agree to ``tol_degen`` additionally diagonalises the block-projected
+    AO Fock ``C_NO_B† F C_NO_B`` and rotates the block accordingly.
+    Returns ``(X = C_NO†, X_inv = S @ C_NO)``.
     '''
-    n_occ, V = LA.eigh(dmk, np.linalg.inv(Sk))
-    V = V.astype(np.complex128)
-    nbf = V.shape[1]
+    S_inv_half = _S_inv_half(Sk)
+    M = S_inv_half @ dmk @ S_inv_half
+    M = 0.5 * (M + M.conj().T)
+    n_occ, u = np.linalg.eigh(M)
+    u = u.astype(np.complex128)
+    nbf = u.shape[1]
 
     i = 0
     while i < nbf:
@@ -88,15 +107,16 @@ def _natural_per_k_with_fock_tiebreak(Sk, dmk, Fk, tol_degen=1e-8):
         while j < nbf and abs(n_occ[j] - n_occ[i]) < tol_degen:
             j += 1
         if j - i > 1:
-            VB = V[:, i:j]
-            FB = VB.conj().T @ Fk @ VB
+            uB = u[:, i:j]
+            C_NO_B = S_inv_half @ uB
+            FB = C_NO_B.conj().T @ Fk @ C_NO_B
             FB = 0.5 * (FB + FB.conj().T)
-            _, W = LA.eigh(FB)
-            V[:, i:j] = VB @ W
+            _, W = np.linalg.eigh(FB)
+            u[:, i:j] = uB @ W
         i = j
 
-    Vh = V.conj().T
-    return LA.inv(Vh), Vh
+    C_NO = (S_inv_half @ u).astype(np.complex128)
+    return C_NO.conj().T, Sk @ C_NO
 
 
 def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,

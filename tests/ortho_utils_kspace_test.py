@@ -192,19 +192,20 @@ def test_natural_per_k_fock_tiebreak_deterministic_in_degenerate_block():
     # X X_inv = I
     np.testing.assert_allclose(X1 @ X_inv1, np.eye(n), atol=1e-10)
 
-    # Columns of X_inv are S-orthonormal: X_inv† S X_inv = I (with S=I)
+    # X orthogonalises S: X S X† = I  (mo_per_k convention)
     np.testing.assert_allclose(
-        X_inv1.conj().T @ S @ X_inv1, np.eye(n), atol=1e-9,
+        X1 @ S @ X1.conj().T, np.eye(n), atol=1e-9,
     )
 
     # Within the originally-degenerate block (occupations both = 2.0), the
     # Fock projected onto the block must be diagonal in the new basis.
-    # LA.eigh returns eigenvalues in ascending order, so the two
-    # max-occupation columns sit at the end of V; X_inv = V† so the
-    # corresponding *rows* of X_inv are the conjugated natural orbitals.
+    # eigh returns eigenvalues in ascending order, so the two
+    # max-occupation columns sit at the end; X = C_NO† so the corresponding
+    # *rows* of X are the conjugated natural orbitals — pull them as columns
+    # by transposing back.
     deg_rows = [n - 2, n - 1]
-    V_B = X_inv1[deg_rows, :].conj().T   # (n, 2) natural orbitals
-    FB = V_B.conj().T @ F @ V_B
+    C_NO_B = X1[deg_rows, :].conj().T   # (n, 2) natural orbitals
+    FB = C_NO_B.conj().T @ F @ C_NO_B
     off = FB - np.diag(np.diag(FB))
     assert np.max(np.abs(off)) < 1e-8, (
         f"Fock not diagonalized within degenerate block: |off|={np.max(np.abs(off))}"
