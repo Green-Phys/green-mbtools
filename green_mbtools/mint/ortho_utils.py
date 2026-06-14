@@ -1,30 +1,7 @@
 import numpy as np
 import scipy.linalg as LA
-from functools import reduce
-from ..pesto import orth
 from .symmetry_utils import get_representation, get_spinor_representation
 
-def wrap_k(k):
-    while k < 0 :
-        k = 1 + k
-    while (k - 9.9999999999e-1) > 0.0 :
-        k = k - 1
-    return k
-
-def normalize(Sv):
-    Svo = np.zeros(Sv.shape, dtype=Sv.dtype)
-    for iv, v in enumerate(Sv.T):
-        ss = np.sign(v[0])*(-1)**iv
-        Svo[:,iv] = ss*v.T
-    return Svo
-
-def avg(kpts, X):
-    '''
-    Average momentum dependent quantity 
-    '''
-    xxx = (X[kpts[0]] + X[kpts[1 % len(kpts)]].conj())/2
-    for ikk, kk in enumerate(kpts):
-        X[kk] = (xxx if (ikk % 2) == 0 else xxx.conj())
 
 def lowdin_per_k(Sk, tol=1e-9):
     '''
@@ -53,6 +30,26 @@ def mo_per_k(Sk, C_k):
     '''
     C_k = np.asarray(C_k, dtype=np.complex128)
     return C_k.conj().T, Sk @ C_k
+
+
+def symmetric_lowdin_per_k(Sk, tol=1e-9):
+    '''
+    Symmetric (Hermitian) Löwdin orthogonalization for a single k-point.
+
+    Returns ``(X = S^{-1/2}, X_inv = S^{+1/2})`` — both Hermitian — in
+    the ``X Z X†`` convention. Distinguished from ``lowdin_per_k``,
+    which returns the *canonical* Löwdin form ``X = Λ^{-1/2} V†`` (a
+    different gauge on the orthogonal basis). Eigenvalues of ``Sk``
+    below ``tol`` are discarded; when linear dependencies are dropped
+    the result is rectangular like the canonical case.
+    '''
+    s_ev, s_eb = np.linalg.eigh(Sk)
+    istart = s_ev.searchsorted(tol)
+    s_sqrt = np.sqrt(s_ev[istart:])
+    V = s_eb[:, istart:]
+    X = (V / s_sqrt) @ V.conj().T
+    X_inv = (V * s_sqrt) @ V.conj().T
+    return X.astype(np.complex128), X_inv.astype(np.complex128)
 
 
 def _S_inv_half(Sk):
@@ -138,6 +135,8 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
         Sk = S_ibz[i_ir]
         if mode == "lowdin":
             x, x_inv = lowdin_per_k(Sk, tol=tol_sing)
+        elif mode == "symmetric_lowdin":
+            x, x_inv = symmetric_lowdin_per_k(Sk, tol=tol_sing)
         elif mode == "mo":
             if mo_coeff_ibz is not None:
                 Ck = mo_coeff_ibz[i_ir]
@@ -160,7 +159,7 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
         else:
             raise ValueError(
                 f"build_X_kspace: unknown mode {mode!r} "
-                "(expected 'lowdin', 'mo', or 'natural')."
+                "(expected 'lowdin', 'symmetric_lowdin', 'mo', or 'natural')."
             )
         X_per_irrep[i_ir] = np.asarray(x, dtype=np.complex128)
         Xinv_per_irrep[i_ir] = np.asarray(x_inv, dtype=np.complex128)
@@ -288,7 +287,7 @@ def build_X_kspace(
 
     Parameters
     ----------
-    mode : {"lowdin", "mo", "natural"}
+    mode : {"lowdin", "symmetric_lowdin", "mo", "natural"}
         IBZ primitive to use.
     kstruct : pyscf.pbc.lib.kpts.KPoints
         Same object the rest of mbtools uses (e.g. from
@@ -324,10 +323,10 @@ def build_X_kspace(
     X_k     : (nk, n_ortho, n) complex128 ndarray
     X_inv_k : (nk, n,        n_ortho) complex128 ndarray
     '''
-    if spinor and mode != "lowdin":
+    if spinor and mode not in ("lowdin", "symmetric_lowdin"):
         raise NotImplementedError(
-            f"build_X_kspace: spinor=True only supported for mode='lowdin', "
-            f"got mode={mode!r}."
+            f"build_X_kspace: spinor=True only supported for mode in "
+            f"{{'lowdin', 'symmetric_lowdin'}}, got mode={mode!r}."
         )
     if mode == "natural" and (dm_ibz is None or F_ibz is None):
         raise ValueError(
@@ -433,227 +432,3 @@ def build_X_kspace_from_ao_reps(
     )
 
 
-def symmetrical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
-    X_k = []
-    X_inv_k = []
-    pairing = {}
-    unique_kpts = []
-    # generate list of unique k-points by applying an inversion symmetry
-    for ik, k in enumerate(kmesh):
-        for ikp, kp in enumerate(kmesh):
-            minus_k = [wrap_k(-kk) for kk in k]
-            if np.allclose(minus_k, kp) and ikp not in pairing.keys():
-                pairing[ikp] = ik
-                unique_kpts.append(ik)
-        if ik not in pairing.keys():
-            pairing[ik] = ik
-    # find the list of k-points that are the same by inversion symmetry and apply the k-symmetrization
-    for ik in unique_kpts:
-        kpts = []
-        for ikp in pairing.keys():
-            if pairing[ikp] == ik:
-                kpts.append(ikp)
-        avg(kpts, dm)
-        avg(kpts, F_up)
-        avg(kpts, F_dn)
-        avg(kpts, T_up)
-        avg(kpts, T_dn)
-
-    # Compute transformation matrices
-    for ik, k in enumerate(kmesh):
-        # check whether matrices should be real by inversion symmetry
-        if np.allclose(k, [wrap_k(-kk) for kk in k]):
-            if Debug_print:
-                print(k)
-            dmk = dm[ik].real
-            Sk = S[ik].real
-        else:
-            dmk = dm[ik]
-            Sk = S[ik]
-
-
-        x, x_pinv = lowdin_per_k(Sk)
-
-        n_ortho, n_nonortho = x.shape
-
-        if Debug_print:
-            print("S", np.allclose(np.dot(x_pinv, x_pinv.conj().T), S[ik]))
-            print("X X^-1", np.allclose(np.dot(x, x_pinv), np.eye(x.shape[0])))
-            print("X* X^-1*", np.allclose(np.dot(x.conj().T, x_pinv.conj().T), np.eye(x.shape[0])))
-
-        # check that direct and inverse symmetries are consistent
-        assert(np.allclose(np.dot(x, x_pinv), np.eye(x.shape[0])))
-
-        # store transformation basis for current k-point
-        xx_inv = x_pinv.conj().T.astype(np.complex128)
-        xx = x.conj().T.astype(np.complex128)
-        X_inv_k.append(xx_inv.copy())
-        X_k.append(xx.copy())
-
-        minus_k = [wrap_k(-kk) for kk in k]
-
-        for ikk, kk in enumerate(kmesh):
-            if np.allclose(kk, minus_k) and ikk < ik:
-                # X_inv_k.append(np.copy(X_inv_k[ikk]))
-                # X_k.append(np.copy(X_k[ikk]))
-                if Debug_print:
-                    print("============== reduced point ================")
-                    print("S", np.allclose(S[ikk].conj(), S[ik]))
-                    print("Sev", np.allclose(LA.eigvalsh(S[ikk]), LA.eigvalsh(S[ik])))
-                    # print LA.eigvalsh(S[ikk]), "\n\n=====\n\n", LA.eigvalsh(S[ik])
-                    print("S", np.allclose(np.dot(X_inv_k[ikk].T, X_inv_k[ikk].conj()), S[ik]))
-                    print("S2", np.allclose(X_inv_k[ikk], xx_inv.conj().T.conj()))
-                assert(np.allclose(np.dot(X_inv_k[ik].conj().T, X_inv_k[ik]), S[ik]))
-                assert(np.allclose(np.dot(X_inv_k[ikk].T, X_inv_k[ikk].conj()), S[ik]))
-                X_inv_k[ik] = np.copy(X_inv_k[ikk].conj())
-                X_k[ik] = np.copy(X_k[ikk].conj())
-                continue
-    return X_inv_k, X_k
-
-def canonical_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
-    X_k = []
-    X_inv_k = []
-    pairing = {}
-    unique_kpts = []
-    # generate list of unique k-points by applying an inversion symmetry
-    for ik, k in enumerate(kmesh):
-        for ikp, kp in enumerate(kmesh):
-            minus_k = [wrap_k(-kk) for kk in k]
-            if np.allclose(minus_k, kp) and ikp not in pairing.keys():
-                pairing[ikp] = ik
-                unique_kpts.append(ik)
-        if ik not in pairing.keys():
-            pairing[ik] = ik
-    # find the list of k-points that are the same by inversion symmetry and apply the k-symmetrization
-    for ik in unique_kpts:
-        kpts = []
-        for ikp in pairing.keys():
-            if pairing[ikp] == ik:
-                kpts.append(ikp)
-        avg(kpts, dm)
-        #avg(kpts, S)
-        avg(kpts, F_up)
-        avg(kpts, F_dn)
-        avg(kpts, T_up)
-        avg(kpts, T_dn)
-
-    # Compute transformation matrices
-    for ik, k in enumerate(kmesh):
-        # check whether matrices should be real by inversion symmetry
-        if np.allclose(k, [wrap_k(-kk) for kk in k]):
-            if Debug_print:
-                print(k)
-            dmk = dm[ik].real
-            Sk = S[ik].real
-        else:
-            dmk = dm[ik]
-            Sk = S[ik]
-
-
-        x, x_pinv = lowdin_per_k(Sk)
-
-        n_ortho, n_nonortho = x.shape
-        if Debug_print:
-            print("S", np.allclose(np.dot(x_pinv, x_pinv.conj().T), S[ik]))
-            print("X X^-1", np.allclose(np.dot(x, x_pinv), np.eye(x.shape[0])))
-            print("X* X^-1*", np.allclose(np.dot(x.conj().T, x_pinv.conj().T), np.eye(x.shape[0])))
-
-        # check that direct and inverse symmetries are consistent
-        assert(np.allclose(np.dot(x, x_pinv), np.eye(x.shape[0])))
-
-        # store transformation basis for current k-point
-        xx_inv = x_pinv.conj().T
-        xx = x.conj().T
-        X_inv_k.append(xx_inv.copy())
-        X_k.append(xx.copy())
-
-        minus_k = [wrap_k(-kk) for kk in k]
-        for ikk, kk in enumerate(kmesh):
-            if np.allclose(kk, minus_k) and ikk < ik:
-                # X_inv_k.append(np.copy(X_inv_k[ikk]))
-                # X_k.append(np.copy(X_k[ikk]))
-                if Debug_print:
-                    print("============== reduced point ================")
-                    print("S", np.allclose(S[ikk].conj(), S[ik]))
-                    print("Sev", np.allclose(LA.eigvalsh(S[ikk]), LA.eigvalsh(S[ik])))
-                    # print LA.eigvalsh(S[ikk]), "\n\n=====\n\n", LA.eigvalsh(S[ik])
-                    print("S", np.allclose(np.dot(X_inv_k[ikk].T, X_inv_k[ikk].conj()), S[ik]))
-                    print("S2", np.allclose(X_inv_k[ikk], xx_inv.conj().T.conj()))
-                assert(np.allclose(np.dot(X_inv_k[ik].conj().T, X_inv_k[ik]), S[ik]))
-                assert(np.allclose(np.dot(X_inv_k[ikk].T, X_inv_k[ikk].conj()), S[ik]))
-                X_inv_k[ik] = np.copy(X_inv_k[ikk].conj())
-                X_k[ik] = np.copy(X_k[ikk].conj())
-                continue
-
-    return X_inv_k, X_k
-
-def natural_orbitals(S, dm, F_up, F_dn, T_up, T_dn, kmesh, Debug_print=False):
-    '''
-    Compute transformation matricies for natural orbtial basis from spin-averaged density matrix
-    ---
-    
-    '''
-    X_k = []
-    X_inv_k = []
-    pairing = {}
-    unique_kpts = []
-    # generate list of unique k-points by applying an inversion symmetry
-    for ik, k in enumerate(kmesh):
-        for ikp, kp in enumerate(kmesh):
-            minus_k = [wrap_k(-kk) for kk in k]
-            if np.allclose(minus_k, kp) and ikp not in pairing.keys():
-                pairing[ikp] = ik
-                unique_kpts.append(ik)
-        if ik not in pairing.keys():
-            pairing[ik] = ik
-    # find the list of k-points that are the same by inversion symmetry and apply the k-symmetrization
-    for ik in unique_kpts:
-        kpts = []
-        for ikp in pairing.keys():
-            if pairing[ikp] == ik:
-                kpts.append(ikp)
-        avg(kpts, dm)
-        avg(kpts, F_up)
-        avg(kpts, F_dn)
-        avg(kpts, T_up)
-        avg(kpts, T_dn)
-
-    # Compute transformation matrices
-    for ik, k in enumerate(kmesh):
-        # check whether matrices should be real by inversion symmetry
-        if np.allclose(k, [wrap_k(-kk) for kk in k]):
-            dmk = dm[ik].real
-            Sk = S[ik].real
-        else:
-            dmk = dm[ik]
-            Sk = S[ik]
-
-        # compute natural orbital basis
-        Svi, Sv = natural_per_k(Sk, dmk)
-
-        # Check that transformations for the inversion symmetries are consistent
-        if ik != pairing[ik] and not np.allclose(reduce(np.dot, (Sv, dm[ik], Sv.conj().T)), reduce(np.dot, (Sv.conj(), dm[pairing[ik]], Sv.T)),
-                          atol=1e-7):
-            print(False, np.max(np.abs(reduce(np.dot, (Sv, dm[ik], Sv.conj().T)) - reduce(np.dot, (Sv.conj(), dm[pairing[ik]], Sv.T))) ))
-            print(ik, k, pairing[ik], kmesh[pairing[ik]])
-            print("A", reduce(np.dot, (Sv, dm[ik], Sv.conj().T)))
-            print("B", reduce(np.dot, (Sv.conj(), dm[pairing[ik]], Sv.T)))
-        else:
-            pass
-
-        # here we assume that the direct transformation is for quantities like Self-energy and Fock matrix
-        # and the inverse transformation if for quantities like density matrix and Green's function
-        x_pinv = Sv
-        x  = Svi
-
-        # check that direct and inverse symmetries are consistent
-        assert(np.allclose(np.dot(x, x_pinv), np.eye(x.shape[0])))
-
-        dmkd = orth.transform_per_k(dmk, x_pinv.conj().T, x.conj().T)
-        assert(np.allclose(dmkd, np.diag(np.diag(dmkd))))
-
-        # store transformation basis for current k-point
-        X_inv_k.append(x_pinv.copy())
-        X_k.append(x.copy())
-
-    return X_inv_k, X_k
