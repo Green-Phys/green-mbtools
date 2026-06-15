@@ -36,19 +36,30 @@ def symmetric_lowdin_per_k(Sk, tol=1e-9):
     '''
     Symmetric (Hermitian) Löwdin orthogonalization for a single k-point.
 
-    Returns ``(X = S^{-1/2}, X_inv = S^{+1/2})`` — both Hermitian — in
-    the ``X Z X†`` convention. Distinguished from ``lowdin_per_k``,
-    which returns the *canonical* Löwdin form ``X = Λ^{-1/2} V†`` (a
-    different gauge on the orthogonal basis). Eigenvalues of ``Sk``
-    below ``tol`` are discarded; when linear dependencies are dropped
-    the result is rectangular like the canonical case.
+    Returns ``(X = S^{-1/2}, X_inv = S^{+1/2})`` — both Hermitian
+    ``(nao, nao)`` matrices — in the ``X Z X†`` convention.
+    Distinguished from ``lowdin_per_k`` (canonical Löwdin) by being
+    Hermitian rather than rectangular.
+
+    Eigenvalues of ``Sk`` below ``tol`` are treated pseudo-inversely:
+    their contribution is zeroed in both ``X`` and ``X_inv``, the same
+    convention ``LA.pinv`` applies (see ``pesto/orth.py``). The output
+    stays Hermitian and square, but in the rank-deficient case
+    ``X @ X_inv`` reduces to the projector onto the kept subspace
+    rather than the identity (Hermitian symmetric Löwdin cannot
+    simultaneously be a strict left inverse on a rank-deficient
+    basis). When linear dependencies are present and a strict
+    ``X @ X_inv = I`` contract is required, use ``lowdin_per_k``
+    (canonical, rectangular).
     '''
     s_ev, s_eb = np.linalg.eigh(Sk)
-    istart = s_ev.searchsorted(tol)
-    s_sqrt = np.sqrt(s_ev[istart:])
-    V = s_eb[:, istart:]
-    X = (V / s_sqrt) @ V.conj().T
-    X_inv = (V * s_sqrt) @ V.conj().T
+    kept = s_ev >= tol
+    s_sqrt = np.zeros_like(s_ev)
+    s_inv_sqrt = np.zeros_like(s_ev)
+    s_sqrt[kept] = np.sqrt(s_ev[kept])
+    s_inv_sqrt[kept] = 1.0 / np.sqrt(s_ev[kept])
+    X = (s_eb * s_inv_sqrt) @ s_eb.conj().T
+    X_inv = (s_eb * s_sqrt) @ s_eb.conj().T
     return X.astype(np.complex128), X_inv.astype(np.complex128)
 
 

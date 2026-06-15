@@ -195,11 +195,21 @@ class pyscf_pbc_init (pyscf_init):
             the Coulomb integrals are non-relativistic.
         X_k : list of ndarray
             Per-k-point orthogonalisation matrices X(k). The specific form
-            depends on ``args.orth``: Löwdin (``X(k) = S(k)^{-1/2}``),
-            canonical MOs (``X(k) = C(k)†``), or natural orbitals
-            (``X(k) = inv(Sv(k))``). When orthogonalisation is disabled
-            (``args.orth == "none"``), ``X_k`` contains identity transforms
-            for each k-point rather than an empty list.
+            depends on ``args.orth``:
+
+            * ``"lowdin"`` — canonical Löwdin, ``X(k) = Lambda^{-1/2} V†``
+              (rectangular when small eigenvalues of S are dropped).
+            * ``"symmetric_lowdin"`` — Hermitian Löwdin, ``X(k) = S(k)^{-1/2}``
+              (square; treats sub-tol eigenvalues pseudo-inversely).
+            * ``"mo"`` — canonical MOs, ``X(k) = C(k)†`` with
+              ``X_inv = S(k) @ C(k)``.
+            * ``"natural"`` — natural orbitals, ``X(k) = C_NO(k)†`` with
+              ``X_inv = S(k) @ C_NO(k)`` and ``C_NO`` the S-orthonormal
+              eigenvectors of ``S^{-1/2} dm S^{-1/2}``.
+
+            When orthogonalisation is disabled (``args.orth == "none"``),
+            ``X_k`` contains identity transforms for each k-point rather
+            than an empty list.
         '''
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)

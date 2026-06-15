@@ -67,6 +67,49 @@ def test_lowdin_per_k_drops_small_eigenvalues(rng):
     assert np.allclose(X @ X_inv, np.eye(n - 1), atol=_TOL)
 
 
+@pytest.mark.parametrize("n", [1, 4, 7])
+def test_symmetric_lowdin_per_k_hermitian_full_rank(rng, n):
+    S = _hermitian_pd(rng, n)
+    X, X_inv = ortho_utils.symmetric_lowdin_per_k(S)
+
+    # Both factors are Hermitian and full square.
+    assert X.shape == (n, n)
+    assert X_inv.shape == (n, n)
+    assert np.allclose(X, X.conj().T, atol=_TOL)
+    assert np.allclose(X_inv, X_inv.conj().T, atol=_TOL)
+
+    # X X_inv = I (left-inverse) and X S X† = I (orthogonalises S).
+    assert np.allclose(X @ X_inv, np.eye(n), atol=_TOL)
+    assert np.allclose(X @ S @ X.conj().T, np.eye(n), atol=_TOL)
+
+    # X_inv X_inv† = S (X_inv = S^{1/2}).
+    assert np.allclose(X_inv @ X_inv.conj().T, S, atol=_TOL)
+
+
+def test_symmetric_lowdin_per_k_rank_deficient_pseudoinverse(rng):
+    # S with one eigenvalue below tol: symmetric Löwdin should treat the
+    # mode pseudo-inversely (zero it out) so the output stays Hermitian and
+    # finite. X @ X_inv reduces to the projector onto the kept subspace.
+    n = 5
+    U, _ = np.linalg.qr(rng.standard_normal((n, n)) + 1j * rng.standard_normal((n, n)))
+    evals = np.array([1e-12, 0.5, 1.0, 2.0, 3.0])
+    S = U @ np.diag(evals) @ U.conj().T
+    S = 0.5 * (S + S.conj().T)
+
+    X, X_inv = ortho_utils.symmetric_lowdin_per_k(S, tol=1e-9)
+    # Outputs are still square Hermitian and finite.
+    assert X.shape == (n, n)
+    assert X_inv.shape == (n, n)
+    assert np.isfinite(X).all() and np.isfinite(X_inv).all()
+    assert np.allclose(X, X.conj().T, atol=_TOL)
+    assert np.allclose(X_inv, X_inv.conj().T, atol=_TOL)
+    # X @ X_inv is the projector onto the kept (n-1)-dim subspace.
+    P = X @ X_inv
+    # Idempotent (P @ P = P) and rank n-1.
+    assert np.allclose(P @ P, P, atol=_TOL)
+    assert np.linalg.matrix_rank(P, tol=1e-7) == n - 1
+
+
 def test_mo_per_k_diagonalizes_fock(rng):
     n = 6
     S = _hermitian_pd(rng, n)

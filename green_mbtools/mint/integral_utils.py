@@ -25,15 +25,23 @@ J2C_LIN_DEP_THRESH = 1e-10
 
 # AO block of X_k[ik] for ERI rotation; for X2C the spinor X is (2·nao)×(2·nao)
 # and we want the upper-left nao×nao block, matching init_seet.py's X_ERI_k.
+# Three-center integral chunks are stored as (NQ, nao, nao), so we require a
+# square orthogonalizer here. Rectangular X — produced by lowdin_per_k when
+# linear dependencies are dropped — would yield (NQ, n_ortho, n_ortho) chunks
+# that don't fit the on-disk shape; reject with a clear error in that case.
 def _x_block_for_eri(X_k, ik, nao):
     Xi = np.asarray(X_k[ik])
-    if Xi.shape[-1] == nao:
+    if Xi.shape == (nao, nao):
         return Xi
-    if Xi.shape[-1] == 2 * nao:
+    if Xi.shape == (2 * nao, 2 * nao):
         return Xi[:nao, :nao]
     raise ValueError(
-        f"_x_block_for_eri: X_k[{ik}] has shape {Xi.shape}; expected last "
-        f"dim {nao} or {2*nao}."
+        f"_x_block_for_eri: X_k[{ik}] has shape {Xi.shape}; expected "
+        f"({nao}, {nao}) or ({2*nao}, {2*nao}). The three-center integral "
+        "storage path requires a square orthogonalizer; rank-deficient "
+        "transforms (lowdin_per_k with linear dependencies, or canonical "
+        "orthogonalization dropping modes) cannot be written into "
+        "df_hf_int / df_int."
     )
 
 

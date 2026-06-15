@@ -390,6 +390,8 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None):
         Sk = S[0, ik]
         if orth == "lowdin":
             x, x_pinv = ortho_utils.lowdin_per_k(Sk)
+        elif orth == "symmetric_lowdin":
+            x, x_pinv = ortho_utils.symmetric_lowdin_per_k(Sk)
         elif orth == "mo":
             # For ns == 2, no single C diagonalizes both F_alpha and F_beta;
             # diagonalize the spin-averaged Fock against S to obtain a
@@ -456,11 +458,12 @@ def add_common_params(parser):
     parser.add_argument("--output_path", type=str, default="input.h5", help="output file with initial data")
     parser.add_argument(
         "--orth", type=str, default="none",
-        choices=["none", "lowdin", "mo", "natural", "0", "1"],
+        choices=["none", "lowdin", "symmetric_lowdin", "mo", "natural", "0", "1"],
         help=(
             "Orbital basis for stored quantities: "
             "'none' = keep AO basis (legacy '0'); "
-            "'lowdin' = symmetric S^{-1/2} orthogonalization (legacy '1'); "
+            "'lowdin' = canonical Löwdin V·Lambda^{-1/2} (legacy '1'); "
+            "'symmetric_lowdin' = Hermitian Löwdin S^{-1/2}; "
             "'mo' = canonical MOs from mean-field; "
             "'natural' = natural orbitals from mean-field density matrix."
         ),
