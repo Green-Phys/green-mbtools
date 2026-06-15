@@ -139,7 +139,17 @@ class pyscf_pbc_init (pyscf_init):
         X_k = []
         X_inv_k = []
 
-        # Orthogonalization matrix
+        # Orthogonalization matrix. For X2C (--x2c=2) the spinor S is
+        # block-diagonal in spin so Löwdin variants give a block-diagonal
+        # X whose AO block is a valid ERI rotation; MO and natural
+        # rotations would have non-block-diagonal X in general and are
+        # refused.
+        if self.args.x2c == 2 and self.args.orth not in ("none", "lowdin", "symmetric_lowdin"):
+            raise NotImplementedError(
+                "ortho not supported for 2-component / x2c1e calculations "
+                "with mode={!r}; allowed modes are 'none', 'lowdin', "
+                "'symmetric_lowdin'.".format(self.args.orth)
+            )
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
         # Save data into Green Software package input format.
         comm.save_data(
@@ -435,7 +445,17 @@ class pyscf_mol_init (pyscf_init):
         X_k = []
         X_inv_k = []
 
-        # Orthogonalization matrix
+        # Orthogonalization matrix. For X2C (--x2c=2) the spinor S is
+        # block-diagonal in spin so Löwdin variants give a block-diagonal
+        # X whose AO block is a valid ERI rotation; MO and natural
+        # rotations would have non-block-diagonal X in general and are
+        # refused.
+        if self.args.x2c == 2 and self.args.orth not in ("none", "lowdin", "symmetric_lowdin"):
+            raise NotImplementedError(
+                "ortho not supported for 2-component / x2c1e calculations "
+                "with mode={!r}; allowed modes are 'none', 'lowdin', "
+                "'symmetric_lowdin'.".format(self.args.orth)
+            )
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
         # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is not long range divergence for molecule
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)

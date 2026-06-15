@@ -23,12 +23,14 @@ from . import kpt_utils
 J2C_LIN_DEP_THRESH = 1e-10
 
 
-# AO block of X_k[ik] for ERI rotation; for X2C the spinor X is (2·nao)×(2·nao)
-# and we want the upper-left nao×nao block, matching init_seet.py's X_ERI_k.
-# Three-center integral chunks are stored as (NQ, nao, nao), so we require a
-# square orthogonalizer here. Rectangular X — produced by lowdin_per_k when
-# linear dependencies are dropped — would yield (NQ, n_ortho, n_ortho) chunks
-# that don't fit the on-disk shape; reject with a clear error in that case.
+# AO block of X_k[ik] for ERI rotation. For X2C the spinor X is
+# (2·nao, 2·nao) and we slice the upper-left nao×nao block — valid only
+# because the CLI guards (pyscf_init / init_seet) restrict X2C
+# orthogonalization to Löwdin variants, whose X inherits the
+# block-diagonal spin structure of the spinor S. MO and natural-orbital
+# rotations are refused upstream for X2C precisely because their X
+# would not be block-diagonal. Rectangular X (rank-deficient case)
+# is rejected here as it can't fit the (NQ, nao, nao) chunk shape.
 def _x_block_for_eri(X_k, ik, nao):
     Xi = np.asarray(X_k[ik])
     if Xi.shape == (nao, nao):
