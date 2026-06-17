@@ -102,9 +102,9 @@ One of the primary steps in the post-processing of Green's function data is anal
 imaginary time and frequency axis to the real frequency axis.
 The `green-mbtools.pesto` module supports several implementations for AC based on theory of:
 
-* Nevanlinna functions, see `examples/nevanlinna.py <https://github.com/Green-Phys/tree/master/examples/nevanlinna.py>`_,
+* Nevanlinna functions, see `examples/nevanlinna.py <https://github.com/Green-Phys/green-mbtools/tree/master/examples/nevanlinna.py>`_,
 * Caratheodory functions, and
-* Pole estimation and semi-definite relaxation, see `examples/es_nevanlinna.py <https://github.com/Green-Phys/tree/master/examples/es_nevanlinna.py>`_.
+* Pole estimation and semi-definite relaxation, see `examples/es_nevanlinna.py <https://github.com/Green-Phys/green-mbtools/tree/master/examples/es_nevanlinna.py>`_.
 
 In addition, an interface to the `Maxent <https://github.com/CQMP/Maxent>`_ AC library is also provided
 (see `examples/maxent.py <https://github.com/Green-Phys/green-mbtools/tree/master/examples/maxent.py>`_.
@@ -119,7 +119,7 @@ Continuing with the above examples, we can directly obtain the spectral function
        # ... initialization
 
        # w_min and w_max: min and max real frequency bracket (in a.u.)
-       # n_real: number of frequency points to consider -- more poitns = smoother plots
+       # n_real: number of frequency points to consider -- more points = smoother plots
        # eta: Broadening parameter
        n_real = 10001
        w_min = -5.0
@@ -148,13 +148,13 @@ and
 `examples/winter_correlated.py <https://github.com/Green-Phys/green-mbtools/tree/master/examples/winter_correlated.py>`_,
 respectively.
 
-Following the above exmple, once the ``MB_post`` object is initialized, the interpolation can be performed directly using
+Following the above example, once the ``MB_post`` object is initialized, the interpolation can be performed directly using
 the function ``wannier_interpolation``.
 
 .. code-block:: python
 
    from ase.spacegroup import crystal
-   from green_mbtools.pest import mb
+   from green_mbtools.pesto import mb
 
    if __name__ == "__main__":
 
@@ -176,7 +176,7 @@ the function ``wannier_interpolation``.
        )
 
 .. note:: The accuracy of interpolation depends on the density of the original Brillouin zone grid.
-   To reduce the errors, we recommend using PySCF to directly calculate the one-body Hamiltonain and the
+   To reduce the errors, we recommend using PySCF to directly calculate the one-body Hamiltonian and the
    overlap matrix along the high-symmetry path rather than interpolation. See, e.g.,
    `examples/useful_scripts/nvnl_winter_analysis.py <https://github.com/Green-Phys/green-mbtools/tree/master/examples/useful_scripts/nvnl_winter_analysis.py>`_.
 

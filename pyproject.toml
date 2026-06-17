@@ -12,8 +12,8 @@ packages = ["green_mbtools", "green_mbtools.mint", "green_mbtools.pesto", "mbana
 name = "green-mbtools"
 dynamic = ["version"]
 authors = [
-  { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Gaurav Harsha", email="gharsha@umich.edu" },
+  { name="Chia-Nan Yeh", email="cyeh@flatironinstitute.org" },
   { name="Sergei Iskakov", email="sergei@iskakov.org" },
   { name="Vibin Abraham", email="avibin@umich.edu" },
   { name="Pavel Pokhilko", email="pokhilko@umich.edu" },
@@ -32,7 +32,7 @@ description = "Collection of Python tools for quantum many-body simulation using
 readme = "README.md"
 requires-python = ">=3.8,<3.13"
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX",
