@@ -779,6 +779,36 @@ k_bz  == k_bz</p>
 <dd></dd></dl>
 
 </section>
+<section id="module-green_mbtools.mint.kpt_utils">
+<span id="green-mbtools-mint-kpt-utils"></span><h2>green_mbtools.mint.kpt_utils<a class="headerlink" href="#module-green_mbtools.mint.kpt_utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.kpt_utils.build_q_struct">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.kpt_utils.</span></span><span class="sig-name descname"><span class="pre">build_q_struct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space_symm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tr_symm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/kpt_utils.html#build_q_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.kpt_utils.build_q_struct" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize q-mesh for GDF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.Cell</em>) – unit cell for simulation</p></li>
+<li><p><strong>k_mesh</strong> (<em>numpy.ndarray</em>) – k-mesh for the Brillouin Zone</p></li>
+<li><p><strong>space_symm</strong> (<em>bool</em>) – utilize space group symmetry for qmesh reduction</p></li>
+<li><p><strong>tr_symm</strong> (<em>bool</em>) – utilize time-reversal symmetry for qmesh reduction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>q-mesh struct for the Brillouin Zone</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyscf.pbc.lib.kpts.KPoints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.kpt_utils.wrap_k">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.kpt_utils.</span></span><span class="sig-name descname"><span class="pre">wrap_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/kpt_utils.html#wrap_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.kpt_utils.wrap_k" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
 <section id="module-green_mbtools.mint.namespace">
 <span id="green-mbtools-mint-namespace"></span><h2>green_mbtools.mint.namespace<a class="headerlink" href="#module-green_mbtools.mint.namespace" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -1174,6 +1204,187 @@ Computes proper orthogonal transformation and projection matricies</p>
 </dd></dl>
 
 </section>
+<section id="module-green_mbtools.mint.symmetry_utils">
+<span id="green-mbtools-mint-symmetry-utils"></span><h2>green_mbtools.mint.symmetry_utils<a class="headerlink" href="#module-green_mbtools.mint.symmetry_utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">check_kspace_symmetry_breaking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datasets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#check_kspace_symmetry_breaking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking" title="Link to this definition">¶</a></dt>
+<dd><p>Report symmetry reconstruction residuals for k-resolved matrix quantities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inp_file</strong> (<em>string</em>) – Path to input.h5 file that contains all the output from initialization</p></li>
+<li><p><strong>datasets</strong> (<em>list</em>) – List of datasets in the input file, for which symmetry checks need to be performed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.fold_to_unit_cell">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">fold_to_unit_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r_cart_scaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#fold_to_unit_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.fold_to_unit_cell" title="Link to this definition">¶</a></dt>
+<dd><p>Fold a scaled (fractional) coordinate into the primary unit cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r_cart_scaled</strong> (<em>array_like</em>) – Scaled/fractional coordinate to be folded, shape (3,). This should be in
+the same convention as <code class="docutils literal notranslate"><span class="pre">Cell.get_scaled_atom_coords()</span></code> (i.e. expressed
+in units of the lattice vectors, not in Cartesian units). The parameter
+name is historical and does not imply Cartesian coordinates.</p></li>
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.gto.cell.Cell</em>) – The unit cell object from PySCF.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>frac</strong> (<em>ndarray</em>) – The folded scaled/fractional coordinate within the unit cell, shape (3,).
+Each component is wrapped into the interval [-0.5, 0.5) to match the atom
+coordinate convention used elsewhere in this module.</p></li>
+<li><p><em>Fold a Cartesian coordinate into the primary unit cell.</em></p></li>
+<li><p><em>Parameters</em></p></li>
+<li><p><em>———–</em></p></li>
+<li><p><strong>r_cart_scaled</strong> (<em>array_like</em>) – Scaled cartesian coordinate to be folded (3,).</p></li>
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.gto.cell.Cell</em>) – The unit cell object from PySCF.</p></li>
+<li><p><em>Returns</em></p></li>
+<li><p><em>———–</em></p></li>
+<li><p><strong>r_rel</strong> (<em>ndarray</em>) – The folded Cartesian coordinate within the unit cell (3,).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.generate_permutation_info">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">generate_permutation_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#generate_permutation_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.generate_permutation_info" title="Link to this definition">¶</a></dt>
+<dd><p>Generate permutation info for given symmetry operation on the atoms of unit cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.gto.cell.Cell</em>) – The unit cell object from PySCF.</p></li>
+<li><p><strong>symm_op</strong> (<em>pyscf.pbc.symm.space_group.SPGElement</em>) – The symmetry operation element from PySCF.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance for numerical comparisons, by default 1e-10</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, print detailed information, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>partner_idx</strong> (<em>int</em>) – Index of the atom that is the partner under the symmetry operation.</p></li>
+<li><p><strong>pos_diff</strong> (<em>ndarray</em>) – The positional difference vector due to folding into the unit cell (3,).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.get_orbital_index">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">get_orbital_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#get_orbital_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.get_orbital_index" title="Link to this definition">¶</a></dt>
+<dd><p>Get the starting and ending index of orbitals for a given atom and angular momentum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atom_idx</strong> (<em>int</em>) – Index of the atom in the unit cell.</p></li>
+<li><p><strong>n_</strong> – Principal quantum number.</p></li>
+<li><p><strong>L_</strong> – Angular momentum quantum number.</p></li>
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.gto.cell.Cell</em>) – The unit cell object from PySCF.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>orb_start</strong> (<em>int</em>) – Starting index of the orbitals.</p></li>
+<li><p><strong>orb_end</strong> (<em>int</em>) – Ending index of the orbitals.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.get_representation">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">get_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bz_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_op_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstruct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#get_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.get_representation" title="Link to this definition">¶</a></dt>
+<dd><p>Get the representation matrix for given symmetry operation on the atoms of unit cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bz_idx</strong> (<em>int</em>) – Index of the k-point in the Brillouin zone.</p></li>
+<li><p><strong>symm_op_idx</strong> (<em>int</em>) – Index of the symmetry operation element from PySCF.</p></li>
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.gto.cell.Cell</em>) – The unit cell object from PySCF.</p></li>
+<li><p><strong>kstruct</strong> (<em>pyscf.pbc.symm.KPointsSymmetry</em>) – k-point symmetry structure for aux-basis</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance for atom-position matching in generate_permutation_info.
+Default is 1e-5, matching generate_permutation_info’s own default.
+Note: PySCF stores fractional translations with ~6 decimal places
+(e.g. 0.666667 instead of 2/3), introducing ~3e-7 residuals after
+applying the operation. A tighter tol (e.g. 1e-10) would therefore
+fail for any lattice whose space-group translations are not integers.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, print detailed information, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>repr_matrix</strong> – The representation matrix for the symmetry operation (nao, nao).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.get_spinor_representation">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">get_spinor_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bz_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_op_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstruct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#get_spinor_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.get_spinor_representation" title="Link to this definition">¶</a></dt>
+<dd><p>Double-group spinor AO representation <span class="math notranslate nohighlight">\(D^{1/2}(R^{-1}) \otimes U_\text{orbital}(R^{-1})\)</span>.</p>
+<p>Reads the rotation directly from <code class="docutils literal notranslate"><span class="pre">kstruct.ops[symm_op_idx]</span></code>, converts it
+to a Cartesian rotation, lifts it to SU(2) via <a class="reference internal" href="#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2" title="green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotation_matrix_to_su2()</span></code></a>,
+and combines it with the orbital representation from <a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_representation" title="green_mbtools.mint.symmetry_utils.get_representation"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_representation()</span></code></a>.</p>
+<p>PySCF’s <code class="docutils literal notranslate"><span class="pre">Dmats</span></code> use the passive (inverse) convention <span class="math notranslate nohighlight">\(D^L(R^{-1})\)</span>, so
+<a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_representation" title="green_mbtools.mint.symmetry_utils.get_representation"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_representation()</span></code></a> returns <span class="math notranslate nohighlight">\(U_\text{orbital}(R^{-1})\)</span>. The matching
+SU(2) factor is therefore <span class="math notranslate nohighlight">\(D^{1/2}(R^{-1}) = D^{1/2}(R)^\dagger\)</span>, i.e. the
+conjugate transpose of the direct lift.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bz_idx</strong> (<em>int</em>) – Index of the BZ k-point.</p></li>
+<li><p><strong>symm_op_idx</strong> (<em>int</em>) – Index of the symmetry operation in <code class="docutils literal notranslate"><span class="pre">kstruct.ops</span></code>.</p></li>
+<li><p><strong>mycell</strong> (<em>pyscf.pbc.gto.Cell</em>) – PySCF unit cell.</p></li>
+<li><p><strong>kstruct</strong> (<em>pyscf.pbc.lib.kpts.KPoints</em>) – k-point symmetry structure from <code class="docutils literal notranslate"><span class="pre">mycell.make_kpts(...)</span></code>.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance passed to get_representation for atom-position matching.
+Default 1e-5 matches generate_permutation_info’s own default and
+accommodates PySCF’s ~6 decimal-place translation precision (~3e-7
+residuals). See get_representation for full discussion.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>u_spinor</strong> – Full spinor AO representation, <code class="docutils literal notranslate"><span class="pre">nso</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">nao</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(nso, nso) complex ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">rotation_matrix_to_su2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R_cart</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#rotation_matrix_to_su2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2" title="Link to this definition">¶</a></dt>
+<dd><p>Return the SU(2) representative of a proper 3D Cartesian rotation matrix.</p>
+<p>For a rotation by angle <span class="math notranslate nohighlight">\(\varphi\)</span> about unit axis <span class="math notranslate nohighlight">\(\hat{n}\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[D^{1/2}(R) = \cos(\varphi/2)\,I_2
+            + i\sin(\varphi/2)\,(\hat{n}\cdot\boldsymbol{\sigma})\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>R_cart</strong> (<em>(</em><em>3</em><em>, </em><em>3</em><em>) </em><em>float ndarray</em>) – Proper rotation matrix (<code class="docutils literal notranslate"><span class="pre">det</span> <span class="pre">=</span> <span class="pre">+1</span></code>) in Cartesian coordinates.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>su2</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(2, 2) complex ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -1293,6 +1504,11 @@ Computes proper orthogonal transformation and projection matricies</p>
 <li><a class="reference internal" href="#green_mbtools.mint.integral_utils.weighted_coulG_ewald_2nd"><code class="docutils literal notranslate"><span class="pre">weighted_coulG_ewald_2nd()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.kpt_utils">green_mbtools.mint.kpt_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.kpt_utils.build_q_struct"><code class="docutils literal notranslate"><span class="pre">build_q_struct()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.kpt_utils.wrap_k"><code class="docutils literal notranslate"><span class="pre">wrap_k()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-green_mbtools.mint.namespace">green_mbtools.mint.namespace</a><ul>
 <li><a class="reference internal" href="#green_mbtools.mint.namespace.Namespace"><code class="docutils literal notranslate"><span class="pre">Namespace</span></code></a></li>
 </ul>
@@ -1346,6 +1562,16 @@ Computes proper orthogonal transformation and projection matricies</p>
 <li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init.to_full_bz"><code class="docutils literal notranslate"><span class="pre">seet_init.to_full_bz()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-green_mbtools.mint.symmetry_utils">green_mbtools.mint.symmetry_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking"><code class="docutils literal notranslate"><span class="pre">check_kspace_symmetry_breaking()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.fold_to_unit_cell"><code class="docutils literal notranslate"><span class="pre">fold_to_unit_cell()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.generate_permutation_info"><code class="docutils literal notranslate"><span class="pre">generate_permutation_info()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_orbital_index"><code class="docutils literal notranslate"><span class="pre">get_orbital_index()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_representation"><code class="docutils literal notranslate"><span class="pre">get_representation()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_spinor_representation"><code class="docutils literal notranslate"><span class="pre">get_spinor_representation()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2"><code class="docutils literal notranslate"><span class="pre">rotation_matrix_to_su2()</span></code></a></li>
 </ul>
 </li>
 </ul>
