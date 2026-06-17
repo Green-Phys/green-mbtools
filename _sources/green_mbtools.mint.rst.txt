@@ -25,6 +25,14 @@ green\_mbtools.mint.integral\_utils
    :show-inheritance:
    :undoc-members:
 
+green\_mbtools.mint.kpt\_utils
+-------------------------------------
+
+.. automodule:: green_mbtools.mint.kpt_utils
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 green\_mbtools.mint.namespace
 ------------------------------------
 
@@ -53,6 +61,14 @@ green\_mbtools.mint.seet\_init
 -------------------------------------
 
 .. automodule:: green_mbtools.mint.seet_init
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+green\_mbtools.mint.symmetry\_utils
+------------------------------------------
+
+.. automodule:: green_mbtools.mint.symmetry_utils
    :members:
    :show-inheritance:
    :undoc-members:

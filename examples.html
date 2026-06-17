@@ -335,9 +335,9 @@ The IR transform is supported by the class <code class="docutils literal notrans
 imaginary time and frequency axis to the real frequency axis.
 The <cite>green-mbtools.pesto</cite> module supports several implementations for AC based on theory of:</p>
 <ul class="simple">
-<li><p>Nevanlinna functions, see <a class="reference external" href="https://github.com/Green-Phys/tree/master/examples/nevanlinna.py">examples/nevanlinna.py</a>,</p></li>
+<li><p>Nevanlinna functions, see <a class="reference external" href="https://github.com/Green-Phys/green-mbtools/tree/master/examples/nevanlinna.py">examples/nevanlinna.py</a>,</p></li>
 <li><p>Caratheodory functions, and</p></li>
-<li><p>Pole estimation and semi-definite relaxation, see <a class="reference external" href="https://github.com/Green-Phys/tree/master/examples/es_nevanlinna.py">examples/es_nevanlinna.py</a>.</p></li>
+<li><p>Pole estimation and semi-definite relaxation, see <a class="reference external" href="https://github.com/Green-Phys/green-mbtools/tree/master/examples/es_nevanlinna.py">examples/es_nevanlinna.py</a>.</p></li>
 </ul>
 <p>In addition, an interface to the <a class="reference external" href="https://github.com/CQMP/Maxent">Maxent</a> AC library is also provided
 (see <a class="reference external" href="https://github.com/Green-Phys/green-mbtools/tree/master/examples/maxent.py">examples/maxent.py</a>.</p>
@@ -348,7 +348,7 @@ Continuing with the above examples, we can directly obtain the spectral function
     <span class="c1"># ... initialization</span>
 
     <span class="c1"># w_min and w_max: min and max real frequency bracket (in a.u.)</span>
-    <span class="c1"># n_real: number of frequency points to consider -- more poitns = smoother plots</span>
+    <span class="c1"># n_real: number of frequency points to consider -- more points = smoother plots</span>
     <span class="c1"># eta: Broadening parameter</span>
     <span class="n">n_real</span> <span class="o">=</span> <span class="mi">10001</span>
     <span class="n">w_min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">5.0</span>
@@ -377,10 +377,10 @@ results are provided in
 and
 <a class="reference external" href="https://github.com/Green-Phys/green-mbtools/tree/master/examples/winter_correlated.py">examples/winter_correlated.py</a>,
 respectively.</p>
-<p>Following the above exmple, once the <code class="docutils literal notranslate"><span class="pre">MB_post</span></code> object is initialized, the interpolation can be performed directly using
+<p>Following the above example, once the <code class="docutils literal notranslate"><span class="pre">MB_post</span></code> object is initialized, the interpolation can be performed directly using
 the function <code class="docutils literal notranslate"><span class="pre">wannier_interpolation</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ase.spacegroup</span><span class="w"> </span><span class="kn">import</span> <span class="n">crystal</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">green_mbtools.pest</span><span class="w"> </span><span class="kn">import</span> <span class="n">mb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">green_mbtools.pesto</span><span class="w"> </span><span class="kn">import</span> <span class="n">mb</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
@@ -405,7 +405,7 @@ the function <code class="docutils literal notranslate"><span class="pre">wannie
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The accuracy of interpolation depends on the density of the original Brillouin zone grid.
-To reduce the errors, we recommend using PySCF to directly calculate the one-body Hamiltonain and the
+To reduce the errors, we recommend using PySCF to directly calculate the one-body Hamiltonian and the
 overlap matrix along the high-symmetry path rather than interpolation. See, e.g.,
 <a class="reference external" href="https://github.com/Green-Phys/green-mbtools/tree/master/examples/useful_scripts/nvnl_winter_analysis.py">examples/useful_scripts/nvnl_winter_analysis.py</a>.</p>
 </div>

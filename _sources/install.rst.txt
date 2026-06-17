@@ -20,7 +20,7 @@ This will automatically build the Nevanlinna and Caratheodory extensions, which 
 Dependencies
 ------------
 
-1. Python packages: `numpy`, `scipy`, `h5py`, `green-ac`, `pyscf`, `ase`, `spglib`, `irbasis`, `cvxpy`, and `baryrat`.
+1. Python packages: `numpy`, `scipy`, `h5py`, `numba`, `green-ac`, `green-igen`, `pyscf`, `ase`, `spglib`, `irbasis`, `cvxpy` (with `clarabel` and `mosek` solver backends), and `baryrat`.
 2. C++ libraries: `Eigen`, `GMP`, `MPFR`
 3. `pytest` for testing
 4. The `Maxent external C++ library <https://github.com/CQMP/Maxent>`_ needs to be built separately to run analytic continuation tasks using the maxent method.
