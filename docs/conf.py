@@ -8,9 +8,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 project = 'Green MBTools'
 html_title = 'Green MBTools'
 
-copyright = '2023, Green-Phys'
-author = 'Chia-Nan Yeh, Gaurav Harsha, Sergei Iskakov, Vibin Abraham, Pavel Pokhilko'
-release = '0.3'
+copyright = '2023-2026, Green-Phys'
+author = 'Gaurav Harsha, Chia-Nan Yeh, Sergei Iskakov, Vibin Abraham, Pavel Pokhilko'
+release = '1.0.0a0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
