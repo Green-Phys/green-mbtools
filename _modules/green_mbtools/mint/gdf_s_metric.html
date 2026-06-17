@@ -1,14 +1,14 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
-        <link rel="prefetch" href="../../../_static/rosetta.png" as="image" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+        <link rel="prefetch" href="../../../_static/rosetta.png" as="image">
 
-    <link rel="shortcut icon" href="../../../_static/rosetta.png"/><!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <link rel="shortcut icon" href="../../../_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>green_mbtools.mint.gdf_s_metric - Green MBTools</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=25e12dd6" />
     
@@ -23,14 +23,14 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
       }
     }
@@ -145,14 +145,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -162,8 +158,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -171,8 +166,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -180,8 +174,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -205,7 +198,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source_code_doc.html">Source code documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Source code documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source_code_doc.html">Source code documentation</a><input aria-label="Toggle navigation of Source code documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../green_mbtools.mint.html">green_mbtools.mint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../green_mbtools.pesto.html">green_mbtools.pesto</a></li>
 </ul>
@@ -231,8 +224,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -240,19 +232,19 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for green_mbtools.mint.gdf_s_metric</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">LA</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">integral_utils</span> <span class="k">as</span> <span class="n">int_utils</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">common_utils</span> <span class="k">as</span> <span class="n">comm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">kpt_utils</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyscf</span><span class="w"> </span><span class="kn">import</span> <span class="n">lib</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc.lib.kpts_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_zero</span><span class="p">,</span> <span class="n">member</span><span class="p">,</span> <span class="n">unique</span>
@@ -270,15 +262,16 @@
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.make_kptij_lst">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_kptij_lst</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">kpts_band</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">kpts_band</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">kband_uniq</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">kband_uniq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">kband_uniq</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kpts_band</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">member</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">kpts</span><span class="p">))</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">kptij_lst</span> <span class="o">=</span> <span class="p">[(</span><span class="n">ki</span><span class="p">,</span> <span class="n">kpts</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ki</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kpts</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
     <span class="n">kptij_lst</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="n">ki</span><span class="p">,</span> <span class="n">kj</span><span class="p">)</span> <span class="k">for</span> <span class="n">ki</span> <span class="ow">in</span> <span class="n">kband_uniq</span> <span class="k">for</span> <span class="n">kj</span> <span class="ow">in</span> <span class="n">kpts</span><span class="p">])</span>
     <span class="n">kptij_lst</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="n">ki</span><span class="p">,</span> <span class="n">ki</span><span class="p">)</span> <span class="k">for</span> <span class="n">ki</span> <span class="ow">in</span> <span class="n">kband_uniq</span><span class="p">])</span>
-    <span class="n">kptij_lst</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>
+    <span class="n">kptij_lst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">kptij_lst</span></div>
+
 
 
 <div class="viewcode-block" id="compute_j2c_sqrt">
@@ -291,14 +284,15 @@
     <span class="k">except</span> <span class="n">LA</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
         <span class="n">w</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">j2c</span><span class="p">)</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DF metric linear dependency for kpt </span><span class="si">{</span><span class="n">uniq_kptji_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;cond = </span><span class="si">{}</span><span class="s2">, drop </span><span class="si">{}</span><span class="s2"> bfns for lin_dep_threshold = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">w</span><span class="o">&lt;</span><span class="n">linear_dep_threshold</span><span class="p">),</span> <span class="n">linear_dep_threshold</span><span class="p">))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;cond = </span><span class="si">{}</span><span class="s2">, drop </span><span class="si">{}</span><span class="s2"> bfns for lin_dep_threshold = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">w</span><span class="o">&lt;</span><span class="n">linear_dep_threshold</span><span class="p">),</span> <span class="n">linear_dep_threshold</span><span class="p">))</span>
         <span class="n">v1</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span><span class="n">w</span><span class="o">&gt;</span><span class="n">linear_dep_threshold</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">v1</span> <span class="o">*=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">w</span><span class="o">&gt;</span><span class="n">linear_dep_threshold</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">v1</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">w</span><span class="o">&gt;</span><span class="n">linear_dep_threshold</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">j2c_sqrt</span> <span class="o">=</span> <span class="n">v1</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">v</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">j2ctag</span> <span class="o">=</span> <span class="s1">&#39;eig&#39;</span>
   
     <span class="k">return</span> <span class="n">j2c_sqrt</span><span class="p">,</span> <span class="n">j2ctag</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_make_j2c_rsgdf</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">auxcell</span><span class="p">,</span> <span class="n">uniq_kpts</span><span class="p">,</span> <span class="n">exx</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -309,18 +303,18 @@
     <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
       <span class="n">qaux</span> <span class="o">=</span> <span class="n">get_aux_chg</span><span class="p">(</span><span class="n">auxcell</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">qaux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">auxcell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">())</span>
+      <span class="n">qaux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">auxcell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">())</span>
   
     <span class="n">omega_j2c</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">omega_j2c</span><span class="p">)</span>
     <span class="n">j2c</span> <span class="o">=</span> <span class="n">rsdf_helper</span><span class="o">.</span><span class="n">intor_j2c</span><span class="p">(</span><span class="n">auxcell</span><span class="p">,</span> <span class="n">omega_j2c</span><span class="p">,</span> <span class="n">kpts</span><span class="o">=</span><span class="n">uniq_kpts</span><span class="p">)</span>
   
     <span class="c1"># Add (1) short-range G=0 (i.e., charge) part and (2) long-range part</span>
     <span class="n">qaux2</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">g0_j2c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">omega_j2c</span><span class="o">**</span><span class="mf">2.</span><span class="o">/</span><span class="n">cell</span><span class="o">.</span><span class="n">vol</span>
+    <span class="n">g0_j2c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">omega_j2c</span><span class="o">**</span><span class="mf">2.</span><span class="o">/</span><span class="n">cell</span><span class="o">.</span><span class="n">vol</span>
     <span class="n">mesh_j2c</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">mesh_j2c</span>
     <span class="n">Gv</span><span class="p">,</span> <span class="n">Gvbase</span><span class="p">,</span> <span class="n">kws</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_Gv_weights</span><span class="p">(</span><span class="n">mesh_j2c</span><span class="p">)</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">reciprocal_vectors</span><span class="p">()</span>
-    <span class="n">gxyz</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Gvbase</span><span class="p">])</span>
+    <span class="n">gxyz</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Gvbase</span><span class="p">])</span>
     <span class="n">ngrids</span> <span class="o">=</span> <span class="n">gxyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
   
     <span class="n">max_memory</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="n">mydf</span><span class="o">.</span><span class="n">max_memory</span> <span class="o">-</span> <span class="n">lib</span><span class="o">.</span><span class="n">current_memory</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
@@ -330,15 +324,15 @@
         <span class="c1"># short-range charge part</span>
         <span class="k">if</span> <span class="n">is_zero</span><span class="p">(</span><span class="n">kpt</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">qaux2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">qaux2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">qaux</span><span class="p">,</span><span class="n">qaux</span><span class="p">)</span>
+                <span class="n">qaux2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">qaux</span><span class="p">,</span><span class="n">qaux</span><span class="p">)</span>
             <span class="n">j2c</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-=</span> <span class="n">qaux2</span> <span class="o">*</span> <span class="n">g0_j2c</span>
         <span class="c1"># long-range part via aft</span>
         <span class="n">coulG_lr</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">kpt</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">mesh_j2c</span><span class="p">,</span> <span class="n">omega_j2c</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span> <span class="ow">in</span> <span class="n">lib</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ngrids</span><span class="p">,</span> <span class="n">blksize</span><span class="p">):</span>
             <span class="n">aoaux</span> <span class="o">=</span> <span class="n">ft_ao</span><span class="o">.</span><span class="n">ft_ao</span><span class="p">(</span><span class="n">auxcell</span><span class="p">,</span> <span class="n">Gv</span><span class="p">[</span><span class="n">p0</span><span class="p">:</span><span class="n">p1</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">gxyz</span><span class="p">[</span><span class="n">p0</span><span class="p">:</span><span class="n">p1</span><span class="p">],</span>
                                 <span class="n">Gvbase</span><span class="p">,</span> <span class="n">kpt</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">LkR</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
-            <span class="n">LkI</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+            <span class="n">LkR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+            <span class="n">LkI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
             <span class="n">aoaux</span> <span class="o">=</span> <span class="kc">None</span>
   
             <span class="k">if</span> <span class="n">is_zero</span><span class="p">(</span><span class="n">kpt</span><span class="p">):</span>  <span class="c1"># kpti == kptj</span>
@@ -355,6 +349,7 @@
 
     <span class="k">return</span> <span class="n">j2c</span>
 
+
 <span class="c1"># make_j2c is updated to be consistent with PySCF 2.0.1 </span>
 <span class="c1"># where the range of lattice Ls vectors are improved. </span>
 <span class="c1"># This version should be compatible with both PySCF 1.7 and 2.0</span>
@@ -370,7 +365,7 @@
     <span class="n">mesh</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">mesh</span>
     <span class="n">Gv</span><span class="p">,</span> <span class="n">Gvbase</span><span class="p">,</span> <span class="n">kws</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_Gv_weights</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">reciprocal_vectors</span><span class="p">()</span>
-    <span class="n">gxyz</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Gvbase</span><span class="p">])</span>
+    <span class="n">gxyz</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Gvbase</span><span class="p">])</span>
     <span class="n">ngrids</span> <span class="o">=</span> <span class="n">gxyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     
     <span class="c1"># Real space integrals within an given amount of repeated unit cell images </span>
@@ -388,8 +383,8 @@
             <span class="n">coulG</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">kpt</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span> <span class="ow">in</span> <span class="n">lib</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ngrids</span><span class="p">,</span> <span class="n">blksize</span><span class="p">):</span>
             <span class="n">aoaux</span> <span class="o">=</span> <span class="n">ft_ao</span><span class="o">.</span><span class="n">ft_ao</span><span class="p">(</span><span class="n">fused_cell</span><span class="p">,</span> <span class="n">Gv</span><span class="p">[</span><span class="n">p0</span><span class="p">:</span><span class="n">p1</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">gxyz</span><span class="p">[</span><span class="n">p0</span><span class="p">:</span><span class="n">p1</span><span class="p">],</span> <span class="n">Gvbase</span><span class="p">,</span> <span class="n">kpt</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">LkR</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
-            <span class="n">LkI</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+            <span class="n">LkR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+            <span class="n">LkI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">aoaux</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
             <span class="n">aoaux</span> <span class="o">=</span> <span class="kc">None</span>
       
             <span class="k">if</span> <span class="n">is_zero</span><span class="p">(</span><span class="n">kpt</span><span class="p">):</span>  <span class="c1"># kpti == kptj</span>
@@ -411,6 +406,7 @@
 
     <span class="k">return</span> <span class="n">j2c</span>
 
+
 <div class="viewcode-block" id="sqrt_j2c">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.sqrt_j2c">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">sqrt_j2c</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">j2c</span><span class="p">):</span>
@@ -423,28 +419,20 @@
     <span class="k">return</span> <span class="n">j2c</span><span class="p">,</span> <span class="n">j2ctags</span></div>
 
 
+
 <div class="viewcode-block" id="make_j2c_sqrt">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.make_j2c_sqrt">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">make_j2c_sqrt</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
-    <span class="n">make_j2c</span> <span class="o">=</span> <span class="n">_make_j2c_rsgdf</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_j2c_sqrt</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">space_symm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tr_symm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rsgdf</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">rsgdf</span><span class="p">:</span>
+        <span class="n">make_j2c</span> <span class="o">=</span> <span class="n">_make_j2c_rsgdf</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">make_j2c</span> <span class="o">=</span> <span class="n">_make_j2c_gdf</span>
   
-    <span class="n">kmesh_scaled</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_scaled_kpts</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span>
-    <span class="n">kptij_lst</span> <span class="o">=</span> <span class="n">make_kptij_lst</span><span class="p">(</span><span class="n">kmesh_scaled</span><span class="p">)</span>
-    <span class="n">nkptij</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>
-    <span class="n">kptis</span> <span class="o">=</span> <span class="n">kptij_lst</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">kptjs</span> <span class="o">=</span> <span class="n">kptij_lst</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">kpt_ji</span> <span class="o">=</span> <span class="n">kptjs</span> <span class="o">-</span> <span class="n">kptis</span>
-    <span class="c1"># Fold kpt_ji back to [-0.5, 0.5] BZ notation</span>
-    <span class="n">kpt_ji</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">fold_back_to_1stBZ</span><span class="p">(</span><span class="n">kpt_ji</span><span class="p">)</span>
-    <span class="c1"># uniq_qs: unique q-points, # uniq_inverse: kptij -&gt; q</span>
-    <span class="n">uniq_qs</span><span class="p">,</span> <span class="n">uniq_index</span><span class="p">,</span> <span class="n">uniq_inverse</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">kpt_ji</span><span class="p">)</span>
-    <span class="n">q_ir_list</span><span class="p">,</span> <span class="n">q_index</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">q_conj_list</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">inversion_sym</span><span class="p">(</span><span class="n">uniq_qs</span><span class="p">)</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;number of k-pairs: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)))</span>
+    <span class="n">qstruct</span> <span class="o">=</span> <span class="n">kpt_utils</span><span class="o">.</span><span class="n">build_q_struct</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span> <span class="n">space_symm</span><span class="p">,</span> <span class="n">tr_symm</span><span class="p">)</span>
+    <span class="n">uniq_qs</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">kpts</span>
+    <span class="n">q_ir_list</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">ibz2bz</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;number of uniq q-pionts: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">uniq_qs</span><span class="p">)))</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;number of uniq q-points w/ the inversion symmetry: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q_ir_list</span><span class="p">)))</span>
-  
-    <span class="n">kptij_lst</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_abs_kpts</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>
-    <span class="n">uniq_qs</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_abs_kpts</span><span class="p">(</span><span class="n">uniq_qs</span><span class="p">)</span>
   
     <span class="c1"># j2c: [q_ir_list][naux, naux]</span>
     <span class="n">j2c</span> <span class="o">=</span> <span class="n">make_j2c</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="p">,</span> <span class="n">uniq_qs</span><span class="p">[</span><span class="n">q_ir_list</span><span class="p">])</span>
@@ -467,11 +455,12 @@
         <span class="n">make_j2c</span> <span class="o">=</span> <span class="n">_make_j2c_rsgdf</span>
     <span class="n">nao</span><span class="p">,</span> <span class="n">naux</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">(),</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span>
   
-    <span class="n">a_lattice</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">lattice_vectors</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="c1"># TODO: Update uniq_qs and relateed stuff here</span>
+    <span class="n">a_lattice</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">lattice_vectors</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
     <span class="n">kmesh_scaled</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_scaled_kpts</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span>
     <span class="n">kptij_lst</span> <span class="o">=</span> <span class="n">make_kptij_lst</span><span class="p">(</span><span class="n">kmesh_scaled</span><span class="p">)</span>
     <span class="n">kptij_idx</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
-    <span class="n">kptij_idx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptij_idx</span><span class="p">)</span>
+    <span class="n">kptij_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptij_idx</span><span class="p">)</span>
     <span class="n">nkptij</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>
     <span class="n">kptis</span> <span class="o">=</span> <span class="n">kptij_lst</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">kptjs</span> <span class="o">=</span> <span class="n">kptij_lst</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
@@ -483,7 +472,7 @@
     <span class="c1"># Reduced kpair list</span>
     <span class="n">kptis</span><span class="p">,</span> <span class="n">kptjs</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_abs_kpts</span><span class="p">(</span><span class="n">kptis</span><span class="p">),</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_abs_kpts</span><span class="p">(</span><span class="n">kptjs</span><span class="p">)</span>
     <span class="n">kij_conj</span><span class="p">,</span> <span class="n">kij_trans</span> <span class="o">=</span> <span class="n">int_utils</span><span class="o">.</span><span class="n">kpair_reduced_lists</span><span class="p">(</span><span class="n">kptis</span><span class="p">,</span> <span class="n">kptjs</span><span class="p">,</span> <span class="n">kptij_idx</span><span class="p">,</span> <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span> <span class="n">a_lattice</span><span class="p">)</span>
-    <span class="n">kpair_irre_list</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">kij_conj</span> <span class="o">==</span> <span class="n">kij_trans</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">kpair_irre_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">kij_conj</span> <span class="o">==</span> <span class="n">kij_trans</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">num_kpair_stored</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kpair_irre_list</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;number of k-pairs: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;number of reduced k-pairs: &quot;</span><span class="p">,</span> <span class="n">num_kpair_stored</span><span class="p">)</span>
@@ -496,7 +485,7 @@
     <span class="n">single_rho_size</span> <span class="o">=</span> <span class="n">nao</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">naux</span> <span class="o">*</span> <span class="mi">16</span>
     <span class="n">full_rho_size</span>   <span class="o">=</span> <span class="p">(</span><span class="n">num_kpair_stored</span> <span class="o">*</span> <span class="n">single_rho_size</span><span class="p">)</span>
     <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">int_utils</span><span class="o">.</span><span class="n">compute_partitioning</span><span class="p">(</span><span class="n">full_rho_size</span><span class="p">,</span> <span class="n">num_kpair_stored</span><span class="p">)</span>
-    <span class="n">num_chunks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_kpair_stored</span> <span class="o">/</span> <span class="n">chunk_size</span><span class="p">))</span>
+    <span class="n">num_chunks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_kpair_stored</span> <span class="o">/</span> <span class="n">chunk_size</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Chunk size: </span><span class="si">{}</span><span class="s2">, number of chunks: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">num_chunks</span><span class="p">))</span>
   
     <span class="c1"># j2c: [q_ir_list][naux, naux]</span>
@@ -519,7 +508,7 @@
         <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sync&quot;</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;mkdir -p &quot;</span> <span class="o">+</span> <span class="n">basename</span><span class="p">)</span>
   
-    <span class="n">ovlp_3c1e</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">nao</span><span class="o">*</span><span class="n">nao</span><span class="p">,</span> <span class="n">naux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">ovlp_3c1e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">nao</span><span class="o">*</span><span class="n">nao</span><span class="p">,</span> <span class="n">naux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="n">c0</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_chunks</span><span class="p">):</span>
         <span class="n">c1</span> <span class="o">=</span> <span class="n">c0</span> <span class="o">+</span> <span class="n">chunk_size</span>
@@ -531,19 +520,19 @@
         <span class="n">ovlp_3c1e</span> <span class="o">=</span> <span class="n">ovlp_3c1e</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nao</span><span class="o">*</span><span class="n">nao</span><span class="p">,</span> <span class="n">naux</span><span class="p">)</span>
         
         <span class="c1"># Combine j2c, ovlp_2c1e, and ovlp_3c1e</span>
-        <span class="n">j3c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">naux</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="n">j3c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">naux</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">local_kpairs_num</span><span class="p">):</span>
             <span class="c1"># find the corresponding q-point</span>
             <span class="n">kij_idx</span> <span class="o">=</span> <span class="n">kij_idx_local</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
             <span class="n">q_idx</span> <span class="o">=</span> <span class="n">uniq_inverse</span><span class="p">[</span><span class="n">kij_idx</span><span class="p">]</span>
-            <span class="n">iq_red</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">q_ir_list</span> <span class="o">==</span> <span class="n">q_index</span><span class="p">[</span><span class="n">q_idx</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">iq_red</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">q_ir_list</span> <span class="o">==</span> <span class="n">q_index</span><span class="p">[</span><span class="n">q_idx</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">j2c_local</span> <span class="o">=</span> <span class="n">j2c</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span> <span class="k">if</span> <span class="n">q_conj_list</span><span class="p">[</span><span class="n">q_idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">j2c</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
             <span class="n">ovlp_2c1e_local</span> <span class="o">=</span> <span class="n">ovlp_2c1e_aux</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span> <span class="k">if</span> <span class="n">q_conj_list</span><span class="p">[</span><span class="n">q_idx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">ovlp_2c1e_aux</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
       
             <span class="c1"># df_coef = (S^-1) * ovlp_3c1e: (naux, nao*nao)</span>
             <span class="n">df_coef</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">ovlp_2c1e_local</span><span class="p">,</span> <span class="n">ovlp_3c1e</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
             <span class="c1"># j3c_buffer: (naux_effective, nao*nao).</span>
-            <span class="n">j3c</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">j2c_local</span><span class="p">,</span> <span class="n">df_coef</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
+            <span class="n">j3c</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">j2c_local</span><span class="p">,</span> <span class="n">df_coef</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
     
         <span class="n">VQ</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">basename</span> <span class="o">+</span> <span class="s2">&quot;/VQ_</span><span class="si">{}</span><span class="s2">.h5&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c0</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
         <span class="n">VQ</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">j3c</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
@@ -553,7 +542,7 @@
   
     <span class="n">data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;chunk_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunk_size</span>
-    <span class="c1">#data[&quot;chunk_indices&quot;] = numpy.array(chunk_indices)</span>
+    <span class="c1">#data[&quot;chunk_indices&quot;] = np.array(chunk_indices)</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;grid/conj_pairs_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kij_conj</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;grid/trans_pairs_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kij_trans</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;grid/kpair_irre_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpair_irre_list</span>
@@ -571,9 +560,10 @@
         <span class="k">return</span> <span class="mi">0</span></div>
 
 
+
 <div class="viewcode-block" id="make_j3c">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.make_j3c">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">make_j3c</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">j2c_sqrt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exx</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_j3c</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">j2c_sqrt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">space_symm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tr_symm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    The inefficient incore version of make_j3c</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -581,6 +571,7 @@
     <span class="n">nao</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span>
     <span class="n">naux</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span>
     
+    <span class="c1"># TODO: Update uniq_qs and related info here</span>
     <span class="n">kmesh_scaled</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_scaled_kpts</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span>
     <span class="n">kptij_lst</span> <span class="o">=</span> <span class="n">make_kptij_lst</span><span class="p">(</span><span class="n">kmesh_scaled</span><span class="p">)</span>
     <span class="n">nkptij</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>
@@ -618,13 +609,13 @@
         <span class="n">j2c</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">compute_j2c_sqrt</span><span class="p">(</span><span class="n">iq</span><span class="p">,</span> <span class="n">j2c</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span> <span class="n">mydf</span><span class="o">.</span><span class="n">linear_dep_threshold</span><span class="p">)</span>
         <span class="n">j2ctags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
   
-    <span class="n">j3c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nkptij</span><span class="p">,</span> <span class="n">naux</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">j3c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nkptij</span><span class="p">,</span> <span class="n">naux</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">uniq_q_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">uniq_qs</span><span class="p">)):</span>
-        <span class="n">adapted_ji_idx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">uniq_inverse</span> <span class="o">==</span> <span class="n">uniq_q_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">adapted_ji_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">uniq_inverse</span> <span class="o">==</span> <span class="n">uniq_q_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;uniq_kptij_id = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uniq_q_id</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;adapted_ji_idx = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">adapted_ji_idx</span><span class="p">))</span>
     
-        <span class="n">iq_red</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">q_ir_list</span> <span class="o">==</span> <span class="n">q_index</span><span class="p">[</span><span class="n">uniq_q_id</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">iq_red</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">q_ir_list</span> <span class="o">==</span> <span class="n">q_index</span><span class="p">[</span><span class="n">uniq_q_id</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">j2c_local</span> <span class="o">=</span> <span class="n">j2c</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span> <span class="k">if</span> <span class="n">q_conj_list</span><span class="p">[</span><span class="n">uniq_q_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">j2c</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
         <span class="n">ovlp_2c1e_local</span> <span class="o">=</span> <span class="n">ovlp_2c1e_aux</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span> <span class="k">if</span> <span class="n">q_conj_list</span><span class="p">[</span><span class="n">uniq_q_id</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">ovlp_2c1e_aux</span><span class="p">[</span><span class="n">iq_red</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
     
@@ -634,7 +625,7 @@
             <span class="c1"># df_coef = (S^-1) * ovlp_3c1e: (naux, nao*nao)</span>
             <span class="n">df_coef</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">ovlp_2c1e_local</span><span class="p">,</span> <span class="n">ovlp_3c1e</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
             <span class="c1"># j3c_buffer: (naux_effective, nao*nao).</span>
-            <span class="n">j3c_buffer</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">j2c_local</span><span class="p">,</span> <span class="n">df_coef</span><span class="p">)</span>
+            <span class="n">j3c_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">j2c_local</span><span class="p">,</span> <span class="n">df_coef</span><span class="p">)</span>
             <span class="n">j3c</span><span class="p">[</span><span class="n">ji</span><span class="p">,:</span><span class="n">j3c_buffer</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">j3c_buffer</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
   
     <span class="k">if</span> <span class="n">j2c_sqrt</span><span class="p">:</span>
@@ -647,6 +638,7 @@
 <div class="viewcode-block" id="check_eri">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.check_eri">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_eri</span><span class="p">(</span><span class="n">j3c1</span><span class="p">,</span> <span class="n">j3c2</span><span class="p">,</span> <span class="n">kptij_lst</span><span class="p">):</span>
+    <span class="c1"># TODO: Update uniq_qs and related info here</span>
     <span class="n">nkptij</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>                                  
     <span class="n">kptis</span> <span class="o">=</span> <span class="n">kptij_lst</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">kptjs</span> <span class="o">=</span> <span class="n">kptij_lst</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
@@ -656,12 +648,12 @@
   
     <span class="k">for</span> <span class="n">uniq_kptji_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">uniq_qs</span><span class="p">)):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;qid = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uniq_kptji_id</span><span class="p">))</span>
-        <span class="n">adapted_ji_idx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">uniq_inverse</span> <span class="o">==</span> <span class="n">uniq_kptji_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">adapted_ji_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">uniq_inverse</span> <span class="o">==</span> <span class="n">uniq_kptji_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">ji</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adapted_ji_idx</span><span class="p">):</span>
             <span class="n">eri1</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;Lpq,Lsr-&gt;pqrs&#39;</span><span class="p">,</span> <span class="n">j3c1</span><span class="p">[</span><span class="n">ji</span><span class="p">],</span> <span class="n">j3c1</span><span class="p">[</span><span class="n">ji</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
             <span class="n">eri2</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;Lpq,Lsr-&gt;pqrs&#39;</span><span class="p">,</span> <span class="n">j3c2</span><span class="p">[</span><span class="n">ji</span><span class="p">],</span> <span class="n">j3c2</span><span class="p">[</span><span class="n">ji</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
             <span class="n">diff</span> <span class="o">=</span> <span class="n">eri1</span> <span class="o">-</span> <span class="n">eri2</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">)))</span>
             <span class="k">if</span> <span class="n">uniq_kptji_id</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;eri_gdf_S:&quot;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">eri1</span><span class="p">)</span>
@@ -670,59 +662,49 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------&quot;</span><span class="p">)</span></div>
 
 
+
 <div class="viewcode-block" id="transformation_PW_to_auxbasis">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.transformation_PW_to_auxbasis">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">transformation_PW_to_auxbasis</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">j2c_sqrt</span><span class="p">,</span> <span class="n">qs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">transformation_PW_to_auxbasis</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">j2c_sqrt</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">space_symm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tr_symm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
-    <span class="n">nao</span><span class="p">,</span> <span class="n">NQ</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">(),</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span> 
+    <span class="n">NQ</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span> 
   
-    <span class="n">kmesh_scaled</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_scaled_kpts</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span>
-    <span class="n">qs_scaled</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_scaled_kpts</span><span class="p">(</span><span class="n">qs</span><span class="p">)</span>
-    <span class="n">ir_list</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">inversion_sym</span><span class="p">(</span><span class="n">kmesh_scaled</span><span class="p">)</span>
-    <span class="n">q_ir_list</span><span class="p">,</span> <span class="n">q_index</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">q_conj_list</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">inversion_sym</span><span class="p">(</span><span class="n">qs_scaled</span><span class="p">)</span>
-    <span class="n">kmesh_reduced</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="n">ir_list</span><span class="p">]</span>
+    <span class="n">qstruct</span> <span class="o">=</span> <span class="n">kpt_utils</span><span class="o">.</span><span class="n">build_q_struct</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span> <span class="n">space_symm</span><span class="p">,</span> <span class="n">tr_symm</span><span class="p">)</span>
+    <span class="n">q_ir_list</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">ibz2bz</span>
+    <span class="n">q_mesh_ibz</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">kpts_ibz</span>
+    <span class="n">inq</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">nkpts_ibz</span>
+    <span class="n">q_mesh_scaled_ibz</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_scaled_kpts</span><span class="p">(</span><span class="n">q_mesh_ibz</span><span class="p">)</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;number of uniq q-pionts: &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">qs</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;size of j2c_sqrt: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">j2c_sqrt</span><span class="p">)))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;number of uniq q-points w/ the inversion symmetry: &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">q_ir_list</span><span class="p">))</span>
     
     <span class="c1"># ints_2c1e_aux</span>
-    <span class="n">ints_2c1e_aux</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="o">.</span><span class="n">pbc_intor</span><span class="p">(</span><span class="s1">&#39;int1e_ovlp&#39;</span><span class="p">,</span> <span class="n">hermi</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kpts</span><span class="o">=</span><span class="n">kmesh_reduced</span><span class="p">)</span>
+    <span class="n">ints_2c1e_aux</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="o">.</span><span class="n">pbc_intor</span><span class="p">(</span><span class="s1">&#39;int1e_ovlp&#39;</span><span class="p">,</span> <span class="n">hermi</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kpts</span><span class="o">=</span><span class="n">q_mesh_ibz</span><span class="p">)</span>
     
-    <span class="n">AqQ</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">kmesh_reduced</span><span class="p">),</span> <span class="n">NQ</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
-    <span class="n">q_reduced</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">kmesh_reduced</span><span class="p">),</span><span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">q_scaled_reduced</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">kmesh_reduced</span><span class="p">),</span><span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">AqQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">inq</span><span class="p">,</span> <span class="n">NQ</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">q_reduced</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">inq</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">q_scaled_reduced</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">inq</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="c1"># q from k_mesh_reduced</span>
-    <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh_reduced</span><span class="p">):</span>
-        <span class="n">q_scaled</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_scaled_kpts</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-      
-        <span class="c1"># Test: Make sure q is in [-0.5, 0.5] </span>
+    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inq</span><span class="p">):</span>
+        <span class="c1"># bring the scaled qmesh to [-0.5, 0.5] BZ instead of [0, 1]</span>
+        <span class="n">q_scaled</span> <span class="o">=</span> <span class="n">q_mesh_scaled_ibz</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
+        <span class="n">q_scaled</span> <span class="o">=</span> <span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">wrap_k</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">q_scaled</span><span class="p">]</span>
         <span class="n">q_scaled</span> <span class="o">=</span> <span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">wrap_1stBZ</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">q_scaled</span><span class="p">]</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_abs_kpts</span><span class="p">(</span><span class="n">q_scaled</span><span class="p">)</span>
       
         <span class="c1"># Chi_G0: (NQ)</span>
-        <span class="n">Chi_G0</span> <span class="o">=</span> <span class="n">ft_ao</span><span class="o">.</span><span class="n">ft_ao</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="p">,</span> <span class="n">Gv</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)),</span> <span class="n">kpt</span><span class="o">=</span><span class="n">q</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Chi_G0</span> <span class="o">=</span> <span class="n">ft_ao</span><span class="o">.</span><span class="n">ft_ao</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">auxcell</span><span class="p">,</span> <span class="n">Gv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">kpt</span><span class="o">=</span><span class="n">q</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">S_aux_inv</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">ints_2c1e_aux</span><span class="p">[</span><span class="n">ik</span><span class="p">])</span>
-        <span class="n">uniq_q_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="c1"># q from qs</span>
-        <span class="k">for</span> <span class="n">iq2</span><span class="p">,</span> <span class="n">q2_scaled</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">qs_scaled</span><span class="p">):</span>
-            <span class="c1"># q = [0.0, 1.0]</span>
-            <span class="n">q2_scaled</span> <span class="o">=</span> <span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">wrap_k</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">q2_scaled</span><span class="p">]</span>
-            <span class="c1"># q = [-0.5, 0.5]</span>
-            <span class="n">q2_scaled</span> <span class="o">=</span> <span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">wrap_1stBZ</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">q2_scaled</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q_scaled</span><span class="p">,</span> <span class="n">q2_scaled</span><span class="p">):</span>
-                <span class="n">iq2_red</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">q_ir_list</span> <span class="o">==</span> <span class="n">q_index</span><span class="p">[</span><span class="n">iq2</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">U</span> <span class="o">=</span> <span class="n">j2c_sqrt</span><span class="p">[</span><span class="n">iq2_red</span><span class="p">]</span> <span class="k">if</span> <span class="n">q_conj_list</span><span class="p">[</span><span class="n">iq2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">j2c_sqrt</span><span class="p">[</span><span class="n">iq2_red</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-                <span class="n">uniq_q_id</span> <span class="o">=</span> <span class="n">iq2</span>
-                <span class="k">break</span>
-        <span class="k">if</span> <span class="n">U</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: No matching j2c_sqrt is found!&quot;</span><span class="p">)</span>
-        <span class="c1"># A^q_Q = (U)^q * (S^{-1})^{q} * Chi_G0*</span>
+
+        <span class="c1"># Get j2c corresponding to the irreducible q point</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">j2c_sqrt</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
         <span class="n">q_reduced</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
         <span class="n">q_scaled_reduced</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_scaled</span>
+
         <span class="c1"># U: (naux_effective, naux), S_aux_inv: (naux, naux), Chi_G0: (naux)</span>
-        <span class="n">AqQ</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="p">:</span><span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">S_aux_inv</span><span class="p">,</span> <span class="n">Chi_G0</span><span class="o">.</span><span class="n">conj</span><span class="p">()))</span>
-        <span class="n">AqQ</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">cell</span><span class="o">.</span><span class="n">vol</span><span class="p">))</span>
+        <span class="n">AqQ</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="p">:</span><span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">S_aux_inv</span><span class="p">,</span> <span class="n">Chi_G0</span><span class="o">.</span><span class="n">conj</span><span class="p">()))</span>
+        <span class="n">AqQ</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">cell</span><span class="o">.</span><span class="n">vol</span><span class="p">))</span>
         <span class="n">U</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">AqQ</span><span class="p">,</span> <span class="n">q_reduced</span><span class="p">,</span> <span class="n">q_scaled_reduced</span></div>
@@ -760,8 +742,8 @@
     </aside>
   </div>
 </div><script src="../../../_static/documentation_options.js?v=b489f392"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

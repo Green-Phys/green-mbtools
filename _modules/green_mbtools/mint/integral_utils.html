@@ -1,14 +1,14 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
-        <link rel="prefetch" href="../../../_static/rosetta.png" as="image" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+        <link rel="prefetch" href="../../../_static/rosetta.png" as="image">
 
-    <link rel="shortcut icon" href="../../../_static/rosetta.png"/><!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <link rel="shortcut icon" href="../../../_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>green_mbtools.mint.integral_utils - Green MBTools</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=25e12dd6" />
     
@@ -23,14 +23,14 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
       }
     }
@@ -145,14 +145,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -162,8 +158,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -171,8 +166,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -180,8 +174,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -205,7 +198,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source_code_doc.html">Source code documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Source code documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source_code_doc.html">Source code documentation</a><input aria-label="Toggle navigation of Source code documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../green_mbtools.mint.html">green_mbtools.mint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../green_mbtools.pesto.html">green_mbtools.pesto</a></li>
 </ul>
@@ -231,8 +224,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -240,8 +232,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -250,13 +241,57 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib.metadata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">imd</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.df</span><span class="w"> </span><span class="kn">import</span> <span class="n">addons</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc</span><span class="w"> </span><span class="kn">import</span> <span class="n">df</span><span class="p">,</span> <span class="n">tools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc</span><span class="w"> </span><span class="kn">import</span> <span class="n">gto</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">tools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">kpts</span> <span class="k">as</span> <span class="n">libkpts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc.lib.kpts_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">unique</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc.df.rsdf_builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">_RSGDFBuilder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc.df.gdf_builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">_CCGDFBuilder</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">LA</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">kpt_utils</span>
+
+<span class="c1"># Linear dep threshold for J2C metric eigenvalues</span>
+<span class="n">J2C_LIN_DEP_THRESH</span> <span class="o">=</span> <span class="mf">1e-10</span>
+
+
+<span class="c1"># AO block of X_k[ik] for ERI rotation. For X2C the spinor X is</span>
+<span class="c1"># (2·nao, 2·nao) and we slice the upper-left nao×nao block — valid only</span>
+<span class="c1"># because the CLI guards (pyscf_init / init_seet) restrict X2C</span>
+<span class="c1"># orthogonalization to Löwdin variants, whose X inherits the</span>
+<span class="c1"># block-diagonal spin structure of the spinor S. MO and natural-orbital</span>
+<span class="c1"># rotations are refused upstream for X2C precisely because their X</span>
+<span class="c1"># would not be block-diagonal. Rectangular X (rank-deficient case)</span>
+<span class="c1"># is rejected here as it can&#39;t fit the (NQ, nao, nao) chunk shape.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_x_block_for_eri</span><span class="p">(</span><span class="n">X_k</span><span class="p">,</span> <span class="n">ik</span><span class="p">,</span> <span class="n">nao</span><span class="p">):</span>
+    <span class="n">Xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X_k</span><span class="p">[</span><span class="n">ik</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">Xi</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Xi</span>
+    <span class="k">if</span> <span class="n">Xi</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">nao</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nao</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Xi</span><span class="p">[:</span><span class="n">nao</span><span class="p">,</span> <span class="p">:</span><span class="n">nao</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;_x_block_for_eri: X_k[</span><span class="si">{</span><span class="n">ik</span><span class="si">}</span><span class="s2">] has shape </span><span class="si">{</span><span class="n">Xi</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">; expected &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">nao</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">nao</span><span class="si">}</span><span class="s2">) or (</span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">nao</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">nao</span><span class="si">}</span><span class="s2">). The three-center integral &quot;</span>
+        <span class="s2">&quot;storage path requires a square orthogonalizer; rank-deficient &quot;</span>
+        <span class="s2">&quot;transforms (lowdin_per_k with linear dependencies, or canonical &quot;</span>
+        <span class="s2">&quot;orthogonalization dropping modes) cannot be written into &quot;</span>
+        <span class="s2">&quot;df_hf_int / df_int.&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># Lpq_ortho[Q] = X_i @ Lpq[Q] @ X_j.conj().T — the &quot;X Z X†&quot; convention used by</span>
+<span class="c1"># the per-k ortho primitives; pairs with the dm stored by common_utils.orthogonalize</span>
+<span class="c1"># so the Hartree contraction Σ_{ab} L[Q,a,b] * dm[b,a] inside mbpt&#39;s HF kernel</span>
+<span class="c1"># reduces to its AO value.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rotate_Lpq</span><span class="p">(</span><span class="n">Lpq</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">X_j</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;Ia,Qab,Jb-&gt;QIJ&quot;</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">Lpq</span><span class="p">,</span> <span class="n">X_j</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="compute_kG">
@@ -489,6 +524,35 @@
 
 
 
+<div class="viewcode-block" id="make_gdf_kptij_lst_jk">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.make_gdf_kptij_lst_jk">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_gdf_kptij_lst_jk</span><span class="p">(</span><span class="n">kstruct</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    [WIP]</span>
+<span class="sd">    Build GDF k-point-pair list for get_jk</span>
+<span class="sd">    All combinations:</span>
+<span class="sd">        k_ibz != k_bz</span>
+<span class="sd">        k_bz  == k_bz</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc.lib.kpts_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">member</span>
+    <span class="n">kptij_lst</span> <span class="o">=</span> <span class="p">[(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span><span class="p">)]</span>
+    <span class="n">kptij_idx_lst</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts_ibz</span><span class="p">):</span>
+        <span class="n">ki</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">kpts_ibz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="n">member</span><span class="p">(</span><span class="n">ki</span><span class="p">,</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span><span class="p">):</span>
+            <span class="n">kj</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">where</span><span class="p">:</span>
+                <span class="n">kptij_lst</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="n">ki</span><span class="p">,</span><span class="n">kj</span><span class="p">)])</span>
+                <span class="n">kptij_idx_lst</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)])</span>
+    <span class="n">kptij_lst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptij_lst</span><span class="p">)</span>
+    <span class="n">kptij_idx_lst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptij_idx_lst</span><span class="p">)</span>
+    <span class="c1"># dummy lists for kij_conj and kij_trans</span>
+    <span class="c1"># kptij_conjlist = </span>
+    <span class="k">return</span> <span class="n">kptij_lst</span><span class="p">,</span> <span class="n">kptij_idx_lst</span></div>
+
+
+
 <div class="viewcode-block" id="integrals_grid">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.integrals_grid">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">integrals_grid</span><span class="p">(</span><span class="n">mycell</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">):</span>
@@ -503,6 +567,7 @@
     <span class="n">kpair_irre_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">kij_conj</span> <span class="o">==</span> <span class="n">kij_trans</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">num_kpair_stored</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kpair_irre_list</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">kptij_idx</span><span class="p">,</span> <span class="n">kij_conj</span><span class="p">,</span> <span class="n">kij_trans</span><span class="p">,</span> <span class="n">kpair_irre_list</span><span class="p">,</span> <span class="n">num_kpair_stored</span><span class="p">,</span> <span class="n">kptis</span><span class="p">,</span> <span class="n">kptjs</span></div>
+
 
 
 <div class="viewcode-block" id="compute_integrals">
@@ -571,15 +636,26 @@
     <span class="n">buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">NQ</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="n">Lpq_mo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NQ</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="n">chunk_indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Rotate three-center integrals into the AO-&gt;ortho basis when</span>
+    <span class="c1"># args.orth != &quot;none&quot;, so on-disk V matches S/F/T/dm in input.h5.</span>
+    <span class="n">rotate</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_k</span><span class="p">)</span> <span class="o">==</span> <span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+              <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">orth</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">kpair_irre_list</span><span class="p">:</span>
         <span class="n">k1</span> <span class="o">=</span> <span class="n">kptis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">k2</span> <span class="o">=</span> <span class="n">kptjs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">k1_idx</span><span class="p">,</span> <span class="n">k2_idx</span> <span class="o">=</span> <span class="n">kptij_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rotate</span><span class="p">:</span>
+            <span class="n">X_i</span> <span class="o">=</span> <span class="n">_x_block_for_eri</span><span class="p">(</span><span class="n">X_k</span><span class="p">,</span> <span class="n">k1_idx</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
+            <span class="n">X_j</span> <span class="o">=</span> <span class="n">_x_block_for_eri</span><span class="p">(</span><span class="n">X_k</span><span class="p">,</span> <span class="n">k2_idx</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
         <span class="c1"># auxiliary basis index</span>
         <span class="n">s1</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">XXX</span> <span class="ow">in</span> <span class="n">mydf</span><span class="o">.</span><span class="n">sr_loop</span><span class="p">((</span><span class="n">k1</span><span class="p">,</span><span class="n">k2</span><span class="p">),</span> <span class="n">max_memory</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="n">LpqR</span> <span class="o">=</span> <span class="n">XXX</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">LpqI</span> <span class="o">=</span> <span class="n">XXX</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">Lpq</span> <span class="o">=</span> <span class="p">(</span><span class="n">LpqR</span> <span class="o">+</span> <span class="n">LpqI</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">LpqR</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rotate</span><span class="p">:</span>
+                <span class="n">Lpq</span> <span class="o">=</span> <span class="n">_rotate_Lpq</span><span class="p">(</span><span class="n">Lpq</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">X_j</span><span class="p">)</span>
             <span class="n">buffer</span><span class="p">[</span><span class="n">cnt</span><span class="o">%</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">s1</span><span class="p">:</span><span class="n">s1</span><span class="o">+</span><span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Lpq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],:,:]</span>
             <span class="c1"># s1 = NQ at maximum.</span>
             <span class="n">s1</span> <span class="o">+=</span> <span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -589,6 +665,8 @@
                 <span class="n">LpqR</span> <span class="o">=</span> <span class="n">XXX</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">LpqI</span> <span class="o">=</span> <span class="n">XXX</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">Lpq</span> <span class="o">=</span> <span class="p">(</span><span class="n">LpqR</span> <span class="o">+</span> <span class="n">LpqI</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">LpqR</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">rotate</span><span class="p">:</span>
+                    <span class="n">Lpq</span> <span class="o">=</span> <span class="n">_rotate_Lpq</span><span class="p">(</span><span class="n">Lpq</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">X_j</span><span class="p">)</span>
                 <span class="n">buffer</span><span class="p">[</span><span class="n">cnt</span><span class="o">%</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">s1</span><span class="p">:</span><span class="n">s1</span><span class="o">+</span><span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Lpq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],:,:]</span>
                 <span class="c1"># s1 = NQ at maximum.</span>
                 <span class="n">s1</span> <span class="o">+=</span> <span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -647,7 +725,7 @@
 
 <div class="viewcode-block" id="compute_ewald_correction">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.compute_ewald_correction">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_ewald_correction</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">maindf</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;df_ewald.h5&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_ewald_correction</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">maindf</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;df_ewald.h5&quot;</span><span class="p">,</span> <span class="n">X_k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1"># global full_k_mesh</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
     <span class="n">EW</span>     <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;EW&quot;</span><span class="p">)</span>
@@ -702,7 +780,13 @@
     <span class="n">df1</span><span class="o">.</span><span class="n">_cderi</span> <span class="o">=</span> <span class="n">cderi_file_1</span>
     <span class="n">df1</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">kmesh</span>
     <span class="n">df1</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
-    <span class="n">nk</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">nk</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">nk2</span><span class="p">,</span> <span class="n">nk3</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">nk</span>
+
+    <span class="c1"># Rotate Ewald-correction buffers to AO-&gt;ortho basis when</span>
+    <span class="c1"># args.orth != &quot;none&quot;, to match the V integrals written by</span>
+    <span class="c1"># compute_integrals (avoids mixing V_ortho with EW_AO downstream).</span>
+    <span class="n">rotate</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_k</span><span class="p">)</span> <span class="o">==</span> <span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+              <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">orth</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
 
     <span class="c1"># We know that G=0 contribution diverge only when q = 0</span>
     <span class="c1"># so we loop over (k1,k1) pairs</span>
@@ -742,13 +826,15 @@
             <span class="n">buffer2</span><span class="p">[</span><span class="n">s1</span><span class="p">:</span><span class="n">s1</span><span class="o">+</span><span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Lpq_mo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],:,:]</span>
             <span class="n">s1</span> <span class="o">+=</span> <span class="n">Lpq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="c1"># i = k1 * nk * nk + k2 * nk + k3</span>
-        <span class="n">k3</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span><span class="p">(</span><span class="n">nk</span><span class="o">*</span><span class="n">nk</span><span class="p">))</span>
-        <span class="n">k2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">i</span> <span class="o">%</span> <span class="p">(</span><span class="n">nk</span><span class="o">*</span><span class="n">nk</span><span class="p">))</span><span class="o">/</span><span class="n">nk</span><span class="p">)</span>
-        <span class="n">k1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">nk</span><span class="p">)</span>
-        <span class="n">k_fine</span> <span class="o">=</span> <span class="p">(</span><span class="n">k3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">nk</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nk</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">k2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">nk</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">k1</span><span class="p">)</span>
-        <span class="n">EW</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k_fine</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">buffer1</span> <span class="o">-</span> <span class="n">buffer2</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">EW_bar</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k_fine</span><span class="p">)]</span> <span class="o">=</span> <span class="n">buffer2</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rotate</span><span class="p">:</span>
+            <span class="n">X_i</span> <span class="o">=</span> <span class="n">_x_block_for_eri</span><span class="p">(</span><span class="n">X_k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
+            <span class="n">ew_arr</span> <span class="o">=</span> <span class="n">_rotate_Lpq</span><span class="p">(</span><span class="n">buffer1</span> <span class="o">-</span> <span class="n">buffer2</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">X_i</span><span class="p">)</span>
+            <span class="n">ew_bar_arr</span> <span class="o">=</span> <span class="n">_rotate_Lpq</span><span class="p">(</span><span class="n">buffer2</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">X_i</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ew_arr</span> <span class="o">=</span> <span class="n">buffer1</span> <span class="o">-</span> <span class="n">buffer2</span>
+            <span class="n">ew_bar_arr</span> <span class="o">=</span> <span class="n">buffer2</span>
+        <span class="n">EW</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ew_arr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">EW_bar</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ew_bar_arr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">buffer1</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">buffer2</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
@@ -762,6 +848,165 @@
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cderi_file_1</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cderi_file_2</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ewald correction has been computed and stored into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="GreenGDF">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.GreenGDF">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GreenGDF</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">GDF</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">kpts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">kpts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">space_symm</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tr_symm</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x2c</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_j2c_eig_decomposition</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_j3c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auxcell</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kptij_lst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cderi_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Customized ERI building to build and store j2c at the same time</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cell : pyscf.pbc.gto.Cell, optional</span>
+<span class="sd">            periodic cell, by default None</span>
+<span class="sd">        auxcell : pyscf.pbc.gto.Cell, optional</span>
+<span class="sd">            auxiliary basis cell, by default None</span>
+<span class="sd">        kptij_lst : list, optional</span>
+<span class="sd">            list of k-point pairs, by default None</span>
+<span class="sd">        cderi_file : str, optional</span>
+<span class="sd">            output file to store ERI, by default None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span>
+        <span class="k">if</span> <span class="n">auxcell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">auxcell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxcell</span>
+        <span class="k">if</span> <span class="n">cderi_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">cderi_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cderi_to_save</span>
+
+        <span class="c1"># Logger</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">new_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Remove duplicated k-points. Duplicated kpts may lead to a buffer</span>
+        <span class="c1"># located in incore.wrap_int3c larger than necessary. Integral code</span>
+        <span class="c1"># only fills necessary part of the buffer, leaving some space in the</span>
+        <span class="c1"># buffer unfilled.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts_band</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kpts_union</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kpts_union</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts_band</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prefer_ccdf</span> <span class="ow">or</span> <span class="n">cell</span><span class="o">.</span><span class="n">omega</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># For long-range integrals _CCGDFBuilder is the only option</span>
+            <span class="n">dfbuilder</span> <span class="o">=</span> <span class="n">_CCGDFBuilder</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">auxcell</span><span class="p">,</span> <span class="n">kpts_union</span><span class="p">)</span>
+            <span class="n">dfbuilder</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dfbuilder</span> <span class="o">=</span> <span class="n">_RSGDFBuilder</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">auxcell</span><span class="p">,</span> <span class="n">kpts_union</span><span class="p">)</span>
+        <span class="c1"># Keep configurable to support both legacy-reference compatibility and systematic eigenvalue workflow.</span>
+        <span class="n">dfbuilder</span><span class="o">.</span><span class="n">j2c_eig_always</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;use_j2c_eig_decomposition&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">dfbuilder</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span>
+        <span class="n">dfbuilder</span><span class="o">.</span><span class="n">linear_dep_threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_dep_threshold</span>
+        <span class="n">j_only</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_j_only</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">kpts_union</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">dfbuilder</span><span class="o">.</span><span class="n">make_j3c</span><span class="p">(</span><span class="n">cderi_file</span><span class="p">,</span> <span class="n">j_only</span><span class="o">=</span><span class="n">j_only</span><span class="p">,</span> <span class="n">dataname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataname</span><span class="p">,</span>
+                           <span class="n">kptij_lst</span><span class="o">=</span><span class="n">kptij_lst</span><span class="p">)</span>
+
+        <span class="c1"># Build q = k1-k2 and reduce to a unique wrapped q-mesh, then construct a q-structure and use its functionalities</span>
+        <span class="n">use_space_symm</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;space_symm&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">use_tr_symm</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tr_symm&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">use_x2c</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;x2c&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">qstruct</span> <span class="o">=</span> <span class="n">kpt_utils</span><span class="o">.</span><span class="n">build_q_struct</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span> <span class="n">space_symm</span><span class="o">=</span><span class="p">(</span><span class="n">use_space_symm</span> <span class="ow">and</span> <span class="n">use_x2c</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">),</span> <span class="n">tr_symm</span><span class="o">=</span><span class="n">use_tr_symm</span><span class="p">)</span>
+        <span class="n">uniq_qpts</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">kpts</span>
+        <span class="n">scaled_uniq_kpts</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">kpts_scaled</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Num uniq kpts </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniq_qpts</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug2</span><span class="p">(</span><span class="s1">&#39;scaled unique kpts </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">scaled_uniq_kpts</span><span class="p">)</span>
+
+        <span class="c1"># Group k-points into conjugate pairs and build a mapping from the original q-mesh to the unique q-mesh.</span>
+        <span class="c1"># qstruct.ibz2bz are the full-BZ indices of irreducible q-points.</span>
+        <span class="c1"># Store j2c strictly for q_IBZ representatives in this order.</span>
+        <span class="n">q_ibz2bz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">qstruct</span><span class="o">.</span><span class="n">ibz2bz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">j2c_uniq_kpts</span> <span class="o">=</span> <span class="n">uniq_qpts</span><span class="p">[</span><span class="n">q_ibz2bz</span><span class="p">]</span>
+        <span class="n">feri</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">cderi_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="n">all_j2c</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dfbuilder</span><span class="o">.</span><span class="n">get_2c2e</span><span class="p">(</span><span class="n">j2c_uniq_kpts</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j2c_idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q_ibz2bz</span><span class="p">):</span>
+            <span class="n">j2c</span> <span class="o">=</span> <span class="n">all_j2c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">j2c</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">:</span>
+                <span class="n">feri</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;j2c/</span><span class="si">{</span><span class="n">j2c_idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">feri</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;j2c/</span><span class="si">{</span><span class="n">j2c_idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c</span> <span class="o">+</span> <span class="mf">0.</span><span class="n">j</span>
+            <span class="n">j2c</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Meta data</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/qmesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniq_qpts</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/scaled_qmesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaled_uniq_kpts</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/j2c_uniq_kpts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c_uniq_kpts</span>
+        <span class="c1"># Compatibility metadata: pair each stored q_IBZ representative with itself.</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/q_ibz2bz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_ibz2bz</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/q_bz2ibz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">qstruct</span><span class="o">.</span><span class="n">bz2ibz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;j2c_decomposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eigenvalue&#39;</span> <span class="k">if</span> <span class="n">dfbuilder</span><span class="o">.</span><span class="n">j2c_eig_always</span> <span class="k">else</span> <span class="s1">&#39;cholesky&#39;</span>
+        <span class="n">feri</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="cholesky_decomposed_metric">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.cholesky_decomposed_metric">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cholesky_decomposed_metric</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Cholesky decomposition of the j2c metric for a given k-point, or its inverse if requested.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    j2c_k : _type_</span>
+<span class="sd">        j2c metric for a specific k-point.</span>
+<span class="sd">    cell : _type_</span>
+<span class="sd">        information about the unit cell, used for error handling and potential adjustments based on dimensionality.</span>
+<span class="sd">    inv : bool, optional</span>
+<span class="sd">        Whether to return the inverse of the Cholesky decomposition, by default False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    j2c_sqrt_k or j2c_sqrt_inv_k : ndarray</span>
+<span class="sd">        Cholesky decomposition of the j2c metric (lower triangular matrix L such that j2c_k = L @ L†) or</span>
+<span class="sd">        its inverse (L⁻¹), depending on the value of `inv`.</span>
+<span class="sd">    j2c_negative : ndarray or None</span>
+<span class="sd">        If the j2c metric has negative eigenvalues (which can occur in 2D systems with certain Fourier </span>
+<span class="sd">        transform conventions), this will contain the corresponding eigenvectors. Otherwise, it will be None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Cholesky: j2c = LL†  (L lower triangular).  PySCF computes B = L⁻¹ @ eri3c</span>
+    <span class="c1"># (by solving L†x = eri3c, i.e., x = L⁻¹ @ eri3c), so P0_tilde lives in the</span>
+    <span class="c1"># L-basis.  Obar = L_bz⁻¹ @ mat_ao @ L_irre correctly maps P0_tilde between</span>
+    <span class="c1"># k-points.  Using upper Cholesky (lower=False) gives the wrong convention.</span>
+    <span class="n">nQ</span> <span class="o">=</span> <span class="n">j2c_k</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">j2c_negative</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">j2c_sqrt_k</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inv</span><span class="p">:</span>
+            <span class="c1"># this is actually the inverse and not just the sqrt</span>
+            <span class="n">j2c_sqrt_k</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span>  <span class="c1"># = L^{-1}</span>
+                <span class="n">j2c_sqrt_k</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">nQ</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">),</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+    <span class="k">except</span> <span class="n">LA</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+        <span class="n">j2c_sqrt_k</span><span class="p">,</span> <span class="n">j2c_negative</span> <span class="o">=</span> <span class="n">eigenvalue_decomposed_metric</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">inv</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">j2c_sqrt_k</span><span class="p">,</span> <span class="n">j2c_negative</span></div>
+
+
+
+<div class="viewcode-block" id="eigenvalue_decomposed_metric">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.eigenvalue_decomposed_metric">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">eigenvalue_decomposed_metric</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">j2c_negative</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cond_num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cond_num</span> <span class="o">&gt;</span> <span class="mf">1e12</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Condition number of j2c_k (</span><span class="si">{</span><span class="n">cond_num</span><span class="si">}</span><span class="s2">) is too large. Consider using a smaller aux. basis.&quot;</span><span class="p">)</span>
+
+    <span class="n">eigs</span><span class="p">,</span> <span class="n">vecs</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">eigs</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">J2C_LIN_DEP_THRESH</span><span class="p">),</span> <span class="s2">&quot;j2c metric has non-positive eigenvalues&quot;</span>
+    <span class="n">eig_mask</span> <span class="o">=</span> <span class="n">eigs</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">eigs</span><span class="p">)</span> <span class="o">*</span> <span class="n">J2C_LIN_DEP_THRESH</span>
+    <span class="n">eigs_trim</span> <span class="o">=</span> <span class="n">eigs</span><span class="p">[</span><span class="n">eig_mask</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">inv</span><span class="p">:</span>
+        <span class="n">j2c_sqrt_k</span> <span class="o">=</span> <span class="n">vecs</span><span class="p">[:,</span> <span class="n">eig_mask</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eigs_trim</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">j2c_sqrt_k</span> <span class="o">=</span> <span class="n">vecs</span><span class="p">[:,</span> <span class="n">eig_mask</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eigs_trim</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># negative eigenvalues can occur in 2D systems with certain Fourier transform conventions,</span>
+    <span class="c1"># but we can still use the corresponding eigenvectors to define a &quot;negative&quot; subspace for the J2C metric</span>
+    <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">low_dim_ft_type</span> <span class="o">!=</span> <span class="s1">&#39;inf_vacuum&#39;</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">eigs</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">J2C_LIN_DEP_THRESH</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">j2c_negative</span> <span class="o">=</span> <span class="p">(</span><span class="n">vecs</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">eigs</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">return</span> <span class="n">j2c_sqrt_k</span><span class="p">,</span> <span class="n">j2c_negative</span></div>
 
 </pre></div>
         </article>
@@ -796,8 +1041,8 @@
     </aside>
   </div>
 </div><script src="../../../_static/documentation_options.js?v=b489f392"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

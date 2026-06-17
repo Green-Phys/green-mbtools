@@ -1,14 +1,14 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
-        <link rel="prefetch" href="../../../_static/rosetta.png" as="image" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+        <link rel="prefetch" href="../../../_static/rosetta.png" as="image">
 
-    <link rel="shortcut icon" href="../../../_static/rosetta.png"/><!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <link rel="shortcut icon" href="../../../_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>green_mbtools.mint.ortho_utils - Green MBTools</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=25e12dd6" />
     
@@ -23,14 +23,14 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
       }
     }
@@ -145,14 +145,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -162,8 +158,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -171,8 +166,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -180,8 +174,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -205,7 +198,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source_code_doc.html">Source code documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Source code documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source_code_doc.html">Source code documentation</a><input aria-label="Toggle navigation of Source code documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../green_mbtools.mint.html">green_mbtools.mint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../green_mbtools.pesto.html">green_mbtools.pesto</a></li>
 </ul>
@@ -231,8 +224,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -240,313 +232,473 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for green_mbtools.mint.ortho_utils</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">LA</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..pesto</span><span class="w"> </span><span class="kn">import</span> <span class="n">orth</span>
-
-<div class="viewcode-block" id="wrap_k">
-<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.wrap_k">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">wrap_k</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
-    <span class="k">while</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">:</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">k</span>
-    <span class="k">while</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mf">9.9999999999e-1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="p">:</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">k</span></div>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.symmetry_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_representation</span><span class="p">,</span> <span class="n">get_spinor_representation</span>
 
 
-<div class="viewcode-block" id="normalize">
-<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.normalize">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="n">Sv</span><span class="p">):</span>
-    <span class="n">Svo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Sv</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">Sv</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">iv</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Sv</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
-        <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">iv</span>
-        <span class="n">Svo</span><span class="p">[:,</span><span class="n">iv</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span><span class="o">*</span><span class="n">v</span><span class="o">.</span><span class="n">T</span>
-    <span class="k">return</span> <span class="n">Svo</span></div>
-
-
-<div class="viewcode-block" id="avg">
-<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.avg">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<div class="viewcode-block" id="lowdin_per_k">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.lowdin_per_k">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Average momentum dependent quantity </span>
+<span class="sd">    Symmetric (Löwdin) S^{-1/2} orthogonalization for a single k-point.</span>
+
+<span class="sd">    Returns ``(X, X_inv)`` in the convention used by</span>
+<span class="sd">    ``common_utils.transform`` (i.e. transforms apply as ``X Z X†``):</span>
+<span class="sd">        X     = S^{-1/2}   (shape (n_ortho, nao))</span>
+<span class="sd">        X_inv = S^{+1/2}   (shape (nao, n_ortho))</span>
+<span class="sd">    Eigenvalues of ``Sk`` below ``tol`` are discarded.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">xxx</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="n">kpts</span><span class="p">[</span><span class="mi">1</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">kpts</span><span class="p">)]]</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span><span class="o">/</span><span class="mi">2</span>
-    <span class="k">for</span> <span class="n">ikk</span><span class="p">,</span> <span class="n">kk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kpts</span><span class="p">):</span>
-        <span class="n">X</span><span class="p">[</span><span class="n">kk</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">xxx</span> <span class="k">if</span> <span class="p">(</span><span class="n">ikk</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">xxx</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span></div>
+    <span class="n">s_ev</span><span class="p">,</span> <span class="n">s_eb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
+    <span class="n">istart</span> <span class="o">=</span> <span class="n">s_ev</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
+    <span class="n">s_sqrtev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ev</span><span class="p">[</span><span class="n">istart</span><span class="p">:])</span>
+    <span class="n">x_pinv</span> <span class="o">=</span> <span class="n">s_eb</span><span class="p">[:,</span> <span class="n">istart</span><span class="p">:]</span> <span class="o">*</span> <span class="n">s_sqrtev</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_eb</span><span class="p">[:,</span> <span class="n">istart</span><span class="p">:]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">s_sqrtev</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_pinv</span></div>
 
 
-<div class="viewcode-block" id="symmetrical_orbitals">
-<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.symmetrical_orbitals">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">symmetrical_orbitals</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">dm</span><span class="p">,</span> <span class="n">F_up</span><span class="p">,</span> <span class="n">F_dn</span><span class="p">,</span> <span class="n">T_up</span><span class="p">,</span> <span class="n">T_dn</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">Debug_print</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="n">X_k</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">X_inv_k</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">pairing</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">unique_kpts</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># generate list of unique k-points by applying an inversion symmetry</span>
-    <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">ikp</span><span class="p">,</span> <span class="n">kp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-            <span class="n">minus_k</span> <span class="o">=</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">minus_k</span><span class="p">,</span> <span class="n">kp</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ikp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">pairing</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span> <span class="o">=</span> <span class="n">ik</span>
-                <span class="n">unique_kpts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ik</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ik</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">ik</span>
-    <span class="c1"># find the list of k-points that are the same by inversion symmetry and apply the k-symmetrization</span>
-    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="n">unique_kpts</span><span class="p">:</span>
-        <span class="n">kpts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ikp</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">pairing</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span> <span class="o">==</span> <span class="n">ik</span><span class="p">:</span>
-                <span class="n">kpts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ikp</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">dm</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">F_up</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">F_dn</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">T_up</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">T_dn</span><span class="p">)</span>
 
-    <span class="n">dmmm</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Compute transformation matrices</span>
-    <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-        <span class="c1"># check whether matrices should be real by inversion symmetry</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="n">Debug_print</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
-            <span class="n">Sk</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
-            <span class="n">Sk</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
-
-
-        <span class="n">x_pinv</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">sqrtm</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">x_pinv</span><span class="p">)</span>
-
-
-        <span class="n">n_ortho</span><span class="p">,</span> <span class="n">n_nonortho</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
-
-        <span class="k">if</span> <span class="n">Debug_print</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_pinv</span><span class="p">,</span> <span class="n">x_pinv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X X^-1&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pinv</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X* X^-1*&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">x_pinv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-
-        <span class="c1"># check that direct and inverse symmetries are consistent</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pinv</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-
-        <span class="c1"># store transformation basis for current k-point</span>
-        <span class="n">xx_inv</span> <span class="o">=</span> <span class="n">x_pinv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-        <span class="n">xx</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-        <span class="n">X_inv_k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xx_inv</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-        <span class="n">X_k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xx</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-
-        <span class="n">minus_k</span> <span class="o">=</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
-
-        <span class="k">for</span> <span class="n">ikk</span><span class="p">,</span> <span class="n">kk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">kk</span><span class="p">,</span> <span class="n">minus_k</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ikk</span> <span class="o">&lt;</span> <span class="n">ik</span><span class="p">:</span>
-                <span class="c1"># X_inv_k.append(np.copy(X_inv_k[ikk]))</span>
-                <span class="c1"># X_k.append(np.copy(X_k[ikk]))</span>
-                <span class="k">if</span> <span class="n">Debug_print</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;============== reduced point ================&quot;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sev&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">LA</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">ikk</span><span class="p">]),</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">])))</span>
-                    <span class="c1"># print LA.eigvalsh(S[ikk]), &quot;\n\n=====\n\n&quot;, LA.eigvalsh(S[ik])</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S2&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">],</span> <span class="n">xx_inv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()))</span>
-                <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
-                <span class="n">X_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">X_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
-                <span class="k">continue</span>
-
-    <span class="c1"># save density matrix eigen values distribution per each k-point</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;dm_k&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ik</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dmmm</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;dm_band_k&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ik</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dmmm</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">X_inv_k</span><span class="p">,</span> <span class="n">X_k</span></div>
-
-
-<div class="viewcode-block" id="canonical_orbitals">
-<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.canonical_orbitals">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">canonical_orbitals</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">dm</span><span class="p">,</span> <span class="n">F_up</span><span class="p">,</span> <span class="n">F_dn</span><span class="p">,</span> <span class="n">T_up</span><span class="p">,</span> <span class="n">T_dn</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">Debug_print</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="n">X_k</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">X_inv_k</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">pairing</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">unique_kpts</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># generate list of unique k-points by applying an inversion symmetry</span>
-    <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">ikp</span><span class="p">,</span> <span class="n">kp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-            <span class="n">minus_k</span> <span class="o">=</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">minus_k</span><span class="p">,</span> <span class="n">kp</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ikp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">pairing</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span> <span class="o">=</span> <span class="n">ik</span>
-                <span class="n">unique_kpts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ik</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ik</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">ik</span>
-    <span class="c1"># find the list of k-points that are the same by inversion symmetry and apply the k-symmetrization</span>
-    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="n">unique_kpts</span><span class="p">:</span>
-        <span class="n">kpts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ikp</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">pairing</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span> <span class="o">==</span> <span class="n">ik</span><span class="p">:</span>
-                <span class="n">kpts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ikp</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">dm</span><span class="p">)</span>
-        <span class="c1">#avg(kpts, S)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">F_up</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">F_dn</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">T_up</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">T_dn</span><span class="p">)</span>
-
-    <span class="n">dmmm</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Compute transformation matrices</span>
-    <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-        <span class="c1"># check whether matrices should be real by inversion symmetry</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="n">Debug_print</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
-            <span class="n">Sk</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
-            <span class="n">Sk</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
-
-
-        <span class="n">s_ev</span><span class="p">,</span> <span class="n">s_eb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
-
-        <span class="c1"># Remove all eigenvalues &lt; threshold</span>
-        <span class="n">istart</span> <span class="o">=</span> <span class="n">s_ev</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="mf">1e-9</span><span class="p">)</span>
-        <span class="n">s_sqrtev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ev</span><span class="p">[</span><span class="n">istart</span><span class="p">:])</span>
-
-        <span class="c1"># Moore-Penrose pseudoinverse of X:  (X^+ * X)^(-1) * X^+</span>
-        <span class="c1"># TODO: use least squares instead</span>
-        <span class="n">x_pinv</span> <span class="o">=</span> <span class="n">s_eb</span><span class="p">[:,</span> <span class="n">istart</span><span class="p">:]</span> <span class="o">*</span> <span class="n">s_sqrtev</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_eb</span><span class="p">[:,</span> <span class="n">istart</span><span class="p">:]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">s_sqrtev</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">x_pinv</span><span class="p">)</span>
-
-        <span class="n">n_ortho</span><span class="p">,</span> <span class="n">n_nonortho</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
-        <span class="k">if</span> <span class="n">Debug_print</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_pinv</span><span class="p">,</span> <span class="n">x_pinv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X X^-1&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pinv</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X* X^-1*&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">x_pinv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-
-        <span class="c1"># check that direct and inverse symmetries are consistent</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pinv</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-
-        <span class="c1"># store transformation basis for current k-point</span>
-        <span class="n">xx_inv</span> <span class="o">=</span> <span class="n">x_pinv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">xx</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">X_inv_k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xx_inv</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-        <span class="n">X_k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xx</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-
-        <span class="n">minus_k</span> <span class="o">=</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">ikk</span><span class="p">,</span> <span class="n">kk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">kk</span><span class="p">,</span> <span class="n">minus_k</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ikk</span> <span class="o">&lt;</span> <span class="n">ik</span><span class="p">:</span>
-                <span class="c1"># X_inv_k.append(np.copy(X_inv_k[ikk]))</span>
-                <span class="c1"># X_k.append(np.copy(X_k[ikk]))</span>
-                <span class="k">if</span> <span class="n">Debug_print</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;============== reduced point ================&quot;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sev&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">LA</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">ikk</span><span class="p">]),</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">])))</span>
-                    <span class="c1"># print LA.eigvalsh(S[ikk]), &quot;\n\n=====\n\n&quot;, LA.eigvalsh(S[ik])</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S2&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">],</span> <span class="n">xx_inv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()))</span>
-                <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()),</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]))</span>
-                <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">X_inv_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
-                <span class="n">X_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">X_k</span><span class="p">[</span><span class="n">ikk</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
-                <span class="k">continue</span>
-
-    <span class="c1"># save density matrix eigen values distribution per each k-point</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;dm_k&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ik</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dmmm</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;dm_band_k&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ik</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dmmm</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">X_inv_k</span><span class="p">,</span> <span class="n">X_k</span></div>
-
-
-<div class="viewcode-block" id="natural_orbitals">
-<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.natural_orbitals">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">natural_orbitals</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">dm</span><span class="p">,</span> <span class="n">F_up</span><span class="p">,</span> <span class="n">F_dn</span><span class="p">,</span> <span class="n">T_up</span><span class="p">,</span> <span class="n">T_dn</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">Debug_print</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="mo_per_k">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.mo_per_k">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mo_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">C_k</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Compute transformation matricies for natural orbtial basis from spin-averaged density matrix</span>
-<span class="sd">    ---</span>
-<span class="sd">    </span>
+<span class="sd">    Canonical-MO basis for a single k-point from MO coefficients ``C_k``</span>
+<span class="sd">    satisfying ``C† S C = I``.</span>
+
+<span class="sd">    Returns ``(X = C†, X_inv = S C)`` in the ``X Z X†`` convention.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">X_k</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">X_inv_k</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">pairing</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">unique_kpts</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># generate list of unique k-points by applying an inversion symmetry</span>
-    <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">ikp</span><span class="p">,</span> <span class="n">kp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-            <span class="n">minus_k</span> <span class="o">=</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">minus_k</span><span class="p">,</span> <span class="n">kp</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ikp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">pairing</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span> <span class="o">=</span> <span class="n">ik</span>
-                <span class="n">unique_kpts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ik</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ik</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">ik</span>
-    <span class="c1"># find the list of k-points that are the same by inversion symmetry and apply the k-symmetrization</span>
-    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="n">unique_kpts</span><span class="p">:</span>
-        <span class="n">kpts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ikp</span> <span class="ow">in</span> <span class="n">pairing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">pairing</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span> <span class="o">==</span> <span class="n">ik</span><span class="p">:</span>
-                <span class="n">kpts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ikp</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">dm</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">F_up</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">F_dn</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">T_up</span><span class="p">)</span>
-        <span class="n">avg</span><span class="p">(</span><span class="n">kpts</span><span class="p">,</span> <span class="n">T_dn</span><span class="p">)</span>
+    <span class="n">C_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">C_k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">C_k</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Sk</span> <span class="o">@</span> <span class="n">C_k</span></div>
 
-    <span class="n">dmmm</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="c1"># Compute transformation matrices</span>
-    <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
-        <span class="c1"># check whether matrices should be real by inversion symmetry</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">[</span><span class="n">wrap_k</span><span class="p">(</span><span class="o">-</span><span class="n">kk</span><span class="p">)</span> <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]):</span>
-            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
-            <span class="n">Sk</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+
+<div class="viewcode-block" id="symmetric_lowdin_per_k">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.symmetric_lowdin_per_k">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">symmetric_lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Symmetric (Hermitian) Löwdin orthogonalization for a single k-point.</span>
+
+<span class="sd">    Returns ``(X = S^{-1/2}, X_inv = S^{+1/2})`` — both Hermitian</span>
+<span class="sd">    ``(nao, nao)`` matrices — in the ``X Z X†`` convention.</span>
+<span class="sd">    Distinguished from ``lowdin_per_k`` (canonical Löwdin) by being</span>
+<span class="sd">    Hermitian rather than rectangular.</span>
+
+<span class="sd">    Eigenvalues of ``Sk`` below ``tol`` are treated pseudo-inversely:</span>
+<span class="sd">    their contribution is zeroed in both ``X`` and ``X_inv``, the same</span>
+<span class="sd">    convention ``LA.pinv`` applies (see ``pesto/orth.py``). The output</span>
+<span class="sd">    stays Hermitian and square, but in the rank-deficient case</span>
+<span class="sd">    ``X @ X_inv`` reduces to the projector onto the kept subspace</span>
+<span class="sd">    rather than the identity (Hermitian symmetric Löwdin cannot</span>
+<span class="sd">    simultaneously be a strict left inverse on a rank-deficient</span>
+<span class="sd">    basis). When linear dependencies are present and a strict</span>
+<span class="sd">    ``X @ X_inv = I`` contract is required, use ``lowdin_per_k``</span>
+<span class="sd">    (canonical, rectangular).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">s_ev</span><span class="p">,</span> <span class="n">s_eb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
+    <span class="n">kept</span> <span class="o">=</span> <span class="n">s_ev</span> <span class="o">&gt;=</span> <span class="n">tol</span>
+    <span class="n">s_sqrt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">s_ev</span><span class="p">)</span>
+    <span class="n">s_inv_sqrt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">s_ev</span><span class="p">)</span>
+    <span class="n">s_sqrt</span><span class="p">[</span><span class="n">kept</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ev</span><span class="p">[</span><span class="n">kept</span><span class="p">])</span>
+    <span class="n">s_inv_sqrt</span><span class="p">[</span><span class="n">kept</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ev</span><span class="p">[</span><span class="n">kept</span><span class="p">])</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_eb</span> <span class="o">*</span> <span class="n">s_inv_sqrt</span><span class="p">)</span> <span class="o">@</span> <span class="n">s_eb</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">X_inv</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_eb</span> <span class="o">*</span> <span class="n">s_sqrt</span><span class="p">)</span> <span class="o">@</span> <span class="n">s_eb</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">),</span> <span class="n">X_inv</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_S_inv_half</span><span class="p">(</span><span class="n">Sk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return ``S^{-1/2}`` via Hermitian eigendecomposition of S.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">s_ev</span><span class="p">,</span> <span class="n">s_eb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">s_eb</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ev</span><span class="p">))</span> <span class="o">@</span> <span class="n">s_eb</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+
+<div class="viewcode-block" id="natural_per_k">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.natural_per_k">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">natural_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">dmk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Natural-orbital basis at one k-point from density matrix ``dmk``.</span>
+
+<span class="sd">    Diagonalises ``S^{-1/2} dm S^{-1/2}`` to obtain S-orthonormal</span>
+<span class="sd">    natural orbitals ``C_NO = S^{-1/2} u`` (columns) with</span>
+<span class="sd">    ``C_NO† S C_NO = I`` and ``C_NO† dm C_NO = diag(occ)``. Returns</span>
+<span class="sd">    ``(X, X_inv)`` in the same ``X Z X†`` convention as ``mo_per_k``:</span>
+
+<span class="sd">        X     = C_NO†      (shape (n_ortho, nao))</span>
+<span class="sd">        X_inv = S @ C_NO   (shape (nao, n_ortho))</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">S_inv_half</span> <span class="o">=</span> <span class="n">_S_inv_half</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">S_inv_half</span> <span class="o">@</span> <span class="n">dmk</span> <span class="o">@</span> <span class="n">S_inv_half</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">M</span> <span class="o">+</span> <span class="n">M</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+    <span class="n">C_NO</span> <span class="o">=</span> <span class="p">(</span><span class="n">S_inv_half</span> <span class="o">@</span> <span class="n">u</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">C_NO</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Sk</span> <span class="o">@</span> <span class="n">C_NO</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_natural_per_k_with_fock_tiebreak</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">dmk</span><span class="p">,</span> <span class="n">Fk</span><span class="p">,</span> <span class="n">tol_degen</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Natural orbitals at one k-point with Fock-within-block tie-breaking.</span>
+
+<span class="sd">    Same S-orthonormal convention as ``natural_per_k``: diagonalises</span>
+<span class="sd">    ``S^{-1/2} dm S^{-1/2}`` to obtain occupations and orbitals in the</span>
+<span class="sd">    ``S^{-1/2}`` frame, then for each block of columns whose occupations</span>
+<span class="sd">    agree to ``tol_degen`` additionally diagonalises the block-projected</span>
+<span class="sd">    AO Fock ``C_NO_B† F C_NO_B`` and rotates the block accordingly.</span>
+<span class="sd">    Returns ``(X = C_NO†, X_inv = S @ C_NO)``.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">S_inv_half</span> <span class="o">=</span> <span class="n">_S_inv_half</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">S_inv_half</span> <span class="o">@</span> <span class="n">dmk</span> <span class="o">@</span> <span class="n">S_inv_half</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">M</span> <span class="o">+</span> <span class="n">M</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">n_occ</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="n">nbf</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nbf</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">nbf</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">n_occ</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">n_occ</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">tol_degen</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">-</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">uB</span> <span class="o">=</span> <span class="n">u</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">C_NO_B</span> <span class="o">=</span> <span class="n">S_inv_half</span> <span class="o">@</span> <span class="n">uB</span>
+            <span class="n">FB</span> <span class="o">=</span> <span class="n">C_NO_B</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Fk</span> <span class="o">@</span> <span class="n">C_NO_B</span>
+            <span class="n">FB</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">FB</span> <span class="o">+</span> <span class="n">FB</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">FB</span><span class="p">)</span>
+            <span class="n">u</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">uB</span> <span class="o">@</span> <span class="n">W</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">j</span>
+
+    <span class="n">C_NO</span> <span class="o">=</span> <span class="p">(</span><span class="n">S_inv_half</span> <span class="o">@</span> <span class="n">u</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">C_NO</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Sk</span> <span class="o">@</span> <span class="n">C_NO</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_X_ibz</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">S_ibz</span><span class="p">,</span> <span class="n">F_ibz</span><span class="p">,</span> <span class="n">dm_ibz</span><span class="p">,</span> <span class="n">mo_coeff_ibz</span><span class="p">,</span>
+                 <span class="n">tol_sing</span><span class="p">,</span> <span class="n">tol_degen</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Per-IBZ orthogonalization step shared by ``build_X_kspace`` and</span>
+<span class="sd">    ``build_X_kspace_from_ao_reps``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X_per_irrep, X_inv_per_irrep : lists of length n_ibz</span>
+<span class="sd">        Per-IBZ-point X and X_inv in the ``X Z X†`` convention.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">n_ibz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S_ibz</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">X_per_irrep</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_ibz</span>
+    <span class="n">Xinv_per_irrep</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_ibz</span>
+
+    <span class="k">for</span> <span class="n">i_ir</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ibz</span><span class="p">):</span>
+        <span class="n">Sk</span> <span class="o">=</span> <span class="n">S_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;lowdin&quot;</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span> <span class="o">=</span> <span class="n">lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol_sing</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;symmetric_lowdin&quot;</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span> <span class="o">=</span> <span class="n">symmetric_lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol_sing</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mo&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">Ck</span> <span class="o">=</span> <span class="n">mo_coeff_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Fk</span> <span class="o">=</span> <span class="n">F_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">Fk</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">Fk</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">Fk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">Fk</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">Ck</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Fk</span><span class="p">,</span> <span class="n">Sk</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span> <span class="o">=</span> <span class="n">mo_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">Ck</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;natural&quot;</span><span class="p">:</span>
+            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+            <span class="n">Fk</span> <span class="o">=</span> <span class="n">F_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dmk</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">dmk</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">dmk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dmk</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">Fk</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">Fk</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">Fk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">Fk</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span> <span class="o">=</span> <span class="n">_natural_per_k_with_fock_tiebreak</span><span class="p">(</span>
+                <span class="n">Sk</span><span class="p">,</span> <span class="n">dmk</span><span class="p">,</span> <span class="n">Fk</span><span class="p">,</span> <span class="n">tol_degen</span><span class="o">=</span><span class="n">tol_degen</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
-            <span class="n">Sk</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;build_X_kspace: unknown mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;(expected &#39;lowdin&#39;, &#39;symmetric_lowdin&#39;, &#39;mo&#39;, or &#39;natural&#39;).&quot;</span>
+            <span class="p">)</span>
+        <span class="n">X_per_irrep</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">Xinv_per_irrep</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_inv</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
 
-        <span class="c1"># compute natural orbital basis</span>
-        <span class="n">Sd</span><span class="p">,</span> <span class="n">Sv</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">dmk</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Sk</span><span class="p">))</span>
-        <span class="n">Sv</span> <span class="o">=</span> <span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-        <span class="n">Svi</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Sv</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span>
 
-        <span class="c1"># Check that transformations for the inversion symmetries are consistent</span>
-        <span class="k">if</span> <span class="n">ik</span> <span class="o">!=</span> <span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">],</span> <span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)),</span> <span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">dm</span><span class="p">[</span><span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]],</span> <span class="n">Sv</span><span class="o">.</span><span class="n">T</span><span class="p">)),</span>
-                          <span class="n">atol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">],</span> <span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">dm</span><span class="p">[</span><span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]],</span> <span class="n">Sv</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span> <span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">ik</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">],</span> <span class="n">kmesh</span><span class="p">[</span><span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">],</span> <span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">dm</span><span class="p">[</span><span class="n">pairing</span><span class="p">[</span><span class="n">ik</span><span class="p">]],</span> <span class="n">Sv</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_propagate_with_reps</span><span class="p">(</span><span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span> <span class="n">ibz2bz</span><span class="p">,</span> <span class="n">bz2ibz</span><span class="p">,</span>
+                         <span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">tr_conj</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Propagate per-IBZ ``(X, X_inv)`` to every BZ point given precomputed</span>
+<span class="sd">    AO-space rotations ``k_sym_transform_ao`` and TR flags ``tr_conj``.</span>
+
+<span class="sd">    Convention (matching ``common_utils.store_kstruct_ops_info``):</span>
+
+<span class="sd">    - Non-TR (``tr_conj[k] == False``): the AO rotation ``U(k)`` is</span>
+<span class="sd">      ``get_representation(k, stars_ops[k], ...)`` (or the spinor analog),</span>
+<span class="sd">      and ``M(k) = U M(k_ir) U†``. Then</span>
+
+<span class="sd">          X(k)     = X(k_ir) @ U†</span>
+<span class="sd">          X_inv(k) = U @ X_inv(k_ir)</span>
+
+<span class="sd">    - TR (``tr_conj[k] == True``): the stored rotation already</span>
+<span class="sd">      incorporates the conjugation factor (e.g. for X2C double group it</span>
+<span class="sd">      is ``(U_spinor @ Θ).conj()``), and the reconstruction is</span>
+<span class="sd">      ``M(k) = (U M(k_ir) U†).conj()``. Then</span>
+
+<span class="sd">          X(k)     = (X(k_ir) @ U†).conj()</span>
+<span class="sd">          X_inv(k) = (U @ X_inv(k_ir)).conj()</span>
+
+<span class="sd">    so that ``X(k) S(k) X(k)† = I`` at every BZ point.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">ibz2bz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ibz2bz</span><span class="p">)</span>
+    <span class="n">bz2ibz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bz2ibz</span><span class="p">)</span>
+    <span class="n">nk</span> <span class="o">=</span> <span class="n">bz2ibz_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">X_per_irrep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_ortho</span><span class="p">,</span> <span class="n">n_basis</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">X_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nk</span><span class="p">,</span> <span class="n">n_ortho</span><span class="p">,</span> <span class="n">n_basis</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="n">X_inv_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nk</span><span class="p">,</span> <span class="n">n_basis</span><span class="p">,</span> <span class="n">n_ortho</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tr_conj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tr_conj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nk</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="p">):</span>
+        <span class="n">i_ir</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bz2ibz_arr</span><span class="p">[</span><span class="n">ik</span><span class="p">])</span>
+        <span class="n">X_ir</span> <span class="o">=</span> <span class="n">X_per_irrep</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+        <span class="n">Xinv_ir</span> <span class="o">=</span> <span class="n">Xinv_per_irrep</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">k_sym_transform_ao</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
+
+        <span class="n">Xk</span> <span class="o">=</span> <span class="n">X_ir</span> <span class="o">@</span> <span class="n">u</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">Xinvk</span> <span class="o">=</span> <span class="n">u</span> <span class="o">@</span> <span class="n">Xinv_ir</span>
+        <span class="k">if</span> <span class="n">tr_conj</span><span class="p">[</span><span class="n">ik</span><span class="p">]:</span>
+            <span class="n">Xk</span> <span class="o">=</span> <span class="n">Xk</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+            <span class="n">Xinvk</span> <span class="o">=</span> <span class="n">Xinvk</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+        <span class="n">X_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xk</span>
+        <span class="n">X_inv_k</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xinvk</span>
+
+    <span class="k">return</span> <span class="n">X_k</span><span class="p">,</span> <span class="n">X_inv_k</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_propagate_X_to_star</span><span class="p">(</span>
+    <span class="n">X_per_irrep</span><span class="p">,</span>
+    <span class="n">Xinv_per_irrep</span><span class="p">,</span>
+    <span class="n">kstruct</span><span class="p">,</span>
+    <span class="n">mycell</span><span class="p">,</span>
+    <span class="n">spinor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Build precomputed AO-rotation arrays from ``kstruct`` + ``mycell`` and</span>
+<span class="sd">    delegate to ``_propagate_with_reps``.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">nk</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span>
+    <span class="n">stars_ops</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">stars_ops_bz</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">X_per_irrep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nbasis_out</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">k_sym_transform_ao</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nk</span><span class="p">,</span> <span class="n">nbasis_out</span><span class="p">,</span> <span class="n">nbasis_out</span><span class="p">),</span>
+                                  <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="n">tr_conj_bz</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">time_reversal_symm_bz</span>
+
+    <span class="k">if</span> <span class="n">spinor</span><span class="p">:</span>
+        <span class="n">nao</span> <span class="o">=</span> <span class="n">mycell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">nao</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="p">):</span>
+        <span class="n">iop</span> <span class="o">=</span> <span class="n">stars_ops</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">spinor</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">get_spinor_representation</span><span class="p">(</span><span class="n">ik</span><span class="p">,</span> <span class="n">iop</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">kstruct</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tr_conj_bz</span><span class="p">[</span><span class="n">ik</span><span class="p">]:</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">u</span> <span class="o">@</span> <span class="n">theta</span><span class="p">)</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">get_representation</span><span class="p">(</span><span class="n">ik</span><span class="p">,</span> <span class="n">iop</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">kstruct</span><span class="p">)</span>
+        <span class="n">k_sym_transform_ao</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span>
 
-        <span class="c1"># save density matrix eigenvalues for future analysis</span>
-        <span class="n">dmmm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="p">(</span><span class="n">Sv</span><span class="p">,</span> <span class="n">dm</span><span class="p">[</span><span class="n">ik</span><span class="p">],</span> <span class="n">Sv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_propagate_with_reps</span><span class="p">(</span>
+        <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span>
+        <span class="n">kstruct</span><span class="o">.</span><span class="n">ibz2bz</span><span class="p">,</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">bz2ibz</span><span class="p">,</span>
+        <span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">tr_conj_bz</span><span class="p">,</span>
+    <span class="p">)</span>
 
-        <span class="c1"># here we assume that the direct transformation is for quantities like Self-energy and Fock matrix</span>
-        <span class="c1"># and the inverse transformation if for quantities like density matrix and Green&#39;s function</span>
-        <span class="n">x_pinv</span> <span class="o">=</span> <span class="n">Sv</span>
-        <span class="n">x</span>  <span class="o">=</span> <span class="n">Svi</span>
 
-        <span class="c1"># check that direct and inverse symmetries are consistent</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pinv</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+<div class="viewcode-block" id="build_X_kspace">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.build_X_kspace">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_X_kspace</span><span class="p">(</span>
+    <span class="n">mode</span><span class="p">,</span>
+    <span class="n">kstruct</span><span class="p">,</span>
+    <span class="n">mycell</span><span class="p">,</span>
+    <span class="n">S_ibz</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">F_ibz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dm_ibz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mo_coeff_ibz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">spinor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">tol_sing</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span>
+    <span class="n">tol_degen</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Build orthogonalization matrices ``(X_k, X_inv_k)`` over the full BZ.</span>
 
-        <span class="n">dmkd</span> <span class="o">=</span> <span class="n">orth</span><span class="o">.</span><span class="n">transform_per_k</span><span class="p">(</span><span class="n">dmk</span><span class="p">,</span> <span class="n">x_pinv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">dmkd</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">dmkd</span><span class="p">))))</span>
+<span class="sd">    ``X`` is constructed only at IBZ k-points using one of the per-k</span>
+<span class="sd">    primitives, then propagated to every star member via the space-group</span>
+<span class="sd">    + time-reversal representations carried by ``kstruct``. See</span>
+<span class="sd">    ``_propagate_X_to_star`` for the convention.</span>
 
-        <span class="c1"># store transformation basis for current k-point</span>
-        <span class="n">X_inv_k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_pinv</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-        <span class="n">X_k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mode : {&quot;lowdin&quot;, &quot;symmetric_lowdin&quot;, &quot;mo&quot;, &quot;natural&quot;}</span>
+<span class="sd">        IBZ primitive to use.</span>
+<span class="sd">    kstruct : pyscf.pbc.lib.kpts.KPoints</span>
+<span class="sd">        Same object the rest of mbtools uses (e.g. from</span>
+<span class="sd">        ``kpt_utils.build_q_struct(mycell, kmesh, space_symm=True,</span>
+<span class="sd">        tr_symm=True)``).</span>
+<span class="sd">    mycell : pyscf.pbc.gto.Cell</span>
+<span class="sd">        Required for the AO-space representations.</span>
+<span class="sd">    S_ibz : (n_ibz, n, n) ndarray</span>
+<span class="sd">        Overlap at IBZ k-points, in the order</span>
+<span class="sd">        ``kstruct.kpts_scaled[kstruct.ibz2bz]``.</span>
+<span class="sd">    F_ibz : (n_ibz, n, n) ndarray, optional</span>
+<span class="sd">        Fock at IBZ. Required for ``mode=&quot;natural&quot;`` (degeneracy</span>
+<span class="sd">        tie-breaking) and for ``mode=&quot;mo&quot;`` when ``mo_coeff_ibz`` is not</span>
+<span class="sd">        provided (spin-averaged Fock is used to derive MOs).</span>
+<span class="sd">    dm_ibz : (n_ibz, n, n) ndarray, optional</span>
+<span class="sd">        Spin-averaged / total density matrix at IBZ. Required for</span>
+<span class="sd">        ``mode=&quot;natural&quot;``.</span>
+<span class="sd">    mo_coeff_ibz : (n_ibz, n, n_mo) ndarray, optional</span>
+<span class="sd">        MO coefficients at IBZ. Preferred input for ``mode=&quot;mo&quot;``.</span>
+<span class="sd">    spinor : bool, default False</span>
+<span class="sd">        If True, use the double-group spinor representation</span>
+<span class="sd">        (``get_spinor_representation``). Currently only supported with</span>
+<span class="sd">        ``mode=&quot;lowdin&quot;``.</span>
+<span class="sd">    tol_sing : float</span>
+<span class="sd">        Threshold for discarding small eigenvalues of ``S`` in the</span>
+<span class="sd">        Löwdin primitive.</span>
+<span class="sd">    tol_degen : float</span>
+<span class="sd">        Tolerance used by the natural-mode Fock tie-breaker to detect</span>
+<span class="sd">        degenerate occupation blocks.</span>
 
-    <span class="c1"># save density matrix eigen values distribution per each k-point</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;dm_k&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ik</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dmmm</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;dm_band_k&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ik</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dmmm</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">X_inv_k</span><span class="p">,</span> <span class="n">X_k</span></div>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X_k     : (nk, n_ortho, n) complex128 ndarray</span>
+<span class="sd">    X_inv_k : (nk, n,        n_ortho) complex128 ndarray</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">spinor</span> <span class="ow">and</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;lowdin&quot;</span><span class="p">,</span> <span class="s2">&quot;symmetric_lowdin&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;build_X_kspace: spinor=True only supported for mode in &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">&#39;lowdin&#39;, &#39;symmetric_lowdin&#39;</span><span class="se">}}</span><span class="s2">, got mode=</span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;natural&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dm_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;build_X_kspace: mode=&#39;natural&#39; requires dm_ibz and F_ibz.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mo&quot;</span> <span class="ow">and</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;build_X_kspace: mode=&#39;mo&#39; requires mo_coeff_ibz or F_ibz.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">ibz2bz</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">ibz2bz</span>
+    <span class="n">n_ibz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ibz2bz</span><span class="p">)</span>
+    <span class="n">S_ibz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S_ibz</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">n_ibz</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;build_X_kspace: S_ibz has </span><span class="si">{</span><span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> k-points but &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;kstruct has </span><span class="si">{</span><span class="n">n_ibz</span><span class="si">}</span><span class="s2"> IBZ points.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span> <span class="o">=</span> <span class="n">_build_X_ibz</span><span class="p">(</span>
+        <span class="n">mode</span><span class="p">,</span> <span class="n">S_ibz</span><span class="p">,</span> <span class="n">F_ibz</span><span class="p">,</span> <span class="n">dm_ibz</span><span class="p">,</span> <span class="n">mo_coeff_ibz</span><span class="p">,</span> <span class="n">tol_sing</span><span class="p">,</span> <span class="n">tol_degen</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_propagate_X_to_star</span><span class="p">(</span>
+        <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span> <span class="n">kstruct</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">spinor</span><span class="o">=</span><span class="n">spinor</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="build_X_kspace_from_ao_reps">
+<a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.build_X_kspace_from_ao_reps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_X_kspace_from_ao_reps</span><span class="p">(</span>
+    <span class="n">mode</span><span class="p">,</span>
+    <span class="n">S_ibz</span><span class="p">,</span>
+    <span class="n">ibz2bz</span><span class="p">,</span>
+    <span class="n">bz2ibz</span><span class="p">,</span>
+    <span class="n">k_sym_transform_ao</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">tr_conj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">F_ibz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dm_ibz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mo_coeff_ibz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tol_sing</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span>
+    <span class="n">tol_degen</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Build ``(X_k, X_inv_k)`` from precomputed AO-space rotations.</span>
+
+<span class="sd">    Identical to ``build_X_kspace`` but consumes the symmetry information</span>
+<span class="sd">    that ``common_utils.store_kstruct_ops_info`` already writes into</span>
+<span class="sd">    ``input.h5`` under ``/symmetry/k`` —</span>
+
+<span class="sd">      - ``ibz2bz``            (n_ibz,)        BZ indices of IBZ reps</span>
+<span class="sd">      - ``bz2ibz``            (nk,)           IBZ index for each BZ point</span>
+<span class="sd">      - ``k_sym_transform_ao``(nk, n, n)      stored AO rotation U(k)</span>
+<span class="sd">      - ``tr_conj``           (nk,)  bool     TR partner flags</span>
+
+<span class="sd">    — instead of (kstruct, mycell). Designed for callers like the SEET</span>
+<span class="sd">    pre-processor which read these arrays from h5 and do not carry a</span>
+<span class="sd">    PySCF ``KPoints`` object.</span>
+
+<span class="sd">    For non-TR points, ``M(k) = U M(k_ir) U†``; for TR points the stored</span>
+<span class="sd">    ``U`` already incorporates the conjugation factor (e.g. for X2C</span>
+<span class="sd">    double group, ``(U_spinor @ Θ).conj()``) and the reconstruction is</span>
+<span class="sd">    ``M(k) = (U M(k_ir) U†).conj()``. The function applies the matching</span>
+<span class="sd">    rule for X automatically — callers do not need to special-case TR.</span>
+
+<span class="sd">    Parameters mirror ``build_X_kspace``; ``mode`` semantics are</span>
+<span class="sd">    identical. ``spinor`` is implicit in the basis size of</span>
+<span class="sd">    ``S_ibz`` / ``k_sym_transform_ao`` (both are ``nso × nso`` for X2C).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X_k     : (nk, n_ortho, n) complex128 ndarray</span>
+<span class="sd">    X_inv_k : (nk, n,        n_ortho) complex128 ndarray</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;natural&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dm_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;build_X_kspace_from_ao_reps: mode=&#39;natural&#39; requires &quot;</span>
+            <span class="s2">&quot;dm_ibz and F_ibz.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mo&quot;</span> <span class="ow">and</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;build_X_kspace_from_ao_reps: mode=&#39;mo&#39; requires &quot;</span>
+            <span class="s2">&quot;mo_coeff_ibz or F_ibz.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">ibz2bz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ibz2bz</span><span class="p">)</span>
+    <span class="n">n_ibz</span> <span class="o">=</span> <span class="n">ibz2bz_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">S_ibz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S_ibz</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">n_ibz</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;build_X_kspace_from_ao_reps: S_ibz has </span><span class="si">{</span><span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;k-points but ibz2bz has </span><span class="si">{</span><span class="n">n_ibz</span><span class="si">}</span><span class="s2"> entries.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span> <span class="o">=</span> <span class="n">_build_X_ibz</span><span class="p">(</span>
+        <span class="n">mode</span><span class="p">,</span> <span class="n">S_ibz</span><span class="p">,</span> <span class="n">F_ibz</span><span class="p">,</span> <span class="n">dm_ibz</span><span class="p">,</span> <span class="n">mo_coeff_ibz</span><span class="p">,</span> <span class="n">tol_sing</span><span class="p">,</span> <span class="n">tol_degen</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_propagate_with_reps</span><span class="p">(</span>
+        <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span>
+        <span class="n">ibz2bz_arr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bz2ibz</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tr_conj</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span> <span class="k">if</span> <span class="n">tr_conj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
 
 </pre></div>
         </article>
@@ -581,8 +733,8 @@
     </aside>
   </div>
 </div><script src="../../../_static/documentation_options.js?v=b489f392"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>
