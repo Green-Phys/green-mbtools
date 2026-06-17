@@ -23,6 +23,38 @@ from . import kpt_utils
 J2C_LIN_DEP_THRESH = 1e-10
 
 
+# AO block of X_k[ik] for ERI rotation. For X2C the spinor X is
+# (2·nao, 2·nao) and we slice the upper-left nao×nao block — valid only
+# because the CLI guards (pyscf_init / init_seet) restrict X2C
+# orthogonalization to Löwdin variants, whose X inherits the
+# block-diagonal spin structure of the spinor S. MO and natural-orbital
+# rotations are refused upstream for X2C precisely because their X
+# would not be block-diagonal. Rectangular X (rank-deficient case)
+# is rejected here as it can't fit the (NQ, nao, nao) chunk shape.
+def _x_block_for_eri(X_k, ik, nao):
+    Xi = np.asarray(X_k[ik])
+    if Xi.shape == (nao, nao):
+        return Xi
+    if Xi.shape == (2 * nao, 2 * nao):
+        return Xi[:nao, :nao]
+    raise ValueError(
+        f"_x_block_for_eri: X_k[{ik}] has shape {Xi.shape}; expected "
+        f"({nao}, {nao}) or ({2*nao}, {2*nao}). The three-center integral "
+        "storage path requires a square orthogonalizer; rank-deficient "
+        "transforms (lowdin_per_k with linear dependencies, or canonical "
+        "orthogonalization dropping modes) cannot be written into "
+        "df_hf_int / df_int."
+    )
+
+
+# Lpq_ortho[Q] = X_i @ Lpq[Q] @ X_j.conj().T — the "X Z X†" convention used by
+# the per-k ortho primitives; pairs with the dm stored by common_utils.orthogonalize
+# so the Hartree contraction Σ_{ab} L[Q,a,b] * dm[b,a] inside mbpt's HF kernel
+# reduces to its AO value.
+def _rotate_Lpq(Lpq, X_i, X_j):
+    return np.einsum("Ia,Qab,Jb->QIJ", X_i, Lpq, X_j.conj(), optimize=True)
+
+
 def compute_kG(k, Gv, wrap_around, mesh, cell):
     if abs(k).sum() > 1e-9:
         kG = k + Gv
@@ -345,15 +377,26 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
     buffer = np.zeros((chunk_size, NQ, nao, nao), dtype=complex)
     Lpq_mo = np.zeros((NQ, nao, nao), dtype=complex)
     chunk_indices = []
+    # Rotate three-center integrals into the AO->ortho basis when
+    # args.orth != "none", so on-disk V matches S/F/T/dm in input.h5.
+    rotate = (X_k is not None and len(X_k) == kmesh.shape[0]
+              and args.orth != "none")
+
     for i in kpair_irre_list:
         k1 = kptis[i]
         k2 = kptjs[i]
+        k1_idx, k2_idx = kptij_idx[i]
+        if rotate:
+            X_i = _x_block_for_eri(X_k, k1_idx, nao)
+            X_j = _x_block_for_eri(X_k, k2_idx, nao)
         # auxiliary basis index
         s1 = 0
         for XXX in mydf.sr_loop((k1,k2), max_memory=4000, compact=False):
             LpqR = XXX[0]
             LpqI = XXX[1]
             Lpq = (LpqR + LpqI*1j).reshape(LpqR.shape[0], nao, nao)
+            if rotate:
+                Lpq = _rotate_Lpq(Lpq, X_i, X_j)
             buffer[cnt% chunk_size, s1:s1+Lpq.shape[0], :, :] = Lpq[0:Lpq.shape[0],:,:]
             # s1 = NQ at maximum.
             s1 += Lpq.shape[0]
@@ -363,6 +406,8 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
                 LpqR = XXX[0]
                 LpqI = XXX[1]
                 Lpq = (LpqR + LpqI*1j).reshape(LpqR.shape[0], nao, nao)
+                if rotate:
+                    Lpq = _rotate_Lpq(Lpq, X_i, X_j)
                 buffer[cnt% chunk_size, s1:s1+Lpq.shape[0], :, :] = Lpq[0:Lpq.shape[0],:,:]
                 # s1 = NQ at maximum.
                 s1 += Lpq.shape[0]
@@ -415,7 +460,7 @@ def weighted_coulG_ewald_2nd(mydf, kpt, exx, mesh):
     mydf.kpts = oldkpts
     return coulG
 
-def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5"):
+def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5", X_k=None):
     # global full_k_mesh
     data = h5py.File(filename, "w")
     EW     = data.create_group("EW")
@@ -472,6 +517,12 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
     df1.build()
     _, nk2, nk3 = args.nk
 
+    # Rotate Ewald-correction buffers to AO->ortho basis when
+    # args.orth != "none", to match the V integrals written by
+    # compute_integrals (avoids mixing V_ortho with EW_AO downstream).
+    rotate = (X_k is not None and len(X_k) == kmesh.shape[0]
+              and args.orth != "none")
+
     # We know that G=0 contribution diverge only when q = 0
     # so we loop over (k1,k1) pairs
     for i, ki in enumerate(kmesh):
@@ -510,8 +561,15 @@ def compute_ewald_correction(args, maindf, kmesh, nao, filename = "df_ewald.h5")
             buffer2[s1:s1+Lpq.shape[0], :, :] = Lpq_mo[0:Lpq.shape[0],:,:]
             s1 += Lpq.shape[0]
 
-        EW["{}".format(i)] = (buffer1 - buffer2).view(np.float64)
-        EW_bar["{}".format(i)] = buffer2.view(np.float64)
+        if rotate:
+            X_i = _x_block_for_eri(X_k, i, nao)
+            ew_arr = _rotate_Lpq(buffer1 - buffer2, X_i, X_i)
+            ew_bar_arr = _rotate_Lpq(buffer2, X_i, X_i)
+        else:
+            ew_arr = buffer1 - buffer2
+            ew_bar_arr = buffer2
+        EW["{}".format(i)] = ew_arr.view(np.float64)
+        EW_bar["{}".format(i)] = ew_bar_arr.view(np.float64)
         buffer1[:] = 0.0
         buffer2[:] = 0.0
 

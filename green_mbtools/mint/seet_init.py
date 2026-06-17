@@ -68,33 +68,26 @@ class seet_init:
         dm    = (dm[0] + dm[1])*0.5
         gf2_inp_data.close()
 
-        e_nuc           = inp_data["HF/Energy_nuc"][()]
-        nk              = inp_data["HF/nk"][()]
         kmesh           = inp_data["grid/k_mesh"][()]
         kmesh_sc        = inp_data["grid/k_mesh_scaled"][()]
-        reduced_mesh    = inp_data["grid/k_mesh"][()]
-        reduced_mesh_sc = inp_data["grid/k_mesh_scaled"][()]
-        if "grid/weight" in inp_data:
-            weight          = inp_data["grid/weight"][()]
-            conj_list       = inp_data["grid/conj_list"][()]
-            ir_list = inp_data["grid/ir_list"][()]
-            bz_index = inp_data["grid/index"][()]
-        else:
-            weight = [1] * kmesh.shape[0]
-            conj_list = [0] * kmesh.shape[0]
-            ir_list = range(kmesh.shape[0])
-            bz_index = range(kmesh.shape[0])
         S     = inp_data["HF/S-k"][()].view(np.complex128)
         S     = S.reshape(S.shape[:-1])
         T     = inp_data["HF/H-k"][()].view(np.complex128)
         T     = T.reshape(T.shape[:-1])
         if self.args.from_ibz:
-            # T = to_full_bz(T, conj_list, ir_list, bz_index, 1)
-            S1 = self.to_full_bz(S1, conj_list, ir_list, bz_index, 1)
+            if "grid/weight" in inp_data:
+                conj_list = inp_data["grid/conj_list"][()]
+                ir_list   = inp_data["grid/ir_list"][()]
+                bz_index  = inp_data["grid/index"][()]
+            else:
+                conj_list = [0] * kmesh.shape[0]
+                ir_list   = range(kmesh.shape[0])
+                bz_index  = range(kmesh.shape[0])
+            S1   = self.to_full_bz(S1, conj_list, ir_list, bz_index, 1)
             dm_s = self.to_full_bz(dm_s, conj_list, ir_list, bz_index, 1)
-            dm = self.to_full_bz(dm, conj_list, ir_list, bz_index, 0)
+            dm   = self.to_full_bz(dm, conj_list, ir_list, bz_index, 0)
 
         inp_data.close()
         F = S1 + T
 
-        return F, S, T, dm, dm_s, e_nuc, nk, kmesh, kmesh_sc, reduced_mesh, reduced_mesh_sc, weight, conj_list, ir_list, bz_index
+        return F, S, T, dm, dm_s, kmesh, kmesh_sc

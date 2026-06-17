@@ -107,7 +107,7 @@ class pyscf_pbc_init (pyscf_init):
         if self.args.grid_only:
             comm.store_k_grid(self.args, self.cell, self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik)
             auxcell = addons.make_auxmol(self.cell, mydf.auxbasis)
-            # NOTE: if args.orth = 1, we will not be able to transform the k_sym_transform_ao yet.
+            # NOTE: if args.orth != "none", we will not be able to transform the k_sym_transform_ao yet.
             comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct)
             comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
             return
@@ -139,8 +139,18 @@ class pyscf_pbc_init (pyscf_init):
         X_k = []
         X_inv_k = []
 
-        # Orthogonalization matrix
-        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
+        # Orthogonalization matrix. For X2C (--x2c=2) the spinor S is
+        # block-diagonal in spin so Löwdin variants give a block-diagonal
+        # X whose AO block is a valid ERI rotation; MO and natural
+        # rotations would have non-block-diagonal X in general and are
+        # refused.
+        if self.args.x2c == 2 and self.args.orth not in ("none", "lowdin", "symmetric_lowdin"):
+            raise NotImplementedError(
+                "ortho not supported for 2-component / x2c1e calculations "
+                "with mode={!r}; allowed modes are 'none', 'lowdin', "
+                "'symmetric_lowdin'.".format(self.args.orth)
+            )
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
@@ -194,11 +204,22 @@ class pyscf_pbc_init (pyscf_init):
             Always ``cell.nao_nr()`` regardless of the X2C level, because
             the Coulomb integrals are non-relativistic.
         X_k : list of ndarray
-            Per-k-point orthogonalisation matrices X(k). For Löwdin
-            orthogonalisation, ``X(k) = S(k)^{-1/2}``. When
-            orthogonalisation is disabled (``args.orth == 0``), ``X_k``
-            contains identity transforms for each k-point rather than an
-            empty list.
+            Per-k-point orthogonalisation matrices X(k). The specific form
+            depends on ``args.orth``:
+
+            * ``"lowdin"`` — canonical Löwdin, ``X(k) = Lambda^{-1/2} V†``
+              (rectangular when small eigenvalues of S are dropped).
+            * ``"symmetric_lowdin"`` — Hermitian Löwdin, ``X(k) = S(k)^{-1/2}``
+              (square; treats sub-tol eigenvalues pseudo-inversely).
+            * ``"mo"`` — canonical MOs, ``X(k) = C(k)†`` with
+              ``X_inv = S(k) @ C(k)``.
+            * ``"natural"`` — natural orbitals, ``X(k) = C_NO(k)†`` with
+              ``X_inv = S(k) @ C_NO(k)`` and ``C_NO`` the S-orthonormal
+              eigenvectors of ``S^{-1/2} dm S^{-1/2}``.
+
+            When orthogonalisation is disabled (``args.orth == "none"``),
+            ``X_k`` contains identity transforms for each k-point rather
+            than an empty list.
         '''
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
@@ -209,7 +230,7 @@ class pyscf_pbc_init (pyscf_init):
         # GF2/GW corrections use a separate code path that handles the
         # correction internally; the plain Ewald correction is handled below.
         if 'gf2' in self.args.finite_size_kind or 'gw' in self.args.finite_size_kind or 'gw_s' in self.args.finite_size_kind:
-            self.compute_twobody_finitesize_correction()
+            self.compute_twobody_finitesize_correction(X_k=X_k)
             if not self.args.keep_cderi:
                 os.remove("cderi.h5")
                 os.system("sync")
@@ -276,12 +297,20 @@ class pyscf_pbc_init (pyscf_init):
         inp_data["high_symm_path/special_points"] = special_points
         inp_data["high_symm_path/special_labels"] = special_labels
 
-    def compute_twobody_finitesize_correction(self, mydf=None):
+    def compute_twobody_finitesize_correction(self, mydf=None, X_k=None):
         if not os.path.exists(self.args.hf_int_path):
             os.mkdir(self.args.hf_int_path)
         if 'gf2' in self.args.finite_size_kind :
-            comm.compute_ewald_correction(self.args, self.cell, self.kmesh, self.args.hf_int_path + "/df_ewald.h5")
+            comm.compute_ewald_correction(
+                self.args, self.cell, self.kmesh,
+                self.args.hf_int_path + "/df_ewald.h5",
+                X_k=X_k,
+            )
         if 'gw' in self.args.finite_size_kind :
+            # AqQ is a plane-wave ↔ aux-basis map with no AO indices, so it
+            # does not need the AO→ortho rotation that the Coulomb integrals
+            # require. The mbpt GW correction consumes AqQ together with the
+            # already-rotated V on disk.
             self.evaluate_gw_correction(mydf)
             
     
@@ -416,8 +445,18 @@ class pyscf_mol_init (pyscf_init):
         X_k = []
         X_inv_k = []
 
-        # Orthogonalization matrix
-        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S)
+        # Orthogonalization matrix. For X2C (--x2c=2) the spinor S is
+        # block-diagonal in spin so Löwdin variants give a block-diagonal
+        # X whose AO block is a valid ERI rotation; MO and natural
+        # rotations would have non-block-diagonal X in general and are
+        # refused.
+        if self.args.x2c == 2 and self.args.orth not in ("none", "lowdin", "symmetric_lowdin"):
+            raise NotImplementedError(
+                "ortho not supported for 2-component / x2c1e calculations "
+                "with mode={!r}; allowed modes are 'none', 'lowdin', "
+                "'symmetric_lowdin'.".format(self.args.orth)
+            )
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
         # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is not long range divergence for molecule
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
         comm.store_mol_symmetry_info(self.args, self.kcell, auxcell, self.kmesh)
