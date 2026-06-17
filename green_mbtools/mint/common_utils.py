@@ -379,6 +379,15 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None):
         raise ValueError("orthogonalize: mf is required for orth='mo'.")
 
     ns = hf_dm.shape[0]
+    if orth == "mo" and ns == 2:
+        # No single C diagonalizes both spin Fock blocks; we fall back to the
+        # spin-averaged Fock. The resulting MOs are not the eigenstates of
+        # either F_alpha or F_beta individually.
+        logging.warning(
+            "orthogonalize: orth='mo' with ns=2 (UHF/UKS); using "
+            "spin-averaged MOs (eigenstates of 0.5*(F_alpha+F_beta)), "
+            "not the canonical alpha/beta MOs."
+        )
     maxdiff = -1
     old_shape = [-1, -1]
     for ik, k in enumerate(mydf.kpts):
