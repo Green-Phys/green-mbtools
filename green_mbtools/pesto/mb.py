@@ -313,7 +313,7 @@ class MB_post(object):
         occupations = np.zeros((self._ns, orbitals.shape[0]), dtype=complex)
         if self.S is not None:
             occupations = np.einsum(
-                'k,skij,skji->si', self._weight_ibz, self.dm, self.S
+                'k,skij,skji->si', self._weight_ibz, self.dm, self.S, optimize=True
             )
         else:
             occupations = np.einsum('k,skii->si', self._weight_ibz, self.dm)
@@ -382,7 +382,7 @@ class MB_post(object):
             gtau_orth = orth.sao_orth(
                 self.gtau, self.S, type='g'
             ) if self.S is not None else self.gtau
-            gtau_inp = np.einsum("...ii->...i", gtau_orth)
+            gtau_inp = np.diagonal(gtau_orth, axis1=-2, axis2=-1)
         else:
             gtau_inp = gtau_orth
         tau_mesh = self.ir.tau_mesh
@@ -418,7 +418,7 @@ class MB_post(object):
             gtau_orth = orth.sao_orth(
                 self.gtau, self.S, type='g'
             ) if self.S is not None else self.gtau
-            gtau_orth = np.einsum("...ii->...i", gtau_orth)
+            gtau_orth = np.diagonal(gtau_orth, axis1=-2, axis2=-1)
         nw = self.ir.wsample.shape[0]
         Gw_inp = self.ir.tau_to_w(gtau_orth)[nw//2:]
 
@@ -472,13 +472,13 @@ def to_full_bz(X, conj_list, ibz2bz, bz2ibz, k_ind, k_sym_trans):
             Xk = X[:, k, ::].conj() if conj_list[ik] else X[:, k, ::]
             Uk = k_sym_trans[ik]
             Uk_dag = Uk.conj().T
-            Xk = np.einsum('ab,sbc,cd->sad', Uk, Xk, Uk_dag)
+            Xk = (Uk @ Xk) @ Uk_dag
             Y[:, ik, ::] = Xk
         elif k_ind == 2:
             Xk = X[:, :, k, ::].conj() if conj_list[ik] else X[:, :, k, ::]
             Uk = k_sym_trans[ik]
             Uk_dag = Uk.conj().T
-            Xk = np.einsum('ab,tsbc,cd->tsad', Uk, Xk, Uk_dag)
+            Xk = (Uk @ Xk) @ Uk_dag
             Y[:, :, ik, ::] = Xk
     return Y
 
