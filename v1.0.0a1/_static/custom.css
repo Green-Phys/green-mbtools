@@ -1,0 +1,7 @@
+
+/* Center align sidebar text */
+.sidebar-brand-text {
+  text-align: center;
+  width: 100%;
+  /* display: blocks; */
+}
