@@ -277,7 +277,8 @@ def make_gdf_kptij_lst_jk(kstruct):
     '''
     [WIP]
     Build GDF k-point-pair list for get_jk
-    All combinations:
+    All combinations::
+
         k_ibz != k_bz
         k_bz  == k_bz
     '''

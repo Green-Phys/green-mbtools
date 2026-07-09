@@ -8,9 +8,11 @@ def lowdin_per_k(Sk, tol=1e-9):
     Symmetric (Löwdin) S^{-1/2} orthogonalization for a single k-point.
 
     Returns ``(X, X_inv)`` in the convention used by
-    ``common_utils.transform`` (i.e. transforms apply as ``X Z X†``):
+    ``common_utils.transform`` (i.e. transforms apply as ``X Z X†``)::
+
         X     = S^{-1/2}   (shape (n_ortho, nao))
         X_inv = S^{+1/2}   (shape (nao, n_ortho))
+
     Eigenvalues of ``Sk`` below ``tol`` are discarded.
     '''
     s_ev, s_eb = np.linalg.eigh(Sk)
@@ -389,7 +391,7 @@ def build_X_kspace_from_ao_reps(
 
       - ``ibz2bz``            (n_ibz,)        BZ indices of IBZ reps
       - ``bz2ibz``            (nk,)           IBZ index for each BZ point
-      - ``k_sym_transform_ao``(nk, n, n)      stored AO rotation U(k)
+      - ``k_sym_transform_ao`` (nk, n, n)     stored AO rotation U(k)
       - ``tr_conj``           (nk,)  bool     TR partner flags
 
     — instead of (kstruct, mycell). Designed for callers like the SEET
