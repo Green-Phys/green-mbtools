@@ -60,8 +60,18 @@ jobs:
           fi
 
       - name: Collect published doc versions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git fetch origin gh-pages --depth=1 || true
+          # Checkout runs with persist-credentials: false, so `origin` carries
+          # no auth header -- fetch via an authenticated URL so this also works
+          # for private repos. The explicit refspec forces the
+          # refs/remotes/origin/gh-pages ref to be created regardless of the
+          # remote's configured fetch refspec. A missing gh-pages branch (very
+          # first deploy) is tolerated and yields an empty list.
+          git fetch --depth=1 \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            gh-pages:refs/remotes/origin/gh-pages || true
           VERSIONS=$(git ls-tree origin/gh-pages --name-only 2>/dev/null \
             | grep -E '^v[0-9]' | tr '\n' ' ' || true)
           echo "DOC_EXISTING_VERSIONS=$VERSIONS" >> "$GITHUB_ENV"
