@@ -59,6 +59,13 @@ jobs:
             echo "DOC_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
           fi
 
+      - name: Collect published doc versions
+        run: |
+          git fetch origin gh-pages --depth=1 || true
+          VERSIONS=$(git ls-tree origin/gh-pages --name-only 2>/dev/null \
+            | grep -E '^v[0-9]' | tr '\n' ' ' || true)
+          echo "DOC_EXISTING_VERSIONS=$VERSIONS" >> "$GITHUB_ENV"
+
       - name: Build Sphinx docs
         run: sphinx-build -b html docs/ _build/$DOC_VERSION/html
 

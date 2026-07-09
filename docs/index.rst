@@ -92,8 +92,7 @@ Complete list of contributors is available on the `Github page <https://github.c
 Documentation for older versions
 --------------------------------
 
-* `1.0.0a0 (latest) <https://Green-Phys.github.io/green-mbtools>`_
-* `0.3.0 <https://Green-Phys.github.io/green-mbtools/v0.3.0>`_
+.. include:: _versions.rst
 
 .. toctree::
    :maxdepth: 3
