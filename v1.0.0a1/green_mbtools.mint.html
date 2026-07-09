@@ -762,10 +762,10 @@ This routine overrides get_coulG to perform interaction coarse-graining.</p>
 <dd><p>[WIP]
 Build GDF k-point-pair list for get_jk
 All combinations:</p>
-<blockquote>
-<div><p>k_ibz != k_bz
-k_bz  == k_bz</p>
-</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">k_ibz</span> <span class="o">!=</span> <span class="n">k_bz</span>
+<span class="n">k_bz</span>  <span class="o">==</span> <span class="n">k_bz</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -876,7 +876,7 @@ that <code class="docutils literal notranslate"><span class="pre">common_utils.s
 <div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ibz2bz</span></code>            (n_ibz,)        BZ indices of IBZ reps</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">bz2ibz</span></code>            (nk,)           IBZ index for each BZ point</p></li>
-<li><p><a href="#id1"><span class="problematic" id="id2">``</span></a>k_sym_transform_ao``(nk, n, n)      stored AO rotation U(k)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">k_sym_transform_ao</span></code> (nk, n, n)     stored AO rotation U(k)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tr_conj</span></code>           (nk,)  bool     TR partner flags</p></li>
 </ul>
 </div></blockquote>
@@ -908,10 +908,10 @@ identical. <code class="docutils literal notranslate"><span class="pre">spinor</
 <dd><p>Symmetric (Löwdin) S^{-1/2} orthogonalization for a single k-point.</p>
 <p>Returns <code class="docutils literal notranslate"><span class="pre">(X,</span> <span class="pre">X_inv)</span></code> in the convention used by
 <code class="docutils literal notranslate"><span class="pre">common_utils.transform</span></code> (i.e. transforms apply as <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">Z</span> <span class="pre">X†</span></code>):</p>
-<blockquote>
-<div><p>X     = S^{-1/2}   (shape (n_ortho, nao))
-X_inv = S^{+1/2}   (shape (nao, n_ortho))</p>
-</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span>     <span class="o">=</span> <span class="n">S</span><span class="o">^</span><span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">}</span>   <span class="p">(</span><span class="n">shape</span> <span class="p">(</span><span class="n">n_ortho</span><span class="p">,</span> <span class="n">nao</span><span class="p">))</span>
+<span class="n">X_inv</span> <span class="o">=</span> <span class="n">S</span><span class="o">^</span><span class="p">{</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">}</span>   <span class="p">(</span><span class="n">shape</span> <span class="p">(</span><span class="n">nao</span><span class="p">,</span> <span class="n">n_ortho</span><span class="p">))</span>
+</pre></div>
+</div>
 <p>Eigenvalues of <code class="docutils literal notranslate"><span class="pre">Sk</span></code> below <code class="docutils literal notranslate"><span class="pre">tol</span></code> are discarded.</p>
 </dd></dl>
 
@@ -1585,7 +1585,7 @@ residuals). See get_representation for full discussion.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=00f86429"></script>
+</div><script src="_static/documentation_options.js?v=a480e030"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
