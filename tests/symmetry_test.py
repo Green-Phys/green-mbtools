@@ -325,3 +325,62 @@ def test_x2c_fock_ibz_to_full_bz():
 def test_k_sym_transform_p0_matches_metric_basis_transform(generated_cases):
     """TODO: replace implementation-coupled check with a real-data validation."""
     pass
+
+
+def test_ao_rep_bloch_phase_on_supercell():
+    """AO symmetry operators must obey S(k)=U_k S(k_ir) U_k† for a supercell.
+
+    Regression for the Bloch-phase bug in ``get_representation``: the phase
+    factor was built from atom coordinates folded into [-0.5, 0.5) instead of
+    the as-input positions the Bloch integrals use, so any atom with input
+    fractional coordinate >= 0.5 acquired a spurious e^{i2*pi*k.L} factor.
+
+    A primitive cell (all atoms in [0, 0.5), e.g. the H2 case above) never
+    exercises the fold and always passed. This uses a rock-salt LiH cell
+    doubled along [111] (2 formula units): atoms sit at fractional 1/2 and 3/4,
+    with inequivalent Li/H sublattices, which is what exposes the wrong
+    relative phase between atoms. Broken operators give O(1) residuals here.
+    """
+    from pyscf.pbc import gto
+    from pyscf.pbc.lib import kpts as libkpts
+
+    from green_mbtools.mint.symmetry_utils import get_representation
+
+    a = 4.0
+    amat = np.array([[a, a / 2, a / 2], [a / 2, a, a / 2], [a / 2, a / 2, a]])
+    # rock-salt LiH, doubled along [111]; shift 0.03 off the exact-0.5 boundary
+    # so the origin never lands an atom on the fold discontinuity.
+    frac = np.array([[0, 0, 0], [0.25] * 3, [0.5] * 3, [0.75] * 3]) + 0.03
+    cart = frac @ amat
+
+    cell = gto.Cell()
+    cell.a = amat.tolist()
+    cell.atom = [["Li", cart[0]], ["H", cart[1]], ["Li", cart[2]], ["H", cart[3]]]
+    cell.basis = "gth-szv"
+    cell.pseudo = "gth-pbe"
+    cell.verbose = 0
+    cell.space_group_symmetry = True
+    cell.symmorphic = False
+    cell.build()
+
+    ks = libkpts.make_kpts(
+        cell, cell.make_kpts([4, 4, 4]),
+        space_group_symmetry=True, time_reversal_symmetry=True,
+    )
+    # The supercell must actually reduce, else the round-trip is vacuous.
+    assert ks.nkpts_ibz < ks.nkpts
+
+    overlap = np.asarray(cell.pbc_intor("int1e_ovlp", kpts=ks.kpts))
+    ibz_of = ks.ibz2bz[ks.bz2ibz]          # full-BZ index of each k's IBZ rep
+    tr = ks.time_reversal_symm_bz
+
+    for ik in range(ks.nkpts):
+        uop = get_representation(ik, ks.stars_ops_bz[ik], cell, ks)
+        recon = uop @ overlap[ibz_of[ik]] @ uop.conj().T
+        if tr[ik]:
+            recon = recon.conj()
+        np.testing.assert_allclose(
+            recon, overlap[ik], atol=1e-9, rtol=0,
+            err_msg=f"S(k) not reconstructed from IBZ at k={ik} "
+                    f"(IBZ rep={ibz_of[ik]}); k_sym_transform_ao Bloch phase is wrong",
+        )

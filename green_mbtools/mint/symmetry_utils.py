@@ -80,16 +80,18 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
     # Quantities to be returned
     partner_idx = np.zeros(n_atom, dtype=int)
     pos_diff = np.zeros((n_atom, 3))
-    coords_scaled = mycell.get_scaled_atom_coords().reshape(-1,3)
-    # ensure scaled coordinates are in [-0.5, 0.5)
-    for i in range(coords_scaled.shape[0]):
-        coords_scaled[i] = fold_to_unit_cell(coords_scaled[i])
+    # As-input scaled coordinates: this is the convention the Bloch integrals
+    # (H-k, S-k, ...) are built with, so the Bloch phase below MUST be
+    # referenced to these, not to folded ones.
+    coords_raw = mycell.get_scaled_atom_coords().reshape(-1, 3)
+    # A folded copy in [-0.5, 0.5) is used only to match an atom to its image
+    # (robust when atoms sit near/across the cell boundary).
+    coords_scaled = np.array([fold_to_unit_cell(c) for c in coords_raw])
 
     for i in range(n_atom):
         i_coord = coords_scaled[i]
         trans_pos = np.dot(rot, i_coord) + trans
         shift_pos = fold_to_unit_cell(trans_pos)
-        pos_diff[i] = shift_pos - trans_pos
 
         # Find the corresponding atom partner
         found_partner = False
@@ -104,9 +106,17 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
                 # Else
                 found_partner = True
                 partner_idx[i] = j
+                # The Bloch phase attached in get_representation is
+                # exp(i 2*pi k . pos_diff). It must use the unfolded, as-input
+                # positions that enter the integrals: pos_diff = r_j - (R r_i + t),
+                # i.e. minus the lattice vector connecting atom i's image to its
+                # partner j. Using folded coordinates here injects a spurious
+                # e^{i 2*pi k . L} for any atom whose input frac coord >= 0.5
+                # (e.g. in supercells), breaking X(k) = U X(k_ir) U^dagger.
+                pos_diff[i] = coords_raw[j] - (np.dot(rot, coords_raw[i]) + trans)
                 if verbose:
                     print(f"Atom {i} ({mycell.atom_symbol(i)}) maps to Atom {j} ({mycell.atom_symbol(j)})"
-                          + f" with shift {shift_pos - trans_pos}")
+                          + f" with lattice shift {pos_diff[i]}")
                 break
 
         # Handle error
