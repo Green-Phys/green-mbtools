@@ -65,14 +65,16 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
     
     Returns
     -------
-    partner_idx : int
-        Index of the atom that is the partner under the symmetry operation.
-    pos_diff : ndarray
-        The lattice vector connecting the operated atom to its partner in the
-        as-input (unfolded) coordinates: ``r_partner - (R @ r_i + t)`` (3,).
-        This is what the Bloch phase in :func:`get_representation` must use;
-        note the partner is *matched* using folded coordinates but the returned
-        vector is computed from the unfolded ones.
+    partner_idx : ndarray of int, shape (n_atom,)
+        For each atom, the index of the atom it is mapped onto by the symmetry
+        operation.
+    pos_diff : ndarray, shape (n_atom, 3)
+        For each atom, the lattice translation (in scaled/fractional
+        coordinates) carrying its operated position ``R @ r_i + t`` to its
+        in-cell partner ``r_j``: ``pos_diff = r_j - (R @ r_i + t)``. Partners are
+        matched using folded coordinates; this vector is computed from the
+        unfolded (as-input) coordinates that the Bloch phase in
+        :func:`get_representation` uses.
     """
     # info about symmetry operation
     rot = symm_op.rot
@@ -84,12 +86,11 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
     # Quantities to be returned
     partner_idx = np.zeros(n_atom, dtype=int)
     pos_diff = np.zeros((n_atom, 3))
-    # As-input scaled coordinates: this is the convention the Bloch integrals
-    # (H-k, S-k, ...) are built with, so the Bloch phase below MUST be
-    # referenced to these, not to folded ones.
+    # As-input scaled coordinates: the convention the Bloch integrals
+    # (H-k, S-k, ...) use, and the reference for the Bloch phase below.
     coords_raw = mycell.get_scaled_atom_coords().reshape(-1, 3)
-    # A folded copy in [-0.5, 0.5) is used only to match an atom to its image
-    # (robust when atoms sit near/across the cell boundary).
+    # Folded copy in [-0.5, 0.5), used to match an atom to its image (robust
+    # when atoms sit near/across the cell boundary).
     coords_scaled = np.array([fold_to_unit_cell(c) for c in coords_raw])
 
     for i in range(n_atom):
@@ -110,13 +111,10 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
                 # Else
                 found_partner = True
                 partner_idx[i] = j
-                # The Bloch phase attached in get_representation is
-                # exp(i 2*pi k . pos_diff). It must use the unfolded, as-input
-                # positions that enter the integrals: pos_diff = r_j - (R r_i + t),
-                # i.e. minus the lattice vector connecting atom i's image to its
-                # partner j. Using folded coordinates here injects a spurious
-                # e^{i 2*pi k . L} for any atom whose input frac coord >= 0.5
-                # (e.g. in supercells), breaking X(k) = U X(k_ir) U^dagger.
+                # Lattice translation carrying the operated position R r_i + t
+                # to its in-cell partner r_j, in as-input coordinates. This is
+                # the vector the Bloch phase exp(i 2*pi k . pos_diff) in
+                # get_representation uses.
                 pos_diff[i] = coords_raw[j] - (np.dot(rot, coords_raw[i]) + trans)
                 if verbose:
                     print(f"Atom {i} ({mycell.atom_symbol(i)}) maps to Atom {j} ({mycell.atom_symbol(j)})"
@@ -213,10 +211,9 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=F
         TR-paired k the spatial operation lands on the image -k and the
         reconstruction ``X(k) = (U X(k_ir) U^dagger)*`` conjugates back to +k,
         so U must be the operator that lands on -k, i.e. its phase must use -k.
-        (Harmless when the phase is real, since then +k == -k, which is why
-        cubic cells never needed it.) Set False for callers that apply their own
-        time-reversal handling -- the x2c==2 spinor path -- to avoid
-        double-correcting.
+        (A no-op when the phase is real, since then +k == -k.) Set False for
+        callers that apply their own time-reversal handling -- the x2c==2 spinor
+        path -- so the phase is not corrected twice.
 
     Returns
     -------
@@ -357,16 +354,11 @@ def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, ve
     u_spinor : (nso, nso) complex ndarray
         Full spinor AO representation, ``nso = 2 * nao``.
     """
-    # tr_phase=False is REQUIRED here (not merely "preserve behaviour"). For a
-    # TR point the x2c==2 store keeps (u_spinor @ theta).conj(); that .conj() is
-    # applied to the whole product, so besides the spin operator theta it also
-    # conjugates the orbital block, flipping its Bloch phase +k -> -k -- exactly
-    # the -k the time-reversal reconstruction needs. Hence the orbital phase
-    # must be built at +k here; tr_phase=True would flip it to -k and the store
-    # conj would flip it back to +k (double-flip) -- wrong for complex phases.
-    # Verified on hexagonal hBN: correct with tr_phase=False, O(1) error with
-    # tr_phase=True. (The spinor structure itself is exercised by the cubic
-    # test_x2c_* tests; the folding fix reaches this path via get_representation.)
+    # tr_phase=False here: for a TR point the x2c==2 store keeps
+    # (u_spinor @ theta).conj(). That conjugation acts on the whole product, so
+    # it also conjugates the orbital block and evaluates its Bloch phase at -k,
+    # which is what the reconstruction needs. The orbital phase is therefore
+    # built at +k here and the store conjugation supplies the -k.
     u_orbital = get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=tol, verbose=verbose, tr_phase=False)
     rot_frac = np.array(kstruct.ops[symm_op_idx].rot, dtype=float)
     a = mycell.lattice_vectors()

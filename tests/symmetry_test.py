@@ -330,16 +330,16 @@ def test_k_sym_transform_p0_matches_metric_basis_transform(generated_cases):
 def test_ao_rep_bloch_phase_on_supercell():
     """AO symmetry operators must obey S(k)=U_k S(k_ir) U_k† for a supercell.
 
-    Regression for the Bloch-phase bug in ``get_representation``: the phase
-    factor was built from atom coordinates folded into [-0.5, 0.5) instead of
-    the as-input positions the Bloch integrals use, so any atom with input
-    fractional coordinate >= 0.5 acquired a spurious e^{i2*pi*k.L} factor.
+    The ``get_representation`` Bloch phase must be built from the as-input atom
+    positions the integrals use. This exercises the case where that matters:
+    atoms with fractional coordinate >= 0.5, where the folded ([-0.5, 0.5)) and
+    as-input positions differ by a lattice vector.
 
-    A primitive cell (all atoms in [0, 0.5), e.g. the H2 case above) never
-    exercises the fold and always passed. This uses a rock-salt LiH cell
-    doubled along [111] (2 formula units): atoms sit at fractional 1/2 and 3/4,
-    with inequivalent Li/H sublattices, which is what exposes the wrong
-    relative phase between atoms. Broken operators give O(1) residuals here.
+    A primitive cell (all atoms in [0, 0.5), e.g. the H2 case above) does not
+    reach that case. This uses a rock-salt LiH cell doubled along [111] (2
+    formula units): atoms sit at fractional 1/2 and 3/4, with inequivalent Li/H
+    sublattices, so a wrong relative phase between atoms would show up as an
+    O(1) residual on the inter-atom blocks.
     """
     from pyscf.pbc import gto
     from pyscf.pbc.lib import kpts as libkpts
@@ -390,14 +390,13 @@ def test_ao_rep_time_reversal_phase():
     """AO symmetry operators must obey S(k)=U_k S(k_ir) U_k† at time-reversal-
     paired k-points that carry a *complex* Bloch phase.
 
-    Regression for the time-reversal phase bug in ``get_representation``. For a
-    TR-paired k, the spatial operation lands on -k and the reconstruction applies
-    a conjugation, so the Bloch phase must be evaluated at -k (not +k). Cubic
-    supercells (NiO/LiH, test above) only have *real* phases at their TR points,
-    where +k == -k, so they cannot catch this. Hexagonal hBN on a Gamma-centered
-    6x6x1 mesh folds heavily via time reversal with complex phases (e^{±i pi/3}),
-    which exposes it: the buggy code gives O(1) residuals on the inter-atom
-    blocks.
+    For a TR-paired k the spatial operation lands on -k and the reconstruction
+    applies a conjugation, so the Bloch phase must be evaluated at -k. Cubic
+    supercells (LiH, test above) only have *real* phases at their TR points,
+    where +k == -k, so they do not exercise this. Hexagonal hBN on a
+    Gamma-centered 6x6x1 mesh folds heavily via time reversal with complex
+    phases (e^{±i pi/3}); a wrong choice of +k there gives an O(1) residual on
+    the inter-atom blocks.
     """
     from pyscf.pbc import gto
     from pyscf.pbc.lib import kpts as libkpts
