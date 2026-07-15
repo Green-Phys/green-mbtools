@@ -357,13 +357,16 @@ def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, ve
     u_spinor : (nso, nso) complex ndarray
         Full spinor AO representation, ``nso = 2 * nao``.
     """
-    # tr_phase=False preserves the existing spinor behaviour: the x2c==2 store
-    # path applies its own time-reversal handling ((u_spinor @ theta).conj()
-    # for TR points), where theta acts only on spin and leaves the orbital
-    # Bloch phase at +k. NOTE: this means the spinor operators carry the same
-    # latent +k/-k error at TR points with a *complex* phase (non-cubic cells)
-    # that get_representation was just fixed for; the current x2c tests are
-    # cubic (real phases) so it is not exercised. Tracked as a follow-up.
+    # tr_phase=False is REQUIRED here (not merely "preserve behaviour"). For a
+    # TR point the x2c==2 store keeps (u_spinor @ theta).conj(); that .conj() is
+    # applied to the whole product, so besides the spin operator theta it also
+    # conjugates the orbital block, flipping its Bloch phase +k -> -k -- exactly
+    # the -k the time-reversal reconstruction needs. Hence the orbital phase
+    # must be built at +k here; tr_phase=True would flip it to -k and the store
+    # conj would flip it back to +k (double-flip) -- wrong for complex phases.
+    # Verified on hexagonal hBN: correct with tr_phase=False, O(1) error with
+    # tr_phase=True. (The spinor structure itself is exercised by the cubic
+    # test_x2c_* tests; the folding fix reaches this path via get_representation.)
     u_orbital = get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=tol, verbose=verbose, tr_phase=False)
     rot_frac = np.array(kstruct.ops[symm_op_idx].rot, dtype=float)
     a = mycell.lattice_vectors()
