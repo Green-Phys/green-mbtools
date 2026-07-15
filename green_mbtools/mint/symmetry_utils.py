@@ -68,7 +68,11 @@ def generate_permutation_info(mycell, symm_op, tol=1e-8, verbose=False):
     partner_idx : int
         Index of the atom that is the partner under the symmetry operation.
     pos_diff : ndarray
-        The positional difference vector due to folding into the unit cell (3,).
+        The lattice vector connecting the operated atom to its partner in the
+        as-input (unfolded) coordinates: ``r_partner - (R @ r_i + t)`` (3,).
+        This is what the Bloch phase in :func:`get_representation` must use;
+        note the partner is *matched* using folded coordinates but the returned
+        vector is computed from the unfolded ones.
     """
     # info about symmetry operation
     rot = symm_op.rot
@@ -353,9 +357,13 @@ def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, ve
     u_spinor : (nso, nso) complex ndarray
         Full spinor AO representation, ``nso = 2 * nao``.
     """
-    # tr_phase=False: the x2c==2 store path applies its own time-reversal
-    # handling ((u_spinor @ theta).conj() for TR points), so the orbital phase
-    # here must stay at +k to avoid double-correcting.
+    # tr_phase=False preserves the existing spinor behaviour: the x2c==2 store
+    # path applies its own time-reversal handling ((u_spinor @ theta).conj()
+    # for TR points), where theta acts only on spin and leaves the orbital
+    # Bloch phase at +k. NOTE: this means the spinor operators carry the same
+    # latent +k/-k error at TR points with a *complex* phase (non-cubic cells)
+    # that get_representation was just fixed for; the current x2c tests are
+    # cubic (real phases) so it is not exercised. Tracked as a follow-up.
     u_orbital = get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=tol, verbose=verbose, tr_phase=False)
     rot_frac = np.array(kstruct.ops[symm_op_idx].rot, dtype=float)
     a = mycell.lattice_vectors()
