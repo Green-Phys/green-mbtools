@@ -384,3 +384,61 @@ def test_ao_rep_bloch_phase_on_supercell():
             err_msg=f"S(k) not reconstructed from IBZ at k={ik} "
                     f"(IBZ rep={ibz_of[ik]}); k_sym_transform_ao Bloch phase is wrong",
         )
+
+
+def test_ao_rep_time_reversal_phase():
+    """AO symmetry operators must obey S(k)=U_k S(k_ir) U_k† at time-reversal-
+    paired k-points that carry a *complex* Bloch phase.
+
+    Regression for the time-reversal phase bug in ``get_representation``. For a
+    TR-paired k, the spatial operation lands on -k and the reconstruction applies
+    a conjugation, so the Bloch phase must be evaluated at -k (not +k). Cubic
+    supercells (NiO/LiH, test above) only have *real* phases at their TR points,
+    where +k == -k, so they cannot catch this. Hexagonal hBN on a Gamma-centered
+    6x6x1 mesh folds heavily via time reversal with complex phases (e^{±i pi/3}),
+    which exposes it: the buggy code gives O(1) residuals on the inter-atom
+    blocks.
+    """
+    from pyscf.pbc import gto
+    from pyscf.pbc.lib import kpts as libkpts
+
+    from green_mbtools.mint.symmetry_utils import get_representation
+
+    a = 2.5
+    amat = np.array([[a, 0.0, 0.0],
+                     [-a / 2, a * np.sqrt(3) / 2, 0.0],
+                     [0.0, 0.0, 15.0]])
+    cell = gto.Cell()
+    cell.a = amat
+    cell.atom = [["B", (0.0, a / np.sqrt(3), 7.5)],
+                 ["N", (a / 2, a / (2 * np.sqrt(3)), 7.5)]]
+    cell.basis = "gth-szv"
+    cell.pseudo = "gth-pbe"
+    cell.verbose = 0
+    cell.space_group_symmetry = True
+    cell.symmorphic = False
+    cell.build()
+
+    ks = libkpts.make_kpts(
+        cell, cell.make_kpts([6, 6, 1]),
+        space_group_symmetry=True, time_reversal_symmetry=True,
+    )
+    # The test is only meaningful if the BZ reduction actually uses time reversal.
+    assert ks.time_reversal_symm_bz.any()
+    assert ks.nkpts_ibz < ks.nkpts
+
+    overlap = np.asarray(cell.pbc_intor("int1e_ovlp", kpts=ks.kpts))
+    ibz_of = ks.ibz2bz[ks.bz2ibz]
+    tr = ks.time_reversal_symm_bz
+
+    for ik in range(ks.nkpts):
+        uop = get_representation(ik, ks.stars_ops_bz[ik], cell, ks)
+        recon = uop @ overlap[ibz_of[ik]] @ uop.conj().T
+        if tr[ik]:
+            recon = recon.conj()
+        np.testing.assert_allclose(
+            recon, overlap[ik], atol=1e-8, rtol=0,
+            err_msg=f"S(k) not reconstructed at time-reversal k={ik} "
+                    f"(IBZ rep={ibz_of[ik]}); get_representation must evaluate the "
+                    f"Bloch phase at -k for time-reversal-paired points",
+        )

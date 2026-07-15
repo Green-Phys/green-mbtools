@@ -181,7 +181,7 @@ def get_orbital_index(atom_idx, n_, L_, mycell):
     return orb_start, orb_end
 
 
-def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=False):
+def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=False, tr_phase=True):
     """Get the representation matrix for given symmetry operation on the atoms of unit cell.
 
     Parameters
@@ -203,6 +203,16 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=F
         fail for any lattice whose space-group translations are not integers.
     verbose : bool, optional
         If True, print detailed information, by default False
+    tr_phase : bool, optional
+        If True (default), evaluate the Bloch phase at -k for time-reversal-
+        paired k-points (``kstruct.time_reversal_symm_bz[bz_idx]`` True). For a
+        TR-paired k the spatial operation lands on the image -k and the
+        reconstruction ``X(k) = (U X(k_ir) U^dagger)*`` conjugates back to +k,
+        so U must be the operator that lands on -k, i.e. its phase must use -k.
+        (Harmless when the phase is real, since then +k == -k, which is why
+        cubic cells never needed it.) Set False for callers that apply their own
+        time-reversal handling -- the x2c==2 spinor path -- to avoid
+        double-correcting.
 
     Returns
     -------
@@ -216,6 +226,12 @@ def get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, verbose=F
     repr_matrix = np.zeros((nao, nao), dtype=complex)
 
     bz_kvec = kstruct.kpts_scaled[bz_idx]
+    # Time-reversal-paired k-points: the spatial operation lands on -k (the
+    # reconstruction then conjugates to reach +k), so the Bloch phase must be
+    # evaluated at -k. No-op for real phases (+k == -k).
+    tr_bz = getattr(kstruct, "time_reversal_symm_bz", None)
+    if tr_phase and tr_bz is not None and tr_bz[bz_idx]:
+        bz_kvec = -bz_kvec
     # (loc_start_idx, loc_end_idx, orb_start, orb_end) for each atom
     aoslice = mycell.aoslice_by_atom()
     # starting index of each AO shell
@@ -337,7 +353,10 @@ def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, ve
     u_spinor : (nso, nso) complex ndarray
         Full spinor AO representation, ``nso = 2 * nao``.
     """
-    u_orbital = get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=tol, verbose=verbose)
+    # tr_phase=False: the x2c==2 store path applies its own time-reversal
+    # handling ((u_spinor @ theta).conj() for TR points), so the orbital phase
+    # here must stay at +k to avoid double-correcting.
+    u_orbital = get_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=tol, verbose=verbose, tr_phase=False)
     rot_frac = np.array(kstruct.ops[symm_op_idx].rot, dtype=float)
     a = mycell.lattice_vectors()
     rot_cart = a.T @ rot_frac @ np.linalg.inv(a.T)
