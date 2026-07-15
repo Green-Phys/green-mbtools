@@ -325,3 +325,119 @@ def test_x2c_fock_ibz_to_full_bz():
 def test_k_sym_transform_p0_matches_metric_basis_transform(generated_cases):
     """TODO: replace implementation-coupled check with a real-data validation."""
     pass
+
+
+def test_ao_rep_bloch_phase_on_supercell():
+    """AO symmetry operators must obey S(k)=U_k S(k_ir) U_k† for a supercell.
+
+    The ``get_representation`` Bloch phase must be built from the as-input atom
+    positions the integrals use. This exercises the case where that matters:
+    atoms with fractional coordinate >= 0.5, where the folded ([-0.5, 0.5)) and
+    as-input positions differ by a lattice vector.
+
+    A primitive cell (all atoms in [0, 0.5), e.g. the H2 case above) does not
+    reach that case. This uses a rock-salt LiH cell doubled along [111] (2
+    formula units): atoms sit at fractional 1/2 and 3/4, with inequivalent Li/H
+    sublattices, so a wrong relative phase between atoms would show up as an
+    O(1) residual on the inter-atom blocks.
+    """
+    from pyscf.pbc import gto
+    from pyscf.pbc.lib import kpts as libkpts
+
+    from green_mbtools.mint.symmetry_utils import get_representation
+
+    a = 4.0
+    amat = np.array([[a, a / 2, a / 2], [a / 2, a, a / 2], [a / 2, a / 2, a]])
+    # rock-salt LiH, doubled along [111]; shift 0.03 off the exact-0.5 boundary
+    # so the origin never lands an atom on the fold discontinuity.
+    frac = np.array([[0, 0, 0], [0.25] * 3, [0.5] * 3, [0.75] * 3]) + 0.03
+    cart = frac @ amat
+
+    cell = gto.Cell()
+    cell.a = amat.tolist()
+    cell.atom = [["Li", cart[0]], ["H", cart[1]], ["Li", cart[2]], ["H", cart[3]]]
+    cell.basis = "gth-szv"
+    cell.pseudo = "gth-pbe"
+    cell.verbose = 0
+    cell.space_group_symmetry = True
+    cell.symmorphic = False
+    cell.build()
+
+    ks = libkpts.make_kpts(
+        cell, cell.make_kpts([4, 4, 4]),
+        space_group_symmetry=True, time_reversal_symmetry=True,
+    )
+    # The supercell must actually reduce, else the round-trip is vacuous.
+    assert ks.nkpts_ibz < ks.nkpts
+
+    overlap = np.asarray(cell.pbc_intor("int1e_ovlp", kpts=ks.kpts))
+    ibz_of = ks.ibz2bz[ks.bz2ibz]          # full-BZ index of each k's IBZ rep
+    tr = ks.time_reversal_symm_bz
+
+    for ik in range(ks.nkpts):
+        uop = get_representation(ik, ks.stars_ops_bz[ik], cell, ks)
+        recon = uop @ overlap[ibz_of[ik]] @ uop.conj().T
+        if tr[ik]:
+            recon = recon.conj()
+        np.testing.assert_allclose(
+            recon, overlap[ik], atol=1e-9, rtol=0,
+            err_msg=f"S(k) not reconstructed from IBZ at k={ik} "
+                    f"(IBZ rep={ibz_of[ik]}); k_sym_transform_ao Bloch phase is wrong",
+        )
+
+
+def test_ao_rep_time_reversal_phase():
+    """AO symmetry operators must obey S(k)=U_k S(k_ir) U_k† at time-reversal-
+    paired k-points that carry a *complex* Bloch phase.
+
+    For a TR-paired k the spatial operation lands on -k and the reconstruction
+    applies a conjugation, so the Bloch phase must be evaluated at -k. Cubic
+    supercells (LiH, test above) only have *real* phases at their TR points,
+    where +k == -k, so they do not exercise this. Hexagonal hBN on a
+    Gamma-centered 6x6x1 mesh folds heavily via time reversal with complex
+    phases (e^{±i pi/3}); a wrong choice of +k there gives an O(1) residual on
+    the inter-atom blocks.
+    """
+    from pyscf.pbc import gto
+    from pyscf.pbc.lib import kpts as libkpts
+
+    from green_mbtools.mint.symmetry_utils import get_representation
+
+    a = 2.5
+    amat = np.array([[a, 0.0, 0.0],
+                     [-a / 2, a * np.sqrt(3) / 2, 0.0],
+                     [0.0, 0.0, 15.0]])
+    cell = gto.Cell()
+    cell.a = amat
+    cell.atom = [["B", (0.0, a / np.sqrt(3), 7.5)],
+                 ["N", (a / 2, a / (2 * np.sqrt(3)), 7.5)]]
+    cell.basis = "gth-szv"
+    cell.pseudo = "gth-pbe"
+    cell.verbose = 0
+    cell.space_group_symmetry = True
+    cell.symmorphic = False
+    cell.build()
+
+    ks = libkpts.make_kpts(
+        cell, cell.make_kpts([6, 6, 1]),
+        space_group_symmetry=True, time_reversal_symmetry=True,
+    )
+    # The test is only meaningful if the BZ reduction actually uses time reversal.
+    assert ks.time_reversal_symm_bz.any()
+    assert ks.nkpts_ibz < ks.nkpts
+
+    overlap = np.asarray(cell.pbc_intor("int1e_ovlp", kpts=ks.kpts))
+    ibz_of = ks.ibz2bz[ks.bz2ibz]
+    tr = ks.time_reversal_symm_bz
+
+    for ik in range(ks.nkpts):
+        uop = get_representation(ik, ks.stars_ops_bz[ik], cell, ks)
+        recon = uop @ overlap[ibz_of[ik]] @ uop.conj().T
+        if tr[ik]:
+            recon = recon.conj()
+        np.testing.assert_allclose(
+            recon, overlap[ik], atol=1e-8, rtol=0,
+            err_msg=f"S(k) not reconstructed at time-reversal k={ik} "
+                    f"(IBZ rep={ibz_of[ik]}); get_representation must evaluate the "
+                    f"Bloch phase at -k for time-reversal-paired points",
+        )
