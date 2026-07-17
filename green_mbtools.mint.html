@@ -1268,8 +1268,14 @@ coordinate convention used elsewhere in this module.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>partner_idx</strong> (<em>int</em>) – Index of the atom that is the partner under the symmetry operation.</p></li>
-<li><p><strong>pos_diff</strong> (<em>ndarray</em>) – The positional difference vector due to folding into the unit cell (3,).</p></li>
+<li><p><strong>partner_idx</strong> (<em>ndarray of int, shape (n_atom,)</em>) – For each atom, the index of the atom it is mapped onto by the symmetry
+operation.</p></li>
+<li><p><strong>pos_diff</strong> (<em>ndarray, shape (n_atom, 3)</em>) – For each atom, the lattice translation (in scaled/fractional
+coordinates) carrying its operated position <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">&#64;</span> <span class="pre">r_i</span> <span class="pre">+</span> <span class="pre">t</span></code> to its
+in-cell partner <code class="docutils literal notranslate"><span class="pre">r_j</span></code>: <code class="docutils literal notranslate"><span class="pre">pos_diff</span> <span class="pre">=</span> <span class="pre">r_j</span> <span class="pre">-</span> <span class="pre">(R</span> <span class="pre">&#64;</span> <span class="pre">r_i</span> <span class="pre">+</span> <span class="pre">t)</span></code>. Partners are
+matched using folded coordinates; this vector is computed from the
+unfolded (as-input) coordinates that the Bloch phase in
+<a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_representation" title="green_mbtools.mint.symmetry_utils.get_representation"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_representation()</span></code></a> uses.</p></li>
 </ul>
 </p>
 </dd>
@@ -1301,7 +1307,7 @@ coordinate convention used elsewhere in this module.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.get_representation">
-<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">get_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bz_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_op_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstruct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#get_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.get_representation" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">get_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bz_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_op_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstruct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tr_phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#get_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.get_representation" title="Link to this definition">¶</a></dt>
 <dd><p>Get the representation matrix for given symmetry operation on the atoms of unit cell.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1317,6 +1323,14 @@ Note: PySCF stores fractional translations with ~6 decimal places
 applying the operation. A tighter tol (e.g. 1e-10) would therefore
 fail for any lattice whose space-group translations are not integers.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, print detailed information, by default False</p></li>
+<li><p><strong>tr_phase</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True (default), evaluate the Bloch phase at -k for time-reversal-
+paired k-points (<code class="docutils literal notranslate"><span class="pre">kstruct.time_reversal_symm_bz[bz_idx]</span></code> True). For a
+TR-paired k the spatial operation lands on the image -k and the
+reconstruction <code class="docutils literal notranslate"><span class="pre">X(k)</span> <span class="pre">=</span> <span class="pre">(U</span> <span class="pre">X(k_ir)</span> <span class="pre">U^dagger)*</span></code> conjugates back to +k,
+so U must be the operator that lands on -k, i.e. its phase must use -k.
+(A no-op when the phase is real, since then +k == -k.) Set False for
+callers that apply their own time-reversal handling – the x2c==2 spinor
+path – so the phase is not corrected twice.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1585,7 +1599,7 @@ residuals). See get_representation for full discussion.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=a480e030"></script>
+</div><script src="_static/documentation_options.js?v=93786a5a"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
