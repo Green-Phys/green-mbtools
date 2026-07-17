@@ -1,0 +1,929 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#"><link rel="search" title="Search" href="search.html">
+        <link rel="prefetch" href="_static/rosetta.png" as="image">
+
+    <link rel="shortcut icon" href="_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 --><title>Index - Green MBTools</title>
+<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=25e12dd6" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Green MBTools</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/rosetta.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Green MBTools</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="source_code_doc.html">Source code documentation</a><input aria-label="Toggle navigation of Source code documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="green_mbtools.mint.html">green_mbtools.mint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="green_mbtools.pesto.html">green_mbtools.pesto</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Green-Phys/green-mbtools">Github</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          
+<section class="genindex-section">
+  <h1 id="index">Index</h1>
+  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#W"><strong>W</strong></a></div>
+</section>
+<section id="A" class="genindex-section">
+  <h2>A</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.add_common_params">add_common_params() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.add_pbc_params">add_pbc_params() (in module green_mbtools.mint.common_utils)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.args">args (green_mbtools.mint.pyscf_init.pyscf_init attribute)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.args">(green_mbtools.mint.seet_init.seet_init attribute)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="B" class="genindex-section">
+  <h2>B</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.kpt_utils.build_q_struct">build_q_struct() (in module green_mbtools.mint.kpt_utils)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.ortho_utils.build_X_kspace">build_X_kspace() (in module green_mbtools.mint.ortho_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.ortho_utils.build_X_kspace_from_ao_reps">build_X_kspace_from_ao_reps() (in module green_mbtools.mint.ortho_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="C" class="genindex-section">
+  <h2>C</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.orth.canonical_matrices">canonical_matrices() (in module green_mbtools.pesto.orth)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.orth.canonical_orth">canonical_orth() (in module green_mbtools.pesto.orth)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.cell">cell (green_mbtools.mint.pyscf_init.pyscf_init attribute)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.cell_object">cell_object() (green_mbtools.mint.pyscf_init.pyscf_init method)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_mol_init.cell_object">(green_mbtools.mint.pyscf_init.pyscf_mol_init method)</a>
+</li>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.cell_object">(green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+        </ul></li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.check_eri">check_eri() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.check_high_symmetry_path">check_high_symmetry_path() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking">check_kspace_symmetry_breaking() (in module green_mbtools.mint.symmetry_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.cholesky_decomposed_metric">cholesky_decomposed_metric() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.compute_df_int">compute_df_int() (green_mbtools.mint.pyscf_init.pyscf_init method)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_mol_init.compute_df_int">(green_mbtools.mint.pyscf_init.pyscf_mol_init method)</a>
+</li>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_df_int">(green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+        </ul></li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.compute_df_int_dca">compute_df_int_dca() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.compute_ewald_correction">compute_ewald_correction() (in module green_mbtools.mint.common_utils)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.compute_ewald_correction">(in module green_mbtools.mint.integral_utils)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ft.compute_fourier_coefficients">compute_fourier_coefficients() (in module green_mbtools.pesto.ft)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.compute_integrals">compute_integrals() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.compute_j2c_sqrt">compute_j2c_sqrt() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.compute_kG">compute_kG() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.spectral.compute_mo">compute_mo() (in module green_mbtools.pesto.spectral)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.spectral.compute_no">compute_no() (in module green_mbtools.pesto.spectral)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.compute_twobody_finitesize_correction">compute_twobody_finitesize_correction() (green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.construct_gdf">construct_gdf() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.construct_mol_gdf">construct_mol_gdf() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ft.construct_rmesh">construct_rmesh() (in module green_mbtools.pesto.ft)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ft.construct_symmetric_rmesh">construct_symmetric_rmesh() (in module green_mbtools.pesto.ft)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_diag_projection">cvx_diag_projection() (in module green_mbtools.pesto.pes_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_gradient">cvx_gradient() (in module green_mbtools.pesto.pes_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_matrix_projection">cvx_matrix_projection() (in module green_mbtools.pesto.pes_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_optimize">cvx_optimize() (in module green_mbtools.pesto.pes_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_optimize_spectral">cvx_optimize_spectral() (in module green_mbtools.pesto.pes_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="D" class="genindex-section">
+  <h2>D</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.df_object">df_object() (green_mbtools.mint.pyscf_init.pyscf_init method)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_mol_init.df_object">(green_mbtools.mint.pyscf_init.pyscf_mol_init method)</a>
+</li>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.df_object">(green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ac_utils.dump_input_caratheodory_data">dump_input_caratheodory_data() (in module green_mbtools.pesto.ac_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="E" class="genindex-section">
+  <h2>E</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.eigenvalue_decomposed_metric">eigenvalue_decomposed_metric() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_gw_correction">evaluate_gw_correction() (green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.evaluate_high_symmetry_path">evaluate_high_symmetry_path() (green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.extract_ase_data">extract_ase_data() (in module green_mbtools.mint.common_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="F" class="genindex-section">
+  <h2>F</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.fold_back_to_1stBZ">fold_back_to_1stBZ() (in module green_mbtools.mint.common_utils)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.fold_to_unit_cell">fold_to_unit_cell() (in module green_mbtools.mint.symmetry_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="G" class="genindex-section">
+  <h2>G</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.generate_permutation_info">generate_permutation_info() (in module green_mbtools.mint.symmetry_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.cheby.get_Cheby">get_Cheby() (in module green_mbtools.pesto.cheby)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.get_coarsegrained_coulG">get_coarsegrained_coulG() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.get_input_data">get_input_data() (green_mbtools.mint.seet_init.seet_init method)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_orbital_index">get_orbital_index() (in module green_mbtools.mint.symmetry_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_representation">get_representation() (in module green_mbtools.mint.symmetry_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_spinor_representation">get_spinor_representation() (in module green_mbtools.mint.symmetry_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.cheby.get_tau_mesh">get_tau_mesh() (in module green_mbtools.pesto.cheby)</a>
+</li>
+        <li>
+    green_mbtools.mint.common_utils
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.common_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.mint.gdf_s_metric
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.gdf_s_metric">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.mint.integral_utils
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.integral_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.mint.kpt_utils
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.kpt_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.mint.namespace
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.namespace">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.mint.ortho_utils
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.ortho_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.mint.pyscf_init
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.pyscf_init">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    green_mbtools.mint.seet_init
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.seet_init">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.mint.symmetry_utils
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.symmetry_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.ac_utils
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.ac_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.cheby
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.cheby">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.dyson
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.dyson">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.ft
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.ft">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.ir
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.ir">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.orth
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.orth">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.pes_utils
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.pes_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.spectral
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.spectral">module</a>
+</li>
+        </ul></li>
+        <li>
+    green_mbtools.pesto.winter
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.winter">module</a>
+</li>
+        </ul></li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.GreenGDF">GreenGDF (class in green_mbtools.mint.integral_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="H" class="genindex-section">
+  <h2>H</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.high_symmetry_path">high_symmetry_path() (in module green_mbtools.mint.common_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="I" class="genindex-section">
+  <h2>I</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.init_k_mesh">init_k_mesh() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.init_mol_params">init_mol_params() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.init_pbc_params">init_pbc_params() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.init_q_mesh">init_q_mesh() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.integrals_grid">integrals_grid() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.winter.interpolate">interpolate() (in module green_mbtools.pesto.winter)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.winter.interpolate_G">interpolate_G() (in module green_mbtools.pesto.winter)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.winter.interpolate_tk_object">interpolate_tk_object() (in module green_mbtools.pesto.winter)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.inversion_sym">inversion_sym() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory">IR_factory (class in green_mbtools.pesto.ir)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.cheby.iwmesh">iwmesh() (in module green_mbtools.pesto.cheby)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="K" class="genindex-section">
+  <h2>K</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ft.k_to_real">k_to_real() (in module green_mbtools.pesto.ft)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.kmesh">kmesh (green_mbtools.mint.pyscf_init.pyscf_init attribute)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.kpair_reduced_lists">kpair_reduced_lists() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="L" class="genindex-section">
+  <h2>L</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.legacy_read_IR_matrices">legacy_read_IR_matrices() (in module green_mbtools.pesto.ir)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ac_utils.load_caratheodory_data">load_caratheodory_data() (in module green_mbtools.pesto.ac_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.ortho_utils.lowdin_per_k">lowdin_per_k() (in module green_mbtools.mint.ortho_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="M" class="genindex-section">
+  <h2>M</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.make_gdf_kptij_lst_jk">make_gdf_kptij_lst_jk() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.make_j2c_sqrt">make_j2c_sqrt() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.make_j3c">make_j3c() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.make_j3c_outcore">make_j3c_outcore() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.make_kptij_lst">make_kptij_lst() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.mean_field_input">mean_field_input() (green_mbtools.mint.pyscf_init.pyscf_init method)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_mol_init.mean_field_input">(green_mbtools.mint.pyscf_init.pyscf_mol_init method)</a>
+</li>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.mean_field_input">(green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+        </ul></li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init.mf_object">mf_object() (green_mbtools.mint.pyscf_init.pyscf_init method)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_mol_init.mf_object">(green_mbtools.mint.pyscf_init.pyscf_mol_init method)</a>
+</li>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init.mf_object">(green_mbtools.mint.pyscf_init.pyscf_pbc_init method)</a>
+</li>
+        </ul></li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.ortho_utils.mo_per_k">mo_per_k() (in module green_mbtools.mint.ortho_utils)</a>
+</li>
+        <li>
+    module
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.common_utils">green_mbtools.mint.common_utils</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.gdf_s_metric">green_mbtools.mint.gdf_s_metric</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.integral_utils">green_mbtools.mint.integral_utils</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.kpt_utils">green_mbtools.mint.kpt_utils</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.namespace">green_mbtools.mint.namespace</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.ortho_utils">green_mbtools.mint.ortho_utils</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.pyscf_init">green_mbtools.mint.pyscf_init</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.seet_init">green_mbtools.mint.seet_init</a>
+</li>
+          <li><a href="green_mbtools.mint.html#module-green_mbtools.mint.symmetry_utils">green_mbtools.mint.symmetry_utils</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.ac_utils">green_mbtools.pesto.ac_utils</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.cheby">green_mbtools.pesto.cheby</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.dyson">green_mbtools.pesto.dyson</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.ft">green_mbtools.pesto.ft</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.ir">green_mbtools.pesto.ir</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.orth">green_mbtools.pesto.orth</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.pes_utils">green_mbtools.pesto.pes_utils</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.spectral">green_mbtools.pesto.spectral</a>
+</li>
+          <li><a href="green_mbtools.pesto.html#module-green_mbtools.pesto.winter">green_mbtools.pesto.winter</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.mol_cell">mol_cell() (in module green_mbtools.mint.common_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="N" class="genindex-section">
+  <h2>N</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.namespace.Namespace">Namespace (class in green_mbtools.mint.namespace)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.ortho_utils.natural_per_k">natural_per_k() (in module green_mbtools.mint.ortho_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.new_read_IR_matrices">new_read_IR_matrices() (in module green_mbtools.pesto.ir)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="O" class="genindex-section">
+  <h2>O</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.orthogonalize">orthogonalize() (in module green_mbtools.mint.common_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.parse_basis">parse_basis() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.parse_geometry">parse_geometry() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.pbc_cell">pbc_cell() (in module green_mbtools.mint.common_utils)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.print_high_symmetry_points">print_high_symmetry_points() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_init">pyscf_init (class in green_mbtools.mint.pyscf_init)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_mol_init">pyscf_mol_init (class in green_mbtools.mint.pyscf_init)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.pyscf_init.pyscf_pbc_init">pyscf_pbc_init (class in green_mbtools.mint.pyscf_init)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="R" class="genindex-section">
+  <h2>R</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.read_dm">read_dm() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ft.real_to_k">real_to_k() (in module green_mbtools.pesto.ft)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2">rotation_matrix_to_su2() (in module green_mbtools.mint.symmetry_utils)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.run_es">run_es() (in module green_mbtools.pesto.pes_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="S" class="genindex-section">
+  <h2>S</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.orth.SAO_matrices">SAO_matrices() (in module green_mbtools.pesto.orth)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.orth.sao_orth">sao_orth() (in module green_mbtools.pesto.orth)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.save_data">save_data() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init">seet_init (class in green_mbtools.mint.seet_init)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.cheby.sigma_w_uniform">sigma_w_uniform() (in module green_mbtools.pesto.cheby)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.cheby.sigma_zero">sigma_zero() (in module green_mbtools.pesto.cheby)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.dyson.solve_dyson">solve_dyson() (in module green_mbtools.pesto.dyson)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.solve_mean_field">solve_mean_field() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.solve_mol_mean_field">solve_mol_mean_field() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.sqrt_j2c">sqrt_j2c() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.store_auxcell_kstruct_ops_info">store_auxcell_kstruct_ops_info() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.store_k_grid">store_k_grid() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.store_kstruct_ops_info">store_kstruct_ops_info() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.store_mol_symmetry_info">store_mol_symmetry_info() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.ortho_utils.symmetric_lowdin_per_k">symmetric_lowdin_per_k() (in module green_mbtools.mint.ortho_utils)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="T" class="genindex-section">
+  <h2>T</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.tau_to_w">tau_to_w() (green_mbtools.pesto.ir.IR_factory method)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.tau_to_w_other">tau_to_w_other() (green_mbtools.pesto.ir.IR_factory method)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.tauf_to_wb">tauf_to_wb() (green_mbtools.pesto.ir.IR_factory method)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.to_full_bz">to_full_bz() (green_mbtools.mint.seet_init.seet_init method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.transform">transform() (in module green_mbtools.mint.common_utils)</a>
+
+        <ul>
+          <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.orth.transform">(in module green_mbtools.pesto.orth)</a>
+</li>
+        </ul></li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.orth.transform_per_k">transform_per_k() (in module green_mbtools.pesto.orth)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.gdf_s_metric.transformation_PW_to_auxbasis">transformation_PW_to_auxbasis() (in module green_mbtools.mint.gdf_s_metric)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="U" class="genindex-section">
+  <h2>U</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.update">update() (green_mbtools.pesto.ir.IR_factory method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="W" class="genindex-section">
+  <h2>W</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.w_to_tau">w_to_tau() (green_mbtools.pesto.ir.IR_factory method)</a>
+</li>
+        <li><a href="green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.wb_to_tauf">wb_to_tauf() (green_mbtools.pesto.ir.IR_factory method)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.weighted_coulG_ewald">weighted_coulG_ewald() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.integral_utils.weighted_coulG_ewald_2nd">weighted_coulG_ewald_2nd() (in module green_mbtools.mint.integral_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.wrap_1stBZ">wrap_1stBZ() (in module green_mbtools.mint.common_utils)</a>
+</li>
+        <li><a href="green_mbtools.mint.html#green_mbtools.mint.common_utils.wrap_k">wrap_k() (in module green_mbtools.mint.common_utils)</a>
+
+        <ul>
+          <li><a href="green_mbtools.mint.html#green_mbtools.mint.kpt_utils.wrap_k">(in module green_mbtools.mint.kpt_utils)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023-2026, Green-Phys
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=93786a5a"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
