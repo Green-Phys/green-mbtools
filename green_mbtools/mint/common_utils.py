@@ -362,7 +362,8 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data.close()
 
 
-def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None):
+def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None,
+                  sym_kstruct=None, mycell=None):
     '''
     Transform Fock-matrix, non-interacting Hamiltonian, density matrix and overlap matrix into an orthogonal basis.
 
@@ -388,6 +389,36 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None):
             "spin-averaged MOs (eigenstates of 0.5*(F_alpha+F_beta)), "
             "not the canonical alpha/beta MOs."
         )
+
+    if orth in ("mo", "natural") and sym_kstruct is not None:
+        ibz = np.asarray(sym_kstruct.ibz2bz)
+        S_ibz = np.asarray(S)[0, ibz]                      # (n_ibz, n, n)
+        kw = {}
+        if orth == "mo":
+            if ns == 2:
+                kw["F_ibz"] = np.asarray(F)[:, ibz].swapaxes(0, 1)      # (n_ibz, 2, n, n)
+            else:
+                # Use F_ibz (not mf.mo_coeff) so that at self-TR k-points
+                # (e.g. Γ) the real-eigensolver branch in _build_X_ibz fires
+                # and produces real MO coefficients. mf.mo_coeff may carry
+                # arbitrary complex phases at degenerate eigenvalues.
+                kw["F_ibz"] = np.asarray(F)[0, ibz]                     # (n_ibz, n, n)
+        else:  # natural
+            if ns == 2:
+                kw["dm_ibz"] = np.asarray(hf_dm)[:, ibz].swapaxes(0, 1)
+                kw["F_ibz"] = np.asarray(F)[:, ibz].swapaxes(0, 1)
+            else:
+                kw["dm_ibz"] = np.asarray(hf_dm)[0, ibz]               # (n_ibz, n, n)
+                kw["F_ibz"] = np.asarray(F)[0, ibz]
+        X_k, X_inv_k = ortho_utils.build_X_kspace(
+            orth, sym_kstruct, mycell, S_ibz, **kw)
+        F = transform(F, X_k, X_inv_k)
+        T = transform(T, X_k, X_inv_k)
+        hf_dm = transform(hf_dm, X_inv_k, X_k)
+        S = np.array([np.eye(F.shape[-1], dtype=np.complex128)] * F.shape[1])
+        S = np.array([S] * ns)
+        return X_k, X_inv_k, S, F, T, hf_dm
+
     maxdiff = -1
     old_shape = [-1, -1]
     for ik, k in enumerate(mydf.kpts):
@@ -991,10 +1022,17 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
             )
         # get mapping from full BZ idx to idx (still in full BZ) of the corresponding irreducible point
         bz2ibz = kstruct.ibz2bz[kstruct.bz2ibz]
+        # For time-reversal-mapped BZ points the reconstruction applies an outer
+        # complex conjugation, rec = conj(U @ Q_ir @ U^dag). That outer conj also
+        # hits the left orthogonalization factor, turning X_k[ik] into X_k[ik]*.
+        # Since the stored orthogonalized quantity uses X_k[ik] (not its conj),
+        # pre-conjugate the left factor for TR points so the two cancel.
+        tr_conj_bz = kstruct.time_reversal_symm_bz
         kspace_orep_orth = np.zeros_like(kspace_orep)
         for ik in range(nk):
             ik_ir = bz2ibz[ik]
-            kspace_orep_orth[ik] = X_k[ik] @ kspace_orep[ik] @ X_inv_k[ik_ir]
+            X_left = X_k[ik].conj() if tr_conj_bz[ik] else X_k[ik]
+            kspace_orep_orth[ik] = X_left @ kspace_orep[ik] @ X_inv_k[ik_ir]
         kspace_orep = kspace_orep_orth
 
     if "k_sym_transform_ao" in symm_grp:

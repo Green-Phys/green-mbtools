@@ -150,7 +150,28 @@ class pyscf_pbc_init (pyscf_init):
                 "with mode={!r}; allowed modes are 'none', 'lowdin', "
                 "'symmetric_lowdin'.".format(self.args.orth)
             )
-        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
+        # Phase 1: mo/natural need X(-k)=X(k)* for the conjugate df-integral
+        # reduction. Full space group needs iΘ-consistent X (Phase 2); refuse it.
+        if self.args.space_symm and self.args.orth in ("mo", "natural"):
+            raise NotImplementedError(
+                "orth in {mo, natural} with space_symm=true is not yet "
+                "supported (Phase 2). Run with --space_symm false, or use "
+                "--orth in {none, lowdin, symmetric_lowdin}."
+            )
+        sym_kstruct = None
+        if self.args.orth in ("mo", "natural"):
+            # Time reversal ALWAYS on for the X build (independent of --tr_symm):
+            # the df-integral pair reduction always folds by k->-k conjugation.
+            # NOTE: this TR-always kstruct is used ONLY to build X. The exported
+            # symmetry operators (store_kstruct_ops_info below) follow
+            # self.kstruct (tr_symm=args.tr_symm); the two agree for tr_symm=true
+            # and the TR-conjugation branch is inert for tr_symm=false.
+            sym_kstruct = comm.kpt_utils.build_q_struct(
+                self.cell, self.kmesh,
+                space_symm=self.args.space_symm, tr_symm=True)
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(
+            mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf,
+            sym_kstruct=sym_kstruct, mycell=self.cell)
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,

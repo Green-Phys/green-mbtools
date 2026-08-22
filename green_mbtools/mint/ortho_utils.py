@@ -146,6 +146,7 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
 
     for i_ir in range(n_ibz):
         Sk = S_ibz[i_ir]
+        _tol_real = 1e-11
         if mode == "lowdin":
             x, x_inv = lowdin_per_k(Sk, tol=tol_sing)
         elif mode == "symmetric_lowdin":
@@ -157,7 +158,15 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
                 Fk = F_ibz[i_ir]
                 if Fk.ndim == 3:
                     Fk = 0.5 * (Fk[0] + Fk[1])
-                _, Ck = LA.eigh(Fk, Sk)
+                # Use real eigensolver when inputs are numerically real
+                # (e.g. at self-TR k-points such as Γ) to guarantee
+                # real-valued MO coefficients, which is required for the
+                # symmetry-propagated X to satisfy X(-k) = X(k)*.
+                if (np.max(np.abs(Fk.imag)) < _tol_real
+                        and np.max(np.abs(Sk.imag)) < _tol_real):
+                    _, Ck = LA.eigh(Fk.real, Sk.real)
+                else:
+                    _, Ck = LA.eigh(Fk, Sk)
             x, x_inv = mo_per_k(Sk, Ck)
         elif mode == "natural":
             dmk = dm_ibz[i_ir]
@@ -166,8 +175,19 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
                 dmk = 0.5 * (dmk[0] + dmk[1])
             if Fk.ndim == 3:
                 Fk = 0.5 * (Fk[0] + Fk[1])
+            # Use real matrices when inputs are numerically real
+            # (e.g. at self-TR k-points such as Γ) so that the natural
+            # orbitals are real-valued, satisfying X(-k) = X(k)*.
+            if (np.max(np.abs(Sk.imag)) < _tol_real
+                    and np.max(np.abs(dmk.imag)) < _tol_real
+                    and np.max(np.abs(Fk.imag)) < _tol_real):
+                Sk_use = Sk.real
+                dmk_use = dmk.real
+                Fk_use = Fk.real
+            else:
+                Sk_use, dmk_use, Fk_use = Sk, dmk, Fk
             x, x_inv = _natural_per_k_with_fock_tiebreak(
-                Sk, dmk, Fk, tol_degen=tol_degen
+                Sk_use, dmk_use, Fk_use, tol_degen=tol_degen
             )
         else:
             raise ValueError(
