@@ -376,8 +376,14 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None,
     ``mf`` is required for "mo"; "natural" uses ``hf_dm``. Per-k basis
     construction is delegated to ``ortho_utils.{lowdin,mo,natural}_per_k``.
     '''
-    if orth == "mo" and mf is None:
-        raise ValueError("orthogonalize: mf is required for orth='mo'.")
+    # mf is only consumed by the legacy per-k 'mo' path (mf.mo_coeff below).
+    # The sym_kstruct path builds X from F_ibz/S_ibz and never touches mf, so
+    # it must remain usable for callers that supply F/S but no mf object.
+    if orth == "mo" and mf is None and sym_kstruct is None:
+        raise ValueError(
+            "orthogonalize: mf is required for orth='mo' via the legacy "
+            "per-k path; pass sym_kstruct to build X from F/S instead."
+        )
 
     ns = hf_dm.shape[0]
     if orth == "mo" and ns == 2:

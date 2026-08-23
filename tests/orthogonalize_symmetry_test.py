@@ -93,6 +93,33 @@ def test_orthogonalize_natural_enforces_time_reversal(h2):
     assert orthn < 1e-9, f"natural X S X^dag != I : {orthn}"
 
 
+def test_orthogonalize_mo_sym_kstruct_does_not_require_mf(h2):
+    # The sym_kstruct 'mo' path builds X from F_ibz/S_ibz and never uses mf,
+    # so it must work with mf=None (the mf-required guard applies only to the
+    # legacy per-k path).
+    sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
+                                    space_group_symmetry=False,
+                                    time_reversal_symmetry=True)
+    mydf = types.SimpleNamespace(kpts=h2["kpts"])
+    X_k, *_ = comm.orthogonalize(
+        mydf, "mo", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
+        mf=None, sym_kstruct=sym_kstruct, mycell=h2["cell"])
+    mk = h2["mk"]
+    tr = max(np.max(np.abs(X_k[k] - X_k[mk[k]].conj())) for k in range(h2["nk"]))
+    assert tr < 1e-10, f"mo (mf=None) X(-k) != X(k)* : {tr}"
+    orth = max(np.max(np.abs(X_k[k] @ h2["S"][0, k] @ X_k[k].conj().T
+                             - np.eye(h2["n"]))) for k in range(h2["nk"]))
+    assert orth < 1e-9, f"mo (mf=None) X S X^dag != I : {orth}"
+
+
+def test_orthogonalize_mo_without_kstruct_still_requires_mf(h2):
+    # The legacy per-k 'mo' path uses mf.mo_coeff, so mf is still required there.
+    mydf = types.SimpleNamespace(kpts=h2["kpts"])
+    with pytest.raises(ValueError):
+        comm.orthogonalize(mydf, "mo", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
+                           mf=None)
+
+
 def test_orthogonalize_without_kstruct_is_unchanged(h2):
     # The no-kstruct path must produce exactly the per-k Lowdin result: assert
     # every returned array (X, X_inv, F, T, dm, S) matches a reference assembled
