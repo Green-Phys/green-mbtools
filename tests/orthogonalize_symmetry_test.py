@@ -6,9 +6,11 @@ import h5py
 import numpy as np
 import pytest
 
+from pyscf.pbc.lib import kpts as libkpts
+
 import green_mbtools.mint as pymb
 from green_mbtools.mint import common_utils as comm
-from green_mbtools.mint.kpt_utils import build_q_struct
+from green_mbtools.mint import ortho_utils
 
 
 def _h2_krhf(nk=3):
@@ -55,8 +57,12 @@ def h2():
 
 
 def test_orthogonalize_mo_enforces_time_reversal(h2):
-    sym_kstruct = build_q_struct(h2["cell"], h2["kpts"],
-                                 space_symm=False, tr_symm=True)
+    # Build the symmetry struct exactly as production does (make_kpts on the
+    # actual k-mesh), so this test is sensitive to k-ordering / shifted-mesh
+    # mistakes in the construction used at runtime.
+    sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
+                                    space_group_symmetry=False,
+                                    time_reversal_symmetry=True)
     mydf = types.SimpleNamespace(kpts=h2["kpts"])
     X_k, X_inv_k, S2, F2, T2, dm2 = comm.orthogonalize(
         mydf, "mo", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
@@ -71,8 +77,9 @@ def test_orthogonalize_mo_enforces_time_reversal(h2):
 
 
 def test_orthogonalize_natural_enforces_time_reversal(h2):
-    sym_kstruct = build_q_struct(h2["cell"], h2["kpts"],
-                                 space_symm=False, tr_symm=True)
+    sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
+                                    space_group_symmetry=False,
+                                    time_reversal_symmetry=True)
     mydf = types.SimpleNamespace(kpts=h2["kpts"])
     X_k, *_ = comm.orthogonalize(
         mydf, "natural", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
@@ -87,13 +94,31 @@ def test_orthogonalize_natural_enforces_time_reversal(h2):
 
 
 def test_orthogonalize_without_kstruct_is_unchanged(h2):
+    # The no-kstruct path must produce exactly the per-k Lowdin result: assert
+    # every returned array (X, X_inv, F, T, dm, S) matches a reference assembled
+    # directly from lowdin_per_k + transform, not merely the X S X^dag = I
+    # invariant (which a different gauge could also satisfy).
+    n, nk = h2["n"], h2["nk"]
     mydf = types.SimpleNamespace(kpts=h2["kpts"])
-    X_k, X_inv_k, S2, *_ = comm.orthogonalize(
+    X_k, X_inv_k, S2, F2, T2, dm2 = comm.orthogonalize(
         mydf, "lowdin", [], [], h2["F"], h2["T"], h2["dm"], h2["S"])
-    # lowdin is deterministic in S: X S X^dag = I everywhere
-    orth = max(np.max(np.abs(X_k[k] @ h2["S"][0, k] @ X_k[k].conj().T
-                             - np.eye(h2["n"]))) for k in range(h2["nk"]))
-    assert orth < 1e-9
+
+    Xref = np.empty((nk, n, n), dtype=np.complex128)
+    Xiref = np.empty((nk, n, n), dtype=np.complex128)
+    for k in range(nk):
+        x, x_inv = ortho_utils.lowdin_per_k(h2["S"][0, k])
+        Xref[k], Xiref[k] = x, x_inv
+    Fref = comm.transform(h2["F"], Xref, Xiref)
+    Tref = comm.transform(h2["T"], Xref, Xiref)
+    dmref = comm.transform(h2["dm"], Xiref, Xref)   # dm is contravariant
+    Sref = np.array([[np.eye(n, dtype=np.complex128)] * nk])
+
+    assert np.allclose(np.asarray(X_k), Xref, atol=1e-12)
+    assert np.allclose(np.asarray(X_inv_k), Xiref, atol=1e-12)
+    assert np.allclose(F2, Fref, atol=1e-12)
+    assert np.allclose(T2, Tref, atol=1e-12)
+    assert np.allclose(dm2, dmref, atol=1e-12)
+    assert np.allclose(S2, Sref, atol=1e-12)
 
 
 def _run_init(tmp_path, extra):
@@ -163,3 +188,39 @@ def test_end_to_end_ksym_consistency_shifted_mesh(tmp_path):
         "--center", "0.5", "0.5", "0.5",
     ])
     assert _kspace_residual(out) < 1e-9
+
+
+def _minus_k_index_h5(mesh_scaled):
+    nk = len(mesh_scaled)
+    out = np.empty(nk, dtype=int)
+    for k in range(nk):
+        s = mesh_scaled + mesh_scaled[k]
+        hit = np.all(np.abs(s - np.round(s)) < 1e-6, axis=1)
+        out[k] = int(np.nonzero(hit)[0][0])
+    return out
+
+
+def _tr_conjugate_residual(input_h5, dset):
+    with h5py.File(input_h5, "r") as f:
+        def cx(a):
+            a = a[...]
+            return a if np.iscomplexobj(a) else a[..., 0] + 1j * a[..., 1]
+        mk = _minus_k_index_h5(f["symmetry/k/mesh_scaled"][()])
+        Z = cx(f[dset])            # (ns, nk, n, n)
+        worst = 0.0
+        for s in range(Z.shape[0]):
+            for k in range(Z.shape[1]):
+                worst = max(worst, float(np.max(np.abs(Z[s, mk[k]] - Z[s, k].conj()))))
+        return worst
+
+
+def test_orth_mo_enforces_tr_when_tr_symm_false(tmp_path):
+    # The X-build enforces X(-k)=X(k)* independently of --tr_symm (the df pair
+    # reduction always folds k->-k). With --tr_symm false the exported reduction
+    # is trivial, so this is NOT a reconstruction assertion: we check the stored
+    # orthogonal hcore obeys T_orth(-k) = conj(T_orth(k)) on the actual k-mesh.
+    # Since T_ao(-k) = conj(T_ao(k)), that identity holds iff X(-k) = X(k)*.
+    # HF/H-k (hcore) is off-diagonal in the MO basis, so it is gauge-sensitive
+    # (unlike the diagonal Fock, which is TR-trivial regardless of gauge).
+    out = _run_init(tmp_path, ["--orth", "mo", "--space_symm", "false", "--tr_symm", "false"])
+    assert _tr_conjugate_residual(out, "HF/H-k") < 1e-9
