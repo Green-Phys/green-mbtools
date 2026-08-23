@@ -149,3 +149,17 @@ def test_end_to_end_ksym_consistency(tmp_path):
 def test_end_to_end_ksym_consistency_natural(tmp_path):
     out = _run_init(tmp_path, ["--orth", "natural", "--space_symm", "false", "--tr_symm", "true"])
     assert _kspace_residual(out) < 1e-9
+
+
+def test_end_to_end_ksym_consistency_shifted_mesh(tmp_path):
+    # Coverage for the orth path on a non-Gamma-centered (half-shifted) mesh.
+    # The sym_kstruct that builds X is the symmetry decomposition of self.kmesh
+    # (via make_kpts), so its k-ordering matches the S/F arrays that orthogonalize
+    # indexes with ibz2bz. (This does not discriminate the make_kpts vs
+    # build_q_struct choice: on TR-valid meshes both give identical X. It guards
+    # the shifted-mesh store/reconstruct pipeline generally.)
+    out = _run_init(tmp_path, [
+        "--orth", "mo", "--space_symm", "false", "--tr_symm", "true",
+        "--center", "0.5", "0.5", "0.5",
+    ])
+    assert _kspace_residual(out) < 1e-9

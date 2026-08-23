@@ -391,6 +391,12 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, mf=None,
         )
 
     if orth in ("mo", "natural") and sym_kstruct is not None:
+        if mycell is None:
+            raise ValueError(
+                "orthogonalize: mycell is required when sym_kstruct is "
+                "provided (ortho_utils.build_X_kspace needs it to build X "
+                "on the irreducible wedge)."
+            )
         ibz = np.asarray(sym_kstruct.ibz2bz)
         S_ibz = np.asarray(S)[0, ibz]                      # (n_ibz, n, n)
         kw = {}

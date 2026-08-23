@@ -166,9 +166,17 @@ class pyscf_pbc_init (pyscf_init):
             # symmetry operators (store_kstruct_ops_info below) follow
             # self.kstruct (tr_symm=args.tr_symm); the two agree for tr_symm=true
             # and the TR-conjugation branch is inert for tr_symm=false.
-            sym_kstruct = comm.kpt_utils.build_q_struct(
+            #
+            # Build the symmetry decomposition of self.kmesh itself (NOT the
+            # q=k1-k2 difference mesh that build_q_struct produces). orthogonalize
+            # indexes S/F with sym_kstruct.ibz2bz, so sym_kstruct.kpts must match
+            # self.kmesh in order; make_kpts on self.kmesh guarantees this, whereas
+            # the difference mesh reorders (Gamma-centered) or, for shifted meshes,
+            # is a different set of points entirely.
+            sym_kstruct = libkpts.make_kpts(
                 self.cell, self.kmesh,
-                space_symm=self.args.space_symm, tr_symm=True)
+                space_group_symmetry=self.args.space_symm,
+                time_reversal_symmetry=True)
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(
             mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf,
             sym_kstruct=sym_kstruct, mycell=self.cell)
