@@ -93,6 +93,51 @@ def test_orthogonalize_natural_enforces_time_reversal(h2):
     assert orthn < 1e-9, f"natural X S X^dag != I : {orthn}"
 
 
+def test_orthogonalize_lowdin_enforces_time_reversal(h2):
+    # Canonical Löwdin keeps the overlap eigenvectors, so like mo/natural it
+    # is gauge-sensitive. The fixture passes S as complex dtype, so without the
+    # real-input guard in lowdin_per_k, eigh at self-TR points (e.g. Γ) returns
+    # arbitrary complex phases and X(-k) != X(k)* breaks. This is the regression
+    # guard for the 4x4x4-Silicon lowdin failure.
+    sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
+                                    space_group_symmetry=False,
+                                    time_reversal_symmetry=True)
+    mydf = types.SimpleNamespace(kpts=h2["kpts"])
+    X_k, *_ = comm.orthogonalize(
+        mydf, "lowdin", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
+        sym_kstruct=sym_kstruct, mycell=h2["cell"])
+    mk = h2["mk"]
+    tr = max(np.max(np.abs(X_k[k] - X_k[mk[k]].conj())) for k in range(h2["nk"]))
+    assert tr < 1e-10, f"lowdin X(-k) != X(k)* : {tr}"
+    # X must be real at self-TR points (k == -k), the property the guard restores.
+    selftr = max(np.max(np.abs(X_k[k].imag))
+                 for k in range(h2["nk"]) if mk[k] == k)
+    assert selftr < 1e-10, f"lowdin X not real at self-TR k : {selftr}"
+    # still a valid orthonormalizer: X S X^dag = I
+    orthl = max(np.max(np.abs(X_k[k] @ h2["S"][0, k] @ X_k[k].conj().T
+                             - np.eye(h2["n"]))) for k in range(h2["nk"]))
+    assert orthl < 1e-9, f"lowdin X S X^dag != I : {orthl}"
+
+
+def test_orthogonalize_symmetric_lowdin_enforces_time_reversal(h2):
+    # Symmetric Löwdin X = S^{-1/2} is gauge-free, so X(-k) = X(k)* holds
+    # structurally with no guard; this locks that in against regressions in the
+    # unified build path.
+    sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
+                                    space_group_symmetry=False,
+                                    time_reversal_symmetry=True)
+    mydf = types.SimpleNamespace(kpts=h2["kpts"])
+    X_k, *_ = comm.orthogonalize(
+        mydf, "symmetric_lowdin", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
+        sym_kstruct=sym_kstruct, mycell=h2["cell"])
+    mk = h2["mk"]
+    tr = max(np.max(np.abs(X_k[k] - X_k[mk[k]].conj())) for k in range(h2["nk"]))
+    assert tr < 1e-10, f"symmetric_lowdin X(-k) != X(k)* : {tr}"
+    orths = max(np.max(np.abs(X_k[k] @ h2["S"][0, k] @ X_k[k].conj().T
+                             - np.eye(h2["n"]))) for k in range(h2["nk"]))
+    assert orths < 1e-9, f"symmetric_lowdin X S X^dag != I : {orths}"
+
+
 # def test_orthogonalize_mo_sym_kstruct_does_not_require_mf(h2):
 #     # The sym_kstruct 'mo' path builds X from F_ibz/S_ibz and never uses mf,
 #     # so it must work with mf=None (the mf-required guard applies only to the

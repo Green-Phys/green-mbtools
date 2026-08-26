@@ -107,7 +107,10 @@ def test_kspace_propagation_uses_kstruct_ordering(h2_setup):
     # result on S_ibz directly (no rotation, because the IBZ point is in
     # its own little group's identity slot).
     for i_ir, ik_ir in enumerate(kstruct.ibz2bz):
-        x_ref, _ = ortho_utils.lowdin_per_k(S_ibz[i_ir])
+        # build_X_kspace realifies numerically-real (self-TR) inputs before
+        # orthogonalizing, so the reference must too or the self-TR IBZ point
+        # (e.g. Γ) differs by an eigenvector-gauge sign.
+        x_ref, _ = ortho_utils.lowdin_per_k(ortho_utils._realify(S_ibz[i_ir]))
         # Gauge: at IBZ rep, stars_ops should map the rep to itself via U=I
         # (modulo phase). Compare X X† to identify with the reference up to
         # a unitary on the right — but for the identity op specifically
