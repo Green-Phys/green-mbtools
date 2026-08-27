@@ -171,10 +171,3 @@ cython_debug/
 
 # Auto-generated Sphinx docs version list (docs/conf.py)
 docs/_versions.rst
-
-# Editor / OS / local scratch
-.DS_Store
-.vscode/
-*.chk
-tmp*
-*.npy
