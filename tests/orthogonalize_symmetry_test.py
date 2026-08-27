@@ -138,72 +138,35 @@ def test_orthogonalize_symmetric_lowdin_enforces_time_reversal(h2):
     assert orths < 1e-9, f"symmetric_lowdin X S X^dag != I : {orths}"
 
 
-# def test_orthogonalize_mo_sym_kstruct_does_not_require_mf(h2):
-#     # The sym_kstruct 'mo' path builds X from F_ibz/S_ibz and never uses mf,
-#     # so it must work with mf=None (the mf-required guard applies only to the
-#     # legacy per-k path).
-#     sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
-#                                     space_group_symmetry=False,
-#                                     time_reversal_symmetry=True)
-#     mydf = types.SimpleNamespace(kpts=h2["kpts"])
-#     with pytest.raises(ValueError):
-#         X_k, *_ = comm.orthogonalize(
-#             mydf, "mo", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
-#             sym_kstruct=sym_kstruct, mycell=h2["cell"])
-#     # mk = h2["mk"]
-#     # tr = max(np.max(np.abs(X_k[k] - X_k[mk[k]].conj())) for k in range(h2["nk"]))
-#     # assert tr < 1e-10, f"mo (mf=None) X(-k) != X(k)* : {tr}"
-#     # orth = max(np.max(np.abs(X_k[k] @ h2["S"][0, k] @ X_k[k].conj().T
-#     #                          - np.eye(h2["n"]))) for k in range(h2["nk"]))
-#     # assert orth < 1e-9, f"mo (mf=None) X S X^dag != I : {orth}"
-
-
-# def test_orthogonalize_mo_without_kstruct_still_requires_mf(h2):
-#     # The legacy per-k 'mo' path uses mf.mo_coeff, so mf is still required there.
-#     mydf = types.SimpleNamespace(kpts=h2["kpts"])
-#     with pytest.raises(ValueError):
-#         comm.orthogonalize(mydf, "mo", [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
-#                            mf=None)
-
-
 def test_orthogonalize_requires_kstruct_except_for_none(h2):
-    # The no-kstruct path must produce exactly the per-k Lowdin result: assert
-    # every returned array (X, X_inv, F, T, dm, S) matches a reference assembled
-    # directly from lowdin_per_k + transform, not merely the X S X^dag = I
-    # invariant (which a different gauge could also satisfy).
-    n, nk = h2["n"], h2["nk"]
+    # Every nontrivial mode requires sym_kstruct/mycell (X is built on the
+    # irreducible wedge); only 'none' works without them.
     mydf = types.SimpleNamespace(kpts=h2["kpts"])
-    with pytest.raises(ValueError):
-        X_k, X_inv_k, S2, F2, T2, dm2 = comm.orthogonalize(
-            mydf, "lowdin", [], [], h2["F"], h2["T"], h2["dm"], h2["S"])
-    with pytest.raises(ValueError):
-        X_k, X_inv_k, S2, F2, T2, dm2 = comm.orthogonalize(
-            mydf, "mo", [], [], h2["F"], h2["T"], h2["dm"], h2["S"])
-    with pytest.raises(ValueError):
-        X_k, X_inv_k, S2, F2, T2, dm2 = comm.orthogonalize(
-            mydf, "natural", [], [], h2["F"], h2["T"], h2["dm"], h2["S"])
-    with pytest.raises(ValueError):
-        X_k, X_inv_k, S2, F2, T2, dm2 = comm.orthogonalize(
-            mydf, "symmetric_lowdin", [], [], h2["F"], h2["T"], h2["dm"], h2["S"])
-    X_k, X_inv_k, S2, F2, T2, dm2 = comm.orthogonalize(
+    for mode in ("lowdin", "mo", "natural", "symmetric_lowdin"):
+        with pytest.raises(ValueError):
+            comm.orthogonalize(
+                mydf, mode, [], [], h2["F"], h2["T"], h2["dm"], h2["S"])
+    comm.orthogonalize(
         mydf, 'none', [], [], h2["F"], h2["T"], h2["dm"], h2["S"])
 
-    # Xref = np.empty((nk, n, n), dtype=np.complex128)
-    # Xiref = np.empty((nk, n, n), dtype=np.complex128)
-    # for k in range(nk):
-    #     x, x_inv = ortho_utils.lowdin_per_k(h2["S"][0, k])
-    #     Xref[k], Xiref[k] = x, x_inv
-    # Fref = comm.transform(h2["F"], Xref, Xiref)
-    # Tref = comm.transform(h2["T"], Xref, Xiref)
-    # dmref = comm.transform(h2["dm"], Xiref, Xref)   # dm is contravariant
-    # Sref = np.array([[np.eye(n, dtype=np.complex128)] * nk])
 
-    # assert np.allclose(np.asarray(X_k), Xref, atol=1e-12)
-    # assert np.allclose(np.asarray(X_inv_k), Xiref, atol=1e-12)
-    # assert np.allclose(F2, Fref, atol=1e-12)
-    # assert np.allclose(T2, Tref, atol=1e-12)
-    # assert np.allclose(dm2, dmref, atol=1e-12)
-    # assert np.allclose(S2, Sref, atol=1e-12)
+def test_orthogonalize_dm_preserves_electron_number(h2):
+    # The density matrix is contravariant: Tr(dm_orth(k)) must equal
+    # Tr(S_AO(k) dm_AO(k)) = N_k. The transposed transform (X_inv dm X_inv^dag
+    # instead of X_inv^dag dm X_inv) breaks this for mo/natural.
+    sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
+                                    space_group_symmetry=False,
+                                    time_reversal_symmetry=True)
+    mydf = types.SimpleNamespace(kpts=h2["kpts"])
+    for mode in ("lowdin", "symmetric_lowdin", "mo", "natural"):
+        *_, dm2 = comm.orthogonalize(
+            mydf, mode, [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
+            sym_kstruct=sym_kstruct, mycell=h2["cell"])
+        for k in range(h2["nk"]):
+            n_ref = np.trace(h2["S"][0, k] @ h2["dm"][0, k]).real
+            n_orth = np.trace(dm2[0, k]).real
+            assert abs(n_orth - n_ref) < 1e-9, (
+                f"{mode}: Tr(dm_orth)={n_orth} != N_k={n_ref} at k={k}")
 
 
 def _run_init(tmp_path, extra):
