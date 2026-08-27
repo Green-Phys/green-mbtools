@@ -472,7 +472,14 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
         orth, sym_kstruct, mycell, S_ibz, **kw)
     F = transform(F, X_k, X_inv_k)
     T = transform(T, X_k, X_inv_k)
-    hf_dm = transform(hf_dm, X_inv_k, X_k)
+    # The density matrix is contravariant: it transforms as X_inv^dag dm X_inv,
+    # not X_inv dm X_inv^dag, so that Tr(dm_orth) = Tr(S_AO dm) = N_el is
+    # preserved (the two coincide only for Hermitian X, e.g. symmetric Lowdin).
+    # transform(Z, A, B) applies A Z A^dag, so pass the adjoint factors:
+    # forward A = X_inv^dag, restore B = X^dag.
+    Xinv_dag = np.asarray(X_inv_k).conj().transpose(0, 2, 1)
+    X_dag = np.asarray(X_k).conj().transpose(0, 2, 1)
+    hf_dm = transform(hf_dm, Xinv_dag, X_dag)
     S = np.array([np.eye(F.shape[-1], dtype=np.complex128)] * F.shape[1])
     S = np.array([S] * ns)
     return X_k, X_inv_k, S, F, T, hf_dm
