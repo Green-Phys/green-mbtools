@@ -225,9 +225,18 @@ def _run_init(tmp_path, extra):
     return tmp_path / "input.h5"
 
 
-def test_space_symm_orth_is_guarded(tmp_path):
-    with pytest.raises(NotImplementedError):
-        _run_init(tmp_path, ["--orth", "mo", "--space_symm", "true", "--tr_symm", "true"])
+def test_space_symm_orth_mo(tmp_path):
+    # Full space-group symmetry with the gauge-sensitive mo basis. X is built on
+    # the IBZ and propagated by the space-group AO reps; the stored one-body
+    # matrices must reconstruct as U(k) X(k_ir) U(k)dag to ~machine precision.
+    # (This path was previously guarded off as "Phase 2".)
+    out = _run_init(tmp_path, ["--orth", "mo", "--space_symm", "true", "--tr_symm", "true"])
+    assert _kspace_residual(out) < 1e-9
+
+
+def test_space_symm_orth_natural(tmp_path):
+    out = _run_init(tmp_path, ["--orth", "natural", "--space_symm", "true", "--tr_symm", "true"])
+    assert _kspace_residual(out) < 1e-9
 
 
 def _kspace_residual(input_h5):

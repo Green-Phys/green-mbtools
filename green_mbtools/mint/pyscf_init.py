@@ -150,14 +150,6 @@ class pyscf_pbc_init (pyscf_init):
                 "with mode={!r}; allowed modes are 'none', 'lowdin', "
                 "'symmetric_lowdin'.".format(self.args.orth)
             )
-        # Phase 1: mo/natural need X(-k)=X(k)* for the conjugate df-integral
-        # reduction. Full space group needs iΘ-consistent X (Phase 2); refuse it.
-        if self.args.space_symm and self.args.orth in ("mo", "natural"):
-            raise NotImplementedError(
-                "orth in {mo, natural} with space_symm=true is not yet "
-                "supported (Phase 2). Run with --space_symm false, or use "
-                "--orth in {none, lowdin, symmetric_lowdin}."
-            )
         # Time reversal ALWAYS on for the X build (independent of --tr_symm):
         # the df-integral pair reduction always folds by k->-k conjugation.
         # NOTE: this TR-always kstruct is used ONLY to build X. The exported
