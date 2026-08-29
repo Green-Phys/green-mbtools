@@ -378,14 +378,21 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
         Orthogonalization mode:
 
         - ``"none"``: preserve the AO basis.
-        - ``"lowdin"``: canonical Löwdin orthogonalization, possibly
-          rectangular when linearly dependent overlap eigenvectors are
-          discarded.
+        - ``"lowdin"``: canonical Löwdin orthogonalization. Rank reduction
+          (dropping near-singular overlap eigenvectors, which would make
+          ``X`` rectangular) is not supported end-to-end and is rejected
+          with an error; ``X`` must remain square (AO-sized).
         - ``"symmetric_lowdin"``: Hermitian symmetric Löwdin
           orthogonalization.
-        - ``"mo"``: construct canonical orbitals from the generalized
-          Fock/overlap eigenproblem. For unrestricted calculations, the
-          spin-averaged Fock matrix is used.
+        - ``"mo"``: construct canonical orbitals by solving the generalized
+          Fock/overlap eigenproblem ``F C = S C e`` (spin-averaged ``F`` for
+          unrestricted). This deliberately does not use ``mf.mo_coeff``: the
+          generalized solve lets the self-TR real-gauge branch fire, and for
+          a converged SCF it spans the same subspaces up to an orbital gauge
+          that does not affect the orthonormal basis. Results can differ from
+          ``mf.mo_coeff`` when those coefficients are not eigenvectors of the
+          stored ``F`` (e.g. frozen/custom orbitals, or a Fock inconsistent
+          with the coefficients).
         - ``"natural"``: construct natural orbitals from the density matrix,
           using the Fock matrix to resolve degenerate occupation subspaces.
     X_k, X_inv_k
@@ -442,9 +449,11 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
 
     if sym_kstruct is None or mycell is None:
         raise ValueError(
-            "orthogonalize: sym_kstruct and mycell are required to build transformations "
-            "X and X_inv on the irreducible wedge; "
-            "for molecules, pass a dummy mycell and sym_kstruct"
+            "orthogonalize: orth != 'none' requires both mycell and sym_kstruct "
+            "to build X/X_inv on the irreducible wedge. Pass the actual cell and "
+            "its k-point symmetry structure (as pyscf_init does), consistent with "
+            "the provided k-mesh and the S/F/dm arrays; they are not dummy "
+            "placeholders."
         )
 
     # Non-trivial cases

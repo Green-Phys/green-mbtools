@@ -155,6 +155,13 @@ def _realify(M):
     natural) then diagonalize a real matrix at self-TR points and produce a
     real, ``X(-k) = X(k)*``-consistent X, while gauge-free
     symmetric_lowdin is unaffected. ``None`` passes through.
+
+    The criterion is numerical realness, not an explicit self-TR test.
+    Applying it to every IBZ representative is safe: a generic (non-self-TR)
+    point has O(1) imaginary parts from Bloch phases, so this never fires
+    there; where it does fire the discarded imaginary part is below
+    ``_REAL_TOL`` and physically negligible; and the star stays internally
+    consistent because it is propagated from this (realified) representative.
     '''
     if M is None:
         return M
@@ -213,6 +220,32 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
             )
         X_per_irrep[i_ir] = np.asarray(x, dtype=np.complex128)
         Xinv_per_irrep[i_ir] = np.asarray(x_inv, dtype=np.complex128)
+
+    # Reject rank reduction. Canonical Löwdin can drop near-singular overlap
+    # eigenvectors and return a rectangular X (n_ortho < nao); differing ranks
+    # across IBZ points would also make X shapes inconsistent. The downstream
+    # pipeline (common_utils.transform, store_kstruct_ops_info) and the Green
+    # file format assume a fixed, AO-sized square X, so fail fast here with an
+    # actionable message rather than a later NumPy broadcasting error.
+    shapes = {x.shape for x in X_per_irrep}
+    if len(shapes) != 1:
+        raise ValueError(
+            f"build_X_kspace: mode {mode!r} produced X of differing shapes "
+            f"across IBZ points ({sorted(shapes)}). This means near-singular "
+            "overlap eigenvalues were dropped at some k-points (rank "
+            "reduction), which is not supported. Use a "
+            "linear-dependence-free basis."
+        )
+    n_ortho, n_basis = X_per_irrep[0].shape
+    if n_ortho != n_basis:
+        raise ValueError(
+            f"build_X_kspace: mode {mode!r} produced a rectangular X of shape "
+            f"{(n_ortho, n_basis)} (rank reduction from dropped overlap "
+            "eigenvalues). Rank-reducing orthogonalization is not supported "
+            "end-to-end (downstream transform/symmetry operators and the Green "
+            "file format assume square, AO-sized X). Use a "
+            "linear-dependence-free basis."
+        )
 
     return X_per_irrep, Xinv_per_irrep
 
