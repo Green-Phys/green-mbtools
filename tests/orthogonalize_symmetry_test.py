@@ -151,15 +151,18 @@ def test_orthogonalize_requires_kstruct_except_for_none(h2):
 
 
 def test_orthogonalize_dm_preserves_electron_number(h2):
-    # The density matrix is contravariant: Tr(dm_orth(k)) must equal
-    # Tr(S_AO(k) dm_AO(k)) = N_k. The transposed transform (X_inv dm X_inv^dag
-    # instead of X_inv^dag dm X_inv) breaks this for mo/natural.
+    # The density matrix is contravariant: dm_orth = X_inv^dag dm X_inv (not
+    # X_inv dm X_inv^dag). Pin the transform with three properties:
+    #   - Tr(dm_orth(k)) == Tr(S_AO(k) dm_AO(k)) = N_k   (electron count),
+    #   - dm_orth Hermitian,
+    #   - exact round-trip to AO: X(k)^dag dm_orth(k) X(k) == dm_AO(k).
+    # The transposed ordering breaks the trace and round-trip for mo/natural.
     sym_kstruct = libkpts.make_kpts(h2["cell"], h2["kpts"],
                                     space_group_symmetry=False,
                                     time_reversal_symmetry=True)
     mydf = types.SimpleNamespace(kpts=h2["kpts"])
     for mode in ("lowdin", "symmetric_lowdin", "mo", "natural"):
-        *_, dm2 = comm.orthogonalize(
+        X_k, _, _, _, _, dm2 = comm.orthogonalize(
             mydf, mode, [], [], h2["F"], h2["T"], h2["dm"], h2["S"],
             sym_kstruct=sym_kstruct, mycell=h2["cell"])
         for k in range(h2["nk"]):
@@ -167,6 +170,11 @@ def test_orthogonalize_dm_preserves_electron_number(h2):
             n_orth = np.trace(dm2[0, k]).real
             assert abs(n_orth - n_ref) < 1e-9, (
                 f"{mode}: Tr(dm_orth)={n_orth} != N_k={n_ref} at k={k}")
+            assert np.allclose(dm2[0, k], dm2[0, k].conj().T, atol=1e-10), (
+                f"{mode}: dm_orth not Hermitian at k={k}")
+            dm_ao = X_k[k].conj().T @ dm2[0, k] @ X_k[k]
+            assert np.allclose(dm_ao, h2["dm"][0, k], atol=1e-9), (
+                f"{mode}: dm round-trip to AO failed at k={k}")
 
 
 def _run_init(tmp_path, extra):

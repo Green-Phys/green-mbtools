@@ -103,6 +103,31 @@ def test_realify_strips_self_tr_noise_and_fixes_lowdin_gauge():
     Sc = _hermitian_pd(rng, n)
     assert ortho_utils._realify(Sc) is Sc
 
+    # The threshold discriminates at the right scale: an imaginary part just
+    # ABOVE _REAL_TOL is kept (never silently discarded), one just below is
+    # treated as noise and realified. This bounds what _realify can drop.
+    base = S_real.astype(complex)
+    hi = base.copy(); hi[0, 1] += 1e-9j;  hi[1, 0] -= 1e-9j    # |imag| > _REAL_TOL
+    lo = base.copy(); lo[0, 1] += 1e-11j; lo[1, 0] -= 1e-11j   # |imag| < _REAL_TOL
+    assert ortho_utils._realify(hi) is hi                      # kept, unchanged
+    assert not np.iscomplexobj(ortho_utils._realify(lo))       # realified
+
+
+def test_build_X_ibz_rejects_rank_reduction():
+    # Canonical Löwdin drops a near-singular overlap eigenvalue, making X
+    # rectangular (rank reduction). This is not supported end-to-end, so the
+    # build must fail fast with an actionable error rather than a later
+    # broadcasting error downstream.
+    from green_mbtools.mint.ortho_utils import _build_X_ibz
+    n = 4
+    U, _ = np.linalg.qr(np.random.default_rng(0).standard_normal((n, n)))
+    S = U @ np.diag([1e-12, 0.5, 1.0, 2.0]) @ U.T   # one eigenvalue below tol
+    S = 0.5 * (S + S.T)
+    S_ibz = S.astype(complex)[None]                 # (1, n, n)
+    with pytest.raises(ValueError, match="rank"):
+        _build_X_ibz("lowdin", S_ibz, None, None, None,
+                     tol_sing=1e-9, tol_degen=1e-8)
+
 
 @pytest.mark.parametrize("n", [1, 4, 7])
 def test_symmetric_lowdin_per_k_hermitian_full_rank(rng, n):
