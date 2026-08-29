@@ -221,31 +221,36 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
         X_per_irrep[i_ir] = np.asarray(x, dtype=np.complex128)
         Xinv_per_irrep[i_ir] = np.asarray(x_inv, dtype=np.complex128)
 
-    # Reject rank reduction. Canonical Löwdin can drop near-singular overlap
-    # eigenvectors and return a rectangular X (n_ortho < nao); differing ranks
-    # across IBZ points would also make X shapes inconsistent. The downstream
-    # pipeline (common_utils.transform, store_kstruct_ops_info) and the Green
-    # file format assume a fixed, AO-sized square X, so fail fast here with an
-    # actionable message rather than a later NumPy broadcasting error.
+    # Reject rank-deficient orthogonalization. Near-singular overlap eigenvalues
+    # (< tol_sing) get dropped, which makes X non-invertible: canonical Löwdin
+    # returns a rectangular X, while symmetric Löwdin returns a square X whose
+    # X_inv is only a pseudo-inverse (X_inv @ X is a projector, not I). Differing
+    # retained ranks across IBZ points also break star propagation. None of this
+    # is supported end-to-end (downstream transform/symmetry operators and the
+    # Green file format assume a square, invertible, AO-sized X). Fail fast with
+    # an actionable message rather than a later NumPy broadcasting error or a
+    # generic "Orthogonal transformation failed" RuntimeError from transform().
     shapes = {x.shape for x in X_per_irrep}
     if len(shapes) != 1:
         raise ValueError(
             f"build_X_kspace: mode {mode!r} produced X of differing shapes "
-            f"across IBZ points ({sorted(shapes)}). This means near-singular "
-            "overlap eigenvalues were dropped at some k-points (rank "
-            "reduction), which is not supported. Use a "
-            "linear-dependence-free basis."
+            f"across IBZ points ({sorted(shapes)}) — different retained ranks "
+            "from dropping near-singular overlap eigenvalues. Rank reduction is "
+            "not supported; use a linear-dependence-free basis."
         )
-    n_ortho, n_basis = X_per_irrep[0].shape
-    if n_ortho != n_basis:
-        raise ValueError(
-            f"build_X_kspace: mode {mode!r} produced a rectangular X of shape "
-            f"{(n_ortho, n_basis)} (rank reduction from dropped overlap "
-            "eigenvalues). Rank-reducing orthogonalization is not supported "
-            "end-to-end (downstream transform/symmetry operators and the Green "
-            "file format assume square, AO-sized X). Use a "
-            "linear-dependence-free basis."
-        )
+    n_basis = X_per_irrep[0].shape[1]
+    eye = np.eye(n_basis)
+    for i_ir, (x, x_inv) in enumerate(zip(X_per_irrep, Xinv_per_irrep)):
+        if x.shape[0] != n_basis or not np.allclose(x_inv @ x, eye, atol=1e-8):
+            raise ValueError(
+                f"build_X_kspace: mode {mode!r} produced a rank-deficient, "
+                f"non-invertible X at IBZ point {i_ir} (shape {x.shape}, "
+                "X_inv @ X != I). Near-singular overlap eigenvalues (< tol_sing) "
+                "were dropped: canonical Löwdin becomes rectangular, symmetric "
+                "Löwdin's X_inv becomes a pseudo-inverse. Rank-deficient "
+                "orthogonalization is not supported end-to-end; use a "
+                "linear-dependence-free basis."
+            )
 
     return X_per_irrep, Xinv_per_irrep
 

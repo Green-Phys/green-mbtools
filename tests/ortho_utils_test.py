@@ -114,19 +114,22 @@ def test_realify_strips_self_tr_noise_and_fixes_lowdin_gauge():
 
 
 def test_build_X_ibz_rejects_rank_reduction():
-    # Canonical Löwdin drops a near-singular overlap eigenvalue, making X
-    # rectangular (rank reduction). This is not supported end-to-end, so the
-    # build must fail fast with an actionable error rather than a later
-    # broadcasting error downstream.
+    # A near-singular overlap eigenvalue (< tol_sing) is dropped, giving a
+    # non-invertible X. The build must fail fast with an actionable error for
+    # both modes: canonical Löwdin via a rectangular X, and symmetric Löwdin
+    # via a square-but-pseudo-inverse X (X_inv @ X is a projector, not I). The
+    # latter would otherwise slip past a shape check and fail later inside
+    # common_utils.transform with a generic RuntimeError.
     from green_mbtools.mint.ortho_utils import _build_X_ibz
     n = 4
     U, _ = np.linalg.qr(np.random.default_rng(0).standard_normal((n, n)))
     S = U @ np.diag([1e-12, 0.5, 1.0, 2.0]) @ U.T   # one eigenvalue below tol
     S = 0.5 * (S + S.T)
     S_ibz = S.astype(complex)[None]                 # (1, n, n)
-    with pytest.raises(ValueError, match="rank"):
-        _build_X_ibz("lowdin", S_ibz, None, None, None,
-                     tol_sing=1e-9, tol_degen=1e-8)
+    for mode in ("lowdin", "symmetric_lowdin"):
+        with pytest.raises(ValueError, match="rank"):
+            _build_X_ibz(mode, S_ibz, None, None, None,
+                         tol_sing=1e-9, tol_degen=1e-8)
 
 
 @pytest.mark.parametrize("n", [1, 4, 7])
