@@ -3,17 +3,32 @@ import scipy.linalg as LA
 from .symmetry_utils import get_representation, get_spinor_representation
 
 
+# Below this max|imag|, a k-point matrix is treated as numerically real and its
+# eigenproblem is solved on the real part. This matters at self-TR k-points
+# (e.g. Γ): tiny imaginary noise on a degenerate block would otherwise rotate
+# the canonical-Löwdin/mo/natural eigenvectors into a complex gauge that
+# violates X(-k) = X(k)* and breaks the conjugate df-pair reduction downstream.
+_REAL_TOL = 1e-10
+
+
 def lowdin_per_k(Sk, tol=1e-9):
     '''
-    Symmetric (Löwdin) S^{-1/2} orthogonalization for a single k-point.
+    Canonical (Löwdin) orthogonalization for a single k-point.
 
     Returns ``(X, X_inv)`` in the convention used by
     ``common_utils.transform`` (i.e. transforms apply as ``X Z X†``)::
 
-        X     = S^{-1/2}   (shape (n_ortho, nao))
-        X_inv = S^{+1/2}   (shape (nao, n_ortho))
+        X     = s^{-1/2} U†   (shape (n_ortho, nao))
+        X_inv = U s^{+1/2}    (shape (nao, n_ortho))
 
     Eigenvalues of ``Sk`` below ``tol`` are discarded.
+
+    This keeps the overlap eigenvectors ``U``, so unlike Hermitian
+    symmetric Löwdin (whose ``S^{-1/2}`` is gauge-free) it carries a
+    phase/degenerate-block gauge freedom. At self-TR k-points a real
+    ``Sk`` is required for a real (hence ``X(-k) = X(k)*``-consistent)
+    result; ``_build_X_ibz`` realifies numerically-real inputs before
+    calling this, so that gauge policy lives there, not here.
     '''
     s_ev, s_eb = np.linalg.eigh(Sk)
     istart = s_ev.searchsorted(tol)
@@ -129,6 +144,30 @@ def _natural_per_k_with_fock_tiebreak(Sk, dmk, Fk, tol_degen=1e-8):
     return C_NO.conj().T, Sk @ C_NO
 
 
+def _realify(M):
+    '''
+    Strip numerical imaginary noise from a k-point matrix.
+
+    Returns ``M.real`` when ``max|imag(M)| < _REAL_TOL`` (the case at
+    self-TR k-points, where ``S``/``F``/``dm`` are physically real), else
+    ``M`` unchanged. Centralizing this in ``_build_X_ibz`` keeps the
+    real-gauge policy in one place: the gauge-sensitive modes (lowdin, mo,
+    natural) then diagonalize a real matrix at self-TR points and produce a
+    real, ``X(-k) = X(k)*``-consistent X, while gauge-free
+    symmetric_lowdin is unaffected. ``None`` passes through.
+
+    The criterion is numerical realness, not an explicit self-TR test.
+    Applying it to every IBZ representative is safe: a generic (non-self-TR)
+    point has O(1) imaginary parts from Bloch phases, so this never fires
+    there; where it does fire the discarded imaginary part is below
+    ``_REAL_TOL`` and physically negligible; and the star stays internally
+    consistent because it is propagated from this (realified) representative.
+    '''
+    if M is None:
+        return M
+    return M.real if np.max(np.abs(M.imag)) < _REAL_TOL else M
+
+
 def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
                  tol_sing, tol_degen):
     '''
@@ -145,7 +184,15 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
     Xinv_per_irrep = [None] * n_ibz
 
     for i_ir in range(n_ibz):
-        Sk = S_ibz[i_ir]
+        # Centralized real-gauge policy: at self-TR k-points S/F/dm are
+        # physically real, so strip the imaginary noise once, up front. Every
+        # gauge-sensitive mode below then diagonalizes a real matrix there and
+        # yields a real, X(-k) = X(k)*-consistent X; symmetric_lowdin is
+        # unaffected. None (unused inputs for a given mode) passes through.
+        Sk = _realify(S_ibz[i_ir])
+        Fk = _realify(F_ibz[i_ir]) if F_ibz is not None else None
+        dmk = _realify(dm_ibz[i_ir]) if dm_ibz is not None else None
+
         if mode == "lowdin":
             x, x_inv = lowdin_per_k(Sk, tol=tol_sing)
         elif mode == "symmetric_lowdin":
@@ -154,14 +201,11 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
             if mo_coeff_ibz is not None:
                 Ck = mo_coeff_ibz[i_ir]
             else:
-                Fk = F_ibz[i_ir]
                 if Fk.ndim == 3:
                     Fk = 0.5 * (Fk[0] + Fk[1])
                 _, Ck = LA.eigh(Fk, Sk)
             x, x_inv = mo_per_k(Sk, Ck)
         elif mode == "natural":
-            dmk = dm_ibz[i_ir]
-            Fk = F_ibz[i_ir]
             if dmk.ndim == 3:
                 dmk = 0.5 * (dmk[0] + dmk[1])
             if Fk.ndim == 3:
@@ -176,6 +220,37 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
             )
         X_per_irrep[i_ir] = np.asarray(x, dtype=np.complex128)
         Xinv_per_irrep[i_ir] = np.asarray(x_inv, dtype=np.complex128)
+
+    # Reject rank-deficient orthogonalization. Near-singular overlap eigenvalues
+    # (< tol_sing) get dropped, which makes X non-invertible: canonical Löwdin
+    # returns a rectangular X, while symmetric Löwdin returns a square X whose
+    # X_inv is only a pseudo-inverse (X_inv @ X is a projector, not I). Differing
+    # retained ranks across IBZ points also break star propagation. None of this
+    # is supported end-to-end (downstream transform/symmetry operators and the
+    # Green file format assume a square, invertible, AO-sized X). Fail fast with
+    # an actionable message rather than a later NumPy broadcasting error or a
+    # generic "Orthogonal transformation failed" RuntimeError from transform().
+    shapes = {x.shape for x in X_per_irrep}
+    if len(shapes) != 1:
+        raise ValueError(
+            f"build_X_kspace: mode {mode!r} produced X of differing shapes "
+            f"across IBZ points ({sorted(shapes)}) — different retained ranks "
+            "from dropping near-singular overlap eigenvalues. Rank reduction is "
+            "not supported; use a linear-dependence-free basis."
+        )
+    n_basis = X_per_irrep[0].shape[1]
+    eye = np.eye(n_basis)
+    for i_ir, (x, x_inv) in enumerate(zip(X_per_irrep, Xinv_per_irrep)):
+        if x.shape[0] != n_basis or not np.allclose(x_inv @ x, eye, atol=1e-8):
+            raise ValueError(
+                f"build_X_kspace: mode {mode!r} produced a rank-deficient, "
+                f"non-invertible X at IBZ point {i_ir} (shape {x.shape}, "
+                "X_inv @ X != I). Near-singular overlap eigenvalues (< tol_sing) "
+                "were dropped: canonical Löwdin becomes rectangular, symmetric "
+                "Löwdin's X_inv becomes a pseudo-inverse. Rank-deficient "
+                "orthogonalization is not supported end-to-end; use a "
+                "linear-dependence-free basis."
+            )
 
     return X_per_irrep, Xinv_per_irrep
 

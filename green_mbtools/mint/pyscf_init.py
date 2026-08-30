@@ -150,7 +150,26 @@ class pyscf_pbc_init (pyscf_init):
                 "with mode={!r}; allowed modes are 'none', 'lowdin', "
                 "'symmetric_lowdin'.".format(self.args.orth)
             )
-        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
+        # Time reversal ALWAYS on for the X build (independent of --tr_symm):
+        # the df-integral pair reduction always folds by k->-k conjugation.
+        # NOTE: this TR-always kstruct is used ONLY to build X. The exported
+        # symmetry operators (store_kstruct_ops_info below) follow
+        # self.kstruct (tr_symm=args.tr_symm); the two agree for tr_symm=true
+        # and the TR-conjugation branch is inert for tr_symm=false.
+        #
+        # Build the symmetry decomposition of self.kmesh itself (NOT the
+        # q=k1-k2 difference mesh that build_q_struct produces). orthogonalize
+        # indexes S/F with sym_kstruct.ibz2bz, so sym_kstruct.kpts must match
+        # self.kmesh in order; make_kpts on self.kmesh guarantees this, whereas
+        # the difference mesh reorders (Gamma-centered) or, for shifted meshes,
+        # is a different set of points entirely.
+        sym_kstruct = libkpts.make_kpts(
+            self.cell, self.kmesh,
+            space_group_symmetry=self.args.space_symm,
+            time_reversal_symmetry=True)
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(
+            mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S,
+            sym_kstruct=sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2)
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
@@ -456,9 +475,13 @@ class pyscf_mol_init (pyscf_init):
                 "with mode={!r}; allowed modes are 'none', 'lowdin', "
                 "'symmetric_lowdin'.".format(self.args.orth)
             )
-        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S, mf=mf)
-        # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is not long range divergence for molecule
-        comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
+        X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S,
+                                                          sym_kstruct=self.kstruct, mycell=self.kcell,
+                                                          spinor=self.args.x2c==2)
+        # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is
+        # no long range divergence for molecule
+        comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list,
+                       self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
         comm.store_mol_symmetry_info(self.args, self.kcell, auxcell, self.kmesh)
         if bool(self.args.df_int):
             self.compute_df_int(nao, X_k)

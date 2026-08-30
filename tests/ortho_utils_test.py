@@ -1,7 +1,7 @@
 """Tests for the per-k orthogonalization helpers in ``green_mbtools.mint.ortho_utils``.
 
 These cover the small building blocks used by ``common_utils.orthogonalize``:
-    - ``lowdin_per_k``  : symmetric S^{-1/2} orthogonalization
+    - ``lowdin_per_k``  : canonical Löwdin (s^{-1/2} U†) orthogonalization
     - ``mo_per_k``      : canonical-MO basis from supplied C(k)
     - ``natural_per_k`` : natural-orbital basis from a density matrix
 All helpers return ``(X, X_inv)`` in the ``X Z X†`` convention used by
@@ -65,6 +65,71 @@ def test_lowdin_per_k_drops_small_eigenvalues(rng):
     assert X.shape == (n - 1, n)
     assert X_inv.shape == (n, n - 1)
     assert np.allclose(X @ X_inv, np.eye(n - 1), atol=_TOL)
+
+
+def test_realify_strips_self_tr_noise_and_fixes_lowdin_gauge():
+    # Regression for the self-TR (e.g. Γ) failure that broke canonical Löwdin on
+    # Silicon. A real symmetric overlap with a *degenerate* eigenvalue plus tiny
+    # imaginary Hermitian noise (~1e-13, the level S picks up at self-TR
+    # k-points): on the degenerate block that noise rotates the eigenvectors by
+    # O(1) complex amounts, so lowdin_per_k on the raw matrix returns a
+    # complex-gauge X (max|imag X| ~ 0.64) that violates X(-k) = X(k)*.
+    # _build_X_ibz calls _realify first, stripping the noise so the gauge is
+    # real. This pins that seam.
+    rng = np.random.default_rng(0)
+    n = 4
+    Q, _ = np.linalg.qr(rng.standard_normal((n, n)))
+    S_real = Q @ np.diag([1.0, 1.0, 2.0, 3.0]) @ Q.T   # eigenvalue 1 is 2-fold
+    S_real = 0.5 * (S_real + S_real.T)
+    noise = np.zeros((n, n), dtype=complex)
+    noise[0, 1] = 1e-13j
+    noise[1, 0] = -1e-13j                               # Hermitian imaginary
+    S = S_real.astype(complex) + noise
+
+    # Without realify the gauge is genuinely complex here (else nothing proven).
+    X_raw, _ = ortho_utils.lowdin_per_k(S)
+    assert np.max(np.abs(X_raw.imag)) > 1e-3
+
+    # _realify strips the sub-threshold noise, returning a real matrix ...
+    Sr = ortho_utils._realify(S)
+    assert not np.iscomplexobj(Sr)
+    assert np.allclose(Sr, S_real, atol=_TOL)
+    # ... so the composition _build_X_ibz uses yields a real gauge.
+    X, _ = ortho_utils.lowdin_per_k(Sr)
+    assert np.max(np.abs(X.imag)) < _TOL, "realify failed: X not real at self-TR"
+    assert np.allclose(X @ S @ X.conj().T, np.eye(n), atol=_TOL)
+
+    # A genuinely complex matrix is left untouched (same object returned).
+    Sc = _hermitian_pd(rng, n)
+    assert ortho_utils._realify(Sc) is Sc
+
+    # The threshold discriminates at the right scale: an imaginary part just
+    # ABOVE _REAL_TOL is kept (never silently discarded), one just below is
+    # treated as noise and realified. This bounds what _realify can drop.
+    base = S_real.astype(complex)
+    hi = base.copy(); hi[0, 1] += 1e-9j;  hi[1, 0] -= 1e-9j    # |imag| > _REAL_TOL
+    lo = base.copy(); lo[0, 1] += 1e-11j; lo[1, 0] -= 1e-11j   # |imag| < _REAL_TOL
+    assert ortho_utils._realify(hi) is hi                      # kept, unchanged
+    assert not np.iscomplexobj(ortho_utils._realify(lo))       # realified
+
+
+def test_build_X_ibz_rejects_rank_reduction():
+    # A near-singular overlap eigenvalue (< tol_sing) is dropped, giving a
+    # non-invertible X. The build must fail fast with an actionable error for
+    # both modes: canonical Löwdin via a rectangular X, and symmetric Löwdin
+    # via a square-but-pseudo-inverse X (X_inv @ X is a projector, not I). The
+    # latter would otherwise slip past a shape check and fail later inside
+    # common_utils.transform with a generic RuntimeError.
+    from green_mbtools.mint.ortho_utils import _build_X_ibz
+    n = 4
+    U, _ = np.linalg.qr(np.random.default_rng(0).standard_normal((n, n)))
+    S = U @ np.diag([1e-12, 0.5, 1.0, 2.0]) @ U.T   # one eigenvalue below tol
+    S = 0.5 * (S + S.T)
+    S_ibz = S.astype(complex)[None]                 # (1, n, n)
+    for mode in ("lowdin", "symmetric_lowdin"):
+        with pytest.raises(ValueError, match="rank"):
+            _build_X_ibz(mode, S_ibz, None, None, None,
+                         tol_sing=1e-9, tol_degen=1e-8)
 
 
 @pytest.mark.parametrize("n", [1, 4, 7])
