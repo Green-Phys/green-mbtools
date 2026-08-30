@@ -178,6 +178,9 @@ class pyscf_pbc_init (pyscf_init):
         # Save symmetry operations info for main and auxiliary unit cells
         comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct, X_k=X_k, X_inv_k=X_inv_k,)
         comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
+        # Save the AO->orthogonal basis transformation so tooling can move the
+        # stored (orthogonalized) quantities back to the AO basis.
+        comm.store_orth_transform(self.args, X_k, X_inv_k)
 
         # Diagnose whether self-consistent quantities obey k-space symmetry.
         if self.args.space_symm or self.args.tr_symm:
@@ -483,6 +486,9 @@ class pyscf_mol_init (pyscf_init):
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list,
                        self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
         comm.store_mol_symmetry_info(self.args, self.kcell, auxcell, self.kmesh)
+        # Save the AO->orthogonal basis transformation so tooling can move the
+        # stored (orthogonalized) quantities back to the AO basis.
+        comm.store_orth_transform(self.args, X_k, X_inv_k)
         if bool(self.args.df_int):
             self.compute_df_int(nao, X_k)
 
