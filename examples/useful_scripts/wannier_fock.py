@@ -3,7 +3,8 @@ import argparse
 import scipy.linalg as LA
 import h5py
 
-from ase.dft.kpoints import get_special_points, bandpath, special_paths
+from ase.cell import Cell
+from ase.dft.kpoints import special_paths
 from pyscf.pbc import gto, dft
 from green_mbtools.pesto import winter
 import matplotlib.pyplot as plt
@@ -23,8 +24,14 @@ import matplotlib.pyplot as plt
 # Default parameters
 parser = argparse.ArgumentParser(description="Wannier interpolaotion for Fock to get bands")
 parser.add_argument("--debug", type=bool, default=False, help="Debug mode (True/False)")
-parser.add_argument("--celltype", type=str, default="cubic", help="Type of lattice: cubic, diamond, etc.")
-parser.add_argument("--bz_type", type=str, default="cubic", help="Brillouin zone to get special k-path.")
+parser.add_argument(
+    "--celltype", type=str, default=None,
+    help="Deprecated; lattice type is inferred from the stored cell dimensionality.",
+)
+parser.add_argument(
+    "--bz_type", type=str, default=None,
+    help="Deprecated; explicitly selects a legacy path instead of ASE inference.",
+)
 parser.add_argument(
     "--bandpath", type=str, nargs="*", default=None,
     help="High symmetry path for the band structure, e.g. 'L G X G'. NOTE: Use spaces."
@@ -41,8 +48,6 @@ args = parser.parse_args()
 
 # Parameters in the calculation
 debug = args.debug
-celltype = args.celltype
-bz_type = args.bz_type
 bandpath_str = args.bandpath
 bandpts = args.bandpts
 input_path = args.input
@@ -59,6 +64,7 @@ f = h5py.File(input_path, 'r')
 cell = f["Cell"][()]
 kmesh_abs = f["/symmetry/k/mesh"][()]
 kmesh_scaled = f["/symmetry/k/mesh_scaled"][()]
+nk_list = f["/symmetry/k/nk_list"][()]
 index = f["/symmetry/k/bz2ibz"][()]
 ir_list = f["/symmetry/k/ibz2bz"][()]
 conj_list = f["/symmetry/k/tr_conj"][()]
@@ -71,16 +77,20 @@ f.close()
 # Pyscf object to generate k points
 mycell = gto.loads(cell)
 
-# Crystal structure
-a_vecs = np.genfromtxt(mycell.a.replace(',', ' ').splitlines(), dtype=float)
-points = get_special_points(a_vecs, lattice=celltype)
+# Crystal structure.  PySCF stores a full-rank embedding cell for low-
+# dimensional systems, so tell ASE explicitly which axes are periodic.
+a_vecs = mycell.lattice_vectors(unit='Angstrom')
+ase_cell = Cell(a_vecs)
+pbc = np.arange(3) < mycell.dimension
 
 if bandpath_str is not None:
-    kptlist = bandpath_str
+    path = ase_cell.bandpath(
+        ''.join(bandpath_str), npoints=bandpts, pbc=pbc)
+elif args.bz_type is not None:
+    path = ase_cell.bandpath(
+        special_paths[args.bz_type], npoints=bandpts, pbc=pbc)
 else:
-    special_path_str = special_paths[bz_type]
-    kptlist = special_paths[bz_type]
-path = bandpath(kptlist, a_vecs, npoints=bandpts)
+    path = ase_cell.bandpath(npoints=bandpts, pbc=pbc)
 band_kpts = path.kpts
 kpath, sp_points, labels = path.get_linear_kpoint_axis()
 band_kpts_abs = mycell.get_abs_kpts(band_kpts)
@@ -102,7 +112,8 @@ Sk_int = kmf.get_ovlp(mycell, band_kpts_abs)
 
 # interpolate Fock
 Fk_int = winter.interpolate(
-    Fk, kmesh_scaled, band_kpts, dim=3, hermi=True, debug=debug
+    Fk, kmesh_scaled, band_kpts, nk_list=nk_list,
+    hermi=True, debug=debug
 )
 
 # Overlap 0.00041291502948366776
@@ -127,7 +138,7 @@ it = 0
 f["S-k"] = Sk_int
 if bandpath_str is not None:
     ls_out = []
-    for pt in kptlist:
+    for pt in bandpath_str:
         ls_out.append(pt.replace('G', r'$\Gamma$'))
     f["kptlist"] = ls_out
 else:

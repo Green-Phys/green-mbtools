@@ -479,6 +479,19 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
     kw["spinor"] = spinor
     X_k, X_inv_k = ortho_utils.build_X_kspace(
         orth, sym_kstruct, mycell, S_ibz, **kw)
+    # Sanity check: the constructed basis must be orthonormal, i.e.
+    # X(k) S_AO(k) X(k)^dag = I at every k-point. S is still the AO overlap
+    # here (it is overwritten with the identity further below).
+    S_ao_bz = np.asarray(S)[0]
+    eye = np.eye(X_k.shape[1], dtype=np.complex128)
+    for ik in range(X_k.shape[0]):
+        XSXdag = X_k[ik] @ S_ao_bz[ik] @ X_k[ik].conj().T
+        if not np.allclose(XSXdag, eye, atol=1e-8):
+            raise RuntimeError(
+                "orthogonalize: basis not orthonormal at k-point "
+                f"{ik} (mode={orth!r}): max|X S X^dag - I| = "
+                f"{np.abs(XSXdag - eye).max():.3e}"
+            )
     F = transform(F, X_k, X_inv_k)
     T = transform(T, X_k, X_inv_k)
     # The density matrix is contravariant: it transforms as X_inv^dag dm X_inv,
@@ -1054,6 +1067,60 @@ def store_kstruct_ops_info(args, mycell, kmesh, kstruct, X_k=None, X_inv_k=None)
     else:
         symm_grp["k_sym_transform_ao"] = kspace_orep  # .view(np.float64).reshape(kspace_orep.shape + (2,))
         # symm_grp["k_sym_transform_ao"].attrs["__complex__"] = np.int8(1)
+    inp_data.close()
+
+
+def store_orth_transform(args, X_k, X_inv_k):
+    """Store the AO->orthogonal basis transformation X (and its inverse) in the input file.
+
+    When ``args.orth != "none"`` the one-body quantities written to the input
+    file (``HF/Fock-k``, ``HF/S-k``, ``HF/H-k``, and downstream Green's
+    functions) live in the orthogonalized basis rather than the AO basis.
+    Post-processing tooling therefore needs the exact per-k transformation to
+    move back and forth between the two bases; the degenerate orbital gauge
+    means it cannot be reconstructed reliably from the stored quantities alone.
+
+    The datasets are written under a top-level ``/orthogonalization`` group as
+    native complex arrays:
+
+    - ``X_k``: forward transforms over the full BZ, shape
+      ``(nk, n_ortho, nao)`` (spin-orbital analog for ``x2c == 2``).
+    - ``X_inv_k``: inverse transforms over the full BZ, shape
+      ``(nk, nao, n_ortho)``.
+
+    The orthogonalization mode (``args.orth``) is recorded as the ``mode``
+    attribute on the group.
+
+    Parameters
+    ----------
+    args : map
+        simulation parameters
+    X_k : numpy.ndarray
+        Forward orthogonalization matrices over the full BZ.
+    X_inv_k : numpy.ndarray
+        Inverse orthogonalization matrices over the full BZ.
+
+    Returns
+    -------
+    None
+        Data is written directly to the HDF5 file. No-op when
+        ``args.orth == "none"``.
+    """
+    if args.orth == "none":
+        return
+
+    inp_data = h5py.File(args.output_path, "a")
+    if "orthogonalization" in inp_data:
+        orth_grp = inp_data["orthogonalization"]
+    else:
+        orth_grp = inp_data.create_group("orthogonalization")
+    orth_grp.attrs["mode"] = args.orth
+    X_k = np.asarray(X_k, dtype=np.complex128)
+    X_inv_k = np.asarray(X_inv_k, dtype=np.complex128)
+    for name, data in (("X_k", X_k), ("X_inv_k", X_inv_k)):
+        if name in orth_grp:
+            del orth_grp[name]
+        orth_grp[name] = data
     inp_data.close()
 
 
