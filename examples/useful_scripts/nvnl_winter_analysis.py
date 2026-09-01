@@ -124,7 +124,7 @@ def main():
     # Wannier interpolation
     #
     
-    # Initialize mbanalysis post processing
+    # Initialize pesto post processing
     mbo = mb.MB_post(
         fock=Fk, gtau=G_tk, sigma=Sigma_tk, mu=mu, S=Sk, kmesh=kmesh_scaled,
         beta=T_inv, ir_file=ir_file

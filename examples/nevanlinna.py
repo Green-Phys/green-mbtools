@@ -84,7 +84,7 @@ if __name__ == "__main__":
     ##################
 
     # Construct MB_post class
-    print("Setting up mbanalysis post processing object.")
+    print("Setting up pesto post processing object.")
     t1 = time.time()
     MB = mb.MB_post(
         fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv,

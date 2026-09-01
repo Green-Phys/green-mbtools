@@ -83,7 +83,7 @@ def main():
     Sk_mo = np.einsum('skpr, skrt, sktq -> skpq', mo_coeff_adj, Sk, mo_coeff, optimize=True)
     Sigma_tk_mo = np.einsum('skab, tskbc, skcd -> tskad', mo_coeff_adj, Sigma_tk, mo_coeff, optimize=True)
 
-    # Initialize mbanalysis post processing
+    # Initialize pesto post processing
     mbo = mb.MB_post(
         fock=Fk_mo, sigma=Sigma_tk_mo, mu=mu, S=Sk_mo,
         beta=args.beta, ir_file=args.grid_file, legacy_ir=args.legacy_ir

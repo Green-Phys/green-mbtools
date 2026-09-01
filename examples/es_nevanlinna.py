@@ -72,8 +72,8 @@ if __name__ == "__main__":
     # Use ES analytical continuation to get spectral function
     #
     
-    # 0. Construct mbanalysis object
-    print("Setting up mbanalysis post processing object.")
+    # 0. Construct pesto object
+    print("Setting up pesto post processing object.")
     t1 = time.time()
     MB = mb.MB_post(fock=Fk, sigma=Sigmak, gtau=Gk, mu=mu, S=Sk, beta=T_inv, ir_file=ir_file)
     t2 = time.time()

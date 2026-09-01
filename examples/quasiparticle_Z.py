@@ -13,7 +13,7 @@ import numpy as np
 
 def main():
     #
-    # Initialize the mbanalysis object
+    # Initialize the pesto object
     #
 
     data_dir = '../tests/test_data'

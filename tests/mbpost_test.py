@@ -9,7 +9,7 @@ import h5py
 
 
 def test_initMBpost(mbo, data_path):
-    """Test shortcut way to initialize the mbanalysis::MB_post instance.
+    """Test shortcut way to initialize the pesto::MB_post instance.
     """
     data_dir = pytest.test_data_dir
     sim_path = data_dir + '/H2_GW/sim.h5'

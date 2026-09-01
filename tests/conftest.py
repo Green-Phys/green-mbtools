@@ -5,7 +5,7 @@ from green_mbtools.pesto import mb
 
 
 #
-# Configure the mbanalysis::MB_post objects that will be used in all the tests.
+# Configure the pesto::MB_post objects that will be used in all the tests.
 #
 
 @pytest.fixture
