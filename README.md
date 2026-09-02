@@ -19,8 +19,8 @@ Python Tool Suite for Green's-function-based many-body calculations using Green 
 
 Package contains two main modules:
 
-   - mint (Mean-field INput generation Toolkit): generates input files for Green/WeakCoupling using PySCF, ASE and SPGLib 
-   - pesto (Post-processing Evaluation Software TOols): provides access to various post-processing tools such as analytical continuation, and Mulliken analysis.
+   - 🌿 `mint` (Mean-field INput generation Toolkit): generates input files for Green/WeakCoupling using PySCF, ASE and SPGLib
+   - 🫙 `pesto` (Post-processing Evaluation Software TOols): provides access to various post-processing tools such as analytical continuation, and Mulliken analysis.
   
 Installation
 ----------
@@ -44,14 +44,18 @@ Installation
 
 Features
 ----------
-The `mbtools` package comes with two sub-packages: `mint` and `pesto`. The `mint` sub-package contains utilities for the following tasks:
+The `mbtools` package comes with two sub-packages: `mint` and `pesto`.
+
+### 🌿 `mint`
+
 * Generate input for Green/WeakCoupling.
 * Compute molecular/natural orbitals.
-* Mulliken analyasis based on symmetrical atomic orbitals.
 
-On the other hand, the `pesto` sub-package caters to:
+### 🫙 `pesto`
+
+* Mulliken analysis based on symmetrical atomic orbitals.
 * Fourier transformation between real and reciprocal space.
-* Fourier transformation between imaginary-time and Matsuabara frequency domain on intermediate representation (IR) grids (see [Phys. Rev. B 101, 035144 (2020)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144) for further details).
+* Fourier transformation between imaginary-time and Matsubara frequency domain on intermediate representation (IR) grids (see [Phys. Rev. B 101, 035144 (2020)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144) for further details).
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 * Nevanlinna analytical continuation, based on Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
