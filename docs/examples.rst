@@ -5,7 +5,7 @@ Examples
 demonstrated in these examples.
 
 Several `example scripts <https://github.com/Green-Phys/green-mbtools/tree/master/examples>`_ are provided in the
-Github repo of the green-mbtools package, particularly for the post-processing of Green output.
+GitHub repo of the green-mbtools package, particularly for the post-processing of Green output.
 Here, we will go over some of the basic cases.
 
 
