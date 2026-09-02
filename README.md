@@ -55,7 +55,7 @@ The `mbtools` package comes with two sub-packages: `mint` and `pesto`.
 
 * Mulliken analysis based on symmetrical atomic orbitals.
 * Fourier transformation between real and reciprocal space.
-* Fourier transformation between imaginary-time and Matsuabara frequency domain on intermediate representation (IR) grids (see [Phys. Rev. B 101, 035144 (2020)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144) for further details).
+* Fourier transformation between imaginary-time and Matsubara frequency domain on intermediate representation (IR) grids (see [Phys. Rev. B 101, 035144 (2020)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144) for further details).
 * Wannier interpolation
 * Maxent analytical continuation (External C++ library required: https://github.com/CQMP/Maxent) 
 * Nevanlinna analytical continuation, based on Fei et.al. [Phys. Rev. Lett. 126, 056402 (2021)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402).
