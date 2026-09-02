@@ -15,7 +15,7 @@ This package contains two main modules:
    generates input files for
    `Green/WeakCoupling <https://github.com/Green-Phys/green-mbpt>`_ using PySCF, ASE and SPGLib 
 - 🫙 ``pesto`` (Post-processing Evaluation Software TOols):
-   provides access to various post-processing tools such as analytical continuation, wannier interpolation
+   provides access to various post-processing tools such as analytical continuation, Wannier interpolation
    and Mulliken analysis.
 
 
