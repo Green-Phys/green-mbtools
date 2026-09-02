@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 # by performing wannier interpolation of the density matrix eigenvalues.
 #
 # Usage:
-# python3 ~/dev/mbanalysis/examples/wannier_occ.py \
+# python3 ~/dev/green-mbtools/examples/wannier_occ.py \
 #   --bz_type "rhombohedral type 1" \
 #   --celltype "rhombohedral" \
 #   --inp input.h5 \

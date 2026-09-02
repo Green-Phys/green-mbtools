@@ -70,7 +70,7 @@ The `mbtools` package comes with two sub-packages: `mint` and `pesto`. The `mint
 * Compute molecular/natural orbitals.
 * Mulliken analysis based on symmetrical atomic orbitals.
 
-On the other hand, the `pesto` sub-package, formerly known as the `mbanalysis` package, caters to:
+On the other hand, the `pesto` sub-package caters to:
 
 * Fourier transformation between real and reciprocal space
 * Fourier transformation between imaginary-time and Matsubara frequency domain on intermediate representation (IR) grids (see `Phys. Rev. B 101, 035144 (2020) <https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144>`_ for further details)
@@ -79,6 +79,11 @@ On the other hand, the `pesto` sub-package, formerly known as the `mbanalysis` p
 * Nevanlinna analytical continuation, based on Fei et.al. `Phys. Rev. Lett. 126, 056402 (2021) <https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402>`_
 * PES analytical continuation, based on `Phys. Rev. B 107, 075151 (2023) <https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.075151>`_
 * Caratheodory analytical continuation for complex valued matrices, implemented as a C++ library based on Fei et.al. `Phys. Rev. B 104, 165111 (2021) <https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111>`_
+
+.. deprecated:: 1.0
+   ``pesto`` was formerly known as ``mbanalysis``. Importing ``mbanalysis``
+   still works but is deprecated (it now emits a ``FutureWarning``) and
+   will be removed in **v1.1**. Use ``from green_mbtools import pesto`` instead.
 
 
 Authors
