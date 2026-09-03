@@ -14,7 +14,7 @@ This package contains two main modules:
 - 🌿 ``mint`` (Mean-field INput generation Toolkit):
    generates input files for
    `Green/WeakCoupling <https://github.com/Green-Phys/green-mbpt>`_ using PySCF, ASE and SPGLib 
-- 🫙 ``pesto`` (Post-processing Evaluation Software TOols):
+- 🥣 ``pesto`` (Post-processing Evaluation Software TOols):
    provides access to various post-processing tools such as analytical continuation, Wannier interpolation
    and Mulliken analysis.
 
@@ -72,7 +72,7 @@ The ``mbtools`` package comes with two sub-packages: ``mint`` and ``pesto``.
 * Generate input for Green/WeakCoupling.
 * Compute molecular/natural orbitals.
 
-🫙 ``pesto``
+🥣 ``pesto``
 ~~~~~~~~~~~~~
 
 * Mulliken analysis based on symmetrical atomic orbitals.

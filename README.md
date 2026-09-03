@@ -20,7 +20,7 @@ Python Tool Suite for Green's-function-based many-body calculations using Green 
 Package contains two main modules:
 
    - 🌿 `mint` (Mean-field INput generation Toolkit): generates input files for Green/WeakCoupling using PySCF, ASE and SPGLib
-   - 🫙 `pesto` (Post-processing Evaluation Software TOols): provides access to various post-processing tools such as analytical continuation, and Mulliken analysis.
+   - 🥣 `pesto` (Post-processing Evaluation Software TOols): provides access to various post-processing tools such as analytical continuation, and Mulliken analysis.
   
 Installation
 ----------
@@ -51,7 +51,7 @@ The `mbtools` package comes with two sub-packages: `mint` and `pesto`.
 * Generate input for Green/WeakCoupling.
 * Compute molecular/natural orbitals.
 
-### 🫙 `pesto`
+### 🥣 `pesto`
 
 * Mulliken analysis based on symmetrical atomic orbitals.
 * Fourier transformation between real and reciprocal space.
