@@ -242,20 +242,35 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.symmetry_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_representation</span><span class="p">,</span> <span class="n">get_spinor_representation</span>
 
 
+<span class="c1"># Below this max|imag|, a k-point matrix is treated as numerically real and its</span>
+<span class="c1"># eigenproblem is solved on the real part. This matters at self-TR k-points</span>
+<span class="c1"># (e.g. Γ): tiny imaginary noise on a degenerate block would otherwise rotate</span>
+<span class="c1"># the canonical-Löwdin/mo/natural eigenvectors into a complex gauge that</span>
+<span class="c1"># violates X(-k) = X(k)* and breaks the conjugate df-pair reduction downstream.</span>
+<span class="n">_REAL_TOL</span> <span class="o">=</span> <span class="mf">1e-10</span>
+
+
 <div class="viewcode-block" id="lowdin_per_k">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.lowdin_per_k">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Symmetric (Löwdin) S^{-1/2} orthogonalization for a single k-point.</span>
+<span class="w">    </span><span class="sd">'''</span>
+<span class="sd">    Canonical (Löwdin) orthogonalization for a single k-point.</span>
 
 <span class="sd">    Returns ``(X, X_inv)`` in the convention used by</span>
 <span class="sd">    ``common_utils.transform`` (i.e. transforms apply as ``X Z X†``)::</span>
 
-<span class="sd">        X     = S^{-1/2}   (shape (n_ortho, nao))</span>
-<span class="sd">        X_inv = S^{+1/2}   (shape (nao, n_ortho))</span>
+<span class="sd">        X     = s^{-1/2} U†   (shape (n_ortho, nao))</span>
+<span class="sd">        X_inv = U s^{+1/2}    (shape (nao, n_ortho))</span>
 
 <span class="sd">    Eigenvalues of ``Sk`` below ``tol`` are discarded.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+
+<span class="sd">    This keeps the overlap eigenvectors ``U``, so unlike Hermitian</span>
+<span class="sd">    symmetric Löwdin (whose ``S^{-1/2}`` is gauge-free) it carries a</span>
+<span class="sd">    phase/degenerate-block gauge freedom. At self-TR k-points a real</span>
+<span class="sd">    ``Sk`` is required for a real (hence ``X(-k) = X(k)*``-consistent)</span>
+<span class="sd">    result; ``_build_X_ibz`` realifies numerically-real inputs before</span>
+<span class="sd">    calling this, so that gauge policy lives there, not here.</span>
+<span class="sd">    '''</span>
     <span class="n">s_ev</span><span class="p">,</span> <span class="n">s_eb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
     <span class="n">istart</span> <span class="o">=</span> <span class="n">s_ev</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
     <span class="n">s_sqrtev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ev</span><span class="p">[</span><span class="n">istart</span><span class="p">:])</span>
@@ -268,12 +283,12 @@
 <div class="viewcode-block" id="mo_per_k">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.mo_per_k">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mo_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">C_k</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Canonical-MO basis for a single k-point from MO coefficients ``C_k``</span>
 <span class="sd">    satisfying ``C† S C = I``.</span>
 
 <span class="sd">    Returns ``(X = C†, X_inv = S C)`` in the ``X Z X†`` convention.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">C_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">C_k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">C_k</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Sk</span> <span class="o">@</span> <span class="n">C_k</span></div>
 
@@ -282,7 +297,7 @@
 <div class="viewcode-block" id="symmetric_lowdin_per_k">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.symmetric_lowdin_per_k">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">symmetric_lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Symmetric (Hermitian) Löwdin orthogonalization for a single k-point.</span>
 
 <span class="sd">    Returns ``(X = S^{-1/2}, X_inv = S^{+1/2})`` — both Hermitian</span>
@@ -300,7 +315,7 @@
 <span class="sd">    basis). When linear dependencies are present and a strict</span>
 <span class="sd">    ``X @ X_inv = I`` contract is required, use ``lowdin_per_k``</span>
 <span class="sd">    (canonical, rectangular).</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">s_ev</span><span class="p">,</span> <span class="n">s_eb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
     <span class="n">kept</span> <span class="o">=</span> <span class="n">s_ev</span> <span class="o">&gt;=</span> <span class="n">tol</span>
     <span class="n">s_sqrt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">s_ev</span><span class="p">)</span>
@@ -314,9 +329,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_S_inv_half</span><span class="p">(</span><span class="n">Sk</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Return ``S^{-1/2}`` via Hermitian eigendecomposition of S.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">s_ev</span><span class="p">,</span> <span class="n">s_eb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">s_eb</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ev</span><span class="p">))</span> <span class="o">@</span> <span class="n">s_eb</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
 
@@ -324,7 +339,7 @@
 <div class="viewcode-block" id="natural_per_k">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.ortho_utils.natural_per_k">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">natural_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">dmk</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Natural-orbital basis at one k-point from density matrix ``dmk``.</span>
 
 <span class="sd">    Diagonalises ``S^{-1/2} dm S^{-1/2}`` to obtain S-orthonormal</span>
@@ -334,7 +349,7 @@
 
 <span class="sd">        X     = C_NO†      (shape (n_ortho, nao))</span>
 <span class="sd">        X_inv = S @ C_NO   (shape (nao, n_ortho))</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">S_inv_half</span> <span class="o">=</span> <span class="n">_S_inv_half</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
     <span class="n">M</span> <span class="o">=</span> <span class="n">S_inv_half</span> <span class="o">@</span> <span class="n">dmk</span> <span class="o">@</span> <span class="n">S_inv_half</span>
     <span class="n">M</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">M</span> <span class="o">+</span> <span class="n">M</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
@@ -345,7 +360,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_natural_per_k_with_fock_tiebreak</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">dmk</span><span class="p">,</span> <span class="n">Fk</span><span class="p">,</span> <span class="n">tol_degen</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Natural orbitals at one k-point with Fock-within-block tie-breaking.</span>
 
 <span class="sd">    Same S-orthonormal convention as ``natural_per_k``: diagonalises</span>
@@ -354,7 +369,7 @@
 <span class="sd">    agree to ``tol_degen`` additionally diagonalises the block-projected</span>
 <span class="sd">    AO Fock ``C_NO_B† F C_NO_B`` and rotates the block accordingly.</span>
 <span class="sd">    Returns ``(X = C_NO†, X_inv = S @ C_NO)``.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">S_inv_half</span> <span class="o">=</span> <span class="n">_S_inv_half</span><span class="p">(</span><span class="n">Sk</span><span class="p">)</span>
     <span class="n">M</span> <span class="o">=</span> <span class="n">S_inv_half</span> <span class="o">@</span> <span class="n">dmk</span> <span class="o">@</span> <span class="n">S_inv_half</span>
     <span class="n">M</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">M</span> <span class="o">+</span> <span class="n">M</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
@@ -380,9 +395,33 @@
     <span class="k">return</span> <span class="n">C_NO</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Sk</span> <span class="o">@</span> <span class="n">C_NO</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_realify</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">'''</span>
+<span class="sd">    Strip numerical imaginary noise from a k-point matrix.</span>
+
+<span class="sd">    Returns ``M.real`` when ``max|imag(M)| &lt; _REAL_TOL`` (the case at</span>
+<span class="sd">    self-TR k-points, where ``S``/``F``/``dm`` are physically real), else</span>
+<span class="sd">    ``M`` unchanged. Centralizing this in ``_build_X_ibz`` keeps the</span>
+<span class="sd">    real-gauge policy in one place: the gauge-sensitive modes (lowdin, mo,</span>
+<span class="sd">    natural) then diagonalize a real matrix at self-TR points and produce a</span>
+<span class="sd">    real, ``X(-k) = X(k)*``-consistent X, while gauge-free</span>
+<span class="sd">    symmetric_lowdin is unaffected. ``None`` passes through.</span>
+
+<span class="sd">    The criterion is numerical realness, not an explicit self-TR test.</span>
+<span class="sd">    Applying it to every IBZ representative is safe: a generic (non-self-TR)</span>
+<span class="sd">    point has O(1) imaginary parts from Bloch phases, so this never fires</span>
+<span class="sd">    there; where it does fire the discarded imaginary part is below</span>
+<span class="sd">    ``_REAL_TOL`` and physically negligible; and the star stays internally</span>
+<span class="sd">    consistent because it is propagated from this (realified) representative.</span>
+<span class="sd">    '''</span>
+    <span class="k">if</span> <span class="n">M</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">M</span>
+    <span class="k">return</span> <span class="n">M</span><span class="o">.</span><span class="n">real</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">imag</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">_REAL_TOL</span> <span class="k">else</span> <span class="n">M</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_build_X_ibz</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">S_ibz</span><span class="p">,</span> <span class="n">F_ibz</span><span class="p">,</span> <span class="n">dm_ibz</span><span class="p">,</span> <span class="n">mo_coeff_ibz</span><span class="p">,</span>
                  <span class="n">tol_sing</span><span class="p">,</span> <span class="n">tol_degen</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Per-IBZ orthogonalization step shared by ``build_X_kspace`` and</span>
 <span class="sd">    ``build_X_kspace_from_ao_reps``.</span>
 
@@ -390,29 +429,34 @@
 <span class="sd">    -------</span>
 <span class="sd">    X_per_irrep, X_inv_per_irrep : lists of length n_ibz</span>
 <span class="sd">        Per-IBZ-point X and X_inv in the ``X Z X†`` convention.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">n_ibz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S_ibz</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">X_per_irrep</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_ibz</span>
     <span class="n">Xinv_per_irrep</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_ibz</span>
 
     <span class="k">for</span> <span class="n">i_ir</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ibz</span><span class="p">):</span>
-        <span class="n">Sk</span> <span class="o">=</span> <span class="n">S_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;lowdin&quot;</span><span class="p">:</span>
+        <span class="c1"># Centralized real-gauge policy: at self-TR k-points S/F/dm are</span>
+        <span class="c1"># physically real, so strip the imaginary noise once, up front. Every</span>
+        <span class="c1"># gauge-sensitive mode below then diagonalizes a real matrix there and</span>
+        <span class="c1"># yields a real, X(-k) = X(k)*-consistent X; symmetric_lowdin is</span>
+        <span class="c1"># unaffected. None (unused inputs for a given mode) passes through.</span>
+        <span class="n">Sk</span> <span class="o">=</span> <span class="n">_realify</span><span class="p">(</span><span class="n">S_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">])</span>
+        <span class="n">Fk</span> <span class="o">=</span> <span class="n">_realify</span><span class="p">(</span><span class="n">F_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">])</span> <span class="k">if</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">dmk</span> <span class="o">=</span> <span class="n">_realify</span><span class="p">(</span><span class="n">dm_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">])</span> <span class="k">if</span> <span class="n">dm_ibz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"lowdin"</span><span class="p">:</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span> <span class="o">=</span> <span class="n">lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol_sing</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;symmetric_lowdin&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"symmetric_lowdin"</span><span class="p">:</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span> <span class="o">=</span> <span class="n">symmetric_lowdin_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol_sing</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mo&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"mo"</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">Ck</span> <span class="o">=</span> <span class="n">mo_coeff_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">Fk</span> <span class="o">=</span> <span class="n">F_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">Fk</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="n">Fk</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">Fk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">Fk</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">_</span><span class="p">,</span> <span class="n">Ck</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Fk</span><span class="p">,</span> <span class="n">Sk</span><span class="p">)</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span> <span class="o">=</span> <span class="n">mo_per_k</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">Ck</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;natural&quot;</span><span class="p">:</span>
-            <span class="n">dmk</span> <span class="o">=</span> <span class="n">dm_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
-            <span class="n">Fk</span> <span class="o">=</span> <span class="n">F_ibz</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"natural"</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dmk</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">dmk</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">dmk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dmk</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">Fk</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
@@ -422,18 +466,49 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;build_X_kspace: unknown mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2"> &quot;</span>
-                <span class="s2">&quot;(expected &#39;lowdin&#39;, &#39;symmetric_lowdin&#39;, &#39;mo&#39;, or &#39;natural&#39;).&quot;</span>
+                <span class="sa">f</span><span class="s2">"build_X_kspace: unknown mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2"> "</span>
+                <span class="s2">"(expected 'lowdin', 'symmetric_lowdin', 'mo', or 'natural')."</span>
             <span class="p">)</span>
         <span class="n">X_per_irrep</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
         <span class="n">Xinv_per_irrep</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_inv</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+
+    <span class="c1"># Reject rank-deficient orthogonalization. Near-singular overlap eigenvalues</span>
+    <span class="c1"># (&lt; tol_sing) get dropped, which makes X non-invertible: canonical Löwdin</span>
+    <span class="c1"># returns a rectangular X, while symmetric Löwdin returns a square X whose</span>
+    <span class="c1"># X_inv is only a pseudo-inverse (X_inv @ X is a projector, not I). Differing</span>
+    <span class="c1"># retained ranks across IBZ points also break star propagation. None of this</span>
+    <span class="c1"># is supported end-to-end (downstream transform/symmetry operators and the</span>
+    <span class="c1"># Green file format assume a square, invertible, AO-sized X). Fail fast with</span>
+    <span class="c1"># an actionable message rather than a later NumPy broadcasting error or a</span>
+    <span class="c1"># generic "Orthogonal transformation failed" RuntimeError from transform().</span>
+    <span class="n">shapes</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X_per_irrep</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"build_X_kspace: mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2"> produced X of differing shapes "</span>
+            <span class="sa">f</span><span class="s2">"across IBZ points (</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span><span class="si">}</span><span class="s2">) — different retained ranks "</span>
+            <span class="s2">"from dropping near-singular overlap eigenvalues. Rank reduction is "</span>
+            <span class="s2">"not supported; use a linear-dependence-free basis."</span>
+        <span class="p">)</span>
+    <span class="n">n_basis</span> <span class="o">=</span> <span class="n">X_per_irrep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">eye</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n_basis</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i_ir</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_inv</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">n_basis</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">x_inv</span> <span class="o">@</span> <span class="n">x</span><span class="p">,</span> <span class="n">eye</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"build_X_kspace: mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2"> produced a rank-deficient, "</span>
+                <span class="sa">f</span><span class="s2">"non-invertible X at IBZ point </span><span class="si">{</span><span class="n">i_ir</span><span class="si">}</span><span class="s2"> (shape </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, "</span>
+                <span class="s2">"X_inv @ X != I). Near-singular overlap eigenvalues (&lt; tol_sing) "</span>
+                <span class="s2">"were dropped: canonical Löwdin becomes rectangular, symmetric "</span>
+                <span class="s2">"Löwdin's X_inv becomes a pseudo-inverse. Rank-deficient "</span>
+                <span class="s2">"orthogonalization is not supported end-to-end; use a "</span>
+                <span class="s2">"linear-dependence-free basis."</span>
+            <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_propagate_with_reps</span><span class="p">(</span><span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span> <span class="n">ibz2bz</span><span class="p">,</span> <span class="n">bz2ibz</span><span class="p">,</span>
                          <span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">tr_conj</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Propagate per-IBZ ``(X, X_inv)`` to every BZ point given precomputed</span>
 <span class="sd">    AO-space rotations ``k_sym_transform_ao`` and TR flags ``tr_conj``.</span>
 
@@ -455,7 +530,7 @@
 <span class="sd">          X_inv(k) = (U @ X_inv(k_ir)).conj()</span>
 
 <span class="sd">    so that ``X(k) S(k) X(k)† = I`` at every BZ point.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">ibz2bz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ibz2bz</span><span class="p">)</span>
     <span class="n">bz2ibz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bz2ibz</span><span class="p">)</span>
     <span class="n">nk</span> <span class="o">=</span> <span class="n">bz2ibz_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -493,10 +568,10 @@
     <span class="n">mycell</span><span class="p">,</span>
     <span class="n">spinor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Build precomputed AO-rotation arrays from ``kstruct`` + ``mycell`` and</span>
 <span class="sd">    delegate to ``_propagate_with_reps``.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">nk</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span>
     <span class="n">stars_ops</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">stars_ops_bz</span>
     <span class="n">sample</span> <span class="o">=</span> <span class="n">X_per_irrep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -543,7 +618,7 @@
     <span class="n">tol_sing</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span>
     <span class="n">tol_degen</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Build orthogonalization matrices ``(X_k, X_inv_k)`` over the full BZ.</span>
 
 <span class="sd">    ``X`` is constructed only at IBZ k-points using one of the per-k</span>
@@ -553,7 +628,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    mode : {&quot;lowdin&quot;, &quot;symmetric_lowdin&quot;, &quot;mo&quot;, &quot;natural&quot;}</span>
+<span class="sd">    mode : {"lowdin", "symmetric_lowdin", "mo", "natural"}</span>
 <span class="sd">        IBZ primitive to use.</span>
 <span class="sd">    kstruct : pyscf.pbc.lib.kpts.KPoints</span>
 <span class="sd">        Same object the rest of mbtools uses (e.g. from</span>
@@ -565,18 +640,18 @@
 <span class="sd">        Overlap at IBZ k-points, in the order</span>
 <span class="sd">        ``kstruct.kpts_scaled[kstruct.ibz2bz]``.</span>
 <span class="sd">    F_ibz : (n_ibz, n, n) ndarray, optional</span>
-<span class="sd">        Fock at IBZ. Required for ``mode=&quot;natural&quot;`` (degeneracy</span>
-<span class="sd">        tie-breaking) and for ``mode=&quot;mo&quot;`` when ``mo_coeff_ibz`` is not</span>
+<span class="sd">        Fock at IBZ. Required for ``mode="natural"`` (degeneracy</span>
+<span class="sd">        tie-breaking) and for ``mode="mo"`` when ``mo_coeff_ibz`` is not</span>
 <span class="sd">        provided (spin-averaged Fock is used to derive MOs).</span>
 <span class="sd">    dm_ibz : (n_ibz, n, n) ndarray, optional</span>
 <span class="sd">        Spin-averaged / total density matrix at IBZ. Required for</span>
-<span class="sd">        ``mode=&quot;natural&quot;``.</span>
+<span class="sd">        ``mode="natural"``.</span>
 <span class="sd">    mo_coeff_ibz : (n_ibz, n, n_mo) ndarray, optional</span>
-<span class="sd">        MO coefficients at IBZ. Preferred input for ``mode=&quot;mo&quot;``.</span>
+<span class="sd">        MO coefficients at IBZ. Preferred input for ``mode="mo"``.</span>
 <span class="sd">    spinor : bool, default False</span>
 <span class="sd">        If True, use the double-group spinor representation</span>
 <span class="sd">        (``get_spinor_representation``). Currently only supported with</span>
-<span class="sd">        ``mode=&quot;lowdin&quot;``.</span>
+<span class="sd">        ``mode="lowdin"``.</span>
 <span class="sd">    tol_sing : float</span>
 <span class="sd">        Threshold for discarding small eigenvalues of ``S`` in the</span>
 <span class="sd">        Löwdin primitive.</span>
@@ -588,19 +663,19 @@
 <span class="sd">    -------</span>
 <span class="sd">    X_k     : (nk, n_ortho, n) complex128 ndarray</span>
 <span class="sd">    X_inv_k : (nk, n,        n_ortho) complex128 ndarray</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">spinor</span> <span class="ow">and</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;lowdin&quot;</span><span class="p">,</span> <span class="s2">&quot;symmetric_lowdin&quot;</span><span class="p">):</span>
+<span class="sd">    '''</span>
+    <span class="k">if</span> <span class="n">spinor</span> <span class="ow">and</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"lowdin"</span><span class="p">,</span> <span class="s2">"symmetric_lowdin"</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;build_X_kspace: spinor=True only supported for mode in &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">&#39;lowdin&#39;, &#39;symmetric_lowdin&#39;</span><span class="se">}}</span><span class="s2">, got mode=</span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">"build_X_kspace: spinor=True only supported for mode in "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="se">{{</span><span class="s2">'lowdin', 'symmetric_lowdin'</span><span class="se">}}</span><span class="s2">, got mode=</span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">."</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;natural&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dm_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"natural"</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dm_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;build_X_kspace: mode=&#39;natural&#39; requires dm_ibz and F_ibz.&quot;</span>
+            <span class="s2">"build_X_kspace: mode='natural' requires dm_ibz and F_ibz."</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mo&quot;</span> <span class="ow">and</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"mo"</span> <span class="ow">and</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;build_X_kspace: mode=&#39;mo&#39; requires mo_coeff_ibz or F_ibz.&quot;</span>
+            <span class="s2">"build_X_kspace: mode='mo' requires mo_coeff_ibz or F_ibz."</span>
         <span class="p">)</span>
 
     <span class="n">ibz2bz</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">ibz2bz</span>
@@ -608,8 +683,8 @@
     <span class="n">S_ibz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S_ibz</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">n_ibz</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;build_X_kspace: S_ibz has </span><span class="si">{</span><span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> k-points but &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;kstruct has </span><span class="si">{</span><span class="n">n_ibz</span><span class="si">}</span><span class="s2"> IBZ points.&quot;</span>
+            <span class="sa">f</span><span class="s2">"build_X_kspace: S_ibz has </span><span class="si">{</span><span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> k-points but "</span>
+            <span class="sa">f</span><span class="s2">"kstruct has </span><span class="si">{</span><span class="n">n_ibz</span><span class="si">}</span><span class="s2"> IBZ points."</span>
         <span class="p">)</span>
 
     <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span> <span class="o">=</span> <span class="n">_build_X_ibz</span><span class="p">(</span>
@@ -638,7 +713,7 @@
     <span class="n">tol_sing</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span>
     <span class="n">tol_degen</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Build ``(X_k, X_inv_k)`` from precomputed AO-space rotations.</span>
 
 <span class="sd">    Identical to ``build_X_kspace`` but consumes the symmetry information</span>
@@ -668,16 +743,16 @@
 <span class="sd">    -------</span>
 <span class="sd">    X_k     : (nk, n_ortho, n) complex128 ndarray</span>
 <span class="sd">    X_inv_k : (nk, n,        n_ortho) complex128 ndarray</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;natural&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dm_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+<span class="sd">    '''</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"natural"</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dm_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;build_X_kspace_from_ao_reps: mode=&#39;natural&#39; requires &quot;</span>
-            <span class="s2">&quot;dm_ibz and F_ibz.&quot;</span>
+            <span class="s2">"build_X_kspace_from_ao_reps: mode='natural' requires "</span>
+            <span class="s2">"dm_ibz and F_ibz."</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mo&quot;</span> <span class="ow">and</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"mo"</span> <span class="ow">and</span> <span class="n">mo_coeff_ibz</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">F_ibz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;build_X_kspace_from_ao_reps: mode=&#39;mo&#39; requires &quot;</span>
-            <span class="s2">&quot;mo_coeff_ibz or F_ibz.&quot;</span>
+            <span class="s2">"build_X_kspace_from_ao_reps: mode='mo' requires "</span>
+            <span class="s2">"mo_coeff_ibz or F_ibz."</span>
         <span class="p">)</span>
 
     <span class="n">ibz2bz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ibz2bz</span><span class="p">)</span>
@@ -685,8 +760,8 @@
     <span class="n">S_ibz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S_ibz</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">n_ibz</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;build_X_kspace_from_ao_reps: S_ibz has </span><span class="si">{</span><span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;k-points but ibz2bz has </span><span class="si">{</span><span class="n">n_ibz</span><span class="si">}</span><span class="s2"> entries.&quot;</span>
+            <span class="sa">f</span><span class="s2">"build_X_kspace_from_ao_reps: S_ibz has </span><span class="si">{</span><span class="n">S_ibz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"k-points but ibz2bz has </span><span class="si">{</span><span class="n">n_ibz</span><span class="si">}</span><span class="s2"> entries."</span>
         <span class="p">)</span>
 
     <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span> <span class="o">=</span> <span class="n">_build_X_ibz</span><span class="p">(</span>
@@ -734,7 +809,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

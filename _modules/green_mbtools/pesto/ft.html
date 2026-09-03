@@ -239,15 +239,15 @@
           <h1>Source code for green_mbtools.pesto.ft</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">Fourier transform between real and reciprocal space</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 
 <div class="viewcode-block" id="construct_rmesh">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ft.construct_rmesh">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">construct_rmesh</span><span class="p">(</span><span class="n">nkx</span><span class="p">,</span> <span class="n">nky</span><span class="p">,</span> <span class="n">nkz</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate real-space mesh, in the units of lattice translation vectors. e.g.,</span>
+<span class="w">    </span><span class="sd">"""Generate real-space mesh, in the units of lattice translation vectors. e.g.,</span>
 
 <span class="sd">    .. code-block:: python</span>
 
@@ -268,7 +268,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        real-space mesh</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Lz</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nky</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nkz</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
     <span class="n">leftx</span><span class="p">,</span> <span class="n">lefty</span><span class="p">,</span> <span class="n">leftz</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nky</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nkz</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span>
 
@@ -285,7 +285,7 @@
 <div class="viewcode-block" id="construct_symmetric_rmesh">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ft.construct_symmetric_rmesh">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">construct_symmetric_rmesh</span><span class="p">(</span><span class="n">nkx</span><span class="p">,</span> <span class="n">nky</span><span class="p">,</span> <span class="n">nkz</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a real-space mesh that is symmetric along coordinate axes. e.g.,</span>
+<span class="w">    </span><span class="sd">"""Generate a real-space mesh that is symmetric along coordinate axes. e.g.,</span>
 
 <span class="sd">    .. code-block:: python</span>
 
@@ -306,7 +306,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        unique / symmetric real-space mesh</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Lz</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nky</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nkz</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
     <span class="n">leftx</span><span class="p">,</span> <span class="n">lefty</span><span class="p">,</span> <span class="n">leftz</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nky</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">nkz</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span>
 
@@ -325,7 +325,7 @@
 <div class="viewcode-block" id="compute_fourier_coefficients">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ft.compute_fourier_coefficients">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_fourier_coefficients</span><span class="p">(</span><span class="n">kmesh</span><span class="p">,</span> <span class="n">rmesh</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute Fourier coefficients for direct and inverse transforms between k and real space</span>
+<span class="w">    </span><span class="sd">"""Compute Fourier coefficients for direct and inverse transforms between k and real space</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -340,7 +340,7 @@
 <span class="sd">        coefficients to transform from r to k space</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        coefficients to transform from k to r space</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">fkr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="n">frk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">rmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmesh</span><span class="p">):</span>
@@ -358,7 +358,7 @@
 <div class="viewcode-block" id="k_to_real">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ft.k_to_real">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">k_to_real</span><span class="p">(</span><span class="n">frk</span><span class="p">,</span> <span class="n">obj_k</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform Fourier transform from reciprocal to real space</span>
+<span class="w">    </span><span class="sd">"""Perform Fourier transform from reciprocal to real space</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -367,14 +367,14 @@
 <span class="sd">    obj_k : numpy.ndarray</span>
 <span class="sd">        Reciprocal space object</span>
 <span class="sd">    weights : numpy.ndarray</span>
-<span class="sd">        Fourier coefficient&#39;s degeneracy weights</span>
+<span class="sd">        Fourier coefficient's degeneracy weights</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Real space (inverse Fourier transformed) object</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">obj_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;k...,k,ki-&gt;i...&quot;</span><span class="p">,</span> <span class="n">obj_k</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">frk</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">obj_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"k...,k,ki-&gt;i..."</span><span class="p">,</span> <span class="n">obj_k</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">frk</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
     <span class="n">obj_i</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">obj_i</span></div>
 
@@ -383,7 +383,7 @@
 <div class="viewcode-block" id="real_to_k">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ft.real_to_k">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">real_to_k</span><span class="p">(</span><span class="n">fkr</span><span class="p">,</span> <span class="n">obj_i</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform Fourier transform from real to reciprocal space</span>
+<span class="w">    </span><span class="sd">"""Perform Fourier transform from real to reciprocal space</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -396,7 +396,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Reciprocal space object</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">original_shape</span> <span class="o">=</span> <span class="n">obj_i</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">obj_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">fkr</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">obj_i</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">original_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">obj_k</span> <span class="o">=</span> <span class="n">obj_k</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">obj_k</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span> <span class="o">+</span> <span class="n">original_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
@@ -434,7 +434,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

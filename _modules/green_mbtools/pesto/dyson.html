@@ -243,7 +243,7 @@
 <div class="viewcode-block" id="solve_dyson">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.dyson.solve_dyson">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">solve_dyson</span><span class="p">(</span><span class="n">fock</span><span class="p">,</span> <span class="n">S</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve Dyson equation and construct Green&#39;s function. If overlap is None, it is set to identity.</span>
+<span class="w">    </span><span class="sd">"""Solve Dyson equation and construct Green's function. If overlap is None, it is set to identity.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -261,15 +261,15 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
-<span class="sd">        Green&#39;s function on imaginary time axis of shape (ntau, ns, nk, nao, nao)</span>
+<span class="sd">        Green's function on imaginary time axis of shape (ntau, ns, nk, nao, nao)</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        if `ir` is not provided</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">ir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ir parameter is necessary to perform Matsubara Fourier transforms&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"ir parameter is necessary to perform Matsubara Fourier transforms"</span><span class="p">)</span>
     <span class="n">nts</span><span class="p">,</span> <span class="n">nw</span> <span class="o">=</span> <span class="n">ir</span><span class="o">.</span><span class="n">nts</span><span class="p">,</span> <span class="n">ir</span><span class="o">.</span><span class="n">nw</span>
     <span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span> <span class="o">=</span> <span class="n">fock</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fock</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fock</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">S</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -324,7 +324,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

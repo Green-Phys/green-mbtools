@@ -244,7 +244,7 @@
 <div class="viewcode-block" id="dump_input_caratheodory_data">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ac_utils.dump_input_caratheodory_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">dump_input_caratheodory_data</span><span class="p">(</span><span class="n">wsample</span><span class="p">,</span> <span class="n">X_iw</span><span class="p">,</span> <span class="n">ifile</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to dump input data to files for caratheodory analytic continuation.</span>
+<span class="w">    </span><span class="sd">"""Function to dump input data to files for caratheodory analytic continuation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -262,12 +262,12 @@
 <span class="sd">            Imag X(iw_2) Matrix</span>
 <span class="sd">            ... and so on.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    """</span>    
 
     <span class="n">nw</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span> <span class="o">=</span> <span class="n">X_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
 
     <span class="c1"># Save dim1 for better understanding of output</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">&quot;dimensions.txt&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s2">"dimensions.txt"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
 
     <span class="c1"># Dump input data to file</span>
     <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span>
@@ -277,25 +277,25 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">))</span>
             <span class="c1"># Write the input data to file</span>
-            <span class="n">output_fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">ifile</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_fname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="n">output_fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'/'</span> <span class="o">+</span> <span class="n">ifile</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_fname</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">fs</span><span class="p">:</span>
                 <span class="c1"># write frequencies in the first line</span>
                 <span class="k">for</span> <span class="n">w_j</span> <span class="ow">in</span> <span class="n">wsample</span><span class="p">:</span>
-                    <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">w_j</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">w_j</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n\n</span><span class="s1">'</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">jw</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nw</span><span class="p">):</span>
                     <span class="c1"># Real part for jw-th frequency</span>
                     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nao</span><span class="p">):</span>
                         <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nao</span><span class="p">):</span>
-                            <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">X_iw</span><span class="p">[</span><span class="n">jw</span><span class="p">,</span> <span class="n">js</span><span class="p">,</span> <span class="n">jk</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-                        <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-                    <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                            <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">X_iw</span><span class="p">[</span><span class="n">jw</span><span class="p">,</span> <span class="n">js</span><span class="p">,</span> <span class="n">jk</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+                        <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+                    <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
                     <span class="c1"># Imag part for jw-th frequency</span>
                     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nao</span><span class="p">):</span>
                         <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nao</span><span class="p">):</span>
-                            <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">X_iw</span><span class="p">[</span><span class="n">jw</span><span class="p">,</span> <span class="n">js</span><span class="p">,</span> <span class="n">jk</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-                        <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-                    <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                            <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">X_iw</span><span class="p">[</span><span class="n">jw</span><span class="p">,</span> <span class="n">js</span><span class="p">,</span> <span class="n">jk</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+                        <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+                    <span class="n">fs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">dim</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 
@@ -303,7 +303,7 @@
 <div class="viewcode-block" id="load_caratheodory_data">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ac_utils.load_caratheodory_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_caratheodory_data</span><span class="p">(</span><span class="n">matrix_file</span><span class="p">,</span> <span class="n">spectral_file</span><span class="p">,</span> <span class="n">X_dims</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Loads output data from Caratheodory analytic continuation.</span>
+<span class="w">    </span><span class="sd">"""Loads output data from Caratheodory analytic continuation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -332,7 +332,7 @@
 <span class="sd">        Complex valued output tensor with full matrix form of continued data</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Real valued spectral function corresponding to the complex continued data</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    """</span>    
 
     <span class="c1"># Dimensions</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span> <span class="o">=</span> <span class="n">X_dims</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
@@ -341,7 +341,7 @@
     <span class="c1"># Load the spectral function data</span>
     <span class="n">dump_A</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">XA_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;0/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spectral_file</span><span class="p">))</span>
+        <span class="n">XA_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">"0/</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spectral_file</span><span class="p">))</span>
         <span class="n">freqs</span> <span class="o">=</span> <span class="n">XA_w</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
         <span class="k">pass</span>
@@ -353,22 +353,22 @@
         <span class="k">for</span> <span class="n">d1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim1</span><span class="p">):</span>
             <span class="c1"># Read X_w data</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">X_wsk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">spectral_file</span><span class="p">))</span>
+                <span class="n">X_wsk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">"</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">spectral_file</span><span class="p">))</span>
                 <span class="n">XA_w</span><span class="p">[:,</span> <span class="n">d1</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_wsk</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is missing in </span><span class="si">{}</span><span class="s2"> folder. Analytical continuation </span><span class="se">\</span>
-<span class="s2">                    may have failed at that point.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spectral_file</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
+                    <span class="s2">"</span><span class="si">{}</span><span class="s2"> is missing in </span><span class="si">{}</span><span class="s2"> folder. Analytical continuation </span><span class="se">\</span>
+<span class="s2">                    may have failed at that point."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spectral_file</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
                 <span class="p">)</span>
         <span class="c1"># reshape the spectral data</span>
         <span class="n">XA_w</span> <span class="o">=</span> <span class="n">XA_w</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">freqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span> <span class="o">+</span> <span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All AC fails. Will not dump to DOS.h5&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"All AC fails. Will not dump to DOS.h5"</span><span class="p">)</span>
 
     <span class="c1"># Load the complex matrix data</span>
     <span class="n">dump_c</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">Xc_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;0/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matrix_file</span><span class="p">))</span>
+        <span class="n">Xc_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">"0/</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matrix_file</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">else</span><span class="p">:</span>
@@ -379,15 +379,15 @@
         <span class="k">for</span> <span class="n">d1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim1</span><span class="p">):</span>
             <span class="c1"># Read X_c data</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">X_wsk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">matrix_file</span><span class="p">))</span>
+                <span class="n">X_wsk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">"</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">matrix_file</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">jw</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">)):</span>
                     <span class="c1"># need to convert the real + imag data into complex type</span>
                     <span class="n">Xc_imtd</span> <span class="o">=</span> <span class="n">X_wsk</span><span class="p">[</span><span class="n">jw</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="nb">complex</span><span class="p">)</span>
                     <span class="n">Xc_w</span><span class="p">[</span><span class="n">jw</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Xc_imtd</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is missing in </span><span class="si">{}</span><span class="s2"> folder. Analytical continuation </span><span class="se">\</span>
-<span class="s2">                    may have failed at that point.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spectral_file</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
+                    <span class="s2">"</span><span class="si">{}</span><span class="s2"> is missing in </span><span class="si">{}</span><span class="s2"> folder. Analytical continuation </span><span class="se">\</span>
+<span class="s2">                    may have failed at that point."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spectral_file</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span>
                 <span class="p">)</span>
         <span class="c1"># reshape the complex matrix data</span>
         <span class="n">Xc_w</span> <span class="o">=</span> <span class="n">Xc_w</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">freqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span> <span class="o">+</span> <span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">))</span>
@@ -426,7 +426,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

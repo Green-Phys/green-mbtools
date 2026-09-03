@@ -247,13 +247,13 @@
 <div class="viewcode-block" id="IR_factory">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IR_factory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Class to handle Fourier transform between imaginary time and Matsubara frequency using</span>
 <span class="sd">    the intermediate representation (IR) grids.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ir_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legacy_ir</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize IR basis class for post processing of Green data.</span>
+<span class="w">        </span><span class="sd">"""Initialize IR basis class for post processing of Green data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -268,12 +268,12 @@
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            when a valid IR-grid file is not provided</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="n">ir_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not an acceptable IR-grid file.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ir_file</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot; Provide a valid hdf5 IR-grid file.&quot;</span>
+                <span class="s2">"</span><span class="si">{}</span><span class="s2"> is not an acceptable IR-grid file."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ir_file</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">" Provide a valid hdf5 IR-grid file."</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
@@ -292,7 +292,7 @@
 <div class="viewcode-block" id="IR_factory.update">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.update">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ir_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update IR grid information for the IR_facory object</span>
+<span class="w">        </span><span class="sd">"""Update IR grid information for the IR_facory object</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -300,7 +300,7 @@
 <span class="sd">            inverse temperature of the calculation, by default None</span>
 <span class="sd">        ir_file : string, required</span>
 <span class="sd">            IR-grid file, by default None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ir_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span> <span class="o">=</span> <span class="n">ir_file</span>
         <span class="k">if</span> <span class="n">beta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -314,7 +314,7 @@
 <div class="viewcode-block" id="IR_factory.tau_to_w">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.tau_to_w">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">tau_to_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_t</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform from imaginary time to Matsubara axis</span>
+<span class="w">        </span><span class="sd">"""Transform from imaginary time to Matsubara axis</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -325,7 +325,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
 <span class="sd">            Data on Matsubara axis</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">X_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nw</span><span class="p">,)</span> <span class="o">+</span> <span class="n">X_t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
         <span class="n">original_shape</span> <span class="o">=</span> <span class="n">X_w</span><span class="o">.</span><span class="n">shape</span>
 
@@ -338,7 +338,7 @@
 <div class="viewcode-block" id="IR_factory.w_to_tau">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.w_to_tau">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">w_to_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_w</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform from Matsubara to imaginary time axis</span>
+<span class="w">        </span><span class="sd">"""Transform from Matsubara to imaginary time axis</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -349,7 +349,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
 <span class="sd">            Data on imaginary time axis</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">X_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nts</span><span class="p">,)</span> <span class="o">+</span> <span class="n">X_w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
         <span class="n">original_shape</span> <span class="o">=</span> <span class="n">X_t</span><span class="o">.</span><span class="n">shape</span>
 
@@ -359,8 +359,8 @@
         <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
             <span class="c1"># Check the imaginary parts</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;The largest imaginary parts in X_t is </span><span class="si">{}</span><span class="s2">. Please double </span><span class="se">\</span>
-<span class="s2">                check whether this is consistent to your expectation!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">"The largest imaginary parts in X_t is </span><span class="si">{}</span><span class="s2">. Please double </span><span class="se">\</span>
+<span class="s2">                check whether this is consistent to your expectation!"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X_t</span><span class="o">.</span><span class="n">imag</span><span class="p">))</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -370,7 +370,7 @@
 <div class="viewcode-block" id="IR_factory.tauf_to_wb">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.tauf_to_wb">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">tauf_to_wb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_t</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform from fermionic imaginary time to bosonic Matsubara axis. Imaginary time axis</span>
+<span class="w">        </span><span class="sd">"""Transform from fermionic imaginary time to bosonic Matsubara axis. Imaginary time axis</span>
 <span class="sd">        is the same for fermions and bosons, but Matsubara frequencies differ. E.g., Polarization</span>
 <span class="sd">        from tau to i Omega axis.</span>
 
@@ -383,13 +383,13 @@
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
 <span class="sd">            Data on bosonic Matsubara axis</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">wsample_bose</span><span class="p">,</span> <span class="n">Ttc_b</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">Tnc_b</span><span class="p">,</span> <span class="n">Tct_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_IR_matrices</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">&#39;bose&#39;</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">'bose'</span>
             <span class="p">)</span>
-        <span class="n">fir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-        <span class="n">Ttc_other_tmp</span> <span class="o">=</span> <span class="n">fir</span><span class="p">[</span><span class="s1">&#39;fermi/uxl_other&#39;</span><span class="p">][()]</span>
-        <span class="n">nx_b</span> <span class="o">=</span> <span class="n">fir</span><span class="p">[</span><span class="s1">&#39;bose/nx&#39;</span><span class="p">][()]</span>
+        <span class="n">fir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span>
+        <span class="n">Ttc_other_tmp</span> <span class="o">=</span> <span class="n">fir</span><span class="p">[</span><span class="s1">'fermi/uxl_other'</span><span class="p">][()]</span>
+        <span class="n">nx_b</span> <span class="o">=</span> <span class="n">fir</span><span class="p">[</span><span class="s1">'bose/nx'</span><span class="p">][()]</span>
         <span class="n">fir</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">Ttc_other</span> <span class="o">=</span> <span class="n">Ttc_b</span> <span class="o">@</span> <span class="n">Tct_b</span> <span class="o">@</span> <span class="n">Ttc_other_tmp</span>
         <span class="n">Ttc_other</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
@@ -409,7 +409,7 @@
 <div class="viewcode-block" id="IR_factory.wb_to_tauf">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.wb_to_tauf">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">wb_to_tauf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_wb</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform from bosonic Matsubara to imaginary time axis</span>
+<span class="w">        </span><span class="sd">"""Transform from bosonic Matsubara to imaginary time axis</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -420,13 +420,13 @@
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
 <span class="sd">            Data on imaginary time axis</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">wsample_bose</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">Tcn_b</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_IR_matrices</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">&#39;bose&#39;</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">'bose'</span>
             <span class="p">)</span>
         <span class="n">nw_b</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">wsample_bose</span><span class="p">)</span>
-        <span class="n">fir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-        <span class="n">Ttc_b_other_tmp</span> <span class="o">=</span> <span class="n">fir</span><span class="p">[</span><span class="s1">&#39;bose/other_uxl&#39;</span><span class="p">][()]</span>
+        <span class="n">fir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span>
+        <span class="n">Ttc_b_other_tmp</span> <span class="o">=</span> <span class="n">fir</span><span class="p">[</span><span class="s1">'bose/other_uxl'</span><span class="p">][()]</span>
         <span class="n">fir</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">Ttc_b_other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ttc</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tct</span> <span class="o">@</span> <span class="n">Ttc_b_other_tmp</span>
         <span class="n">Ttc_b_other</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
@@ -446,7 +446,7 @@
 <div class="viewcode-block" id="IR_factory.tau_to_w_other">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.IR_factory.tau_to_w_other">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">tau_to_w_other</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_t</span><span class="p">,</span> <span class="n">wsample</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform from imaginary time axis to user-provided Matsubara frequency points.</span>
+<span class="w">        </span><span class="sd">"""Transform from imaginary time axis to user-provided Matsubara frequency points.</span>
 <span class="sd">        Typically, we deal with time and Matsubara grids that are pre-determined by intermediate</span>
 <span class="sd">        representation grid files. This function allows transformation to other Matsubarar frequencies.</span>
 
@@ -461,12 +461,12 @@
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
 <span class="sd">            Data on Matsubara axis</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">nw</span> <span class="o">=</span> <span class="n">wsample</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">X_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nw</span><span class="p">,)</span><span class="o">+</span><span class="n">X_t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
         <span class="n">original_shape</span> <span class="o">=</span> <span class="n">X_w</span><span class="o">.</span><span class="n">shape</span>
 
-        <span class="n">ir_factory</span> <span class="o">=</span> <span class="n">irbasis</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">))</span>
+        <span class="n">ir_factory</span> <span class="o">=</span> <span class="n">irbasis</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"F"</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ir_file</span><span class="p">))</span>
         <span class="n">tnc</span> <span class="o">=</span> <span class="n">ir_factory</span><span class="o">.</span><span class="n">compute_unl</span><span class="p">(</span><span class="n">wsample</span><span class="p">)</span>
         <span class="n">tnc</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
 
@@ -480,8 +480,8 @@
 
 <div class="viewcode-block" id="new_read_IR_matrices">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.new_read_IR_matrices">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">new_read_IR_matrices</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">&#39;fermi&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read IR file with new data format</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">new_read_IR_matrices</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">'fermi'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Read IR file with new data format</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -490,7 +490,7 @@
 <span class="sd">    beta : float</span>
 <span class="sd">        inverse temperature</span>
 <span class="sd">    ptype : str, optional</span>
-<span class="sd">        parity type (&#39;fermi&#39; or &#39;bose&#39;), by default &#39;fermi&#39;</span>
+<span class="sd">        parity type ('fermi' or 'bose'), by default 'fermi'</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -506,20 +506,20 @@
 <span class="sd">        Transformation coefficients</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Transformation coefficients</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-    <span class="n">wsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/ngrid&quot;</span><span class="p">][()]</span>
-    <span class="n">xsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/xgrid&quot;</span><span class="p">][()]</span>
+<span class="sd">    """</span>
+    <span class="n">ir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span>
+    <span class="n">wsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/ngrid"</span><span class="p">][()]</span>
+    <span class="n">xsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/xgrid"</span><span class="p">][()]</span>
 
-    <span class="n">Ttc_minus1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/u1l_neg&quot;</span><span class="p">][()]</span>
-    <span class="n">Ttc_tmp</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/uxl&quot;</span><span class="p">][()]</span>
-    <span class="n">Ttc_1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/u1l_pos&quot;</span><span class="p">][()]</span>
+    <span class="n">Ttc_minus1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/u1l_neg"</span><span class="p">][()]</span>
+    <span class="n">Ttc_tmp</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/uxl"</span><span class="p">][()]</span>
+    <span class="n">Ttc_1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/u1l_pos"</span><span class="p">][()]</span>
     <span class="n">Ttc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Ttc_tmp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ttc_tmp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
     <span class="n">Ttc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Ttc</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">Ttc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ttc_minus1</span><span class="p">,</span> <span class="n">Ttc_tmp</span><span class="p">,</span> <span class="n">Ttc_1</span>
-    <span class="n">Tnc</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/uwl&quot;</span><span class="p">][()]</span>
+    <span class="n">Tnc</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/uwl"</span><span class="p">][()]</span>
     <span class="n">ir</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;fermi&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">'fermi'</span><span class="p">:</span>
         <span class="n">zeta</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">zeta</span> <span class="o">=</span> <span class="mi">0</span>
@@ -538,8 +538,8 @@
 
 <div class="viewcode-block" id="legacy_read_IR_matrices">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.ir.legacy_read_IR_matrices">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">legacy_read_IR_matrices</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">&#39;fermi&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read IR file with legacy data format</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">legacy_read_IR_matrices</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s1">'fermi'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Read IR file with legacy data format</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -548,7 +548,7 @@
 <span class="sd">    beta : float</span>
 <span class="sd">        inverse temperature</span>
 <span class="sd">    ptype : str, optional</span>
-<span class="sd">        parity type (&#39;fermi&#39; or &#39;bose&#39;), by default &#39;fermi&#39;</span>
+<span class="sd">        parity type ('fermi' or 'bose'), by default 'fermi'</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -564,22 +564,22 @@
 <span class="sd">        Transformation coefficients</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Transformation coefficients</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-    <span class="n">wsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/wsample&quot;</span><span class="p">][()]</span>
-    <span class="n">xsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/xsample&quot;</span><span class="p">][()]</span>
+<span class="sd">    """</span>
+    <span class="n">ir</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">ir_path</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span>
+    <span class="n">wsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/wsample"</span><span class="p">][()]</span>
+    <span class="n">xsample</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/xsample"</span><span class="p">][()]</span>
 
-    <span class="n">Ttc_minus1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/ux1l_minus&quot;</span><span class="p">][()]</span>
-    <span class="n">Ttc_tmp</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/uxl&quot;</span><span class="p">][()]</span>
-    <span class="n">Ttc_1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/ux1l&quot;</span><span class="p">][()]</span>
+    <span class="n">Ttc_minus1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/ux1l_minus"</span><span class="p">][()]</span>
+    <span class="n">Ttc_tmp</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/uxl"</span><span class="p">][()]</span>
+    <span class="n">Ttc_1</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/ux1l"</span><span class="p">][()]</span>
     <span class="n">Ttc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Ttc_tmp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ttc_tmp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
     <span class="n">Ttc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Ttc</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">Ttc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ttc_minus1</span><span class="p">,</span> <span class="n">Ttc_tmp</span><span class="p">,</span> <span class="n">Ttc_1</span>
-    <span class="n">Tnc_re</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/uwl_re&quot;</span><span class="p">][()]</span>
-    <span class="n">Tnc_im</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;/uwl_im&quot;</span><span class="p">][()]</span>
+    <span class="n">Tnc_re</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/uwl_re"</span><span class="p">][()]</span>
+    <span class="n">Tnc_im</span> <span class="o">=</span> <span class="n">ir</span><span class="p">[</span><span class="n">ptype</span> <span class="o">+</span> <span class="s2">"/uwl_im"</span><span class="p">][()]</span>
     <span class="n">Tnc</span> <span class="o">=</span> <span class="n">Tnc_re</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">Tnc_im</span>
     <span class="n">ir</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;fermi&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">'fermi'</span><span class="p">:</span>
         <span class="n">zeta</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">zeta</span> <span class="o">=</span> <span class="mi">0</span>
@@ -626,7 +626,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

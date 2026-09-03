@@ -247,7 +247,7 @@
 <div class="viewcode-block" id="interpolate">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.winter.interpolate">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="n">obj_k</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">kpts_inter</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">hermi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nk_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform Wannier interpolation for static quantities</span>
+<span class="w">    </span><span class="sd">"""Perform Wannier interpolation for static quantities</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -276,7 +276,7 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        if `dim` other than 2 or 3 is specified and nk_list is not provided</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ns</span><span class="p">,</span> <span class="n">Nk</span><span class="p">,</span> <span class="n">nao</span> <span class="o">=</span> <span class="n">obj_k</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">nk_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nkx</span><span class="p">,</span> <span class="n">nky</span><span class="p">,</span> <span class="n">nkz</span> <span class="o">=</span> <span class="n">nk_list</span>
@@ -290,7 +290,7 @@
         <span class="n">rmesh</span> <span class="o">=</span> <span class="n">ft</span><span class="o">.</span><span class="n">construct_rmesh</span><span class="p">(</span><span class="n">nk</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Wannier interpolation only supports 3D and 2D systems.&quot;</span>
+            <span class="s2">"Wannier interpolation only supports 3D and 2D systems."</span>
         <span class="p">)</span>
 
     <span class="n">fkr</span><span class="p">,</span> <span class="n">frk</span> <span class="o">=</span> <span class="n">ft</span><span class="o">.</span><span class="n">compute_fourier_coefficients</span><span class="p">(</span><span class="n">kmesh</span><span class="p">,</span> <span class="n">rmesh</span><span class="p">)</span>
@@ -299,7 +299,7 @@
     <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
         <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">rmesh</span> <span class="o">==</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;obj_i[&quot;</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="n">nk</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;, 0, 0] = &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"obj_i["</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="n">nk</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="s2">", 0, 0] = "</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">obj_i</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">center</span> <span class="o">-</span> <span class="n">nk</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">))</span>
 
     <span class="n">fkr_int</span><span class="p">,</span> <span class="n">frk_int</span> <span class="o">=</span> <span class="n">ft</span><span class="o">.</span><span class="n">compute_fourier_coefficients</span><span class="p">(</span><span class="n">kpts_inter</span><span class="p">,</span> <span class="n">rmesh</span><span class="p">)</span>
@@ -313,7 +313,7 @@
                 <span class="n">obj_sym</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">obj</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
                 <span class="n">error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">obj_sym</span> <span class="o">-</span> <span class="n">obj</span><span class="p">)))</span>
                 <span class="n">obj_k_int</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj_sym</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The largest Hermitization error = &quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"The largest Hermitization error = "</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">obj_k_int</span></div>
 
@@ -324,7 +324,7 @@
 <div class="viewcode-block" id="interpolate_tk_object">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.winter.interpolate_tk_object">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">interpolate_tk_object</span><span class="p">(</span><span class="n">obj_tk</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">kpts_inter</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">hermi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nk_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform Wannier interpolation for dynamic quantities</span>
+<span class="w">    </span><span class="sd">"""Perform Wannier interpolation for dynamic quantities</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -353,7 +353,7 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        if `dim` other than 2 or 3 is specified and nk_list is not provided</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">nts</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">Nk</span><span class="p">,</span> <span class="n">nao</span> <span class="o">=</span> <span class="n">obj_tk</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">nk_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nkx</span><span class="p">,</span> <span class="n">nky</span><span class="p">,</span> <span class="n">nkz</span> <span class="o">=</span> <span class="n">nk_list</span>
@@ -366,7 +366,7 @@
         <span class="n">rmesh</span> <span class="o">=</span> <span class="n">ft</span><span class="o">.</span><span class="n">construct_rmesh</span><span class="p">(</span><span class="n">nk</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Wannier interpolation only supports 3D and 2D systems.&quot;</span>
+            <span class="s2">"Wannier interpolation only supports 3D and 2D systems."</span>
         <span class="p">)</span>
     <span class="n">fkr</span><span class="p">,</span> <span class="n">frk</span> <span class="o">=</span> <span class="n">ft</span><span class="o">.</span><span class="n">compute_fourier_coefficients</span><span class="p">(</span><span class="n">kmesh</span><span class="p">,</span> <span class="n">rmesh</span><span class="p">)</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -382,7 +382,7 @@
     <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
         <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">rmesh</span> <span class="o">==</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;obj_i[&quot;</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nk</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;, 0, 0] = &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"obj_i["</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nk</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">", 0, 0] = "</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">obj_ti</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">center</span> <span class="o">-</span> <span class="n">nk</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">))</span>
 
     <span class="n">fkr_int</span><span class="p">,</span> <span class="n">frk_int</span> <span class="o">=</span> <span class="n">ft</span><span class="o">.</span><span class="n">compute_fourier_coefficients</span><span class="p">(</span><span class="n">kpts_inter</span><span class="p">,</span> <span class="n">rmesh</span><span class="p">)</span>
@@ -398,7 +398,7 @@
                 <span class="n">obj_sym</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">obj</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
                 <span class="n">error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">obj_sym</span> <span class="o">-</span> <span class="n">obj</span><span class="p">)))</span>
                 <span class="n">obj_tk_int</span><span class="p">[</span><span class="n">its</span><span class="p">,</span> <span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj_sym</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The largest Hermitization error = &quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"The largest Hermitization error = "</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
     <span class="n">obj_tk_int</span> <span class="o">=</span> <span class="n">obj_tk_int</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nts</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">kpts_inter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">obj_tk_int</span></div>
@@ -412,7 +412,7 @@
     <span class="n">Fk</span><span class="p">,</span> <span class="n">Sigma_tk</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">Sk</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">kpts_inter</span><span class="p">,</span> <span class="n">ir</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">hermi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nk_list</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate Green&#39;s function from full BZ k-mesh to specified k-points</span>
+<span class="w">    </span><span class="sd">"""Interpolate Green's function from full BZ k-mesh to specified k-points</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -433,7 +433,7 @@
 <span class="sd">    dim : int, optional</span>
 <span class="sd">        dimensionality of lattice, by default 3; used only when nk_list is not given</span>
 <span class="sd">    hermi : bool, optional</span>
-<span class="sd">        Is Green&#39;s function expected to be Hermitian, by default False</span>
+<span class="sd">        Is Green's function expected to be Hermitian, by default False</span>
 <span class="sd">    debug : bool, optional</span>
 <span class="sd">        print extra messages for debugging, by default False</span>
 <span class="sd">    nk_list : array-like of 3 ints, optional</span>
@@ -443,35 +443,35 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
-<span class="sd">        Green&#39;s function interpolated on k-points</span>
+<span class="sd">        Green's function interpolated on k-points</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        if `dim` other than 2 or 3 is specified and nk_list is not provided</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ns</span><span class="p">,</span> <span class="n">Nk</span><span class="p">,</span> <span class="n">nao</span> <span class="o">=</span> <span class="n">Fk</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">nk_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dim</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">dim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Wannier interpolation only supports 3D and 2D systems.&quot;</span>
+            <span class="s2">"Wannier interpolation only supports 3D and 2D systems."</span>
         <span class="p">)</span>
     <span class="n">nts</span> <span class="o">=</span> <span class="n">ir</span><span class="o">.</span><span class="n">nts</span>
 
     <span class="k">if</span> <span class="n">Sigma_tk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">nts</span> <span class="o">==</span> <span class="n">Sigma_tk</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> \
-            <span class="s2">&quot;Number of imaginary time points mismatches.&quot;</span>
+            <span class="s2">"Number of imaginary time points mismatches."</span>
 
     <span class="k">if</span> <span class="n">Sk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Interpolating overlap...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Interpolating overlap..."</span><span class="p">)</span>
         <span class="n">Sk_int</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">Sk</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">kpts_inter</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">hermi</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">nk_list</span><span class="o">=</span><span class="n">nk_list</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">Sk_int</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Interpolating Fock...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Interpolating Fock..."</span><span class="p">)</span>
     <span class="n">Fk_int</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">Fk</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">kpts_inter</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">hermi</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">nk_list</span><span class="o">=</span><span class="n">nk_list</span><span class="p">)</span>
     <span class="c1"># FIXME Too memory demanding and too slow as well.</span>
     <span class="k">if</span> <span class="n">Sigma_tk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Interpolating self-energy...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Interpolating self-energy..."</span><span class="p">)</span>
         <span class="n">Sigma_tk_int</span> <span class="o">=</span> <span class="n">interpolate_tk_object</span><span class="p">(</span>
             <span class="n">Sigma_tk</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">kpts_inter</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">hermi</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">nk_list</span><span class="o">=</span><span class="n">nk_list</span>
         <span class="p">)</span>
@@ -517,7 +517,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

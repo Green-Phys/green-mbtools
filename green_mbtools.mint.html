@@ -453,19 +453,73 @@ equivalent by the time-reversal symmetry and return them and their corresponding
 
 <dl class="py function">
 <dt class="sig sig-object py" id="green_mbtools.mint.common_utils.orthogonalize">
-<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">orthogonalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_inv_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#orthogonalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.orthogonalize" title="Link to this definition">¶</a></dt>
-<dd><p>Transform Fock-matrix, non-interacting Hamiltonian, density matrix and overlap matrix into an orthogonal basis.</p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">orth</span></code> selects the per-k transformation:</dt><dd><ul class="simple">
-<li><p>“none”    : identity (AO basis preserved)</p></li>
-<li><p>“lowdin”  : symmetric S^{-1/2} orthogonalization</p></li>
-<li><p>“mo”      : canonical molecular orbitals from <code class="docutils literal notranslate"><span class="pre">mf.mo_coeff</span></code></p></li>
-<li><p>“natural” : natural orbitals from the mean-field density matrix</p></li>
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">orthogonalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_inv_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_dm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sym_kstruct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spinor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#orthogonalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.orthogonalize" title="Link to this definition">¶</a></dt>
+<dd><p>Transform one-body quantities from the AO basis to an orthogonal basis.</p>
+<p>For nontrivial modes, the transformation is constructed at irreducible
+k-points and propagated over the full Brillouin zone using the symmetry
+operations in <code class="docutils literal notranslate"><span class="pre">sym_kstruct</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mydf</strong> – Density-fitting object. Its <code class="docutils literal notranslate"><span class="pre">kpts</span></code> attribute is used by the
+<code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code> identity path.</p></li>
+<li><p><strong>orth</strong> (<em>{&quot;none&quot;</em><em>, </em><em>&quot;lowdin&quot;</em><em>, </em><em>&quot;symmetric_lowdin&quot;</em><em>, </em><em>&quot;mo&quot;</em><em>, </em><em>&quot;natural&quot;}</em>) – <p>Orthogonalization mode:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: preserve the AO basis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;lowdin&quot;</span></code>: canonical Löwdin orthogonalization. Rank reduction
+(dropping near-singular overlap eigenvectors, which would make
+<code class="docutils literal notranslate"><span class="pre">X</span></code> rectangular) is not supported end-to-end and is rejected
+with an error; <code class="docutils literal notranslate"><span class="pre">X</span></code> must remain square (AO-sized).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;symmetric_lowdin&quot;</span></code>: Hermitian symmetric Löwdin
+orthogonalization.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;mo&quot;</span></code>: construct canonical orbitals by solving the generalized
+Fock/overlap eigenproblem <code class="docutils literal notranslate"><span class="pre">F</span> <span class="pre">C</span> <span class="pre">=</span> <span class="pre">S</span> <span class="pre">C</span> <span class="pre">e</span></code> (spin-averaged <code class="docutils literal notranslate"><span class="pre">F</span></code> for
+unrestricted). This deliberately does not use <code class="docutils literal notranslate"><span class="pre">mf.mo_coeff</span></code>: the
+generalized solve lets the self-TR real-gauge branch fire, and for
+a converged SCF it spans the same subspaces up to an orbital gauge
+that does not affect the orthonormal basis. Results can differ from
+<code class="docutils literal notranslate"><span class="pre">mf.mo_coeff</span></code> when those coefficients are not eigenvectors of the
+stored <code class="docutils literal notranslate"><span class="pre">F</span></code> (e.g. frozen/custom orbitals, or a Fock inconsistent
+with the coefficients).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;natural&quot;</span></code>: construct natural orbitals from the density matrix,
+using the Fock matrix to resolve degenerate occupation subspaces.</p></li>
+</ul>
+</p></li>
+<li><p><strong>X_k</strong> – Initial transformation containers used by the <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code> path.</p></li>
+<li><p><strong>X_inv_k</strong> – Initial transformation containers used by the <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code> path.</p></li>
+<li><p><strong>F</strong> (<em>ndarray</em>) – Fock, one-body Hamiltonian, density, and overlap matrices with shape
+<code class="docutils literal notranslate"><span class="pre">(ns,</span> <span class="pre">nk,</span> <span class="pre">n,</span> <span class="pre">n)</span></code>.</p></li>
+<li><p><strong>T</strong> (<em>ndarray</em>) – Fock, one-body Hamiltonian, density, and overlap matrices with shape
+<code class="docutils literal notranslate"><span class="pre">(ns,</span> <span class="pre">nk,</span> <span class="pre">n,</span> <span class="pre">n)</span></code>.</p></li>
+<li><p><strong>hf_dm</strong> (<em>ndarray</em>) – Fock, one-body Hamiltonian, density, and overlap matrices with shape
+<code class="docutils literal notranslate"><span class="pre">(ns,</span> <span class="pre">nk,</span> <span class="pre">n,</span> <span class="pre">n)</span></code>.</p></li>
+<li><p><strong>S</strong> (<em>ndarray</em>) – Fock, one-body Hamiltonian, density, and overlap matrices with shape
+<code class="docutils literal notranslate"><span class="pre">(ns,</span> <span class="pre">nk,</span> <span class="pre">n,</span> <span class="pre">n)</span></code>.</p></li>
+<li><p><strong>sym_kstruct</strong> – K-point symmetry structure used to construct and propagate nontrivial
+transformations. Required unless <code class="docutils literal notranslate"><span class="pre">orth</span> <span class="pre">==</span> <span class="pre">&quot;none&quot;</span></code>.</p></li>
+<li><p><strong>mycell</strong> – PySCF periodic cell used to construct AO or spinor symmetry
+representations. Required unless <code class="docutils literal notranslate"><span class="pre">orth</span> <span class="pre">==</span> <span class="pre">&quot;none&quot;</span></code>.</p></li>
+<li><p><strong>spinor</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use double-group spinor representations when propagating the
+transformation. Supported for the Löwdin modes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>X_k, X_inv_k</strong> (<em>ndarray</em>) – Forward and inverse transformations over the full k-point mesh.</p></li>
+<li><p><strong>S, F, T, hf_dm</strong> (<em>ndarray</em>) – Overlap, Fock, one-body Hamiltonian, and density matrices in the
+transformed basis. For nontrivial modes, the returned overlap is the
+identity in the retained orthogonal subspace.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – If a nontrivial mode is requested without <code class="docutils literal notranslate"><span class="pre">sym_kstruct</span></code> or
+    <code class="docutils literal notranslate"><span class="pre">mycell</span></code>, or if <code class="docutils literal notranslate"><span class="pre">orth</span></code> is unknown.</p></li>
+<li><p><strong>NotImplementedError</strong> – If an unsupported spinor mode is requested.</p></li>
 </ul>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">mf</span></code> is required for “mo”; “natural” uses <code class="docutils literal notranslate"><span class="pre">hf_dm</span></code>. Per-k basis
-construction is delegated to <code class="docutils literal notranslate"><span class="pre">ortho_utils.{lowdin,mo,natural}_per_k</span></code>.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -605,6 +659,44 @@ via <code class="xref py py-func docutils literal notranslate"><span class="pre"
 <dd><p>Store trivial symmetry information for molecular calculations.</p>
 <p>Molecular cases use a single Gamma-point only, so the k- and q-mesh symmetry
 datasets are all one-point identity mappings.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.store_orth_transform">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">store_orth_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_inv_k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#store_orth_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.store_orth_transform" title="Link to this definition">¶</a></dt>
+<dd><p>Store the AO-&gt;orthogonal basis transformation X (and its inverse) in the input file.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">args.orth</span> <span class="pre">!=</span> <span class="pre">&quot;none&quot;</span></code> the one-body quantities written to the input
+file (<code class="docutils literal notranslate"><span class="pre">HF/Fock-k</span></code>, <code class="docutils literal notranslate"><span class="pre">HF/S-k</span></code>, <code class="docutils literal notranslate"><span class="pre">HF/H-k</span></code>, and downstream Green’s
+functions) live in the orthogonalized basis rather than the AO basis.
+Post-processing tooling therefore needs the exact per-k transformation to
+move back and forth between the two bases; the degenerate orbital gauge
+means it cannot be reconstructed reliably from the stored quantities alone.</p>
+<p>The datasets are written under a top-level <code class="docutils literal notranslate"><span class="pre">/orthogonalization</span></code> group as
+native complex arrays:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X_k</span></code>: forward transforms over the full BZ, shape
+<code class="docutils literal notranslate"><span class="pre">(nk,</span> <span class="pre">n_ortho,</span> <span class="pre">nao)</span></code> (spin-orbital analog for <code class="docutils literal notranslate"><span class="pre">x2c</span> <span class="pre">==</span> <span class="pre">2</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X_inv_k</span></code>: inverse transforms over the full BZ, shape
+<code class="docutils literal notranslate"><span class="pre">(nk,</span> <span class="pre">nao,</span> <span class="pre">n_ortho)</span></code>.</p></li>
+</ul>
+<p>The orthogonalization mode (<code class="docutils literal notranslate"><span class="pre">args.orth</span></code>) is recorded as the <code class="docutils literal notranslate"><span class="pre">mode</span></code>
+attribute on the group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>map</em>) – simulation parameters</p></li>
+<li><p><strong>X_k</strong> (<em>numpy.ndarray</em>) – Forward orthogonalization matrices over the full BZ.</p></li>
+<li><p><strong>X_inv_k</strong> (<em>numpy.ndarray</em>) – Inverse orthogonalization matrices over the full BZ.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data is written directly to the HDF5 file. No-op when
+<code class="docutils literal notranslate"><span class="pre">args.orth</span> <span class="pre">==</span> <span class="pre">&quot;none&quot;</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -905,14 +997,20 @@ identical. <code class="docutils literal notranslate"><span class="pre">spinor</
 <dl class="py function">
 <dt class="sig sig-object py" id="green_mbtools.mint.ortho_utils.lowdin_per_k">
 <span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.ortho_utils.</span></span><span class="sig-name descname"><span class="pre">lowdin_per_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-09</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/ortho_utils.html#lowdin_per_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.ortho_utils.lowdin_per_k" title="Link to this definition">¶</a></dt>
-<dd><p>Symmetric (Löwdin) S^{-1/2} orthogonalization for a single k-point.</p>
+<dd><p>Canonical (Löwdin) orthogonalization for a single k-point.</p>
 <p>Returns <code class="docutils literal notranslate"><span class="pre">(X,</span> <span class="pre">X_inv)</span></code> in the convention used by
 <code class="docutils literal notranslate"><span class="pre">common_utils.transform</span></code> (i.e. transforms apply as <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">Z</span> <span class="pre">X†</span></code>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span>     <span class="o">=</span> <span class="n">S</span><span class="o">^</span><span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">}</span>   <span class="p">(</span><span class="n">shape</span> <span class="p">(</span><span class="n">n_ortho</span><span class="p">,</span> <span class="n">nao</span><span class="p">))</span>
-<span class="n">X_inv</span> <span class="o">=</span> <span class="n">S</span><span class="o">^</span><span class="p">{</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">}</span>   <span class="p">(</span><span class="n">shape</span> <span class="p">(</span><span class="n">nao</span><span class="p">,</span> <span class="n">n_ortho</span><span class="p">))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>X     = s^{-1/2} U†   (shape (n_ortho, nao))
+X_inv = U s^{+1/2}    (shape (nao, n_ortho))
 </pre></div>
 </div>
 <p>Eigenvalues of <code class="docutils literal notranslate"><span class="pre">Sk</span></code> below <code class="docutils literal notranslate"><span class="pre">tol</span></code> are discarded.</p>
+<p>This keeps the overlap eigenvectors <code class="docutils literal notranslate"><span class="pre">U</span></code>, so unlike Hermitian
+symmetric Löwdin (whose <code class="docutils literal notranslate"><span class="pre">S^{-1/2}</span></code> is gauge-free) it carries a
+phase/degenerate-block gauge freedom. At self-TR k-points a real
+<code class="docutils literal notranslate"><span class="pre">Sk</span></code> is required for a real (hence <code class="docutils literal notranslate"><span class="pre">X(-k)</span> <span class="pre">=</span> <span class="pre">X(k)*</span></code>-consistent)
+result; <code class="docutils literal notranslate"><span class="pre">_build_X_ibz</span></code> realifies numerically-real inputs before
+calling this, so that gauge policy lives there, not here.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1487,6 +1585,7 @@ residuals). See get_representation for full discussion.</p></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.store_k_grid"><code class="docutils literal notranslate"><span class="pre">store_k_grid()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.store_kstruct_ops_info"><code class="docutils literal notranslate"><span class="pre">store_kstruct_ops_info()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.store_mol_symmetry_info"><code class="docutils literal notranslate"><span class="pre">store_mol_symmetry_info()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.store_orth_transform"><code class="docutils literal notranslate"><span class="pre">store_orth_transform()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.transform"><code class="docutils literal notranslate"><span class="pre">transform()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.wrap_1stBZ"><code class="docutils literal notranslate"><span class="pre">wrap_1stBZ()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.wrap_k"><code class="docutils literal notranslate"><span class="pre">wrap_k()</span></code></a></li>
@@ -1599,7 +1698,7 @@ residuals). See get_representation for full discussion.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="_static/documentation_options.js?v=8d563738"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

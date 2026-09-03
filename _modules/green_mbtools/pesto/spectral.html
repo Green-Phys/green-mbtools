@@ -253,7 +253,7 @@
 <div class="viewcode-block" id="compute_mo">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.spectral.compute_mo">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_mo</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve the generalized eigen problem: FC = SCE</span>
+<span class="w">    </span><span class="sd">"""Solve the generalized eigen problem: FC = SCE</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -268,7 +268,7 @@
 <span class="sd">        molecular orbital energies</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        molecular orbital coefficient in AO basis</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
     <span class="n">eiv_sk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span><span class="p">))</span>
     <span class="n">mo_coeff_sk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ns</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">F</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
@@ -298,7 +298,7 @@
 <div class="viewcode-block" id="compute_no">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.spectral.compute_no">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_no</span><span class="p">(</span><span class="n">dm</span><span class="p">,</span> <span class="n">S</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute natural orbitals by diagonalizing density matrix</span>
+<span class="w">    </span><span class="sd">"""Compute natural orbitals by diagonalizing density matrix</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -311,9 +311,9 @@
 <span class="sd">        natural orbital occupations</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        natural orbital coefficients / vectors</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ns</span><span class="p">,</span> <span class="n">ink</span> <span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">dm_orth</span> <span class="o">=</span> <span class="n">orth</span><span class="o">.</span><span class="n">sao_orth</span><span class="p">(</span><span class="n">dm</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">S</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dm</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">dm_orth</span> <span class="o">=</span> <span class="n">orth</span><span class="o">.</span><span class="n">sao_orth</span><span class="p">(</span><span class="n">dm</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="s1">'g'</span><span class="p">)</span> <span class="k">if</span> <span class="n">S</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dm</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">occ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dm</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">no_coeff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dm</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ns</span><span class="p">):</span>
@@ -355,7 +355,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

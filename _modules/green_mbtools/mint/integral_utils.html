@@ -269,7 +269,7 @@
 <span class="c1"># block-diagonal spin structure of the spinor S. MO and natural-orbital</span>
 <span class="c1"># rotations are refused upstream for X2C precisely because their X</span>
 <span class="c1"># would not be block-diagonal. Rectangular X (rank-deficient case)</span>
-<span class="c1"># is rejected here as it can&#39;t fit the (NQ, nao, nao) chunk shape.</span>
+<span class="c1"># is rejected here as it can't fit the (NQ, nao, nao) chunk shape.</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_x_block_for_eri</span><span class="p">(</span><span class="n">X_k</span><span class="p">,</span> <span class="n">ik</span><span class="p">,</span> <span class="n">nao</span><span class="p">):</span>
     <span class="n">Xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X_k</span><span class="p">[</span><span class="n">ik</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">Xi</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">):</span>
@@ -277,21 +277,21 @@
     <span class="k">if</span> <span class="n">Xi</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">nao</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nao</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Xi</span><span class="p">[:</span><span class="n">nao</span><span class="p">,</span> <span class="p">:</span><span class="n">nao</span><span class="p">]</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;_x_block_for_eri: X_k[</span><span class="si">{</span><span class="n">ik</span><span class="si">}</span><span class="s2">] has shape </span><span class="si">{</span><span class="n">Xi</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">; expected &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">nao</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">nao</span><span class="si">}</span><span class="s2">) or (</span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">nao</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">nao</span><span class="si">}</span><span class="s2">). The three-center integral &quot;</span>
-        <span class="s2">&quot;storage path requires a square orthogonalizer; rank-deficient &quot;</span>
-        <span class="s2">&quot;transforms (lowdin_per_k with linear dependencies, or canonical &quot;</span>
-        <span class="s2">&quot;orthogonalization dropping modes) cannot be written into &quot;</span>
-        <span class="s2">&quot;df_hf_int / df_int.&quot;</span>
+        <span class="sa">f</span><span class="s2">"_x_block_for_eri: X_k[</span><span class="si">{</span><span class="n">ik</span><span class="si">}</span><span class="s2">] has shape </span><span class="si">{</span><span class="n">Xi</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">; expected "</span>
+        <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">nao</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">nao</span><span class="si">}</span><span class="s2">) or (</span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">nao</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="mi">2</span><span class="o">*</span><span class="n">nao</span><span class="si">}</span><span class="s2">). The three-center integral "</span>
+        <span class="s2">"storage path requires a square orthogonalizer; rank-deficient "</span>
+        <span class="s2">"transforms (lowdin_per_k with linear dependencies, or canonical "</span>
+        <span class="s2">"orthogonalization dropping modes) cannot be written into "</span>
+        <span class="s2">"df_hf_int / df_int."</span>
     <span class="p">)</span>
 
 
-<span class="c1"># Lpq_ortho[Q] = X_i @ Lpq[Q] @ X_j.conj().T — the &quot;X Z X†&quot; convention used by</span>
+<span class="c1"># Lpq_ortho[Q] = X_i @ Lpq[Q] @ X_j.conj().T — the "X Z X†" convention used by</span>
 <span class="c1"># the per-k ortho primitives; pairs with the dm stored by common_utils.orthogonalize</span>
-<span class="c1"># so the Hartree contraction Σ_{ab} L[Q,a,b] * dm[b,a] inside mbpt&#39;s HF kernel</span>
+<span class="c1"># so the Hartree contraction Σ_{ab} L[Q,a,b] * dm[b,a] inside mbpt's HF kernel</span>
 <span class="c1"># reduces to its AO value.</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_rotate_Lpq</span><span class="p">(</span><span class="n">Lpq</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">X_j</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;Ia,Qab,Jb-&gt;QIJ&quot;</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">Lpq</span><span class="p">,</span> <span class="n">X_j</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"Ia,Qab,Jb-&gt;QIJ"</span><span class="p">,</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">Lpq</span><span class="p">,</span> <span class="n">X_j</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="compute_kG">
@@ -304,11 +304,11 @@
 
     <span class="n">equal2boundary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Gv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">wrap_around</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">1e-9</span><span class="p">:</span>
-        <span class="c1"># Here we &#39;wrap around&#39; the high frequency k+G vectors into their lower</span>
+        <span class="c1"># Here we 'wrap around' the high frequency k+G vectors into their lower</span>
         <span class="c1"># frequency counterparts.  Important if you want the gamma point and k-point</span>
         <span class="c1"># answers to agree</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">reciprocal_vectors</span><span class="p">()</span>
-        <span class="n">box_edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;i,ij-&gt;ij&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">box_edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'i,ij-&gt;ij'</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">box_edge</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">))</span>
         <span class="n">reduced_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">box_edge</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">kG</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
         <span class="n">on_edge</span> <span class="o">=</span> <span class="n">reduced_coords</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -336,9 +336,9 @@
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.get_coarsegrained_coulG">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_coarsegrained_coulG</span><span class="p">(</span><span class="n">lattice_kmesh</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">exx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Gv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">wrap_around</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">omega</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Calculate the coarse-grained Coulomb kernel for all G-vectors, handling G=0 and exchange.</span>
+<span class="w">    </span><span class="sd">'''Calculate the coarse-grained Coulomb kernel for all G-vectors, handling G=0 and exchange.</span>
 <span class="sd">    This routine overrides get_coulG to perform interaction coarse-graining.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">exxdiv</span> <span class="o">=</span> <span class="n">exx</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exx</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">exxdiv</span> <span class="o">=</span> <span class="n">exx</span>
@@ -347,21 +347,21 @@
 
     <span class="k">if</span> <span class="n">mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">mesh</span>
-    <span class="k">if</span> <span class="s1">&#39;gs&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;cell.gs is deprecated.  It is replaced by cell.mesh,&#39;</span>
-                      <span class="s1">&#39;the number of PWs (=2*gs+1) along each direction.&#39;</span><span class="p">)</span>
-        <span class="n">mesh</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;gs&#39;</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="s1">'gs'</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">'cell.gs is deprecated.  It is replaced by cell.mesh,'</span>
+                      <span class="s1">'the number of PWs (=2*gs+1) along each direction.'</span><span class="p">)</span>
+        <span class="n">mesh</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'gs'</span><span class="p">]]</span>
     <span class="k">if</span> <span class="n">Gv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Gv</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_Gv</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
     <span class="n">absG2</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">kG_0</span><span class="p">,</span> <span class="n">equal2boundary_0</span> <span class="o">=</span> <span class="n">compute_kG</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Gv</span><span class="p">,</span> <span class="n">wrap_around</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
-    <span class="n">absG2_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;gi,gi-&gt;g&#39;</span><span class="p">,</span> <span class="n">kG_0</span><span class="p">,</span> <span class="n">kG_0</span><span class="p">)</span>
+    <span class="n">absG2_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'gi,gi-&gt;g'</span><span class="p">,</span> <span class="n">kG_0</span><span class="p">,</span> <span class="n">kG_0</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="n">lattice_kmesh</span><span class="p">:</span>
         <span class="n">kG</span><span class="p">,</span> <span class="n">equal2boundary</span> <span class="o">=</span> <span class="n">compute_kG</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="n">kp</span><span class="p">,</span> <span class="n">Gv</span><span class="p">,</span> <span class="n">wrap_around</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
-        <span class="n">absG2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;gi,gi-&gt;g&#39;</span><span class="p">,</span> <span class="n">kG</span><span class="p">,</span> <span class="n">kG</span><span class="p">))</span>
+        <span class="n">absG2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'gi,gi-&gt;g'</span><span class="p">,</span> <span class="n">kG</span><span class="p">,</span> <span class="n">kG</span><span class="p">))</span>
     <span class="n">absG2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">absG2</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mf</span><span class="p">,</span> <span class="s1">&#39;kpts&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mf</span><span class="p">,</span> <span class="s1">'kpts'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">kpts</span> <span class="o">=</span> <span class="n">mf</span><span class="o">.</span><span class="n">kpts</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">kpts</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
@@ -372,10 +372,10 @@
             <span class="n">fullkpts</span><span class="p">[</span><span class="n">ikk</span><span class="o">*</span><span class="n">lattice_kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ikkp</span><span class="p">]</span> <span class="o">=</span> <span class="n">kk</span> <span class="o">+</span> <span class="n">kkp</span>
     <span class="n">Nkk</span> <span class="o">=</span> <span class="n">Nk</span> <span class="o">*</span> <span class="n">lattice_kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">exxdiv</span> <span class="o">==</span> <span class="s1">&#39;vcut_sph&#39;</span><span class="p">:</span>  <span class="c1"># PRB 77 193110</span>
+    <span class="k">if</span> <span class="n">exxdiv</span> <span class="o">==</span> <span class="s1">'vcut_sph'</span><span class="p">:</span>  <span class="c1"># PRB 77 193110</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
-    <span class="k">elif</span> <span class="n">exxdiv</span> <span class="o">==</span> <span class="s1">&#39;vcut_ws&#39;</span><span class="p">:</span>  <span class="c1"># PRB 87, 165122</span>
+    <span class="k">elif</span> <span class="n">exxdiv</span> <span class="o">==</span> <span class="s1">'vcut_ws'</span><span class="p">:</span>  <span class="c1"># PRB 87, 165122</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -383,10 +383,10 @@
         <span class="c1"># error in exchange integrals</span>
 
         <span class="n">G0_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">absG2_0</span><span class="o">==</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">cell</span><span class="o">.</span><span class="n">low_dim_ft_type</span> <span class="o">==</span> <span class="s1">&#39;inf_vacuum&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">cell</span><span class="o">.</span><span class="n">low_dim_ft_type</span> <span class="o">==</span> <span class="s1">'inf_vacuum'</span><span class="p">:</span>
             <span class="n">coulG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">absG2</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ikp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">absG2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="c1">#with np.errstate(divide=&#39;ignore&#39;):</span>
+                <span class="c1">#with np.errstate(divide='ignore'):</span>
                 <span class="n">coulG</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">absG2</span><span class="p">[</span><span class="n">ikp</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">:</span> 
                     <span class="nb">print</span><span class="p">(</span><span class="n">ikp</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">absG2</span><span class="p">[</span><span class="n">ikp</span><span class="p">])</span>
@@ -394,7 +394,7 @@
                     <span class="n">coulG</span><span class="p">[</span><span class="n">ikp</span><span class="p">,</span> <span class="n">G0_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">coulG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coulG</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">absG2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">:</span> 
-               <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sum:&quot;</span><span class="p">,</span> <span class="n">coulG</span><span class="p">)</span>
+               <span class="nb">print</span><span class="p">(</span><span class="s2">"Sum:"</span><span class="p">,</span> <span class="n">coulG</span><span class="p">)</span>
             <span class="c1">#coulG[G0_idx] = 0</span>
             
 
@@ -403,8 +403,8 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
         <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="s1">&#39;No method for PBC dimension 1, dim-type </span><span class="si">%s</span><span class="s1">.&#39;</span>
-                        <span class="s1">&#39;  cell.low_dim_ft_type=&quot;inf_vacuum&quot;  should be set.&#39;</span><span class="p">,</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="s1">'No method for PBC dimension 1, dim-type </span><span class="si">%s</span><span class="s1">.'</span>
+                        <span class="s1">'  cell.low_dim_ft_type="inf_vacuum"  should be set.'</span><span class="p">,</span>
                         <span class="n">cell</span><span class="o">.</span><span class="n">low_dim_ft_type</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
@@ -414,7 +414,7 @@
         <span class="c1"># interaction. The periodic part of (ii|ii) in exchange cannot be</span>
         <span class="c1"># cancelled out by Coulomb integrals. Its leading term is calculated</span>
         <span class="c1"># using Ewald probe charge (the function madelung below)</span>
-        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">exxdiv</span> <span class="o">==</span> <span class="s1">&#39;ewald&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">G0_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">exxdiv</span> <span class="o">==</span> <span class="s1">'ewald'</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">G0_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">coulG</span><span class="p">[</span><span class="n">G0_idx</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Nkk</span><span class="o">*</span><span class="n">cell</span><span class="o">.</span><span class="n">vol</span><span class="o">*</span><span class="n">tools</span><span class="o">.</span><span class="n">madelung</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">fullkpts</span><span class="p">)</span>
 
     <span class="n">coulG</span><span class="p">[</span><span class="n">equal2boundary_0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -443,8 +443,8 @@
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.weighted_coulG_ewald">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">weighted_coulG_ewald</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">omega</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">omega</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">aft</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="s2">&quot;ewald&quot;</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">aft</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="s2">&quot;ewald&quot;</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">aft</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="s2">"ewald"</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">aft</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="s2">"ewald"</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span></div>
 
 
 <span class="c1"># a = lattice vectors / (2*pi)</span>
@@ -453,11 +453,11 @@
 <span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">kpair_reduced_lists</span><span class="p">(</span><span class="n">kptis</span><span class="p">,</span> <span class="n">kptjs</span><span class="p">,</span> <span class="n">kptij_idx</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
     <span class="n">nkpts</span> <span class="o">=</span> <span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nkpts = &quot;</span><span class="p">,</span> <span class="n">nkpts</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"nkpts = "</span><span class="p">,</span> <span class="n">nkpts</span><span class="p">)</span>
     <span class="n">kptis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptis</span><span class="p">)</span>
     <span class="n">kptjs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kptjs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">kptis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">kptjs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: Dimension of kptis and kptjs doesn&#39;t match.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Error: Dimension of kptis and kptjs doesn't match."</span><span class="p">)</span>
     <span class="n">num_kpair</span> <span class="o">=</span> <span class="n">kptis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">conj_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_kpair</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
     <span class="n">trans_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_kpair</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
@@ -480,7 +480,7 @@
                 <span class="k">for</span> <span class="n">kk2_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">kk1_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
                     <span class="n">kk2</span> <span class="o">=</span> <span class="n">kmesh</span><span class="p">[</span><span class="n">kk2_idx</span><span class="p">]</span>
                     <span class="n">kidif</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">k2</span> <span class="o">+</span> <span class="n">kk2</span><span class="p">)</span>
-                    <span class="c1">#kidif = np.einsum(&#39;wx,x-&gt;w&#39;, a, k2 + kk2)</span>
+                    <span class="c1">#kidif = np.einsum('wx,x-&gt;w', a, k2 + kk2)</span>
                     <span class="n">kidif_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">kidif</span><span class="p">)</span>
                     <span class="n">maski</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">kidif</span> <span class="o">-</span> <span class="n">kidif_int</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-6</span>
 
@@ -527,14 +527,14 @@
 <div class="viewcode-block" id="make_gdf_kptij_lst_jk">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.make_gdf_kptij_lst_jk">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_gdf_kptij_lst_jk</span><span class="p">(</span><span class="n">kstruct</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    [WIP]</span>
 <span class="sd">    Build GDF k-point-pair list for get_jk</span>
 <span class="sd">    All combinations::</span>
 
 <span class="sd">        k_ibz != k_bz</span>
 <span class="sd">        k_bz  == k_bz</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyscf.pbc.lib.kpts_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">member</span>
     <span class="n">kptij_lst</span> <span class="o">=</span> <span class="p">[(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span><span class="p">)]</span>
     <span class="n">kptij_idx_lst</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span><span class="p">)]</span>
@@ -573,21 +573,21 @@
 
 <div class="viewcode-block" id="compute_integrals">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.compute_integrals">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_integrals</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">mydf</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">X_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basename</span> <span class="o">=</span> <span class="s2">&quot;df_int&quot;</span><span class="p">,</span> <span class="n">cderi_name</span><span class="o">=</span><span class="s2">&quot;cderi.h5&quot;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">keep_after</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cderi_name2</span><span class="o">=</span><span class="s2">&quot;cderi_ewald.h5&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_integrals</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">mydf</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">X_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basename</span> <span class="o">=</span> <span class="s2">"df_int"</span><span class="p">,</span> <span class="n">cderi_name</span><span class="o">=</span><span class="s2">"cderi.h5"</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">keep_after</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cderi_name2</span><span class="o">=</span><span class="s2">"cderi_ewald.h5"</span><span class="p">):</span>
 
     <span class="n">kptij_idx</span><span class="p">,</span> <span class="n">kij_conj</span><span class="p">,</span> <span class="n">kij_trans</span><span class="p">,</span> <span class="n">kpair_irre_list</span><span class="p">,</span> <span class="n">num_kpair_stored</span><span class="p">,</span> <span class="n">kptis</span><span class="p">,</span> <span class="n">kptjs</span> <span class="o">=</span> <span class="n">integrals_grid</span><span class="p">(</span><span class="n">mycell</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">)</span>
 
     <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">kmesh</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">&quot;/meta.h5&quot;</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sync&quot;</span><span class="p">)</span> <span class="c1"># This is needed to syncronize the NFS between nodes</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">"/meta.h5"</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"sync"</span><span class="p">)</span> <span class="c1"># This is needed to syncronize the NFS between nodes</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">basename</span><span class="p">):</span>
-        <span class="n">unsafe_rm</span> <span class="o">=</span> <span class="s2">&quot;rm  &quot;</span> <span class="o">+</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">&quot;/VQ*&quot;</span>
+        <span class="n">unsafe_rm</span> <span class="o">=</span> <span class="s2">"rm  "</span> <span class="o">+</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">"/VQ*"</span>
         <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">unsafe_rm</span><span class="p">)</span>
-        <span class="n">unsafe_rm</span> <span class="o">=</span> <span class="s2">&quot;rm  &quot;</span> <span class="o">+</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">&quot;/meta*&quot;</span>
+        <span class="n">unsafe_rm</span> <span class="o">=</span> <span class="s2">"rm  "</span> <span class="o">+</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">"/meta*"</span>
         <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">unsafe_rm</span><span class="p">)</span>
         <span class="c1"># This is needed to ensure that files are removed both on the computational and head nodes:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sync&quot;</span><span class="p">)</span> 
-    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;mkdir -p &quot;</span> <span class="o">+</span> <span class="n">basename</span><span class="p">)</span> <span class="c1"># Here &quot;-p&quot; is important and is needed if the if condition is trigerred</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"sync"</span><span class="p">)</span> 
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"mkdir -p "</span> <span class="o">+</span> <span class="n">basename</span><span class="p">)</span> <span class="c1"># Here "-p" is important and is needed if the if condition is trigerred</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cderi_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">keep</span> <span class="p">:</span>
         <span class="n">mydf</span><span class="o">.</span><span class="n">_cderi</span> <span class="o">=</span> <span class="n">cderi_name</span>
     <span class="k">else</span><span class="p">:</span>
@@ -603,7 +603,7 @@
 
     <span class="n">auxcell</span> <span class="o">=</span> <span class="n">addons</span><span class="o">.</span><span class="n">make_auxmol</span><span class="p">(</span><span class="n">mycell</span><span class="p">,</span> <span class="n">mydf</span><span class="o">.</span><span class="n">auxbasis</span><span class="p">)</span>
     <span class="n">NQ</span> <span class="o">=</span> <span class="n">auxcell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NQ = &quot;</span><span class="p">,</span> <span class="n">NQ</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"NQ = "</span><span class="p">,</span> <span class="n">NQ</span><span class="p">)</span>
 
     <span class="c1"># compute partitioning</span>
 
@@ -615,7 +615,7 @@
             <span class="n">mult</span> <span class="o">=</span> <span class="n">tot_size</span> <span class="o">//</span> <span class="n">ubound</span>
             <span class="n">chunks</span> <span class="o">=</span> <span class="n">num_kpair_stored</span> <span class="o">//</span> <span class="p">(</span><span class="n">mult</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">chunks</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2"> Chunk size is bigger than upper memory bound per chunk you have </span><span class="se">\n\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n\n\n</span><span class="s2"> Chunk size is bigger than upper memory bound per chunk you have </span><span class="se">\n\n\n</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">chunks</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">return</span> <span class="n">chunks</span>
         <span class="k">return</span> <span class="n">num_kpair_stored</span>
@@ -623,12 +623,12 @@
     <span class="n">single_rho_size</span> <span class="o">=</span> <span class="n">nao</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">NQ</span> <span class="o">*</span> <span class="mi">16</span>
     <span class="n">full_rho_size</span>   <span class="o">=</span> <span class="p">(</span><span class="n">num_kpair_stored</span> <span class="o">*</span> <span class="n">single_rho_size</span><span class="p">)</span>
     <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">compute_partitioning</span><span class="p">(</span><span class="n">full_rho_size</span><span class="p">,</span> <span class="n">num_kpair_stored</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The chunk size: &quot;</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="s2">&quot; k-point pair&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"The chunk size: "</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="s2">" k-point pair"</span><span class="p">)</span>
 
     <span class="c1"># open file to write integrals in</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span>
 
     <span class="c1"># Loop over k-point pair</span>
     <span class="c1"># processed densities count</span>
@@ -638,9 +638,9 @@
     <span class="n">Lpq_mo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NQ</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="n">chunk_indices</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># Rotate three-center integrals into the AO-&gt;ortho basis when</span>
-    <span class="c1"># args.orth != &quot;none&quot;, so on-disk V matches S/F/T/dm in input.h5.</span>
+    <span class="c1"># args.orth != "none", so on-disk V matches S/F/T/dm in input.h5.</span>
     <span class="n">rotate</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_k</span><span class="p">)</span> <span class="o">==</span> <span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-              <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">orth</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+              <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">orth</span> <span class="o">!=</span> <span class="s2">"none"</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">kpair_irre_list</span><span class="p">:</span>
         <span class="n">k1</span> <span class="o">=</span> <span class="n">kptis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -675,36 +675,36 @@
 
         <span class="c1"># if reach chunk size: (cnt-chunk_size) equals to chunk id.</span>
         <span class="k">if</span> <span class="n">cnt</span> <span class="o">%</span> <span class="n">chunk_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">chunk_name</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">&quot;/VQ_</span><span class="si">{}</span><span class="s2">.h5&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cnt</span> <span class="o">-</span> <span class="n">chunk_size</span><span class="p">)</span>
+            <span class="n">chunk_name</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">"/VQ_</span><span class="si">{}</span><span class="s2">.h5"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cnt</span> <span class="o">-</span> <span class="n">chunk_size</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">)</span> <span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">)</span>
-            <span class="n">VQ</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
-            <span class="n">VQ</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cnt</span> <span class="o">-</span> <span class="n">chunk_size</span><span class="p">)]</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">VQ</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span>
+            <span class="n">VQ</span><span class="p">[</span><span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cnt</span> <span class="o">-</span> <span class="n">chunk_size</span><span class="p">)]</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
             <span class="n">VQ</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">chunk_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cnt</span> <span class="o">-</span> <span class="n">chunk_size</span><span class="p">)</span>
             <span class="n">buffer</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="c1"># Deal the rest</span>
     <span class="k">if</span> <span class="n">cnt</span> <span class="o">%</span> <span class="n">chunk_size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">last_chunk</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_kpair_stored</span> <span class="o">//</span> <span class="n">chunk_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">chunk_size</span>
-        <span class="n">chunk_name</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">&quot;/VQ_</span><span class="si">{}</span><span class="s2">.h5&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_chunk</span><span class="p">)</span>
+        <span class="n">chunk_name</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">"/VQ_</span><span class="si">{}</span><span class="s2">.h5"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_chunk</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">)</span> <span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">)</span>
-        <span class="n">VQ</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
-        <span class="n">VQ</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_chunk</span><span class="p">)]</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">VQ</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">chunk_name</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span>
+        <span class="n">VQ</span><span class="p">[</span><span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_chunk</span><span class="p">)]</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">chunk_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_chunk</span><span class="p">)</span>
         <span class="n">VQ</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">buffer</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;chunk_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunk_size</span>
-    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;chunk_indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">chunk_indices</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;__green_version__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">imd</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;green_mbtools&quot;</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">"chunk_size"</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunk_size</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">"chunk_indices"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">chunk_indices</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"__green_version__"</span><span class="p">]</span> <span class="o">=</span> <span class="n">imd</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">"green_mbtools"</span><span class="p">)</span>
     <span class="n">data</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_after</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cderi_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">apply_correction</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cderi_name2</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sync&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Integrals have been computed and stored into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"sync"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Integrals have been computed and stored into </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">kij_conj</span><span class="p">,</span> <span class="n">kij_trans</span><span class="p">,</span> <span class="n">kpair_irre_list</span><span class="p">,</span> <span class="n">kptij_idx</span><span class="p">,</span> <span class="n">num_kpair_stored</span></div>
 
 
@@ -715,25 +715,25 @@
     <span class="c1"># PySCF needs to have a full k-grid to properly compute the madelung constant</span>
     <span class="c1"># but we want to compute only the contribution for ki == kj to speedup this calculations</span>
     <span class="c1"># TODO Double check where we define full_k_mesh?</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="s1">&#39;full_k_mesh&#39;</span><span class="p">):</span>
-         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Using wrong DF object&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mydf</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="s1">'full_k_mesh'</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Using wrong DF object"</span><span class="p">)</span>
     <span class="n">oldkpts</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span>
     <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">mydf</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">full_k_mesh</span>
-    <span class="n">coulG</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">aft</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="s1">&#39;ewald&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="n">coulG</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">aft</span><span class="o">.</span><span class="n">weighted_coulG</span><span class="p">(</span><span class="n">mydf</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="s1">'ewald'</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
     <span class="n">mydf</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">oldkpts</span>
     <span class="k">return</span> <span class="n">coulG</span></div>
 
 
 <div class="viewcode-block" id="compute_ewald_correction">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.compute_ewald_correction">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_ewald_correction</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">maindf</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;df_ewald.h5&quot;</span><span class="p">,</span> <span class="n">X_k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_ewald_correction</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">maindf</span><span class="p">,</span> <span class="n">kmesh</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="s2">"df_ewald.h5"</span><span class="p">,</span> <span class="n">X_k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1"># global full_k_mesh</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
-    <span class="n">EW</span>     <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;EW&quot;</span><span class="p">)</span>
-    <span class="n">EW_bar</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;EW_bar&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span>
+    <span class="n">EW</span>     <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"EW"</span><span class="p">)</span>
+    <span class="n">EW_bar</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"EW_bar"</span><span class="p">)</span>
     <span class="c1"># keep original method for computing Coulomb kernel</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">importlib.util</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">iu</span>
-    <span class="n">new_pyscf</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s1">&#39;pyscf.pbc.df.gdf_builder&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">new_pyscf</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s1">'pyscf.pbc.df.gdf_builder'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">new_pyscf</span> <span class="p">:</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">pyscf.pbc.df.gdf_builder</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdf</span>
         <span class="n">weighted_coulG_old</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">_CCGDFBuilder</span><span class="o">.</span><span class="n">weighted_coulG</span>
@@ -743,13 +743,13 @@
 
     <span class="c1"># density-fitting w/o ewald correction for fine grid</span>
     <span class="n">df2</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">GDF</span><span class="p">(</span><span class="n">maindf</span><span class="o">.</span><span class="n">cell</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="s2">&quot;_prefer_ccdf&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="s2">"_prefer_ccdf"</span><span class="p">):</span>
         <span class="n">df2</span><span class="o">.</span><span class="n">_prefer_ccdf</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Disable RS-GDF switch for new pyscf versions</span>
     <span class="k">if</span> <span class="n">maindf</span><span class="o">.</span><span class="n">auxbasis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">df2</span><span class="o">.</span><span class="n">auxbasis</span> <span class="o">=</span> <span class="n">maindf</span><span class="o">.</span><span class="n">auxbasis</span>
     <span class="c1"># Coulomb kernel mesh</span>
     <span class="n">df2</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">maindf</span><span class="o">.</span><span class="n">mesh</span>
-    <span class="n">cderi_file_2</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.h5&quot;</span>
+    <span class="n">cderi_file_2</span> <span class="o">=</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span> <span class="o">+</span> <span class="s2">".h5"</span>
     <span class="n">df2</span><span class="o">.</span><span class="n">_cderi_to_save</span> <span class="o">=</span> <span class="n">cderi_file_2</span>
     <span class="n">df2</span><span class="o">.</span><span class="n">_cderi</span> <span class="o">=</span> <span class="n">cderi_file_2</span>
     <span class="n">df2</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">kmesh</span>
@@ -768,15 +768,15 @@
     <span class="c1"># df.aft.weighted_coulG = weighted_coulG_ewald_2nd</span>
     <span class="n">df1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">GDF</span><span class="p">(</span><span class="n">maindf</span><span class="o">.</span><span class="n">cell</span><span class="p">)</span>
     <span class="n">df1</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">full_k_mesh</span> <span class="o">=</span> <span class="n">maindf</span><span class="o">.</span><span class="n">kpts</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="s2">&quot;_prefer_ccdf&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="s2">"_prefer_ccdf"</span><span class="p">):</span>
         <span class="n">df1</span><span class="o">.</span><span class="n">_prefer_ccdf</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Disable RS-GDF switch for new pyscf versions</span>
     <span class="k">if</span> <span class="n">maindf</span><span class="o">.</span><span class="n">auxbasis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">df1</span><span class="o">.</span><span class="n">auxbasis</span> <span class="o">=</span> <span class="n">maindf</span><span class="o">.</span><span class="n">auxbasis</span>
     <span class="c1"># Use Ewald for divergence treatment</span>
-    <span class="n">df1</span><span class="o">.</span><span class="n">exxdiv</span> <span class="o">=</span> <span class="s1">&#39;ewald&#39;</span>
+    <span class="n">df1</span><span class="o">.</span><span class="n">exxdiv</span> <span class="o">=</span> <span class="s1">'ewald'</span>
     <span class="c1"># Coulomb kernel mesh</span>
     <span class="n">df1</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">maindf</span><span class="o">.</span><span class="n">mesh</span>
-    <span class="n">cderi_file_1</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.h5&quot;</span>
+    <span class="n">cderi_file_1</span> <span class="o">=</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span> <span class="o">+</span> <span class="s2">".h5"</span>
     <span class="n">df1</span><span class="o">.</span><span class="n">_cderi_to_save</span> <span class="o">=</span> <span class="n">cderi_file_1</span>
     <span class="n">df1</span><span class="o">.</span><span class="n">_cderi</span> <span class="o">=</span> <span class="n">cderi_file_1</span>
     <span class="n">df1</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">kmesh</span>
@@ -784,10 +784,10 @@
     <span class="n">_</span><span class="p">,</span> <span class="n">nk2</span><span class="p">,</span> <span class="n">nk3</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">nk</span>
 
     <span class="c1"># Rotate Ewald-correction buffers to AO-&gt;ortho basis when</span>
-    <span class="c1"># args.orth != &quot;none&quot;, to match the V integrals written by</span>
+    <span class="c1"># args.orth != "none", to match the V integrals written by</span>
     <span class="c1"># compute_integrals (avoids mixing V_ortho with EW_AO downstream).</span>
     <span class="n">rotate</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_k</span><span class="p">)</span> <span class="o">==</span> <span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-              <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">orth</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+              <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">orth</span> <span class="o">!=</span> <span class="s2">"none"</span><span class="p">)</span>
 
     <span class="c1"># We know that G=0 contribution diverge only when q = 0</span>
     <span class="c1"># so we loop over (k1,k1) pairs</span>
@@ -834,8 +834,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ew_arr</span> <span class="o">=</span> <span class="n">buffer1</span> <span class="o">-</span> <span class="n">buffer2</span>
             <span class="n">ew_bar_arr</span> <span class="o">=</span> <span class="n">buffer2</span>
-        <span class="n">EW</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ew_arr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">EW_bar</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ew_bar_arr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">EW</span><span class="p">[</span><span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ew_arr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">EW_bar</span><span class="p">[</span><span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ew_bar_arr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">buffer1</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">buffer2</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
@@ -848,7 +848,7 @@
         <span class="n">gdf</span><span class="o">.</span><span class="n">GDF</span><span class="o">.</span><span class="n">weighted_coulG</span> <span class="o">=</span> <span class="n">weighted_coulG_old</span>
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cderi_file_1</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cderi_file_2</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ewald correction has been computed and stored into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Ewald correction has been computed and stored into </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span></div>
 
 
 
@@ -863,7 +863,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">use_j2c_eig_decomposition</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_j3c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auxcell</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kptij_lst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cderi_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Customized ERI building to build and store j2c at the same time</span>
+<span class="w">        </span><span class="sd">"""Customized ERI building to build and store j2c at the same time</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -875,7 +875,7 @@
 <span class="sd">            list of k-point pairs, by default None</span>
 <span class="sd">        cderi_file : str, optional</span>
 <span class="sd">            output file to store ERI, by default None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span>
         <span class="k">if</span> <span class="n">auxcell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">auxcell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxcell</span>
         <span class="k">if</span> <span class="n">cderi_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">cderi_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cderi_to_save</span>
@@ -899,7 +899,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dfbuilder</span> <span class="o">=</span> <span class="n">_RSGDFBuilder</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">auxcell</span><span class="p">,</span> <span class="n">kpts_union</span><span class="p">)</span>
         <span class="c1"># Keep configurable to support both legacy-reference compatibility and systematic eigenvalue workflow.</span>
-        <span class="n">dfbuilder</span><span class="o">.</span><span class="n">j2c_eig_always</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;use_j2c_eig_decomposition&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">dfbuilder</span><span class="o">.</span><span class="n">j2c_eig_always</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'use_j2c_eig_decomposition'</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
         <span class="n">dfbuilder</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span>
         <span class="n">dfbuilder</span><span class="o">.</span><span class="n">linear_dep_threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_dep_threshold</span>
         <span class="n">j_only</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_j_only</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">kpts_union</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
@@ -907,37 +907,37 @@
                            <span class="n">kptij_lst</span><span class="o">=</span><span class="n">kptij_lst</span><span class="p">)</span>
 
         <span class="c1"># Build q = k1-k2 and reduce to a unique wrapped q-mesh, then construct a q-structure and use its functionalities</span>
-        <span class="n">use_space_symm</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;space_symm&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
-        <span class="n">use_tr_symm</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tr_symm&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
-        <span class="n">use_x2c</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;x2c&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">use_space_symm</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'space_symm'</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">use_tr_symm</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'tr_symm'</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">use_x2c</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'x2c'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">qstruct</span> <span class="o">=</span> <span class="n">kpt_utils</span><span class="o">.</span><span class="n">build_q_struct</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span> <span class="n">space_symm</span><span class="o">=</span><span class="p">(</span><span class="n">use_space_symm</span> <span class="ow">and</span> <span class="n">use_x2c</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">),</span> <span class="n">tr_symm</span><span class="o">=</span><span class="n">use_tr_symm</span><span class="p">)</span>
         <span class="n">uniq_qpts</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">kpts</span>
         <span class="n">scaled_uniq_kpts</span> <span class="o">=</span> <span class="n">qstruct</span><span class="o">.</span><span class="n">kpts_scaled</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Num uniq kpts </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniq_qpts</span><span class="p">))</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug2</span><span class="p">(</span><span class="s1">&#39;scaled unique kpts </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">scaled_uniq_kpts</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'Num uniq kpts </span><span class="si">%d</span><span class="s1">'</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniq_qpts</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug2</span><span class="p">(</span><span class="s1">'scaled unique kpts </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">scaled_uniq_kpts</span><span class="p">)</span>
 
         <span class="c1"># Group k-points into conjugate pairs and build a mapping from the original q-mesh to the unique q-mesh.</span>
         <span class="c1"># qstruct.ibz2bz are the full-BZ indices of irreducible q-points.</span>
         <span class="c1"># Store j2c strictly for q_IBZ representatives in this order.</span>
         <span class="n">q_ibz2bz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">qstruct</span><span class="o">.</span><span class="n">ibz2bz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">j2c_uniq_kpts</span> <span class="o">=</span> <span class="n">uniq_qpts</span><span class="p">[</span><span class="n">q_ibz2bz</span><span class="p">]</span>
-        <span class="n">feri</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">cderi_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="n">feri</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">cderi_file</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">)</span>
         <span class="n">all_j2c</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dfbuilder</span><span class="o">.</span><span class="n">get_2c2e</span><span class="p">(</span><span class="n">j2c_uniq_kpts</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j2c_idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q_ibz2bz</span><span class="p">):</span>
             <span class="n">j2c</span> <span class="o">=</span> <span class="n">all_j2c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">j2c</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">:</span>
-                <span class="n">feri</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;j2c/</span><span class="si">{</span><span class="n">j2c_idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c</span>
+                <span class="n">feri</span><span class="p">[</span><span class="sa">f</span><span class="s1">'j2c/</span><span class="si">{</span><span class="n">j2c_idx</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">feri</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;j2c/</span><span class="si">{</span><span class="n">j2c_idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c</span> <span class="o">+</span> <span class="mf">0.</span><span class="n">j</span>
+                <span class="n">feri</span><span class="p">[</span><span class="sa">f</span><span class="s1">'j2c/</span><span class="si">{</span><span class="n">j2c_idx</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c</span> <span class="o">+</span> <span class="mf">0.</span><span class="n">j</span>
             <span class="n">j2c</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># Meta data</span>
-        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/qmesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniq_qpts</span>
-        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/scaled_qmesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaled_uniq_kpts</span>
-        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/j2c_uniq_kpts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c_uniq_kpts</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">'j2c/qmesh'</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniq_qpts</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">'j2c/scaled_qmesh'</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaled_uniq_kpts</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">'j2c/j2c_uniq_kpts'</span><span class="p">]</span> <span class="o">=</span> <span class="n">j2c_uniq_kpts</span>
         <span class="c1"># Compatibility metadata: pair each stored q_IBZ representative with itself.</span>
-        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/q_ibz2bz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_ibz2bz</span>
-        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c/q_bz2ibz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">qstruct</span><span class="o">.</span><span class="n">bz2ibz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">feri</span><span class="p">[</span><span class="s1">&#39;j2c&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;j2c_decomposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;eigenvalue&#39;</span> <span class="k">if</span> <span class="n">dfbuilder</span><span class="o">.</span><span class="n">j2c_eig_always</span> <span class="k">else</span> <span class="s1">&#39;cholesky&#39;</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">'j2c/q_ibz2bz'</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_ibz2bz</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">'j2c/q_bz2ibz'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">qstruct</span><span class="o">.</span><span class="n">bz2ibz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">feri</span><span class="p">[</span><span class="s1">'j2c'</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">'j2c_decomposition'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'eigenvalue'</span> <span class="k">if</span> <span class="n">dfbuilder</span><span class="o">.</span><span class="n">j2c_eig_always</span> <span class="k">else</span> <span class="s1">'cholesky'</span>
         <span class="n">feri</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
@@ -945,7 +945,7 @@
 <div class="viewcode-block" id="cholesky_decomposed_metric">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.integral_utils.cholesky_decomposed_metric">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cholesky_decomposed_metric</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Cholesky decomposition of the j2c metric for a given k-point, or its inverse if requested.</span>
+<span class="w">    </span><span class="sd">"""Calculate the Cholesky decomposition of the j2c metric for a given k-point, or its inverse if requested.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -964,7 +964,7 @@
 <span class="sd">    j2c_negative : ndarray or None</span>
 <span class="sd">        If the j2c metric has negative eigenvalues (which can occur in 2D systems with certain Fourier </span>
 <span class="sd">        transform conventions), this will contain the corresponding eigenvectors. Otherwise, it will be None.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Cholesky: j2c = LL†  (L lower triangular).  PySCF computes B = L⁻¹ @ eri3c</span>
     <span class="c1"># (by solving L†x = eri3c, i.e., x = L⁻¹ @ eri3c), so P0_tilde lives in the</span>
     <span class="c1"># L-basis.  Obar = L_bz⁻¹ @ mat_ao @ L_irre correctly maps P0_tilde between</span>
@@ -990,10 +990,10 @@
     <span class="n">j2c_negative</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">cond_num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cond_num</span> <span class="o">&gt;</span> <span class="mf">1e12</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Condition number of j2c_k (</span><span class="si">{</span><span class="n">cond_num</span><span class="si">}</span><span class="s2">) is too large. Consider using a smaller aux. basis.&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Condition number of j2c_k (</span><span class="si">{</span><span class="n">cond_num</span><span class="si">}</span><span class="s2">) is too large. Consider using a smaller aux. basis."</span><span class="p">)</span>
 
     <span class="n">eigs</span><span class="p">,</span> <span class="n">vecs</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">j2c_k</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">eigs</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">J2C_LIN_DEP_THRESH</span><span class="p">),</span> <span class="s2">&quot;j2c metric has non-positive eigenvalues&quot;</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">eigs</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">J2C_LIN_DEP_THRESH</span><span class="p">),</span> <span class="s2">"j2c metric has non-positive eigenvalues"</span>
     <span class="n">eig_mask</span> <span class="o">=</span> <span class="n">eigs</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">eigs</span><span class="p">)</span> <span class="o">*</span> <span class="n">J2C_LIN_DEP_THRESH</span>
     <span class="n">eigs_trim</span> <span class="o">=</span> <span class="n">eigs</span><span class="p">[</span><span class="n">eig_mask</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">inv</span><span class="p">:</span>
@@ -1001,8 +1001,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">j2c_sqrt_k</span> <span class="o">=</span> <span class="n">vecs</span><span class="p">[:,</span> <span class="n">eig_mask</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eigs_trim</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1"># negative eigenvalues can occur in 2D systems with certain Fourier transform conventions,</span>
-    <span class="c1"># but we can still use the corresponding eigenvectors to define a &quot;negative&quot; subspace for the J2C metric</span>
-    <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">low_dim_ft_type</span> <span class="o">!=</span> <span class="s1">&#39;inf_vacuum&#39;</span><span class="p">:</span>
+    <span class="c1"># but we can still use the corresponding eigenvectors to define a "negative" subspace for the J2C metric</span>
+    <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">low_dim_ft_type</span> <span class="o">!=</span> <span class="s1">'inf_vacuum'</span><span class="p">:</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">eigs</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">J2C_LIN_DEP_THRESH</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">j2c_negative</span> <span class="o">=</span> <span class="p">(</span><span class="n">vecs</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">eigs</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
@@ -1041,7 +1041,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

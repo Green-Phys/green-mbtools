@@ -244,8 +244,8 @@
 <div class="viewcode-block" id="iwmesh">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.cheby.iwmesh">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">iwmesh</span><span class="p">(</span><span class="n">iw_list</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Defines imaginary frequency grid from imaginary time grid.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Defines imaginary frequency grid from imaginary time grid.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">iw_list</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">beta</span></div>
 
 
@@ -253,8 +253,8 @@
 <div class="viewcode-block" id="get_tau_mesh">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.cheby.get_tau_mesh">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_tau_mesh</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">ncheb</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate tau grid for a given beta in the chebishev basis.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Generate tau grid for a given beta in the chebishev basis.</span>
+<span class="sd">    """</span>
     <span class="n">nts</span> <span class="o">=</span> <span class="n">ncheb</span> <span class="o">+</span> <span class="mi">2</span>
     <span class="n">tau_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nts</span><span class="p">)</span>
     <span class="n">tau_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tau_mesh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">beta</span>
@@ -313,19 +313,19 @@
             <span class="n">_Tct</span><span class="p">[</span><span class="n">ic</span><span class="p">,</span> <span class="n">it</span><span class="p">]</span> <span class="o">=</span> <span class="n">_Ttc</span><span class="p">[</span><span class="n">it</span><span class="p">,</span> <span class="n">ic</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">normal</span>
 
     <span class="n">_Tnc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nw</span><span class="p">,</span> <span class="n">ncheb</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
-    <span class="n">Tnc</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;/Users/CanonYeh/Projects/chebyshev_input/TNC.h5&#39;</span><span class="p">)</span>
+    <span class="n">Tnc</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">'/Users/CanonYeh/Projects/chebyshev_input/TNC.h5'</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncheb</span><span class="p">):</span>
-        <span class="n">re</span> <span class="o">=</span> <span class="n">Tnc</span><span class="p">[</span><span class="s2">&quot;TNC_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_r&quot;</span><span class="p">][()]</span>
-        <span class="n">im</span> <span class="o">=</span> <span class="n">Tnc</span><span class="p">[</span><span class="s2">&quot;TNC_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_i&quot;</span><span class="p">][()]</span>
+        <span class="n">re</span> <span class="o">=</span> <span class="n">Tnc</span><span class="p">[</span><span class="s2">"TNC_"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"_r"</span><span class="p">][()]</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">Tnc</span><span class="p">[</span><span class="s2">"TNC_"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"_i"</span><span class="p">][()]</span>
         <span class="k">for</span> <span class="n">iw</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nw</span><span class="p">):</span>
             <span class="n">_Tnc</span><span class="p">[</span><span class="n">iw</span><span class="p">,</span> <span class="n">ic</span><span class="p">]</span> <span class="o">=</span> <span class="nb">complex</span><span class="p">(</span><span class="n">re</span><span class="p">[</span><span class="n">iw</span><span class="p">],</span> <span class="n">im</span><span class="p">[</span><span class="n">iw</span><span class="p">])</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">/</span> <span class="mf">2.0</span>
     <span class="n">Tnc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="n">Sigma_tau</span> <span class="o">=</span> <span class="n">Sigma_tau</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nts</span><span class="p">,</span> <span class="n">nk</span><span class="o">*</span><span class="n">nao</span><span class="o">*</span><span class="n">nao</span><span class="p">)</span>
     <span class="c1"># Selfenergy in Chebyshev representation</span>
-    <span class="n">Sigma_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,jk -&gt; ik&#39;</span><span class="p">,</span> <span class="n">_Tct</span><span class="p">,</span> <span class="n">Sigma_tau</span><span class="p">)</span>
+    <span class="n">Sigma_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ij,jk -&gt; ik'</span><span class="p">,</span> <span class="n">_Tct</span><span class="p">,</span> <span class="n">Sigma_tau</span><span class="p">)</span>
     <span class="c1"># Selfenergy in Matsubara axes</span>
-    <span class="n">Sigma_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,jk-&gt;ik&#39;</span><span class="p">,</span> <span class="n">_Tnc</span><span class="p">,</span> <span class="n">Sigma_c</span><span class="p">)</span>
+    <span class="n">Sigma_w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ij,jk-&gt;ik'</span><span class="p">,</span> <span class="n">_Tnc</span><span class="p">,</span> <span class="n">Sigma_c</span><span class="p">)</span>
     <span class="n">Sigma_w</span> <span class="o">=</span> <span class="n">Sigma_w</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nw</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Sigma_w</span></div>
 
@@ -359,20 +359,20 @@
             <span class="n">_Tct</span><span class="p">[</span><span class="n">ic</span><span class="p">,</span> <span class="n">it</span><span class="p">]</span> <span class="o">=</span> <span class="n">_Ttc</span><span class="p">[</span><span class="n">it</span><span class="p">,</span> <span class="n">ic</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">normal</span>
 
     <span class="n">_T_0l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ncheb</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
-    <span class="n">Tnl</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;/Users/CanonYeh/Projects/chebyshev_input/TNC.h5&#39;</span><span class="p">)</span>
+    <span class="n">Tnl</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">'/Users/CanonYeh/Projects/chebyshev_input/TNC.h5'</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncheb</span><span class="p">):</span>
-        <span class="n">re</span> <span class="o">=</span> <span class="n">Tnl</span><span class="p">[</span><span class="s2">&quot;TNC_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;_r&quot;</span><span class="p">][()]</span>
-        <span class="n">im</span> <span class="o">=</span> <span class="n">Tnl</span><span class="p">[</span><span class="s2">&quot;TNC_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;_i&quot;</span><span class="p">][()]</span>
+        <span class="n">re</span> <span class="o">=</span> <span class="n">Tnl</span><span class="p">[</span><span class="s2">"TNC_"</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span><span class="o">+</span><span class="s2">"_r"</span><span class="p">][()]</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">Tnl</span><span class="p">[</span><span class="s2">"TNC_"</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span><span class="o">+</span><span class="s2">"_i"</span><span class="p">][()]</span>
         <span class="n">_T_0l</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span> <span class="o">=</span> <span class="nb">complex</span><span class="p">(</span><span class="n">re</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">im</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">/</span> <span class="mf">2.0</span>
     <span class="n">Tnl</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="n">Sigma</span> <span class="o">=</span> <span class="n">Sigma</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nts</span><span class="p">,</span> <span class="n">nk</span><span class="o">*</span><span class="n">nao</span><span class="o">*</span><span class="n">nao</span><span class="p">)</span>
     <span class="c1"># Selfenergy in Chebyshev representation</span>
     <span class="n">Sigma_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">_Tct</span><span class="p">,</span> <span class="n">Sigma</span><span class="p">)</span>
-    <span class="c1"># Sigma_c = np.einsum(&#39;ij,jklm -&gt; iklm&#39;, _Tct, Sigma)</span>
+    <span class="c1"># Sigma_c = np.einsum('ij,jklm -&gt; iklm', _Tct, Sigma)</span>
     <span class="c1"># Selfenergy in zero frequency</span>
     <span class="n">Sigma_w0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">_T_0l</span><span class="p">,</span> <span class="n">Sigma_c</span><span class="p">)</span>
-    <span class="c1"># Sigma_w0 = np.einsum(&#39;i,ijkl-&gt;jkl&#39;, _T_0l, Sigma_c)</span>
+    <span class="c1"># Sigma_w0 = np.einsum('i,ijkl-&gt;jkl', _T_0l, Sigma_c)</span>
 
     <span class="n">Sigma_w0</span> <span class="o">=</span> <span class="n">Sigma_w0</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nk</span><span class="p">,</span> <span class="n">nao</span><span class="p">,</span> <span class="n">nao</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Sigma_w0</span></div>
@@ -409,7 +409,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

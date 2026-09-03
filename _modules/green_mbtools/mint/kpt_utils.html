@@ -255,7 +255,7 @@
 <div class="viewcode-block" id="build_q_struct">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.kpt_utils.build_q_struct">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">build_q_struct</span><span class="p">(</span><span class="n">mycell</span><span class="p">,</span> <span class="n">k_mesh</span><span class="p">,</span> <span class="n">space_symm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tr_symm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize q-mesh for GDF</span>
+<span class="w">    </span><span class="sd">"""Initialize q-mesh for GDF</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -272,7 +272,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    pyscf.pbc.lib.kpts.KPoints</span>
 <span class="sd">        q-mesh struct for the Brillouin Zone</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Build q = k1 - k2 over the full k-mesh and remove duplicates with</span>
     <span class="c1"># the same wrap-around convention as integral generation.</span>
     <span class="n">q_mesh</span> <span class="o">=</span> <span class="p">(</span><span class="n">k_mesh</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">k_mesh</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
@@ -320,7 +320,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

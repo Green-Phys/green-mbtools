@@ -245,11 +245,11 @@
 
 <div class="viewcode-block" id="cvx_matrix_projection">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_matrix_projection">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">cvx_matrix_projection</span><span class="p">(</span><span class="n">zM</span><span class="p">,</span> <span class="n">GM_matrix</span><span class="p">,</span> <span class="n">w_cut</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_real</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span> <span class="n">ofile</span><span class="o">=</span><span class="s1">&#39;Giw&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;SCS&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Projection of noisy Green&#39;s function matrix data on to Nevanlinna manifold.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cvx_matrix_projection</span><span class="p">(</span><span class="n">zM</span><span class="p">,</span> <span class="n">GM_matrix</span><span class="p">,</span> <span class="n">w_cut</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_real</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span> <span class="n">ofile</span><span class="o">=</span><span class="s1">'Giw'</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">'SCS'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Projection of noisy Green's function matrix data on to Nevanlinna manifold.</span>
 <span class="sd">    Once this is performed, analytic continuation either using Nevanlinna</span>
 <span class="sd">    or ES becomes easier.</span>
-<span class="sd">    The main idea is to obtain a projected Matsubara Green&#39;s function of the form</span>
+<span class="sd">    The main idea is to obtain a projected Matsubara Green's function of the form</span>
 
 <span class="sd">        G(iw_m) = sum_n P_n / (iw_m - w_n)</span>
 
@@ -258,23 +258,23 @@
 <span class="sd">    zM : numpy.ndarray</span>
 <span class="sd">        n_imag number of imaginary frequency values</span>
 <span class="sd">    GM_matrix : numpy.ndarray</span>
-<span class="sd">        Exact Matsubara Green&#39;s function data in the shape (n_imag, n_orb, n_orb)</span>
+<span class="sd">        Exact Matsubara Green's function data in the shape (n_imag, n_orb, n_orb)</span>
 <span class="sd">    w_cut : float, optional</span>
 <span class="sd">        cut-off to consider for real axis, by default 10.0</span>
 <span class="sd">    n_real : int, optional</span>
 <span class="sd">        number of real frequencies to consider, by default 201</span>
 <span class="sd">    ofile : str, optional</span>
-<span class="sd">        Output file in which the green&#39;s function data will be dumped, by default &#39;Giw&#39;</span>
+<span class="sd">        Output file in which the green's function data will be dumped, by default 'Giw'</span>
 <span class="sd">    solver : str, optional</span>
-<span class="sd">        CVXPy solver to use, by default &#39;SCS&#39;</span>
+<span class="sd">        CVXPy solver to use, by default 'SCS'</span>
 <span class="sd">    **kwargs : dict, optional</span>
 <span class="sd">        dictionary of keyword arguments for CVXPy solver</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
-<span class="sd">        Projected Green&#39;s function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Projected Green's function</span>
+<span class="sd">    """</span>
     <span class="c1"># number of imag frequency points</span>
     <span class="n">n_imag</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zM</span><span class="p">)</span>
 
@@ -308,17 +308,17 @@
 
     <span class="n">G_approx</span> <span class="o">=</span> <span class="n">zw_matrix</span> <span class="o">@</span> <span class="n">P_vec</span>
     <span class="n">G_diff</span> <span class="o">=</span> <span class="n">G_approx</span> <span class="o">-</span> <span class="n">GM_matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n_imag</span><span class="p">,</span> <span class="n">n_orb</span> <span class="o">*</span> <span class="n">n_orb</span><span class="p">))</span>
-    <span class="n">obj_qty</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">G_diff</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span><span class="p">)</span>
+    <span class="n">obj_qty</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">G_diff</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">'fro'</span><span class="p">)</span>
 
     <span class="c1">#</span>
-    <span class="c1"># Define cvxy&#39;s Objective problem and solve it</span>
+    <span class="c1"># Define cvxy's Objective problem and solve it</span>
     <span class="c1">#</span>
 
     <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">obj_qty</span><span class="p">),</span> <span class="n">constr</span><span class="p">)</span>
     <span class="c1"># NOTE: using default convergence criterion for the solver</span>
     <span class="n">opt_error</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error CVXPy optimization: &quot;</span><span class="p">,</span> <span class="n">opt_error</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Objective value after optimization: &quot;</span><span class="p">,</span> <span class="n">obj_qty</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Error CVXPy optimization: "</span><span class="p">,</span> <span class="n">opt_error</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Objective value after optimization: "</span><span class="p">,</span> <span class="n">obj_qty</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="c1">#</span>
     <span class="c1"># Get results for the projected imaginary-time Greens function</span>
@@ -334,11 +334,11 @@
 
 <div class="viewcode-block" id="cvx_diag_projection">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_diag_projection">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">cvx_diag_projection</span><span class="p">(</span><span class="n">zM</span><span class="p">,</span> <span class="n">GM_diag</span><span class="p">,</span> <span class="n">w_cut</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_real</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span> <span class="n">ofile</span><span class="o">=</span><span class="s1">&#39;Giw&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;SCS&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Projection of noisy Green&#39;s function diagonal data on to Nevanlinna manifold.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cvx_diag_projection</span><span class="p">(</span><span class="n">zM</span><span class="p">,</span> <span class="n">GM_diag</span><span class="p">,</span> <span class="n">w_cut</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_real</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span> <span class="n">ofile</span><span class="o">=</span><span class="s1">'Giw'</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">'SCS'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Projection of noisy Green's function diagonal data on to Nevanlinna manifold.</span>
 <span class="sd">    Once this is performed, analytic continuation either using Nevanlinna</span>
 <span class="sd">    or ES becomes easier.</span>
-<span class="sd">    The main idea is to obtain a projected Matsubara Green&#39;s function of the form</span>
+<span class="sd">    The main idea is to obtain a projected Matsubara Green's function of the form</span>
 
 <span class="sd">        G(iw_m) = sum_n P_n / (iw_m - w_n)</span>
 
@@ -347,23 +347,23 @@
 <span class="sd">    zM : numpy.ndarray</span>
 <span class="sd">        n_imag number of imaginary frequency values</span>
 <span class="sd">    GM_matrix : numpy.ndarray</span>
-<span class="sd">        Exact Matsubara Green&#39;s function data in the shape (n_imag, n_orb, n_orb)</span>
+<span class="sd">        Exact Matsubara Green's function data in the shape (n_imag, n_orb, n_orb)</span>
 <span class="sd">    w_cut : float, optional</span>
 <span class="sd">        cut-off to consider for real axis, by default 10.0</span>
 <span class="sd">    n_real : int, optional</span>
 <span class="sd">        number of real frequencies to consider, by default 201</span>
 <span class="sd">    ofile : str, optional</span>
-<span class="sd">        Output file in which the green&#39;s function data will be dumped, by default &#39;Giw&#39;</span>
+<span class="sd">        Output file in which the green's function data will be dumped, by default 'Giw'</span>
 <span class="sd">    solver : str, optional</span>
-<span class="sd">        CVXPy solver to use, by default &#39;SCS&#39;</span>
+<span class="sd">        CVXPy solver to use, by default 'SCS'</span>
 <span class="sd">    **kwargs : dict, optional</span>
 <span class="sd">        dictionary of keyword arguments for CVXPy solver</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
-<span class="sd">        Projected Green&#39;s function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Projected Green's function</span>
+<span class="sd">    """</span>
     <span class="c1"># number of imag frequency points</span>
     <span class="n">n_imag</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zM</span><span class="p">)</span>
 
@@ -390,17 +390,17 @@
 
     <span class="n">G_approx</span> <span class="o">=</span> <span class="n">zw_matrix</span> <span class="o">@</span> <span class="n">P_vec</span>
     <span class="n">G_diff</span> <span class="o">=</span> <span class="n">G_approx</span> <span class="o">-</span> <span class="n">GM_diag</span>
-    <span class="n">obj_qty</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">G_diff</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span><span class="p">)</span>
+    <span class="n">obj_qty</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">G_diff</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">'fro'</span><span class="p">)</span>
 
     <span class="c1">#</span>
-    <span class="c1"># Define cvxy&#39;s Objective problem and solve it</span>
+    <span class="c1"># Define cvxy's Objective problem and solve it</span>
     <span class="c1">#</span>
 
     <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">obj_qty</span><span class="p">))</span>
     <span class="c1"># NOTE: using default convergence criterion for the solver</span>
     <span class="n">opt_error</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error CVXPy optimization: &quot;</span><span class="p">,</span> <span class="n">opt_error</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Objective value after optimization: &quot;</span><span class="p">,</span> <span class="n">obj_qty</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Error CVXPy optimization: "</span><span class="p">,</span> <span class="n">opt_error</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Objective value after optimization: "</span><span class="p">,</span> <span class="n">obj_qty</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="c1">#</span>
     <span class="c1"># Get results for the projected imaginary-time Greens function</span>
@@ -417,8 +417,8 @@
 
 <div class="viewcode-block" id="cvx_optimize">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_optimize">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">cvx_optimize</span><span class="p">(</span><span class="n">poles</span><span class="p">,</span> <span class="n">GM_matrix</span><span class="p">,</span> <span class="n">zM</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;SCS&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top level target error function in the ES approach for matrix analytic continuation. It returns</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cvx_optimize</span><span class="p">(</span><span class="n">poles</span><span class="p">,</span> <span class="n">GM_matrix</span><span class="p">,</span> <span class="n">zM</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">'SCS'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Top level target error function in the ES approach for matrix analytic continuation. It returns</span>
 
 <span class="sd">        Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||</span>
 <span class="sd">    </span>
@@ -427,11 +427,11 @@
 <span class="sd">    poles : numpy.ndarray</span>
 <span class="sd">        1D array of pole positions</span>
 <span class="sd">    GM_matrix : numpy.ndarray</span>
-<span class="sd">        Exact Matsubara Green&#39;s function data in the shape (num_imag, num_orb, num_orb)</span>
+<span class="sd">        Exact Matsubara Green's function data in the shape (num_imag, num_orb, num_orb)</span>
 <span class="sd">    zM : numpy.ndarray</span>
 <span class="sd">        1D Matsubara frequencies</span>
 <span class="sd">    solver : str, optional</span>
-<span class="sd">        CVXPy solver for semi-definite relaxation in the ES continuation, by default &#39;SCS&#39;</span>
+<span class="sd">        CVXPy solver for semi-definite relaxation in the ES continuation, by default 'SCS'</span>
 <span class="sd">    **kwargs : dict, optional</span>
 <span class="sd">        dictionary of keyword arguments for CVXPy solver</span>
 
@@ -442,9 +442,9 @@
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        optimal X_vec in the shape (num_poles, num_orb, num_orb)</span>
 <span class="sd">    numpy.ndarray</span>
-<span class="sd">        approximated optimal Green&#39;s function for the specified Matsubara frequencies.</span>
+<span class="sd">        approximated optimal Green's function for the specified Matsubara frequencies.</span>
 <span class="sd">        The shape of the array is (num_imag, num_orb, num_orb)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># number of imag frequency points</span>
     <span class="n">num_imag</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zM</span><span class="p">)</span>
     <span class="c1"># Get the number of poles.</span>
@@ -487,17 +487,17 @@
         <span class="o">+</span> <span class="n">iw_pole_matrix</span> <span class="o">@</span> <span class="n">cp</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">X_vec</span><span class="p">)</span> <span class="o">@</span> <span class="n">X_trans</span>
     <span class="n">obj_qty</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
         <span class="n">G_approx</span> <span class="o">-</span> <span class="n">GM_matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_imag</span><span class="p">,</span> <span class="n">num_orb</span> <span class="o">*</span> <span class="n">num_orb</span><span class="p">)),</span>
-        <span class="n">p</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span>
+        <span class="n">p</span><span class="o">=</span><span class="s1">'fro'</span>
     <span class="p">)</span>
 
     <span class="c1">#</span>
-    <span class="c1"># Define cvxy&#39;s Objective problem and solve it</span>
+    <span class="c1"># Define cvxy's Objective problem and solve it</span>
     <span class="c1">#</span>
 
     <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">obj_qty</span><span class="p">),</span> <span class="n">constr</span><span class="p">)</span>
     <span class="c1"># NOTE: using default convergence criterion for the solver</span>
     <span class="n">opt_error</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="c1"># print(&quot;Constraint values: &quot;)</span>
+    <span class="c1"># print("Constraint values: ")</span>
     <span class="c1"># constr_values = [constr[i].dual_value for i in range(num_poles)]</span>
     <span class="c1"># print(constr_values)</span>
 
@@ -509,8 +509,8 @@
     <span class="n">np_X_vec</span> <span class="o">=</span> <span class="n">X_vec</span><span class="o">.</span><span class="n">value</span>
     <span class="n">np_X_vec</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">np_X_vec</span><span class="p">)</span> <span class="o">@</span> <span class="n">X_trans</span>
     <span class="n">np_X_vec</span> <span class="o">=</span> <span class="n">np_X_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_poles</span><span class="p">,</span> <span class="n">num_orb</span><span class="p">,</span> <span class="n">num_orb</span><span class="p">))</span>
-    <span class="c1"># approximated Green&#39;s function on iw points</span>
-    <span class="n">np_G_approx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;wp, pij -&gt; wij&#39;</span><span class="p">,</span> <span class="n">iw_pole_matrix</span><span class="p">,</span> <span class="n">np_X_vec</span><span class="p">)</span>
+    <span class="c1"># approximated Green's function on iw points</span>
+    <span class="n">np_G_approx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'wp, pij -&gt; wij'</span><span class="p">,</span> <span class="n">iw_pole_matrix</span><span class="p">,</span> <span class="n">np_X_vec</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">opt_error</span><span class="p">,</span> <span class="n">np_X_vec</span><span class="p">,</span> <span class="n">np_G_approx</span></div>
 
@@ -518,8 +518,8 @@
 
 <div class="viewcode-block" id="cvx_optimize_spectral">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_optimize_spectral">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">cvx_optimize_spectral</span><span class="p">(</span><span class="n">poles</span><span class="p">,</span> <span class="n">GM_diags</span><span class="p">,</span> <span class="n">zM</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;SCS&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top level target error function in the ES approach for spectral analytic continuation. It returns</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cvx_optimize_spectral</span><span class="p">(</span><span class="n">poles</span><span class="p">,</span> <span class="n">GM_diags</span><span class="p">,</span> <span class="n">zM</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">'SCS'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Top level target error function in the ES approach for spectral analytic continuation. It returns</span>
 
 <span class="sd">        Err (poles) = min_{X} || Diag(Gimag (iw) - Gapprox [poles, X] (iw)) ||</span>
 <span class="sd">    </span>
@@ -528,11 +528,11 @@
 <span class="sd">    poles : numpy.ndarray</span>
 <span class="sd">        1D array of pole positions</span>
 <span class="sd">    GM_diags : numpy.ndarray</span>
-<span class="sd">        Exact Matsubara Green&#39;s function diagonal data in the shape (num_imag, num_orb)</span>
+<span class="sd">        Exact Matsubara Green's function diagonal data in the shape (num_imag, num_orb)</span>
 <span class="sd">    zM : numpy.ndarray</span>
 <span class="sd">        1D Matsubara frequencies</span>
 <span class="sd">    solver : str, optional</span>
-<span class="sd">        CVXPy solver for semi-definite relaxation in the ES continuation, by default &#39;SCS&#39;</span>
+<span class="sd">        CVXPy solver for semi-definite relaxation in the ES continuation, by default 'SCS'</span>
 <span class="sd">    **kwargs : dict, optional</span>
 <span class="sd">        dictionary of keyword arguments for CVXPy solver</span>
 
@@ -543,9 +543,9 @@
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        optimal X_vec in the shape (num_poles, num_orb)</span>
 <span class="sd">    numpy.ndarray</span>
-<span class="sd">        approximated optimal Green&#39;s function diagonals for the specified Matsubara frequencies.</span>
+<span class="sd">        approximated optimal Green's function diagonals for the specified Matsubara frequencies.</span>
 <span class="sd">        The shape of the array is (num_imag, num_orb)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># number of imag frequency points</span>
     <span class="n">num_imag</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zM</span><span class="p">)</span>
     <span class="c1"># Get the number of poles.</span>
@@ -573,17 +573,17 @@
     <span class="n">G_approx</span> <span class="o">=</span> <span class="n">iw_pole_matrix</span> <span class="o">@</span> <span class="n">X_vec</span>
     <span class="n">obj_qty</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
         <span class="n">G_approx</span> <span class="o">-</span> <span class="n">GM_diags</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_imag</span><span class="p">,</span> <span class="n">num_orb</span><span class="p">)),</span>
-        <span class="n">p</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span>
+        <span class="n">p</span><span class="o">=</span><span class="s1">'fro'</span>
     <span class="p">)</span>
 
     <span class="c1">#</span>
-    <span class="c1"># Define cvxy&#39;s Objective problem and solve itjj</span>
+    <span class="c1"># Define cvxy's Objective problem and solve itjj</span>
     <span class="c1">#</span>
 
     <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">obj_qty</span><span class="p">))</span>
     <span class="c1"># NOTE: using default convergence criterion for the solver</span>
     <span class="n">opt_error</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="c1"># print(&quot;Constraint values: &quot;)</span>
+    <span class="c1"># print("Constraint values: ")</span>
     <span class="c1"># constr_values = [constr[i].dual_value for i in range(num_poles)]</span>
     <span class="c1"># print(constr_values)</span>
 
@@ -594,7 +594,7 @@
     <span class="c1"># X vectors</span>
     <span class="n">np_X_vec</span> <span class="o">=</span> <span class="n">X_vec</span><span class="o">.</span><span class="n">value</span>
     <span class="n">np_X_vec</span> <span class="o">=</span> <span class="n">np_X_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_poles</span><span class="p">,</span> <span class="n">num_orb</span><span class="p">))</span>
-    <span class="c1"># approximated Green&#39;s function on iw points</span>
+    <span class="c1"># approximated Green's function on iw points</span>
     <span class="n">np_G_approx</span> <span class="o">=</span> <span class="n">iw_pole_matrix</span> <span class="o">@</span> <span class="n">np_X_vec</span>
 
     <span class="k">return</span> <span class="n">opt_error</span><span class="p">,</span> <span class="n">np_X_vec</span><span class="p">,</span> <span class="n">np_G_approx</span></div>
@@ -604,7 +604,7 @@
 <div class="viewcode-block" id="cvx_gradient">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.cvx_gradient">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cvx_gradient</span><span class="p">(</span><span class="n">poles</span><span class="p">,</span> <span class="n">GM_matrix</span><span class="p">,</span> <span class="n">zM</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the gradient for top-level optimization of pole positions in ES analytic continuation</span>
+<span class="w">    </span><span class="sd">"""Computes the gradient for top-level optimization of pole positions in ES analytic continuation</span>
 <span class="sd">    i.e., d Err / d poles where,</span>
 
 <span class="sd">        `Err (poles) = min_{X} || Gimag (iw) - Gapprox [poles, X] (iw) ||`</span>
@@ -620,7 +620,7 @@
 <span class="sd">    poles : numpy.ndarray</span>
 <span class="sd">        pole positions</span>
 <span class="sd">    GM_matrix : numpy.ndarray</span>
-<span class="sd">        Exact Matsubara Green&#39;s function data in the shape (num_imag, num_orb, num_orb)</span>
+<span class="sd">        Exact Matsubara Green's function data in the shape (num_imag, num_orb, num_orb)</span>
 <span class="sd">    zM : numpy.ndarray</span>
 <span class="sd">        Matsubara frequencies</span>
 
@@ -628,7 +628,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Gradient of E with respect to poles</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#</span>
     <span class="c1"># Initialization</span>
@@ -657,7 +657,7 @@
             <span class="n">gradhere</span> <span class="o">=</span> <span class="n">X_vec</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">/</span> <span class="p">(</span>
                 <span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">zM</span><span class="p">[</span><span class="n">iw</span><span class="p">]</span> <span class="o">-</span> <span class="n">poles</span><span class="p">[</span><span class="n">k</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
             <span class="p">)</span>
-            <span class="n">grad</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij, ij -&gt;&#39;</span><span class="p">,</span> <span class="n">dG_iw</span><span class="p">,</span> <span class="n">gradhere</span><span class="p">))</span>
+            <span class="n">grad</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'ij, ij -&gt;'</span><span class="p">,</span> <span class="n">dG_iw</span><span class="p">,</span> <span class="n">gradhere</span><span class="p">))</span>
 
     <span class="c1"># Scale the gradient by -1/y.</span>
     <span class="n">grad</span> <span class="o">=</span> <span class="o">-</span><span class="n">grad</span> <span class="o">/</span> <span class="n">err_value</span>
@@ -670,9 +670,9 @@
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.pes_utils.run_es">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_es</span><span class="p">(</span>
     <span class="n">iw_vals</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">,</span> <span class="n">re_w_vals</span><span class="p">,</span> <span class="n">diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">eps_pol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">ofile</span><span class="o">=</span><span class="s1">&#39;Xw_real.txt&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;SCS&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="n">ofile</span><span class="o">=</span><span class="s1">'Xw_real.txt'</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">'SCS'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pole estimation and semi-definite (PES) relaation algorithm based on</span>
+<span class="w">    </span><span class="sd">"""Pole estimation and semi-definite (PES) relaation algorithm based on</span>
 <span class="sd">    Huang, Gull and Lin, 10.1103/PhysRevB.107.075151. The output is saved in ofile.</span>
 
 <span class="sd">    Parameters</span>
@@ -692,23 +692,23 @@
 <span class="sd">    ofile : str, optional</span>
 <span class="sd">        Path or name of output file for storing the continued data</span>
 <span class="sd">    solver : str, optional</span>
-<span class="sd">        CVXPy solver to use (options: SCS, MOSEK, CLARABEL, etc.), by default &#39;SCS&#39;</span>
+<span class="sd">        CVXPy solver to use (options: SCS, MOSEK, CLARABEL, etc.), by default 'SCS'</span>
 <span class="sd">    **kwargs : dict, optional</span>
 <span class="sd">        dictionary of keyword arguments for CVXPy solver</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># step 1: AAA algorithm for pole estimation</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">G_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">G_iw</span> <span class="o">=</span> <span class="n">G_iw</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">G_iw</span><span class="o">.</span><span class="n">shape</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">))</span>
         <span class="n">g_trace</span> <span class="o">=</span> <span class="n">G_iw</span> <span class="o">*</span> <span class="mf">1.0</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">G_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">g_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;wa -&gt; w&#39;</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">)</span>
+        <span class="n">g_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'wa -&gt; w'</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">G_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">g_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;wpp -&gt; w&#39;</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">)</span>
+        <span class="n">g_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'wpp -&gt; w'</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s1">&#39;expect X_iw shape to be (nw, nao) or (nw, nao, nao), &#39;</span>
-            <span class="o">+</span> <span class="s1">&#39;but received </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">G_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="s1">'expect X_iw shape to be (nw, nao) or (nw, nao, nao), '</span>
+            <span class="o">+</span> <span class="s1">'but received </span><span class="si">{}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">G_iw</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">baryrat</span><span class="o">.</span><span class="n">aaa</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">iw_vals</span><span class="p">,</span> <span class="n">g_trace</span><span class="p">)</span>
     <span class="n">poles</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">polres</span><span class="p">()</span>
@@ -723,8 +723,8 @@
             <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cvx_optimize_spectral</span><span class="p">(</span>
                 <span class="n">x</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">,</span> <span class="n">iw_vals</span><span class="p">,</span> <span class="n">solver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
             <span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">poles</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s2">&quot;eps&quot;</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
+                <span class="s2">"maxiter"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">"eps"</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">)</span>
         <span class="n">poles_opt</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
@@ -736,8 +736,8 @@
             <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cvx_optimize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">,</span> <span class="n">iw_vals</span><span class="p">,</span> <span class="n">solver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">poles</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cvx_gradient</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">G_iw</span><span class="p">,</span> <span class="n">iw_vals</span><span class="p">),</span>
             <span class="n">tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s2">&quot;eps&quot;</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
+                <span class="s2">"maxiter"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">"eps"</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">)</span>
         <span class="n">poles_opt</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
@@ -758,7 +758,7 @@
         <span class="n">Greens_calc</span><span class="p">[</span><span class="n">i_re</span><span class="p">]</span> <span class="o">=</span> <span class="n">Greenhere</span>
 
     <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">ofile</span><span class="p">,</span> <span class="n">Greens_calc</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">re_w_vals</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">ofile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;_error.txt&#39;</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">opt_error</span><span class="p">]))</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">ofile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'.txt'</span><span class="p">,</span> <span class="s1">'_error.txt'</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">opt_error</span><span class="p">]))</span>
 
     <span class="k">return</span></div>
 
@@ -794,7 +794,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

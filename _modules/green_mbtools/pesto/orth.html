@@ -241,15 +241,15 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">LA</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">Orthogonalization utilities</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 
 <div class="viewcode-block" id="canonical_matrices">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.orth.canonical_matrices">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">canonical_matrices</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">thr</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Löwdin&#39;s canonical orthogonalization transformation matrix</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">canonical_matrices</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">thr</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">'f'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Löwdin's canonical orthogonalization transformation matrix</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -258,7 +258,7 @@
 <span class="sd">    thr : float, optional</span>
 <span class="sd">        threshold for orthogonalization and inverses, by default 1e-7</span>
 <span class="sd">    type : str, optional</span>
-<span class="sd">        &#39;f&#39; for Fock and &#39;g&#39; for Green&#39;s function or density matrix, by default &#39;f&#39;</span>
+<span class="sd">        'f' for Fock and 'g' for Green's function or density matrix, by default 'f'</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -268,52 +268,52 @@
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        if type of input is anything other than &#39;g&#39; or &#39;f&#39;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">        if type of input is anything other than 'g' or 'f'.</span>
+<span class="sd">    """</span>    
     <span class="c1"># Form vectors for normalized overlap matrix</span>
     <span class="n">Sval</span><span class="p">,</span> <span class="n">Svec</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">Svec</span><span class="p">[:,</span> <span class="n">Sval</span> <span class="o">&gt;=</span> <span class="n">thr</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Sval</span><span class="p">[</span><span class="n">Sval</span> <span class="o">&gt;=</span> <span class="n">thr</span><span class="p">])</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">'f'</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">X</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;g&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">'g'</span><span class="p">:</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Invalid transofrmation type. Only &#39;f&#39;/&#39;g&#39; type for </span><span class="se">\</span>
-<span class="s2">            Fock/Green&#39;s function only.&quot;</span>
+            <span class="s2">"Invalid transofrmation type. Only 'f'/'g' type for </span><span class="se">\</span>
+<span class="s2">            Fock/Green's function only."</span>
         <span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="canonical_orth">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.orth.canonical_orth">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">canonical_orth</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">thr</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Löwdin&#39;s canonical orthogonalization</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">canonical_orth</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">thr</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">'f'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Löwdin's canonical orthogonalization</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    H : numpy.ndarray</span>
-<span class="sd">        tensor/matrix to be orthogonalized (e.g., Fock, density or Green&#39;s function).</span>
+<span class="sd">        tensor/matrix to be orthogonalized (e.g., Fock, density or Green's function).</span>
 <span class="sd">        It has shape (..., ns, nk, nao, nao)</span>
 <span class="sd">    S : numpy.ndarray</span>
 <span class="sd">        overlap matrix</span>
 <span class="sd">    thr : float, optional</span>
 <span class="sd">        threshold for orthogonalization and inverses, by default 1e-7</span>
 <span class="sd">    type : str, optional</span>
-<span class="sd">        &#39;f&#39; for Fock and &#39;g&#39; for Green&#39;s function or density matrix, by default &#39;f&#39;</span>
+<span class="sd">        'f' for Fock and 'g' for Green's function or density matrix, by default 'f'</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Orthogonalized matrix / tensor</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># if type != &#39;f&#39;:</span>
+<span class="sd">    """</span>
+    <span class="c1"># if type != 'f':</span>
     <span class="c1">#     raise ValueError(</span>
-    <span class="c1">#         &quot;Invalid transformation type. &quot;</span>
-    <span class="c1">#         &quot;Only &#39;f&#39; type for Fock is supported currently.&quot;</span>
+    <span class="c1">#         "Invalid transformation type. "</span>
+    <span class="c1">#         "Only 'f' type for Fock is supported currently."</span>
     <span class="c1">#     )</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Canonical orthogonalization with threshold = </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">thr</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Canonical orthogonalization with threshold = </span><span class="si">{}</span><span class="s2">."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">thr</span><span class="p">))</span>
     <span class="n">ns</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">nk</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">nao</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -325,8 +325,8 @@
             <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">cond</span> <span class="o">&gt;</span> <span class="mf">1e7</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;Warning: Condition number = </span><span class="si">{}</span><span class="s2"> is larger than&quot;</span>
-                    <span class="s2">&quot; 1e7.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span>
+                    <span class="s2">"Warning: Condition number = </span><span class="si">{}</span><span class="s2"> is larger than"</span>
+                    <span class="s2">" 1e7."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">canonical_matrices</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">],</span> <span class="n">thr</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
             <span class="c1"># nbands &lt;= nao due to linear dependency</span>
@@ -344,17 +344,17 @@
 <div class="viewcode-block" id="sao_orth">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.orth.sao_orth">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">sao_orth</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Löwdin&#39;s symmetric orthogonalization</span>
+<span class="w">    </span><span class="sd">"""Löwdin's symmetric orthogonalization</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    X : numpy.ndarray</span>
-<span class="sd">        tensor/matrix to be orthogonalized (e.g., Fock, density or Green&#39;s function).</span>
+<span class="sd">        tensor/matrix to be orthogonalized (e.g., Fock, density or Green's function).</span>
 <span class="sd">        It has shape (..., ns, nk, nao, nao)</span>
 <span class="sd">    S : numpy.ndarray</span>
 <span class="sd">        overlap matrix</span>
 <span class="sd">    type : str, optional</span>
-<span class="sd">        &#39;f&#39; for Fock and &#39;g&#39; for Green&#39;s function or density matrix, by default &#39;f&#39;</span>
+<span class="sd">        'f' for Fock and 'g' for Green's function or density matrix, by default 'f'</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -364,11 +364,11 @@
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        if type of input is anything other than &#39;g&#39; or &#39;f&#39;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;g&#39;</span> <span class="ow">or</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;f&#39;</span><span class="p">):</span>
+<span class="sd">        if type of input is anything other than 'g' or 'f'.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">type</span> <span class="o">==</span> <span class="s1">'g'</span> <span class="ow">or</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">'f'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Valid transformation types are &#39;g&#39; for density, &#39;f&#39; for Fock&quot;</span>
+            <span class="s2">"Valid transformation types are 'g' for density, 'f' for Fock"</span>
         <span class="p">)</span>
     <span class="n">ns</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">nk</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -382,14 +382,14 @@
             <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">cond</span> <span class="o">&gt;</span> <span class="mf">1e7</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;Warning: Condition number, </span><span class="si">{}</span><span class="s2">, is larger than 1e7. &quot;</span>
-                    <span class="s2">&quot;Possible numerical instability could appear. </span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="s2">&quot;Consider to use the canonical orthogonalization &quot;</span>
-                    <span class="s2">&quot;instead.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span>
+                    <span class="s2">"Warning: Condition number, </span><span class="si">{}</span><span class="s2">, is larger than 1e7. "</span>
+                    <span class="s2">"Possible numerical instability could appear. </span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="s2">"Consider to use the canonical orthogonalization "</span>
+                    <span class="s2">"instead."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;g&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">'g'</span><span class="p">:</span>
                 <span class="n">S12</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">sqrtm</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">])</span>
-            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">'f'</span><span class="p">:</span>
                 <span class="n">S12</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">LA</span><span class="o">.</span><span class="n">sqrtm</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">ik</span><span class="p">]))</span>
 
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -406,7 +406,7 @@
 <div class="viewcode-block" id="SAO_matrices">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.orth.SAO_matrices">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">SAO_matrices</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Löwdin&#39;s symmetric orthogonalization transformation matrix</span>
+<span class="w">    </span><span class="sd">"""Löwdin's symmetric orthogonalization transformation matrix</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -417,7 +417,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Transformation matrix for symmetric orthogonalization</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">nk</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">X_k</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">X_inv_k</span> <span class="o">=</span> <span class="p">[]</span>
@@ -444,7 +444,7 @@
 <div class="viewcode-block" id="transform">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.orth.transform">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">X_inv</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform Z into X basis using Z_X = X^* Z X</span>
+<span class="w">    </span><span class="sd">"""Transform Z into X basis using Z_X = X^* Z X</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -459,7 +459,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Z in new basis</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Z_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="n">Z_X</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">=</span> <span class="n">transform_per_k</span><span class="p">(</span><span class="n">Z</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="p">:],</span> <span class="n">X</span><span class="p">[</span><span class="n">ik</span><span class="p">],</span> <span class="n">X_inv</span><span class="p">[</span><span class="n">ik</span><span class="p">])</span>
@@ -471,7 +471,7 @@
 <div class="viewcode-block" id="transform_per_k">
 <a class="viewcode-back" href="../../../green_mbtools.pesto.html#green_mbtools.pesto.orth.transform_per_k">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">transform_per_k</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">X_inv</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform Z into X basis as Z_X = X^* Z X for each k-point</span>
+<span class="w">    </span><span class="sd">"""Transform Z into X basis as Z_X = X^* Z X for each k-point</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -486,15 +486,15 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Z in new basis for the given k-point</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Z_X = np.einsum(&#39;ij,jk...,kl-&gt;il...&#39;, X, Z, X.T.conj())</span>
+<span class="sd">    """</span>
+    <span class="c1"># Z_X = np.einsum('ij,jk...,kl-&gt;il...', X, Z, X.T.conj())</span>
     <span class="n">Z_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span>
 
     <span class="n">Z_restore</span> <span class="o">=</span> <span class="n">X_inv</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Z_X</span> <span class="o">@</span> <span class="n">X_inv</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">Z_restore</span><span class="p">):</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Orthogonal transformation failed. &quot;</span>\
-            <span class="s2">&quot;Max difference between origin and restored quantity &quot;</span>\
-            <span class="s2">&quot;is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Z</span> <span class="o">-</span> <span class="n">Z_restore</span><span class="p">))</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="s2">"Orthogonal transformation failed. "</span>\
+            <span class="s2">"Max difference between origin and restored quantity "</span>\
+            <span class="s2">"is </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Z</span> <span class="o">-</span> <span class="n">Z_restore</span><span class="p">))</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Z_X</span></div>
 
@@ -530,7 +530,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

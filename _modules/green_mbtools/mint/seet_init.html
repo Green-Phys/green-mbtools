@@ -243,7 +243,7 @@
 <div class="viewcode-block" id="seet_init">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">seet_init</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    SEET pre-processing class.</span>
 <span class="sd">    Computes proper orthogonal transformation and projection matricies</span>
 
@@ -251,26 +251,26 @@
 <span class="sd">    ----------</span>
 <span class="sd">    args : map</span>
 <span class="sd">        simulation parameters</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">'''</span>
 <span class="sd">        Initialize SEET pre-processing class</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        args: map</span>
 <span class="sd">            simulation parameters</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        '''</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
 
 
 <div class="viewcode-block" id="seet_init.to_full_bz">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.to_full_bz">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_full_bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">conj_list</span><span class="p">,</span> <span class="n">ir_list</span><span class="p">,</span> <span class="n">bz_index</span><span class="p">,</span> <span class="n">k_ind</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">'''</span>
 <span class="sd">        Project moment-dependent quantity onto full Brillouin zone</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        '''</span>
         <span class="n">index_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bz_index</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">irn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ir_list</span><span class="p">):</span>
             <span class="n">index_list</span><span class="p">[</span><span class="n">irn</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
@@ -292,20 +292,20 @@
 <div class="viewcode-block" id="seet_init.get_input_data">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.get_input_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">'''</span>
 <span class="sd">        Read weak-coupling solution</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">inp_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="sd">        '''</span>
+        <span class="n">inp_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
 
-        <span class="n">gf2_inp_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">gf2_input_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-        <span class="n">last_gf2_iter</span> <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">&quot;iter&quot;</span><span class="p">][()]</span>
-        <span class="n">S1</span>     <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">&quot;iter</span><span class="si">{}</span><span class="s2">/Sigma1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_gf2_iter</span><span class="p">)][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">gf2_inp_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">gf2_input_file</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
+        <span class="n">last_gf2_iter</span> <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">"iter"</span><span class="p">][()]</span>
+        <span class="n">S1</span>     <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">"iter</span><span class="si">{}</span><span class="s2">/Sigma1"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_gf2_iter</span><span class="p">)][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">S1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
             <span class="n">S1</span>     <span class="o">=</span> <span class="n">S1</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">S1</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-        <span class="n">gf2_inp_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">gf2_input_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-        <span class="n">last_gf2_iter</span> <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">&quot;iter&quot;</span><span class="p">][()]</span>
-        <span class="n">G_tau</span> <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">&quot;iter</span><span class="si">{}</span><span class="s2">/G_tau/data&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_gf2_iter</span><span class="p">)][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">gf2_inp_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">gf2_input_file</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
+        <span class="n">last_gf2_iter</span> <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">"iter"</span><span class="p">][()]</span>
+        <span class="n">G_tau</span> <span class="o">=</span> <span class="n">gf2_inp_data</span><span class="p">[</span><span class="s2">"iter</span><span class="si">{}</span><span class="s2">/G_tau/data"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">last_gf2_iter</span><span class="p">)][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">G_tau</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
             <span class="n">dm</span>    <span class="o">=</span> <span class="o">-</span> <span class="n">G_tau</span><span class="p">[</span><span class="n">G_tau</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">G_tau</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">else</span> <span class="p">:</span>
@@ -314,17 +314,17 @@
         <span class="n">dm</span>    <span class="o">=</span> <span class="p">(</span><span class="n">dm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dm</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">0.5</span>
         <span class="n">gf2_inp_data</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="n">kmesh</span>           <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">&quot;grid/k_mesh&quot;</span><span class="p">][()]</span>
-        <span class="n">kmesh_sc</span>        <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">&quot;grid/k_mesh_scaled&quot;</span><span class="p">][()]</span>
-        <span class="n">S</span>     <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">&quot;HF/S-k&quot;</span><span class="p">][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">kmesh</span>           <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">"grid/k_mesh"</span><span class="p">][()]</span>
+        <span class="n">kmesh_sc</span>        <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">"grid/k_mesh_scaled"</span><span class="p">][()]</span>
+        <span class="n">S</span>     <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">"HF/S-k"</span><span class="p">][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
         <span class="n">S</span>     <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">T</span>     <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">&quot;HF/H-k&quot;</span><span class="p">][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">T</span>     <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">"HF/H-k"</span><span class="p">][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
         <span class="n">T</span>     <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">from_ibz</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;grid/weight&quot;</span> <span class="ow">in</span> <span class="n">inp_data</span><span class="p">:</span>
-                <span class="n">conj_list</span> <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">&quot;grid/conj_list&quot;</span><span class="p">][()]</span>
-                <span class="n">ir_list</span>   <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">&quot;grid/ir_list&quot;</span><span class="p">][()]</span>
-                <span class="n">bz_index</span>  <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">&quot;grid/index&quot;</span><span class="p">][()]</span>
+            <span class="k">if</span> <span class="s2">"grid/weight"</span> <span class="ow">in</span> <span class="n">inp_data</span><span class="p">:</span>
+                <span class="n">conj_list</span> <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">"grid/conj_list"</span><span class="p">][()]</span>
+                <span class="n">ir_list</span>   <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">"grid/ir_list"</span><span class="p">][()]</span>
+                <span class="n">bz_index</span>  <span class="o">=</span> <span class="n">inp_data</span><span class="p">[</span><span class="s2">"grid/index"</span><span class="p">][()]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">conj_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">ir_list</span>   <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">kmesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -371,7 +371,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

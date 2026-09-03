@@ -3,11 +3,11 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Installation" href="install.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html">
         <link rel="prefetch" href="_static/rosetta.png" as="image">
 
     <link rel="shortcut icon" href="_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Green MBTools</title>
+        <title>Orthogonalization is consistent with space-group and time-reversal symmetry - Green MBTools</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">Green MBTools</div></a>
+      <a href="index.html"><div class="brand">Green MBTools</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -182,7 +182,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="_static/rosetta.png" alt="Logo"/>
   </div>
@@ -225,7 +225,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/index.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/orth_symmetry_note.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -243,105 +243,56 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h1>
-<p>The <cite>green-mbtools</cite> is a python tool suite for Green’s-function-based many-body calculations implemented in the
-<a class="reference external" href="https://www.Green-Phys.org">Green Software Package</a>.</p>
-<p>This package contains two main modules:</p>
-<ul class="simple">
-<li><dl class="simple">
-<dt>🌿 <code class="docutils literal notranslate"><span class="pre">mint</span></code> (Mean-field INput generation Toolkit):</dt><dd><p>generates input files for
-<a class="reference external" href="https://github.com/Green-Phys/green-mbpt">Green/WeakCoupling</a> using PySCF, ASE and SPGLib</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>🥣 <code class="docutils literal notranslate"><span class="pre">pesto</span></code> (Post-processing Evaluation Software TOols):</dt><dd><p>provides access to various post-processing tools such as analytical continuation, Wannier interpolation
-and Mulliken analysis.</p>
-</dd>
-</dl>
-</li>
-</ul>
-<section id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">¶</a></h2>
-<p>To install the <cite>green-mbtools</cite> binary package simply execute</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>green-mbtools
-</pre></div>
-</div>
-<p>To get started with the post-processing of <cite>green-mbpt</cite> output, you can initialize the <code class="docutils literal notranslate"><span class="pre">MB_post</span></code> class using the
-input, output and Matsubara grid (aka IR grid) files:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">green_mbtools.pesto</span><span class="w"> </span><span class="kn">import</span> <span class="n">mb</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-    <span class="c1"># path to files</span>
-    <span class="n">input_path</span> <span class="o">=</span> <span class="s2">"path/to/input.h5"</span>
-    <span class="n">output_path</span> <span class="o">=</span> <span class="s2">"path/to/sim.h5"</span>
-    <span class="n">ir_path</span> <span class="o">=</span> <span class="s2">"path/to/ir/grid.h5"</span>
-
-    <span class="c1"># initialize the MB_post class</span>
-    <span class="n">my_mb</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">initialize_MB_post</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">ir_path</span><span class="p">)</span>
-
-    <span class="c1"># use my_mb to do other tasks</span>
-    <span class="c1"># e.g., Nevanlinna analytic continuation to get spectral function on real-axis</span>
-    <span class="c1"># with frequencies between -5 and 5 a.u. with 1001 grid points</span>
-    <span class="c1"># and broadening parameter of 0.01</span>
-    <span class="n">freqs</span><span class="p">,</span> <span class="n">Aw</span> <span class="o">=</span> <span class="n">my_mb</span><span class="o">.</span><span class="n">AC_nevanlinna</span><span class="p">(</span><span class="n">n_real</span><span class="o">=</span><span class="mi">1001</span><span class="p">,</span> <span class="n">w_min</span><span class="o">=-</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">w_max</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-
-    <span class="c1"># trace over spin, k-points and orbitals</span>
-    <span class="n">Aw_traced</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'wska -&gt; w'</span><span class="p">,</span> <span class="n">Aw</span><span class="p">)</span>
-
-    <span class="c1"># plot the density of states</span>
-    <span class="n">freqs_ev</span> <span class="o">=</span> <span class="n">freqs</span> <span class="o">*</span> <span class="mf">27.211</span>  <span class="c1"># convert frequency from a.u. to eV</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freqs_ev</span><span class="p">,</span> <span class="n">Aw_traced</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
+          <blockquote>
+<div><p>Developer / theory note (not user-facing). Referenced from PR #54: the
+derivation of why <code class="docutils literal notranslate"><span class="pre">X(-k)</span> <span class="pre">=</span> <span class="pre">X(k)*</span></code> is the sufficient condition for the
+orthogonalization to be consistent with space-group and time-reversal
+symmetry in the conjugate DF-pair contraction.</p>
+</div></blockquote>
+<section id="orthogonalization-is-consistent-with-space-group-and-time-reversal-symmetry">
+<h1>Orthogonalization is consistent with space-group and time-reversal symmetry<a class="headerlink" href="#orthogonalization-is-consistent-with-space-group-and-time-reversal-symmetry" title="Link to this heading">¶</a></h1>
+<p>This note records why building the orthogonalizer on the irreducible wedge (with time-reversal conjugation and realification at self-TR k-points) makes every orthogonalization mode, including the gauge-sensitive ones (mo, natural, canonical Löwdin), consistent with full space-group plus time-reversal symmetry. It is the compact writeup of the argument in <code class="docutils literal notranslate"><span class="pre">Derivation.md</span></code>, ending in a simple example.</p>
+<section id="conventions">
+<h2>Conventions<a class="headerlink" href="#conventions" title="Link to this heading">¶</a></h2>
+<p>The orthogonalizer $X(k)$ maps AO one-body quantities to an orthonormal basis. Covariant quantities (overlap, hcore, Fock) transform as</p>
+<p>$$F(k) = X(k),F_{\rm AO}(k),X^\dagger(k), \qquad I = X(k),S_{\rm AO}(k),X^\dagger(k).$$</p>
+<p>The second identity gives the two relations used throughout:</p>
+<p>$$X^\dagger(k),X(k) = S_{\rm AO}^{-1}(k), \qquad X^{-1}(k) \equiv X_{\rm inv}(k) = S_{\rm AO}(k),X^\dagger(k).$$</p>
+<p>The Green’s function (contravariant) carries the inverse factors,</p>
+<p>$$G(k) = X^{-\dagger}(k),G_{\rm AO}(k),X^{-1}(k).$$</p>
 </section>
-<section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">mbtools</span></code> package comes with two sub-packages: <code class="docutils literal notranslate"><span class="pre">mint</span></code> and <code class="docutils literal notranslate"><span class="pre">pesto</span></code>.</p>
-<section id="mint">
-<h3>🌿 <code class="docutils literal notranslate"><span class="pre">mint</span></code><a class="headerlink" href="#mint" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p>Generate input for Green/WeakCoupling.</p></li>
-<li><p>Compute molecular/natural orbitals.</p></li>
-</ul>
+<section id="symmetry-operator-in-the-ortho-basis">
+<h2>Symmetry operator in the ortho basis<a class="headerlink" href="#symmetry-operator-in-the-ortho-basis" title="Link to this heading">¶</a></h2>
+<p>Let $U_{\rm AO}(k)$ be the AO representation of the space-group operation taking the irreducible representative $k_{\rm ir}$ to $k$, so $O_{\rm AO}(k) = U_{\rm AO}(k),O_{\rm AO}(k_{\rm ir}),U_{\rm AO}^\dagger(k)$ for covariant $O$. The corresponding ortho-basis operator is</p>
+<p>$$U(k) = X(k),U_{\rm AO}(k),X^{-1}(k_{\rm ir}).$$</p>
+<p>Note the left factor sits at $k$ and the right factor at $k_{\rm ir}$: $U(k)$ maps the orthonormal space at $k_{\rm ir}$ to the one at $k$. It is unitary,</p>
+<p>$$U(k),U^\dagger(k) = X(k),U_{\rm AO}(k),\big[X_{\rm inv}(k_{\rm ir})X_{\rm inv}^\dagger(k_{\rm ir})\big],U_{\rm AO}^\dagger(k),X^\dagger(k) = X(k),U_{\rm AO}(k),S_{\rm AO}(k_{\rm ir}),U_{\rm AO}^\dagger(k),X^\dagger(k) = X(k),S_{\rm AO}(k),X^\dagger(k) = I,$$</p>
+<p>using $X_{\rm inv}X_{\rm inv}^\dagger = S,X^\dagger X,S = S$ and the AO covariance $U_{\rm AO}(k)S_{\rm AO}(k_{\rm ir})U_{\rm AO}^\dagger(k) = S_{\rm AO}(k)$. Because $U(k)$ is unitary, reconstruction across a star preserves the full spectrum and all traces, so occupations and band energies are exactly star-invariant. The same $U(k)$ reconstructs both $F$ and $G$ in the ortho basis, since $S_{\rm orth}=I$ removes the covariant/contravariant distinction.</p>
 </section>
-<section id="pesto">
-<h3>🥣 <code class="docutils literal notranslate"><span class="pre">pesto</span></code><a class="headerlink" href="#pesto" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p>Mulliken analysis based on symmetrical atomic orbitals.</p></li>
-<li><p>Fourier transformation between real and reciprocal space</p></li>
-<li><p>Fourier transformation between imaginary-time and Matsubara frequency domain on intermediate representation (IR) grids (see <a class="reference external" href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.101.035144">Phys. Rev. B 101, 035144 (2020)</a> for further details)</p></li>
-<li><p>Wannier interpolation</p></li>
-<li><p>Maxent analytical continuation using the <a class="reference external" href="https://github.com/CQMP/Maxent">external C++ library</a></p></li>
-<li><p>Nevanlinna analytical continuation, based on Fei et.al. <a class="reference external" href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.056402">Phys. Rev. Lett. 126, 056402 (2021)</a></p></li>
-<li><p>PES analytical continuation, based on <a class="reference external" href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.075151">Phys. Rev. B 107, 075151 (2023)</a></p></li>
-<li><p>Caratheodory analytical continuation for complex valued matrices, implemented as a C++ library based on Fei et.al. <a class="reference external" href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.104.165111">Phys. Rev. B 104, 165111 (2021)</a></p></li>
-</ul>
-<div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 1.0: </span><code class="docutils literal notranslate"><span class="pre">pesto</span></code> was formerly known as <code class="docutils literal notranslate"><span class="pre">mbanalysis</span></code>. Importing <code class="docutils literal notranslate"><span class="pre">mbanalysis</span></code>
-still works but is deprecated (it now emits a <code class="docutils literal notranslate"><span class="pre">FutureWarning</span></code>) and
-will be removed in <strong>v1.1</strong>. Use <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">green_mbtools</span> <span class="pre">import</span> <span class="pre">pesto</span></code> instead.</p>
-</div>
+<section id="the-pathological-contraction">
+<h2>The pathological contraction<a class="headerlink" href="#the-pathological-contraction" title="Link to this heading">¶</a></h2>
+<p>Take the worst case for symmetry consistency: a self-energy-like contraction $\sum_k G(k),V(k,q)$ where $k = R,k_0$ is generated from an IBZ point $k_0$ by a space-group operation (acting on $G$), while the interaction is reconstructed by time reversal, $V(k,q)$ from $V(-k,-q)^\ast$. Both symmetries act at once. Substituting the ortho-basis reconstructions and collapsing with $X^\dagger X = S_{\rm AO}^{-1}$ and the AO covariance (full algebra in <code class="docutils literal notranslate"><span class="pre">Derivation.md</span></code>) gives</p>
+<p>$$G(k),V(k,q) = X(k),S_{\rm AO}(k),U_{\rm AO}(k),G_{\rm AO}(k_0),U_{\rm AO}^\dagger(k),S_{\rm AO}(k),X^\dagger(k)\ \mathrm{conj}!\big[X(-k),V_{\rm AO}(-k,-q),X^\dagger(-q)\big].$$</p>
+<p>If and only if $\mathrm{conj}[X(-k)] = X(k)$, the middle factor $S_{\rm AO}(k),X^\dagger(k),X(k) = 1$ collapses and</p>
+<p>$$G(k),V(k,q) = X(k),S_{\rm AO}(k)\ \big[G_{\rm AO}(k),V_{\rm AO}(k,q)\big]\ \mathrm{conj}!\big[X^\dagger(-q)\big].$$</p>
+<p>The outer $X S$ and $\mathrm{conj}[X^\dagger(-q)]$ only dress the external indices. The contraction over the internal $k$ index between $G$ and $V$ is therefore identical in the AO and ortho bases, for any space-group star, provided the single condition</p>
+<p>$$\boxed{,X(-k) = X(k)^\ast,}$$</p>
+<p>holds. This is the one thing the orthogonalization build must guarantee. It is exactly what the IBZ build enforces: propagate $X$ from the wedge by the $U_{\rm AO}$ reps with a time-reversal conjugation, and realify $S$ (hence $X$) at self-TR k-points.</p>
 </section>
-</section>
-<section id="authors">
-<h2>Authors<a class="headerlink" href="#authors" title="Link to this heading">¶</a></h2>
-<p>The package is currently maintained by <a class="reference external" href="https://github.com/Green-Phys">Green-Phys</a>, including <a class="reference external" href="https://github.com/egull">&#64;egull</a>
-and <a class="reference external" href="https://github.com/gauravharsha">&#64;gauravharsha</a>.</p>
-<p>Complete list of contributors is available on the <a class="reference external" href="https://github.com/Green-Phys/green-mbtools/graphs/contributors">Github page</a>.</p>
-</section>
-<section id="documentation-for-older-versions">
-<h2>Documentation for older versions<a class="headerlink" href="#documentation-for-older-versions" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://Green-Phys.github.io/green-mbtools">1.0.0 (latest)</a></p></li>
-<li><p><a class="reference external" href="https://Green-Phys.github.io/green-mbtools/v0.3.0">0.3.0</a></p></li>
-</ul>
-<div class="toctree-wrapper compound">
-</div>
+<section id="simple-example">
+<h2>Simple example<a class="headerlink" href="#simple-example" title="Link to this heading">¶</a></h2>
+<p>Take a two-orbital overlap at a time-reversal pair ${k, -k}$,</p>
+<p>$$S_{\rm AO}(k) = \begin{pmatrix} 1 &amp; b(k) \ b(k)^\ast &amp; 1 \end{pmatrix}, \qquad S_{\rm AO}(-k) = S_{\rm AO}(k)^\ast \ \ (\text{i.e. } b(-k) = b(k)^\ast),$$</p>
+<p>which is the generic real-space relation for a Bloch overlap.</p>
+<p>Symmetric Löwdin, $X(k) = S_{\rm AO}(k)^{-1/2}$, is a smooth (gauge-free) function of $S$, and the matrix inverse-square-root commutes with complex conjugation, so</p>
+<p>$$X(-k) = \big(S_{\rm AO}(k)^\ast\big)^{-1/2} = \big(S_{\rm AO}(k)^{-1/2}\big)^\ast = X(k)^\ast$$</p>
+<p>automatically. The boxed condition holds with nothing to enforce, which is why symmetric Löwdin was never broken.</p>
+<p>Canonical Löwdin, mo, and natural instead keep the overlap (or Fock) eigenvectors, $X(k) = s^{-1/2}(k),U^\dagger(k)$. Diagonalizing $S_{\rm AO}(k)$ and $S_{\rm AO}(-k) = S_{\rm AO}(k)^\ast$ independently returns eigenvectors with unrelated phases (and arbitrary rotations inside degenerate blocks), so in general $X(-k) \neq X(k)^\ast$ and the middle factor above does not collapse: the contraction picks up a spurious gauge and the total energy drifts. Two build rules restore the condition:</p>
+<ol class="arabic simple">
+<li><p>Build $X$ once at the representative and define the partner by $X(-k) := X(k)^\ast$ (more generally propagate the whole star by $U_{\rm AO}$ with the TR conjugation). Then $X(-k) = X(k)^\ast$ by construction.</p></li>
+<li><p>At a self-TR point $k = -k$, $S_{\rm AO}(k)$ is numerically real, so solve the eigenproblem on the real part. Real eigenvectors give a real $X = X^\ast$, which is the $k=-k$ case of the same condition. This is the realification step; without it, tiny imaginary noise on a degenerate block rotates the eigenvectors into a complex gauge and breaks $X(k) = X(k)^\ast$ at that single point (the Silicon 4x4x4 failure).</p></li>
+</ol>
+<p>With both rules in place, $X(-k) = X(k)^\ast$ holds for every mode, so by the boxed result the orthogonalized contraction equals the AO one for arbitrary space-group symmetry, which is what the numerical tests on Si and SiC confirm.</p>
 </section>
 </section>
 
@@ -350,15 +301,7 @@ and <a class="reference external" href="https://github.com/gauravharsha">&#64;ga
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="install.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Installation</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
+          
           
         </div>
         <div class="bottom-of-page">
@@ -390,15 +333,11 @@ and <a class="reference external" href="https://github.com/gauravharsha">&#64;ga
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Overview</a><ul>
-<li><a class="reference internal" href="#quickstart">Quickstart</a></li>
-<li><a class="reference internal" href="#features">Features</a><ul>
-<li><a class="reference internal" href="#mint">🌿 <code class="docutils literal notranslate"><span class="pre">mint</span></code></a></li>
-<li><a class="reference internal" href="#pesto">🥣 <code class="docutils literal notranslate"><span class="pre">pesto</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#authors">Authors</a></li>
-<li><a class="reference internal" href="#documentation-for-older-versions">Documentation for older versions</a></li>
+<li><a class="reference internal" href="#">Orthogonalization is consistent with space-group and time-reversal symmetry</a><ul>
+<li><a class="reference internal" href="#conventions">Conventions</a></li>
+<li><a class="reference internal" href="#symmetry-operator-in-the-ortho-basis">Symmetry operator in the ortho basis</a></li>
+<li><a class="reference internal" href="#the-pathological-contraction">The pathological contraction</a></li>
+<li><a class="reference internal" href="#simple-example">Simple example</a></li>
 </ul>
 </li>
 </ul>

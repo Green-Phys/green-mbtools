@@ -238,8 +238,8 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for green_mbtools.mint.symmetry_utils</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -------------Acknowledgements-------------</span>
-<span class="c1"># The functions &quot;fold_to_unit_cell&quot;, &quot;generate_permutation_info&quot;, &quot;get_orbital_index&quot; and</span>
-<span class="c1"># &quot;get_representation&quot; are adopted from Xinyang&#39;s implementation:</span>
+<span class="c1"># The functions "fold_to_unit_cell", "generate_permutation_info", "get_orbital_index" and</span>
+<span class="c1"># "get_representation" are adopted from Xinyang's implementation:</span>
 <span class="c1"># https://github.com/CQMP/MBSymmetry</span>
 <span class="c1"># ------------------------------------------</span>
 
@@ -251,7 +251,7 @@
 <div class="viewcode-block" id="fold_to_unit_cell">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.fold_to_unit_cell">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">fold_to_unit_cell</span><span class="p">(</span><span class="n">r_cart_scaled</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Fold a scaled (fractional) coordinate into the primary unit cell.</span>
 
 <span class="sd">    Parameters</span>
@@ -283,7 +283,7 @@
 <span class="sd">    -----------</span>
 <span class="sd">    r_rel : ndarray</span>
 <span class="sd">        The folded Cartesian coordinate within the unit cell (3,).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">frac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">r_cart_scaled</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="c1"># Wrap to [-0.5, 0.5) to match atom coordinate convention</span>
     <span class="n">frac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">frac</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
@@ -294,7 +294,7 @@
 <div class="viewcode-block" id="generate_permutation_info">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.generate_permutation_info">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_permutation_info</span><span class="p">(</span><span class="n">mycell</span><span class="p">,</span> <span class="n">symm_op</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate permutation info for given symmetry operation on the atoms of unit cell.</span>
+<span class="w">    </span><span class="sd">"""Generate permutation info for given symmetry operation on the atoms of unit cell.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -319,7 +319,7 @@
 <span class="sd">        matched using folded coordinates; this vector is computed from the</span>
 <span class="sd">        unfolded (as-input) coordinates that the Bloch phase in</span>
 <span class="sd">        :func:`get_representation` uses.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># info about symmetry operation</span>
     <span class="n">rot</span> <span class="o">=</span> <span class="n">symm_op</span><span class="o">.</span><span class="n">rot</span>
     <span class="n">trans</span> <span class="o">=</span> <span class="n">symm_op</span><span class="o">.</span><span class="n">trans</span>
@@ -351,7 +351,7 @@
             <span class="n">min_distance</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_distance</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">mycell</span><span class="o">.</span><span class="n">atom_symbol</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">!=</span> <span class="n">mycell</span><span class="o">.</span><span class="n">atom_symbol</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;point group maps atoms of different type onto each other&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"point group maps atoms of different type onto each other"</span><span class="p">)</span>
                 <span class="c1"># Else</span>
                 <span class="n">found_partner</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">partner_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
@@ -361,21 +361,21 @@
                 <span class="c1"># get_representation uses.</span>
                 <span class="n">pos_diff</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords_raw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">coords_raw</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">trans</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Atom </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">mycell</span><span class="o">.</span><span class="n">atom_symbol</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="si">}</span><span class="s2">) maps to Atom </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">mycell</span><span class="o">.</span><span class="n">atom_symbol</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
-                          <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; with lattice shift </span><span class="si">{</span><span class="n">pos_diff</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Atom </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">mycell</span><span class="o">.</span><span class="n">atom_symbol</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="si">}</span><span class="s2">) maps to Atom </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">mycell</span><span class="o">.</span><span class="n">atom_symbol</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
+                          <span class="o">+</span> <span class="sa">f</span><span class="s2">" with lattice shift </span><span class="si">{</span><span class="n">pos_diff</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">break</span>
 
         <span class="c1"># Handle error</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">found_partner</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;atom position: &quot;</span><span class="p">,</span> <span class="n">coords_scaled</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shifted position: &quot;</span><span class="p">,</span> <span class="n">shift_pos</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;symmetry operation: &quot;</span><span class="p">,</span> <span class="n">symm_op</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rotation: &quot;</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;translation vector: &quot;</span><span class="p">,</span> <span class="n">trans</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;transformed position: &quot;</span><span class="p">,</span> <span class="n">trans_pos</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Min distance: &quot;</span><span class="p">,</span> <span class="n">min_distance</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Available atom coordinates: &quot;</span><span class="p">,</span> <span class="n">coords_scaled</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;symmetry analysis could not find partner.&quot;</span><span class="p">);</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"atom position: "</span><span class="p">,</span> <span class="n">coords_scaled</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"shifted position: "</span><span class="p">,</span> <span class="n">shift_pos</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"symmetry operation: "</span><span class="p">,</span> <span class="n">symm_op</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"rotation: "</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"translation vector: "</span><span class="p">,</span> <span class="n">trans</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"transformed position: "</span><span class="p">,</span> <span class="n">trans_pos</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Min distance: "</span><span class="p">,</span> <span class="n">min_distance</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Available atom coordinates: "</span><span class="p">,</span> <span class="n">coords_scaled</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"symmetry analysis could not find partner."</span><span class="p">);</span>
 
     <span class="k">return</span> <span class="n">partner_idx</span><span class="p">,</span> <span class="n">pos_diff</span></div>
 
@@ -384,7 +384,7 @@
 <div class="viewcode-block" id="get_orbital_index">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_orbital_index">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_orbital_index</span><span class="p">(</span><span class="n">atom_idx</span><span class="p">,</span> <span class="n">n_</span><span class="p">,</span> <span class="n">L_</span><span class="p">,</span> <span class="n">mycell</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the starting and ending index of orbitals for a given atom and angular momentum.</span>
+<span class="w">    </span><span class="sd">"""Get the starting and ending index of orbitals for a given atom and angular momentum.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -403,7 +403,7 @@
 <span class="sd">        Starting index of the orbitals.</span>
 <span class="sd">    orb_end : int</span>
 <span class="sd">        Ending index of the orbitals.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">aoslice</span> <span class="o">=</span> <span class="n">mycell</span><span class="o">.</span><span class="n">aoslice_by_atom</span><span class="p">()</span>
     <span class="n">ao_loc</span> <span class="o">=</span> <span class="n">mycell</span><span class="o">.</span><span class="n">ao_loc</span>
 
@@ -425,7 +425,7 @@
                 <span class="k">break</span>
 
     <span class="k">if</span> <span class="n">orb_start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">orb_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Specified (n, L) not found for the given atom.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Specified (n, L) not found for the given atom."</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">orb_start</span><span class="p">,</span> <span class="n">orb_end</span></div>
 
@@ -434,7 +434,7 @@
 <div class="viewcode-block" id="get_representation">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_representation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_representation</span><span class="p">(</span><span class="n">bz_idx</span><span class="p">,</span> <span class="n">symm_op_idx</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">kstruct</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tr_phase</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the representation matrix for given symmetry operation on the atoms of unit cell.</span>
+<span class="w">    </span><span class="sd">"""Get the representation matrix for given symmetry operation on the atoms of unit cell.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -448,7 +448,7 @@
 <span class="sd">        k-point symmetry structure for aux-basis</span>
 <span class="sd">    tol : float, optional</span>
 <span class="sd">        Tolerance for atom-position matching in generate_permutation_info.</span>
-<span class="sd">        Default is 1e-5, matching generate_permutation_info&#39;s own default.</span>
+<span class="sd">        Default is 1e-5, matching generate_permutation_info's own default.</span>
 <span class="sd">        Note: PySCF stores fractional translations with ~6 decimal places</span>
 <span class="sd">        (e.g. 0.666667 instead of 2/3), introducing ~3e-7 residuals after</span>
 <span class="sd">        applying the operation. A tighter tol (e.g. 1e-10) would therefore</span>
@@ -469,7 +469,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    repr_matrix : ndarray</span>
 <span class="sd">        The representation matrix for the symmetry operation (nao, nao).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">n_atom</span> <span class="o">=</span> <span class="n">mycell</span><span class="o">.</span><span class="n">natm</span>
     <span class="n">nao</span> <span class="o">=</span> <span class="n">mycell</span><span class="o">.</span><span class="n">nao_nr</span><span class="p">()</span>
     <span class="n">symm_op</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">ops</span><span class="p">[</span><span class="n">symm_op_idx</span><span class="p">]</span>
@@ -480,7 +480,7 @@
     <span class="c1"># Time-reversal-paired k-points: the spatial operation lands on -k (the</span>
     <span class="c1"># reconstruction then conjugates to reach +k), so the Bloch phase must be</span>
     <span class="c1"># evaluated at -k. No-op for real phases (+k == -k).</span>
-    <span class="n">tr_bz</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">kstruct</span><span class="p">,</span> <span class="s2">&quot;time_reversal_symm_bz&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">tr_bz</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">kstruct</span><span class="p">,</span> <span class="s2">"time_reversal_symm_bz"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tr_phase</span> <span class="ow">and</span> <span class="n">tr_bz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tr_bz</span><span class="p">[</span><span class="n">bz_idx</span><span class="p">]:</span>
         <span class="n">bz_kvec</span> <span class="o">=</span> <span class="o">-</span><span class="n">bz_kvec</span>
     <span class="c1"># (loc_start_idx, loc_end_idx, orb_start, orb_end) for each atom</span>
@@ -513,8 +513,8 @@
             
             <span class="c1"># Verify angular momentum matches</span>
             <span class="k">if</span> <span class="n">L_value</span> <span class="o">!=</span> <span class="n">target_L_value</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Angular momentum mismatch: shell </span><span class="si">{</span><span class="n">ao_loc_idx</span><span class="si">}</span><span class="s2"> of atom </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has L=</span><span class="si">{</span><span class="n">L_value</span><span class="si">}</span><span class="s2">, &quot;</span>
-                                   <span class="sa">f</span><span class="s2">&quot;but shell </span><span class="si">{</span><span class="n">target_ao_loc_idx</span><span class="si">}</span><span class="s2"> of atom </span><span class="si">{</span><span class="n">target_atom</span><span class="si">}</span><span class="s2"> has L=</span><span class="si">{</span><span class="n">target_L_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Angular momentum mismatch: shell </span><span class="si">{</span><span class="n">ao_loc_idx</span><span class="si">}</span><span class="s2"> of atom </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has L=</span><span class="si">{</span><span class="n">L_value</span><span class="si">}</span><span class="s2">, "</span>
+                                   <span class="sa">f</span><span class="s2">"but shell </span><span class="si">{</span><span class="n">target_ao_loc_idx</span><span class="si">}</span><span class="s2"> of atom </span><span class="si">{</span><span class="n">target_atom</span><span class="si">}</span><span class="s2"> has L=</span><span class="si">{</span><span class="n">target_L_value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             
             <span class="n">multiplicity</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">L_value</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">n_orbs_for_L</span> <span class="o">=</span> <span class="n">ao_loc</span><span class="p">[</span><span class="n">ao_loc_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ao_loc</span><span class="p">[</span><span class="n">ao_loc_idx</span><span class="p">]</span>
@@ -522,8 +522,8 @@
             
             <span class="c1"># Verify orbital count matches</span>
             <span class="k">if</span> <span class="n">n_orbs_for_L</span> <span class="o">!=</span> <span class="n">target_n_orbs</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Orbital count mismatch: shell </span><span class="si">{</span><span class="n">ao_loc_idx</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">n_orbs_for_L</span><span class="si">}</span><span class="s2"> orbitals, &quot;</span>
-                                   <span class="sa">f</span><span class="s2">&quot;but shell </span><span class="si">{</span><span class="n">target_ao_loc_idx</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">target_n_orbs</span><span class="si">}</span><span class="s2"> orbitals&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Orbital count mismatch: shell </span><span class="si">{</span><span class="n">ao_loc_idx</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">n_orbs_for_L</span><span class="si">}</span><span class="s2"> orbitals, "</span>
+                                   <span class="sa">f</span><span class="s2">"but shell </span><span class="si">{</span><span class="n">target_ao_loc_idx</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">target_n_orbs</span><span class="si">}</span><span class="s2"> orbitals"</span><span class="p">)</span>
             
             <span class="c1"># number of radial shells in the block</span>
             <span class="n">n_shells</span> <span class="o">=</span> <span class="n">n_orbs_for_L</span> <span class="o">//</span> <span class="n">multiplicity</span>
@@ -544,7 +544,7 @@
 <div class="viewcode-block" id="rotation_matrix_to_su2">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">rotation_matrix_to_su2</span><span class="p">(</span><span class="n">R_cart</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the SU(2) representative of a proper 3D Cartesian rotation matrix.</span>
+<span class="w">    </span><span class="sd">"""Return the SU(2) representative of a proper 3D Cartesian rotation matrix.</span>
 
 <span class="sd">    For a rotation by angle :math:`\\varphi` about unit axis :math:`\\hat{n}`:</span>
 
@@ -560,7 +560,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    su2 : (2, 2) complex ndarray</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rotation</span>
     <span class="n">rotvec</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">R_cart</span><span class="p">)</span><span class="o">.</span><span class="n">as_rotvec</span><span class="p">()</span>
     <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rotvec</span><span class="p">)</span>
@@ -578,13 +578,13 @@
 <div class="viewcode-block" id="get_spinor_representation">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_spinor_representation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_spinor_representation</span><span class="p">(</span><span class="n">bz_idx</span><span class="p">,</span> <span class="n">symm_op_idx</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">kstruct</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Double-group spinor AO representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R^{-1})`.</span>
+<span class="w">    </span><span class="sd">"""Double-group spinor AO representation :math:`D^{1/2}(R^{-1}) \\otimes U_\\text{orbital}(R^{-1})`.</span>
 
 <span class="sd">    Reads the rotation directly from ``kstruct.ops[symm_op_idx]``, converts it</span>
 <span class="sd">    to a Cartesian rotation, lifts it to SU(2) via :func:`rotation_matrix_to_su2`,</span>
 <span class="sd">    and combines it with the orbital representation from :func:`get_representation`.</span>
 
-<span class="sd">    PySCF&#39;s ``Dmats`` use the passive (inverse) convention :math:`D^L(R^{-1})`, so</span>
+<span class="sd">    PySCF's ``Dmats`` use the passive (inverse) convention :math:`D^L(R^{-1})`, so</span>
 <span class="sd">    :func:`get_representation` returns :math:`U_\\text{orbital}(R^{-1})`. The matching</span>
 <span class="sd">    SU(2) factor is therefore :math:`D^{1/2}(R^{-1}) = D^{1/2}(R)^\\dagger`, i.e. the</span>
 <span class="sd">    conjugate transpose of the direct lift.</span>
@@ -601,15 +601,15 @@
 <span class="sd">        k-point symmetry structure from ``mycell.make_kpts(...)``.</span>
 <span class="sd">    tol : float, optional</span>
 <span class="sd">        Tolerance passed to get_representation for atom-position matching.</span>
-<span class="sd">        Default 1e-5 matches generate_permutation_info&#39;s own default and</span>
-<span class="sd">        accommodates PySCF&#39;s ~6 decimal-place translation precision (~3e-7</span>
+<span class="sd">        Default 1e-5 matches generate_permutation_info's own default and</span>
+<span class="sd">        accommodates PySCF's ~6 decimal-place translation precision (~3e-7</span>
 <span class="sd">        residuals). See get_representation for full discussion.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    u_spinor : (nso, nso) complex ndarray</span>
 <span class="sd">        Full spinor AO representation, ``nso = 2 * nao``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># tr_phase=False here: for a TR point the x2c==2 store keeps</span>
     <span class="c1"># (u_spinor @ theta).conj(). That conjugation acts on the whole product, so</span>
     <span class="c1"># it also conjugates the orbital block and evaluates its Bloch phase at -k,</span>
@@ -621,7 +621,7 @@
     <span class="n">rot_cart</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">rot_frac</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">rot_cart</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>   <span class="c1"># improper: inversion is trivial on spinors</span>
         <span class="n">rot_cart</span> <span class="o">=</span> <span class="o">-</span><span class="n">rot_cart</span>
-    <span class="c1"># D†= D^{1/2}(R^{-1}): matches PySCF&#39;s passive Dmats convention</span>
+    <span class="c1"># D†= D^{1/2}(R^{-1}): matches PySCF's passive Dmats convention</span>
     <span class="n">su2</span> <span class="o">=</span> <span class="n">rotation_matrix_to_su2</span><span class="p">(</span><span class="n">rot_cart</span><span class="p">)</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">su2</span><span class="p">,</span> <span class="n">u_orbital</span><span class="p">)</span></div>
 
@@ -630,7 +630,7 @@
 <div class="viewcode-block" id="check_kspace_symmetry_breaking">
 <a class="viewcode-back" href="../../../green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_kspace_symmetry_breaking</span><span class="p">(</span><span class="n">inp_file</span><span class="p">,</span> <span class="n">datasets</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Report symmetry reconstruction residuals for k-resolved matrix quantities.</span>
+<span class="w">    </span><span class="sd">"""Report symmetry reconstruction residuals for k-resolved matrix quantities.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -638,13 +638,13 @@
 <span class="sd">        Path to input.h5 file that contains all the output from initialization</span>
 <span class="sd">    datasets : list</span>
 <span class="sd">        List of datasets in the input file, for which symmetry checks need to be performed</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">finp</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">inp_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">finp</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">inp_file</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span>
     <span class="c1"># get k-symmetry info</span>
-    <span class="n">bz2ibz</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">&#39;symmetry/k/bz2ibz&#39;</span><span class="p">][()]</span>
-    <span class="n">tr_conj</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">&#39;symmetry/k/tr_conj&#39;</span><span class="p">][()]</span>
-    <span class="n">nk</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">&#39;symmetry/k/nk&#39;</span><span class="p">][()]</span>
-    <span class="n">k_sym_trans</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">&#39;symmetry/k/k_sym_transform_ao&#39;</span><span class="p">][()]</span>
+    <span class="n">bz2ibz</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">'symmetry/k/bz2ibz'</span><span class="p">][()]</span>
+    <span class="n">tr_conj</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">'symmetry/k/tr_conj'</span><span class="p">][()]</span>
+    <span class="n">nk</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">'symmetry/k/nk'</span><span class="p">][()]</span>
+    <span class="n">k_sym_trans</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="s1">'symmetry/k/k_sym_transform_ao'</span><span class="p">][()]</span>
 
     <span class="k">for</span> <span class="n">dset</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">finp</span><span class="p">[</span><span class="n">dset</span><span class="p">][()]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="nb">complex</span><span class="p">)</span>
@@ -665,11 +665,11 @@
 
         <span class="k">if</span> <span class="n">max_abs</span> <span class="o">&gt;</span> <span class="mf">1e-3</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Dataset &#39;</span><span class="si">{</span><span class="n">dset</span><span class="si">}</span><span class="s2">&#39; is not symmetric under the stored k-point symmetry operations &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;(max residual = </span><span class="si">{</span><span class="n">max_abs</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">). &quot;</span>
-                <span class="s2">&quot;The mean-field solution may have broken the assumed space-group symmetry. &quot;</span>
-                <span class="s2">&quot;Please rerun the initialization with &#39;--grid_only&#39; and &#39;--space_symm=false&#39; &quot;</span>
-                <span class="s2">&quot;to disable space-group symmetry and obtain a consistent set of k-points.&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"Dataset '</span><span class="si">{</span><span class="n">dset</span><span class="si">}</span><span class="s2">' is not symmetric under the stored k-point symmetry operations "</span>
+                <span class="sa">f</span><span class="s2">"(max residual = </span><span class="si">{</span><span class="n">max_abs</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">). "</span>
+                <span class="s2">"The mean-field solution may have broken the assumed space-group symmetry. "</span>
+                <span class="s2">"Please rerun the initialization with '--grid_only' and '--space_symm=false' "</span>
+                <span class="s2">"to disable space-group symmetry and obtain a consistent set of k-points."</span><span class="p">,</span>
                 <span class="ne">UserWarning</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
@@ -707,7 +707,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=93786a5a"></script>
+</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
