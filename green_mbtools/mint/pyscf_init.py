@@ -159,17 +159,17 @@ class pyscf_pbc_init (pyscf_init):
         #
         # Build the symmetry decomposition of self.kmesh itself (NOT the
         # q=k1-k2 difference mesh that build_q_struct produces). orthogonalize
-        # indexes S/F with sym_kstruct.ibz2bz, so sym_kstruct.kpts must match
+        # indexes S/F with ortho_sym_kstruct.ibz2bz, so ortho_sym_kstruct.kpts must match
         # self.kmesh in order; make_kpts on self.kmesh guarantees this, whereas
         # the difference mesh reorders (Gamma-centered) or, for shifted meshes,
         # is a different set of points entirely.
-        sym_kstruct = libkpts.make_kpts(
+        ortho_sym_kstruct = libkpts.make_kpts(
             self.cell, self.kmesh,
-            space_group_symmetry=self.args.space_symm,
+            space_group_symmetry=False,
             time_reversal_symmetry=True)
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(
             mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S,
-            sym_kstruct=sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2)
+            sym_kstruct=ortho_sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2)
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
