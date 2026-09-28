@@ -894,6 +894,23 @@ def solve_mean_field(args, mydf, mycell):
     return mf
 
 
+def _set_mol_df_auxbasis(with_df, args, mycell, mydf=None):
+    """Honor ``--auxbasis`` / ``--beta`` on a molecular DF object before ``build()``.
+
+    ``construct_mol_gdf`` already applies these flags, but ``solve_mol_mean_field``
+    used to call ``density_fit().build()`` without copying them onto ``mf.with_df``,
+    so molecular SCF + ``cderi_mol.h5`` always used PySCF's default auxbasis.
+    """
+    if getattr(args, "auxbasis", None) is not None:
+        with_df.auxbasis = args.auxbasis
+    elif getattr(args, "beta", None) is not None:
+        # Match construct_mol_gdf (pbc df.aug_etb also accepts Mol).
+        with_df.auxbasis = df.aug_etb(mycell, beta=args.beta)
+    elif mydf is not None and getattr(mydf, "auxbasis", None) is not None:
+        with_df.auxbasis = mydf.auxbasis
+    logging.info(f"Molecular DF auxbasis = {with_df.auxbasis!r}")
+
+
 def solve_mol_mean_field(args, mydf, mycell):
     '''
     Obtain pySCF mean-field solution for a given parameters, unit-cell object and density-fitting object
@@ -913,10 +930,12 @@ def solve_mol_mean_field(args, mydf, mycell):
     # mydf._cderi = "cderi.h5"
     if args.x2c == 2:
         tmp_mf = mscf.RHF(mycell).density_fit() if args.restricted else mscf.UHF(mycell).density_fit()
+        _set_mol_df_auxbasis(tmp_mf.with_df, args, mycell, mydf)
         tmp_mf.with_df._cderi_to_save = "cderi_mol.h5"
         tmp_mf.with_df.build()
         tmp_mf = None
     else:
+        _set_mol_df_auxbasis(mf.with_df, args, mycell, mydf)
         mf.with_df._cderi_to_save = "cderi_mol.h5"
         mf.with_df.build()
     mf.diis_space = 16
