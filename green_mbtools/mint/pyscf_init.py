@@ -13,8 +13,7 @@ from . import common_utils as comm
 from . import integral_utils as int_utils
 from . import symmetry_utils as symm_utils
 from ..pesto import ft
-
-
+from ..pesto import mb
 
 class pyscf_init:
     '''Initialization class for Green project
@@ -159,6 +158,80 @@ class pyscf_init:
         logging.info(f"Number of core orbitals: {self.ncore}")
         logging.info(f"Core + valence AO reordering: {self.orb_reordering}")
 
+    def read_fno_density(self, nso, sym_kstruct):
+        '''
+        Read the correlated density matrix used to build the FNO basis (``--orth fno``).
+
+        The density is taken from a previous GW/GF2 run (``--input_fno`` / ``--sim_fno``)
+        as rho(k) = -2 G(k, tau=beta) (restricted), unfolded to the full Brillouin zone,
+        and brought back to the AO basis if that run was orthogonalized.
+
+        Parameters
+        ----------
+        nso : int
+            Number of AO (or spin-orbital) basis functions of the current calculation.
+        sym_kstruct : pyscf.pbc.lib.kpts.KPoints
+            k-point structure used to build X; defines which k-points are self-time-reversal.
+
+        Returns
+        -------
+        corr_dm : numpy.ndarray
+            Correlated density matrix in the AO basis, shape (1, nk, nso, nso), Hermitian and
+            exactly real at self-time-reversal k-points (k = -k).
+        '''
+        if self.args.input_fno is None or self.args.sim_fno is None:
+            raise ValueError("--orth fno requires --input_fno and --sim_fno to read the correlated density matrix.")
+
+        with h5py.File(self.args.input_fno, "r") as f:
+            ibz2bz = f["symmetry/k/ibz2bz"][()]
+            bz2ibz = f["symmetry/k/bz2ibz"][()]
+            tr_conj = f["symmetry/k/tr_conj"][()]
+            k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
+            # Absent when the previous run was done in the AO basis (--orth none)
+            X_prev = f["orthogonalization/X_k"][()] if "orthogonalization/X_k" in f else None
+
+        with h5py.File(self.args.sim_fno, "r") as f:
+            it = self.args.iter_fno
+            if it == -1:
+                it = f["iter"][()]
+            G_tau = f[f"iter{it}/G_tau/data"]  # (ntau, ns, nk_ibz, n, n)
+            G_beta = G_tau[G_tau.shape[0] - 1]  # only tau = beta is needed
+
+        if G_beta.shape[0] > 1:
+            raise NotImplementedError("--orth fno is not implemented for unrestricted (UHF) references.")
+
+        # Unfold to the full BZ in the basis of the previous run (k_sym_transform_ao is stored in that basis)
+        G_beta = mb.to_full_bz(G_beta, tr_conj, ibz2bz, bz2ibz, 1, k_sym_trans)   # (1, nk, n, n)
+        nk = sym_kstruct.nkpts
+        if G_beta.shape[1] != nk:
+            raise ValueError(
+                f"--orth fno: the previous run has {G_beta.shape[1]} k-points but the current k-mesh has {nk}."
+            )
+
+        # G(tau=beta) = -rho per spin; factor 2 for the restricted (spin-summed) density
+        corr_dm = -2.0 * G_beta.astype(np.complex128)
+
+        # Back to the AO basis. The density is contravariant: orthogonalize() stores
+        # dm_orth = X_inv^dag dm_AO X_inv, hence dm_AO = X^dag dm_orth X.
+        if X_prev is not None:
+            corr_dm = np.einsum("kai,skab,kbj->skij", X_prev.conj(), corr_dm, X_prev, optimize=True)
+
+        if corr_dm.shape[-1] != nso:
+            raise ValueError(
+                f"--orth fno: the density read from {self.args.sim_fno} has dimension {corr_dm.shape[-1]} "
+                f"but the current basis has {nso} functions; the previous run must use the same basis set."
+            )
+
+        # Make the density exactly Hermitian, and exactly real at self-time-reversal
+        # k-points (k = -k), where X must be real so that X(-k) = X(k)* holds for the
+        # conjugate integral pairs.
+        corr_dm = 0.5 * (corr_dm + corr_dm.conj().transpose(0, 1, 3, 2))
+        self_tr = np.zeros(nk, dtype=bool)
+        self_tr[sym_kstruct.ibz2bz[np.isclose(sym_kstruct.weights_ibz * nk, 1)]] = True
+        corr_dm[:, self_tr] = corr_dm[:, self_tr].real
+
+        return corr_dm
+
     def compute_df_int(self, nao, X_k):
         raise NotImplementedError("Please Implement this method")
     def mf_object(self, mydf=None):
@@ -278,9 +351,17 @@ class pyscf_pbc_init (pyscf_init):
             self.cell, self.kmesh,
             space_group_symmetry=False,
             time_reversal_symmetry=True)
+        
+        # Correlated density for FNO: only used to build X, hf_dm stays the mean-field density
+        corr_dm = None
+        if self.args.orth == 'fno':
+            corr_dm = self.read_fno_density(nso, ortho_sym_kstruct)
+
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(
             mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S,
-            sym_kstruct=ortho_sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2)
+            sym_kstruct=ortho_sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2,
+            dm_fno=corr_dm)
+        
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
@@ -591,9 +672,15 @@ class pyscf_mol_init (pyscf_init):
                 "with mode={!r}; allowed modes are 'none', 'lowdin', "
                 "'symmetric_lowdin'.".format(self.args.orth)
             )
+        # Correlated density for FNO: only used to build X, hf_dm stays the mean-field density
+        corr_dm = None
+        if self.args.orth == 'fno':
+            corr_dm = self.read_fno_density(nso, self.kstruct)
+
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S,
                                                           sym_kstruct=self.kstruct, mycell=self.kcell,
-                                                          spinor=self.args.x2c==2)
+                                                          spinor=self.args.x2c==2, dm_fno=corr_dm)
+        
         # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is
         # no long range divergence for molecule
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list,

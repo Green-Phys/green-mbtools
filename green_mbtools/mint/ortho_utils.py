@@ -2,6 +2,7 @@ import numpy as np
 import scipy.linalg as LA
 from .symmetry_utils import get_representation, get_spinor_representation
 
+import logging
 
 # Below this max|imag|, a k-point matrix is treated as numerically real and its
 # eigenproblem is solved on the real part. This matters at self-TR k-points
@@ -143,7 +144,86 @@ def _natural_per_k_with_fock_tiebreak(Sk, dmk, Fk, tol_degen=1e-8):
     C_NO = (S_inv_half @ u).astype(np.complex128)
     return C_NO.conj().T, Sk @ C_NO
 
+# Thresholds reported in the FNO truncation summary
+_FNO_OCC_THRESHOLDS = (1e-7, 5e-7, 1e-6, 5e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2)
+_FNO_PCT_THRESHOLDS = (0.75, 0.90, 0.95, 0.99, 0.995, 0.999, 0.9995)
 
+
+def fno_per_k(Sk, dmk):
+    '''
+    Frozen-natural-orbital transformation for a single k-point.
+
+    Returns
+    -------
+    X, X_inv : ndarray
+        Transformation in the ``X Z X†`` convention.
+    nat_occ_vir : ndarray
+        Virtual natural occupations sorted in descending order, used for the
+        truncation summary built in ``_build_X_ibz``.
+    '''
+    s_ev, s_eb = np.linalg.eigh(Sk)
+    S_half = (s_eb * np.sqrt(s_ev)) @ s_eb.conj().T
+    S_inv_half = (s_eb / np.sqrt(s_ev)) @ s_eb.conj().T
+    M = S_half @ dmk @ S_half
+    M = 0.5 * (M + M.conj().T)
+    nat_occ, Ck = np.linalg.eigh(M)
+    nocc = int(nat_occ.sum().round() / 2)
+    idx = np.argsort(nat_occ)[::-1]
+    nat_occ, Ck = nat_occ[idx], Ck[:, idx]
+    nat_occ_vir = nat_occ[nocc:]
+
+    Ck_NO = (S_inv_half @ Ck).astype(np.complex128)
+    return Ck_NO.conj().T, Sk @ Ck_NO, nat_occ_vir
+
+
+def _pct_occ_fno(nat_occ_vir, blocks, thresh):
+    '''Number of virtual orbitals to delete so that the kept ones carry at least
+    ``thresh`` of the total virtual occupation, without splitting degenerate blocks.'''
+    total = nat_occ_vir.sum()
+    # No virtual orbitals, or a (numerically) idempotent density: the virtual
+    # space carries no occupation, so every virtual orbital can be deleted.
+    if len(nat_occ_vir) == 0 or total <= 1e-14:
+        return len(nat_occ_vir)
+    cum = 0.0
+    nkeep = 0
+    for b in blocks:
+        cum += nat_occ_vir[b].sum()
+        nkeep += len(nat_occ_vir[b])
+        if cum / total > thresh:
+            break
+    return len(nat_occ_vir) - nkeep
+
+
+def _fno_truncation_counts(nat_occ_vir):
+    '''
+    Number of virtual orbitals that could be deleted at one k-point, for each
+    threshold in ``_FNO_OCC_THRESHOLDS`` (by occupation) and
+    ``_FNO_PCT_THRESHOLDS`` (by fraction of total virtual occupation kept).
+    Degenerate blocks are never split in the percentage criterion.
+    '''
+    blocks = []
+    start = 0
+    for i in range(1, len(nat_occ_vir)):
+        if not np.isclose(nat_occ_vir[i], nat_occ_vir[i - 1], atol=1e-8):
+            blocks.append(slice(start, i))
+            start = i
+    blocks.append(slice(start, len(nat_occ_vir)))
+
+    by_occ = [np.count_nonzero(nat_occ_vir < thr) for thr in _FNO_OCC_THRESHOLDS]
+    by_pct = [_pct_occ_fno(nat_occ_vir, blocks, pct) for pct in _FNO_PCT_THRESHOLDS]
+    return np.array(by_occ), np.array(by_pct)
+
+
+def _log_fno_summary(nvir, ndel_occ, ndel_pct):
+    '''Log, once for all k-points, the minimum over k of the deletable orbitals.'''
+    lines = [f"FNO truncation summary ({nvir} virtual orbitals, minimum over all k-points):"]
+    for thr, n in zip(_FNO_OCC_THRESHOLDS, ndel_occ):
+        lines.append(f"  occupation < {thr:.0e}        -> delete {n} orbitals")
+    for pct, n in zip(_FNO_PCT_THRESHOLDS, ndel_pct):
+        lines.append(f"  keep {pct:7.2%} of virtual occ. -> delete {n} orbitals")
+    logging.info("\n".join(lines))
+
+    
 def _realify(M):
     '''
     Strip numerical imaginary noise from a k-point matrix.
@@ -183,6 +263,10 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
     X_per_irrep = [None] * n_ibz
     Xinv_per_irrep = [None] * n_ibz
 
+    fno_ndel_occ = []   # per-k deletable counts, reduced to the minimum after the loop
+    fno_ndel_pct = []
+    fno_nvir = None
+    
     for i_ir in range(n_ibz):
         # Centralized real-gauge policy: at self-TR k-points S/F/dm are
         # physically real, so strip the imaginary noise once, up front. Every
@@ -213,14 +297,27 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
             x, x_inv = _natural_per_k_with_fock_tiebreak(
                 Sk, dmk, Fk, tol_degen=tol_degen
             )
+        elif mode == "fno":
+            x, x_inv, nat_occ_vir = fno_per_k(Sk, dmk)
+            ndel_occ, ndel_pct = _fno_truncation_counts(nat_occ_vir)
+            fno_ndel_occ.append(ndel_occ)
+            fno_ndel_pct.append(ndel_pct)
+            fno_nvir = len(nat_occ_vir)
         else:
             raise ValueError(
                 f"build_X_kspace: unknown mode {mode!r} "
-                "(expected 'lowdin', 'symmetric_lowdin', 'mo', or 'natural')."
+                "(expected 'lowdin', 'symmetric_lowdin', 'mo', 'natural' or 'fno')."
             )
         X_per_irrep[i_ir] = np.asarray(x, dtype=np.complex128)
         Xinv_per_irrep[i_ir] = np.asarray(x_inv, dtype=np.complex128)
 
+    if mode == "fno":
+        # The same number of orbitals must be kept at every k-point, so the
+        # number that can safely be deleted is the minimum over k.
+        _log_fno_summary(fno_nvir,
+                         np.min(fno_ndel_occ, axis=0),
+                         np.min(fno_ndel_pct, axis=0))
+        
     # Reject rank-deficient orthogonalization. Near-singular overlap eigenvalues
     # (< tol_sing) get dropped, which makes X non-invertible: canonical Löwdin
     # returns a rectangular X, while symmetric Löwdin returns a square X whose
@@ -423,6 +520,10 @@ def build_X_kspace(
     if mode == "mo" and mo_coeff_ibz is None and F_ibz is None:
         raise ValueError(
             "build_X_kspace: mode='mo' requires mo_coeff_ibz or F_ibz."
+        )
+    if mode == "fno" and dm_ibz is None:
+          raise ValueError(
+            "build_X_kspace: mode='fno' requires dm_ibz."
         )
 
     ibz2bz = kstruct.ibz2bz

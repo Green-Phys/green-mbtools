@@ -371,7 +371,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data.close()
 
 
-def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, mycell=None, spinor=False):
+def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, mycell=None, spinor=False, dm_fno=None):
     """
     Transform one-body quantities from the AO basis to an orthogonal basis.
 
@@ -384,7 +384,7 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
     mydf
         Density-fitting object. Its ``kpts`` attribute is used by the
         ``"none"`` identity path.
-    orth : {"none", "lowdin", "symmetric_lowdin", "mo", "natural"}
+    orth : {"none", "lowdin", "symmetric_lowdin", "mo", "natural", "fno"}
         Orthogonalization mode:
 
         - ``"none"``: preserve the AO basis.
@@ -405,6 +405,8 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
           with the coefficients).
         - ``"natural"``: construct natural orbitals from the density matrix,
           using the Fock matrix to resolve degenerate occupation subspaces.
+        - ``"fno"``: frozen natural orbitals built from the correlated
+          density matrix ``dm_fno`` (restricted only).
     X_k, X_inv_k
         Initial transformation containers used by the ``"none"`` path.
     F, T, hf_dm, S : ndarray
@@ -419,6 +421,9 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
     spinor : bool, optional
         Use double-group spinor representations when propagating the
         transformation. Supported for the Löwdin modes.
+    dm_fno : ndarray, optional
+        Correlated density matrix in the AO basis, shape ``(1, nk, n, n)``,
+        used only to build ``X`` when ``orth == "fno"``.
 
     Returns
     -------
@@ -486,6 +491,14 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
         else:
             kw["dm_ibz"] = np.asarray(hf_dm)[0, ibz]               # (n_ibz, n, n)
             kw["F_ibz"] = np.asarray(F)[0, ibz]
+    elif orth == "fno":
+        if ns == 2:
+            raise ValueError("The fno orthogonalization is not yet implemented for UHF.")
+        if dm_fno is None:
+            raise ValueError("orthogonalize: orth='fno' requires dm_fno (the correlated density matrix).")
+        kw["dm_ibz"] = np.asarray(dm_fno)[0, ibz]
+        kw["F_ibz"] = np.asarray(F)[0, ibz]
+
     kw["spinor"] = spinor
     X_k, X_inv_k = ortho_utils.build_X_kspace(
         orth, sym_kstruct, mycell, S_ibz, **kw)
@@ -534,14 +547,15 @@ def add_common_params(parser):
     parser.add_argument("--output_path", type=str, default="input.h5", help="output file with initial data")
     parser.add_argument(
         "--orth", type=str, default="none",
-        choices=["none", "lowdin", "symmetric_lowdin", "mo", "natural", "0", "1"],
+        choices=["none", "lowdin", "symmetric_lowdin", "mo", "natural", "fno", "0", "1"],
         help=(
             "Orbital basis for stored quantities: "
             "'none' = keep AO basis (legacy '0'); "
             "'lowdin' = canonical Löwdin V·Lambda^{-1/2} (legacy '1'); "
             "'symmetric_lowdin' = Hermitian Löwdin S^{-1/2}; "
             "'mo' = canonical MOs from mean-field; "
-            "'natural' = natural orbitals from mean-field density matrix."
+            "'natural' = natural orbitals from mean-field density matrix; "
+            "'fno' = fno virtual orbitals (this orth requires input_fno and sim_fno file). RHF only."
         ),
     )
     parser.add_argument("--beta", type=float, default=None, help="Emperical parameter for even-Gaussian auxiliary basis")
@@ -571,6 +585,18 @@ def add_common_params(parser):
     )
 
     parser.add_argument("--nb_core_elec", nargs="+", type=str, default=None, help="Override default core electrons number per element, e.g. C,0 Si,2. The number should be the total core electrons per element, including those removed by an ECP/pseudo.")
+    parser.add_argument(
+        "--input_fno", type=str, default=None,
+        help="Input file (input.h5) of the previous GW/GF2 run used for --orth fno. Provides the k-point "
+             "symmetry and, if that run was orthogonalized, the /orthogonalization transform used to bring "
+             "its density back to the AO basis. The previous run must use the same basis set and k-mesh."
+    )
+    parser.add_argument(
+        "--sim_fno", type=str, default=None,
+        help="Output file (sim.h5) of the previous GW/GF2 run; its G_tau at tau=beta gives the correlated "
+             "density matrix for --orth fno."
+    )
+    parser.add_argument("--iter_fno", type=int, default=2, help="GW/GF2 iteration to use for --orth fno (-1 = last iteration). Default is iteration 2 corresponding to the G_0W_0 Green's function.")
 
 def add_pbc_params(parser):
     '''
