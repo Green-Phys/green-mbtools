@@ -512,9 +512,22 @@ def build_X_kspace_from_ao_reps(
         mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz, tol_sing, tol_degen
     )
 
+    # ``/symmetry/k/bz2ibz`` stores, for each BZ point, the *full-BZ index*
+    # of its IBZ representative (common_utils.save_data does
+    # ``ind = ir_list[ind]``), matching pesto.mb.to_full_bz. _propagate_with_reps
+    # indexes the per-IBZ arrays directly, so convert those representative
+    # BZ indices into compact IBZ positions [0, n_ibz) via ibz2bz.
+    # NOTE -    in the function _propagate_X_to_star, we use kstruct.bz2ibz which is same as
+    #           the bz2ib_compact defined below.
+    bz2ibz_arr = np.asarray(bz2ibz)
+    pos_in_ibz = {int(b): i for i, b in enumerate(ibz2bz_arr)}
+    bz2ibz_compact = np.array(
+        [pos_in_ibz[int(b)] for b in bz2ibz_arr], dtype=int
+    )
+
     return _propagate_with_reps(
         X_per_irrep, Xinv_per_irrep,
-        ibz2bz_arr, np.asarray(bz2ibz),
+        ibz2bz_arr, bz2ibz_compact,
         np.asarray(k_sym_transform_ao, dtype=np.complex128),
         np.asarray(tr_conj, dtype=bool) if tr_conj is not None else None,
     )
