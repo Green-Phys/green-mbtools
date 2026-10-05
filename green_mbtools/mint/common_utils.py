@@ -306,8 +306,14 @@ def parse_geometry(g):
         res = g
     return res
 
+def parse_core(values):
+    result = []
+    for v in values:
+        key, num = v.split(",")
+        result.append((key, int(num)))
+    return result
 
-def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm, madelung, Zs, last_ao):
+def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm, madelung, Zs, last_ao, ncore=0, orb_reordering=None):
     '''
     Save data in Green/WeakCoupling format into a hdf5 file
     '''
@@ -351,6 +357,10 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     nk_arr = np.atleast_1d(np.array(args.nk, dtype=int))
     inp_data["symmetry/k/nk_list"] = np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr
     inp_data["params/NQ"] = NQ
+    if orb_reordering is None:
+        orb_reordering = np.arange(F.shape[-1])
+    inp_data["params/ncore"] = ncore
+    inp_data["params/orb_reordering"] = np.asarray(orb_reordering, dtype=int)
     inp_data.attrs["__green_version__"] = __version__
     inp_data.close()
     chk.save(args.output_path, "Cell", mycell.dumps())
@@ -560,6 +570,7 @@ def add_common_params(parser):
         help="Use eigenvalue decomposition for j2c factors during DF build. Set false to force Cholesky-based path."
     )
 
+    parser.add_argument("--nb_core_elec", nargs="+", type=str, default=None, help="Override default core electrons number per element, e.g. C,0 Si,2. The number should be the total core electrons per element, including those removed by an ECP/pseudo.")
 
 def add_pbc_params(parser):
     '''
@@ -612,6 +623,8 @@ def init_mol_params(params=None):
     args.nk = [1, 1, 1]
     args.shift =  [0.,0.,0.]
     args.center = [0.,0.,0.]
+    if args.nb_core_elec is not None:
+        args.nb_core_elec = parse_core(args.nb_core_elec)
     return args
 
 
@@ -646,7 +659,8 @@ def init_pbc_params(params=None):
         else:
             args.mean_field = scf.KRHF if args.restricted else scf.KUHF
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
-
+    if args.nb_core_elec is not None:
+        args.nb_core_elec = parse_core(args.nb_core_elec)
     return args
 
 
