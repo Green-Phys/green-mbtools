@@ -597,6 +597,11 @@ def add_common_params(parser):
              "density matrix for --orth fno."
     )
     parser.add_argument("--iter_fno", type=int, default=2, help="GW/GF2 iteration to use for --orth fno (-1 = last iteration). Default is iteration 2 corresponding to the G_0W_0 Green's function.")
+    parser.add_argument(
+        "--aux_orth", type=str, default="none", choices=["none", "naf"],
+        help="Auxiliary basis for stored 3-center integrals: "
+             "'none' = keep aux-AO basis; 'naf' = natural auxiliary functions."
+    )
 
 def add_pbc_params(parser):
     '''
@@ -1164,9 +1169,8 @@ def store_orth_transform(args, X_k, X_inv_k):
     inp_data.close()
 
 
-def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
-    """Store symmetry operation information for k-points into hdf5 file in Green'WeakCoupling format
-    for auxcell only case
+def store_auxcell_kstruct_ops_info(args, auxcell, kmesh, Y=None, Y_inv=None):
+    """Store symmetry operation information for k-points into hdf5 file
 
     Parameters
     ----------
@@ -1178,6 +1182,11 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         k-mesh for the Brillouin Zone
     aux_kstruct : pyscf.pbc.symm.KPointsSymmetry
         k-point symmetry structure for aux-basis
+    Y : ndarray, optional
+        NAF rotation (unitary), as returned by ``build_naf_transform``.
+        Required together with ``Y_inv`` when ``args.aux_orth != "none"``, so j2c and the exported q-space symmetry operators are expressed in the same NAF basis as the three-center integrals stored by ``compute_integrals``.
+    Y_inv : ndarray, optional
+        Inverse NAF rotation. Since Y is unitary, this is ``Y.conj().transpose()``, but is accepted explicitly for API symmetry with X_k/X_inv_k.
     """
 
     # generate periodic cell for auxbasis
@@ -1192,6 +1201,14 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     stars = qstruct.stars
     n_stars = len(stars)
 
+    naf_rotate = Y is not None
+    if naf_rotate and (Y_inv is None):
+        raise ValueError(
+            "store_auxcell_kstruct_ops_info: Y was provided but Y_inv "
+            "is None; both are required to rotate j2c and the q-space "
+            "symmetry operators consistently."
+        )
+    
     # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each k-point using lower Cholesky
     # decomposition to match the convention used by PySCF when building j3c integrals.
     # PySCF computes B = L^{-1} @ eri3c (lower Cholesky, j2c = LL†), so P0_tilde lives
@@ -1257,8 +1274,17 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         # get effective dimensions
         ncols = j2c_irre_k_sqrt.shape[1]
         nrows = j2c_ik_sqrt_inv.shape[0]
-        # transform to j2c basis
-        kspace_orep_p0[ik, :nrows, :ncols] = j2c_ik_sqrt_inv @ mat_ao @ j2c_irre_k_sqrt
+        p0_op = j2c_ik_sqrt_inv @ mat_ao @ j2c_irre_k_sqrt
+        if naf_rotate:
+            # The stored 3-center integrals (and hence P0_tilde) live in the
+            # NAF-rotated L-basis (compute_integrals applies
+            # Y to the raw L-basis Lpq). So the exported reconstruction
+            # operator must itself be sandwiched by Y, exactly like X_k
+            # sandwiches kspace_orep in store_kstruct_ops_info -- Y must
+            # NOT be injected into mat_ao/j2c themselves (those live in the
+            # unrelated raw aux-AO basis).
+            p0_op = Y @ p0_op @ Y_inv
+        kspace_orep_p0[ik, :nrows, :ncols] = p0_op
         kspace_orep_j2c[ik] = mat_ao
         # clean up for next iteration
         j2c_irre_i = None

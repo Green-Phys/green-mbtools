@@ -362,6 +362,11 @@ class pyscf_pbc_init (pyscf_init):
             sym_kstruct=ortho_sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2,
             dm_fno=corr_dm)
         
+        Y, Y_inv = None, None
+        if self.args.aux_orth == "naf":
+            auxcell.build()
+            Y, Y_inv = int_utils.build_naf_transform(mydf, self.args, auxcell)
+
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
@@ -369,10 +374,12 @@ class pyscf_pbc_init (pyscf_init):
         )
         # Save symmetry operations info for main and auxiliary unit cells
         comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct, X_k=X_k, X_inv_k=X_inv_k,)
-        comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
+        comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh, Y=Y, Y_inv=Y_inv)
         # Save the AO->orthogonal basis transformation so tooling can move the
         # stored (orthogonalized) quantities back to the AO basis.
         comm.store_orth_transform(self.args, X_k, X_inv_k)
+        if self.args.aux_orth == "naf":
+            int_utils.store_naf_transform(self.args, Y, Y_inv)
 
         # Diagnose whether self-consistent quantities obey k-space symmetry.
         if self.args.space_symm or self.args.tr_symm:
@@ -380,9 +387,9 @@ class pyscf_pbc_init (pyscf_init):
 
         # Store density-fitted integrals
         if bool(self.args.df_int) :
-            self.compute_df_int(nao, X_k)
-
-    def compute_df_int(self, nao, X_k):
+            self.compute_df_int(nao, X_k, Y=Y, Y_inv=Y_inv)
+            
+    def compute_df_int(self, nao, X_k, Y=None, Y_inv=None):
         '''
         Generate density-fitting (DF) three-center Coulomb integrals for correlated methods.
 
@@ -434,10 +441,16 @@ class pyscf_pbc_init (pyscf_init):
             When orthogonalisation is disabled (``args.orth == "none"``),
             ``X_k`` contains identity transforms for each k-point rather
             than an empty list.
+        Y : ndarray, optional
+            NAF rotation. When provided, three-
+            center integrals are rotated into the NAF basis consistently across every k-pair.
+        Y_inv : ndarray, optional
+            Inverse NAF rotation. Forwarded to compute_integrals.
         '''
+        
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
-        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, True)
+        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, True, Y=Y, Y_inv=Y_inv)
         mydf = None
 
         # --- Step 2: correlated integrals with finite-size correction --------
@@ -477,7 +490,7 @@ class pyscf_pbc_init (pyscf_init):
         gdf.GDF.weighted_coulG = weighted_coulG_old  # always restore
 
         # Build correlated integrals; diagonal pairs come from cderi_ewald.h5.
-        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5")
+        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5", Y=Y, Y_inv=Y_inv)
 
     def evaluate_high_symmetry_path(self):
         if self.args.print_high_symmetry_points:

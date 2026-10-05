@@ -621,3 +621,48 @@ def build_X_kspace_from_ao_reps(
     )
 
 
+def _build_naf(M):
+    '''
+    Diagonalize the aux-metric M and return the (unitary) aux-AO -> NAF rotation.
+
+    Unlike lowdin_per_k/symmetric_lowdin_per_k, this is a pure basis
+    rotation (no rescaling): Y is unitary, so Y_inv = Y^dagger exactly.
+    Eigenvalues are sorted descending so that, if a caller later truncates
+    (in the scGW reader, not here), the most important NAFs come first.
+
+    Returns
+    -------
+    Y, Y_inv : (NQ, NQ) complex128 ndarrays
+    '''
+    M = np.asarray(M, dtype=np.complex128)
+    M = _realify(M)
+    M = 0.5 * (M + M.conj().T)
+    eigval, eigvec = np.linalg.eigh(M)
+    idx = np.argsort(eigval)[::-1]
+    eigval, eigvec = eigval[idx], eigvec[:, idx]
+    # Y Z Y^dagger convention
+    Y = eigvec.conj().T.astype(np.complex128)
+    Y_inv = eigvec.astype(np.complex128)
+    
+    _log_naf_summary(eigval)
+
+    return Y, Y_inv
+
+
+# Thresholds on the normalized NAF eigenvalues (eigval / eigval_max) reported in the NAF summary
+_NAF_EIG_THRESHOLDS = (1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6)
+
+def _log_naf_summary(eigval):
+    '''
+    Log the NAF truncation summary: for each threshold in ``_NAF_EIG_THRESHOLDS``,
+    the number of auxiliary functions whose normalized eigenvalue falls below it.
+    ``eigval`` must be sorted in descending order.
+    '''
+    norm_eigval = eigval / eigval[0]
+    lines = [f"NAF truncation summary ({len(eigval)} auxiliary functions, "
+             f"normalized eigenvalues in [{norm_eigval[-1]:.2e}, 1]):"]
+    for thr in _NAF_EIG_THRESHOLDS:
+        lines.append(f"  eigenvalue < {thr:.0e}          -> delete "
+                     f"{np.count_nonzero(norm_eigval < thr)} auxiliary functions")
+    logging.info("\n".join(lines))
+    logging.debug(f"NAF normalized eigenvalues: {norm_eigval}")
