@@ -306,8 +306,14 @@ def parse_geometry(g):
         res = g
     return res
 
+def parse_core(values):
+    result = []
+    for v in values:
+        key, num = v.split(",")
+        result.append((key, int(num)))
+    return result
 
-def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm, madelung, Zs, last_ao):
+def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, Nk, nk, NQ, F, S, T, hf_dm, madelung, Zs, last_ao, ncore=0, orb_reordering=None):
     '''
     Save data in Green/WeakCoupling format into a hdf5 file
     '''
@@ -351,6 +357,10 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     nk_arr = np.atleast_1d(np.array(args.nk, dtype=int))
     inp_data["symmetry/k/nk_list"] = np.array([nk_arr[0]]*3, dtype=int) if nk_arr.size == 1 else nk_arr
     inp_data["params/NQ"] = NQ
+    if orb_reordering is None:
+        orb_reordering = np.arange(F.shape[-1])
+    inp_data["params/ncore"] = ncore
+    inp_data["params/orb_reordering"] = np.asarray(orb_reordering, dtype=int)
     inp_data.attrs["__green_version__"] = __version__
     inp_data.close()
     chk.save(args.output_path, "Cell", mycell.dumps())
@@ -361,7 +371,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data.close()
 
 
-def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, mycell=None, spinor=False):
+def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, mycell=None, spinor=False, dm_fno=None):
     """
     Transform one-body quantities from the AO basis to an orthogonal basis.
 
@@ -374,7 +384,7 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
     mydf
         Density-fitting object. Its ``kpts`` attribute is used by the
         ``"none"`` identity path.
-    orth : {"none", "lowdin", "symmetric_lowdin", "mo", "natural"}
+    orth : {"none", "lowdin", "symmetric_lowdin", "mo", "natural", "fno"}
         Orthogonalization mode:
 
         - ``"none"``: preserve the AO basis.
@@ -395,6 +405,8 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
           with the coefficients).
         - ``"natural"``: construct natural orbitals from the density matrix,
           using the Fock matrix to resolve degenerate occupation subspaces.
+        - ``"fno"``: frozen natural orbitals built from the correlated
+          density matrix ``dm_fno`` (restricted only).
     X_k, X_inv_k
         Initial transformation containers used by the ``"none"`` path.
     F, T, hf_dm, S : ndarray
@@ -409,6 +421,9 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
     spinor : bool, optional
         Use double-group spinor representations when propagating the
         transformation. Supported for the Löwdin modes.
+    dm_fno : ndarray, optional
+        Correlated density matrix in the AO basis, shape ``(1, nk, n, n)``,
+        used only to build ``X`` when ``orth == "fno"``.
 
     Returns
     -------
@@ -476,6 +491,14 @@ def orthogonalize(mydf, orth, X_k, X_inv_k, F, T, hf_dm, S, sym_kstruct=None, my
         else:
             kw["dm_ibz"] = np.asarray(hf_dm)[0, ibz]               # (n_ibz, n, n)
             kw["F_ibz"] = np.asarray(F)[0, ibz]
+    elif orth == "fno":
+        if ns == 2:
+            raise ValueError("The fno orthogonalization is not yet implemented for UHF.")
+        if dm_fno is None:
+            raise ValueError("orthogonalize: orth='fno' requires dm_fno (the correlated density matrix).")
+        kw["dm_ibz"] = np.asarray(dm_fno)[0, ibz]
+        kw["F_ibz"] = np.asarray(F)[0, ibz]
+
     kw["spinor"] = spinor
     X_k, X_inv_k = ortho_utils.build_X_kspace(
         orth, sym_kstruct, mycell, S_ibz, **kw)
@@ -524,14 +547,15 @@ def add_common_params(parser):
     parser.add_argument("--output_path", type=str, default="input.h5", help="output file with initial data")
     parser.add_argument(
         "--orth", type=str, default="none",
-        choices=["none", "lowdin", "symmetric_lowdin", "mo", "natural", "0", "1"],
+        choices=["none", "lowdin", "symmetric_lowdin", "mo", "natural", "fno", "0", "1"],
         help=(
             "Orbital basis for stored quantities: "
             "'none' = keep AO basis (legacy '0'); "
             "'lowdin' = canonical Löwdin V·Lambda^{-1/2} (legacy '1'); "
             "'symmetric_lowdin' = Hermitian Löwdin S^{-1/2}; "
             "'mo' = canonical MOs from mean-field; "
-            "'natural' = natural orbitals from mean-field density matrix."
+            "'natural' = natural orbitals from mean-field density matrix; "
+            "'fno' = fno virtual orbitals (this orth requires input_fno and sim_fno file). RHF only."
         ),
     )
     parser.add_argument("--beta", type=float, default=None, help="Emperical parameter for even-Gaussian auxiliary basis")
@@ -560,6 +584,24 @@ def add_common_params(parser):
         help="Use eigenvalue decomposition for j2c factors during DF build. Set false to force Cholesky-based path."
     )
 
+    parser.add_argument("--nb_core_elec", nargs="+", type=str, default=None, help="Override default core electrons number per element, e.g. C,0 Si,2. The number should be the total core electrons per element, including those removed by an ECP/pseudo.")
+    parser.add_argument(
+        "--input_fno", type=str, default=None,
+        help="Input file (input.h5) of the previous GW/GF2 run used for --orth fno. Provides the k-point "
+             "symmetry and, if that run was orthogonalized, the /orthogonalization transform used to bring "
+             "its density back to the AO basis. The previous run must use the same basis set and k-mesh."
+    )
+    parser.add_argument(
+        "--sim_fno", type=str, default=None,
+        help="Output file (sim.h5) of the previous GW/GF2 run; its G_tau at tau=beta gives the correlated "
+             "density matrix for --orth fno."
+    )
+    parser.add_argument("--iter_fno", type=int, default=2, help="GW/GF2 iteration to use for --orth fno (-1 = last iteration). Default is iteration 2 corresponding to the G_0W_0 Green's function.")
+    parser.add_argument(
+        "--aux_orth", type=str, default="none", choices=["none", "naf"],
+        help="Auxiliary basis for stored 3-center integrals: "
+             "'none' = keep aux-AO basis; 'naf' = natural auxiliary functions."
+    )
 
 def add_pbc_params(parser):
     '''
@@ -612,6 +654,8 @@ def init_mol_params(params=None):
     args.nk = [1, 1, 1]
     args.shift =  [0.,0.,0.]
     args.center = [0.,0.,0.]
+    if args.nb_core_elec is not None:
+        args.nb_core_elec = parse_core(args.nb_core_elec)
     return args
 
 
@@ -646,7 +690,8 @@ def init_pbc_params(params=None):
         else:
             args.mean_field = scf.KRHF if args.restricted else scf.KUHF
     args.ns = 1 if args.restricted or args.x2c == 2 else 2
-
+    if args.nb_core_elec is not None:
+        args.nb_core_elec = parse_core(args.nb_core_elec)
     return args
 
 
@@ -1124,9 +1169,8 @@ def store_orth_transform(args, X_k, X_inv_k):
     inp_data.close()
 
 
-def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
-    """Store symmetry operation information for k-points into hdf5 file in Green'WeakCoupling format
-    for auxcell only case
+def store_auxcell_kstruct_ops_info(args, auxcell, kmesh, Y=None, Y_inv=None):
+    """Store symmetry operation information for k-points into hdf5 file
 
     Parameters
     ----------
@@ -1138,6 +1182,11 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         k-mesh for the Brillouin Zone
     aux_kstruct : pyscf.pbc.symm.KPointsSymmetry
         k-point symmetry structure for aux-basis
+    Y : ndarray, optional
+        NAF rotation (unitary), as returned by ``build_naf_transform``.
+        Required together with ``Y_inv`` when ``args.aux_orth != "none"``, so j2c and the exported q-space symmetry operators are expressed in the same NAF basis as the three-center integrals stored by ``compute_integrals``.
+    Y_inv : ndarray, optional
+        Inverse NAF rotation. Since Y is unitary, this is ``Y.conj().transpose()``, but is accepted explicitly for API symmetry with X_k/X_inv_k.
     """
 
     # generate periodic cell for auxbasis
@@ -1152,6 +1201,14 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
     stars = qstruct.stars
     n_stars = len(stars)
 
+    naf_rotate = Y is not None
+    if naf_rotate and (Y_inv is None):
+        raise ValueError(
+            "store_auxcell_kstruct_ops_info: Y was provided but Y_inv "
+            "is None; both are required to rotate j2c and the q-space "
+            "symmetry operators consistently."
+        )
+    
     # read j2c and compute j2c_sqrt and j2c_sqrt_inv for each k-point using lower Cholesky
     # decomposition to match the convention used by PySCF when building j3c integrals.
     # PySCF computes B = L^{-1} @ eri3c (lower Cholesky, j2c = LL†), so P0_tilde lives
@@ -1217,8 +1274,17 @@ def store_auxcell_kstruct_ops_info(args, auxcell, kmesh):
         # get effective dimensions
         ncols = j2c_irre_k_sqrt.shape[1]
         nrows = j2c_ik_sqrt_inv.shape[0]
-        # transform to j2c basis
-        kspace_orep_p0[ik, :nrows, :ncols] = j2c_ik_sqrt_inv @ mat_ao @ j2c_irre_k_sqrt
+        p0_op = j2c_ik_sqrt_inv @ mat_ao @ j2c_irre_k_sqrt
+        if naf_rotate:
+            # The stored 3-center integrals (and hence P0_tilde) live in the
+            # NAF-rotated L-basis (compute_integrals applies
+            # Y to the raw L-basis Lpq). So the exported reconstruction
+            # operator must itself be sandwiched by Y, exactly like X_k
+            # sandwiches kspace_orep in store_kstruct_ops_info -- Y must
+            # NOT be injected into mat_ao/j2c themselves (those live in the
+            # unrelated raw aux-AO basis).
+            p0_op = Y @ p0_op @ Y_inv
+        kspace_orep_p0[ik, :nrows, :ncols] = p0_op
         kspace_orep_j2c[ik] = mat_ao
         # clean up for next iteration
         j2c_irre_i = None

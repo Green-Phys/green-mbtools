@@ -4,6 +4,7 @@ import h5py
 import logging
 import numpy as np
 from pyscf.df import addons
+from pyscf.gto.ecp import core_configuration
 from pyscf.pbc import tools, gto
 from pyscf.pbc.lib import kpts as libkpts
 
@@ -12,8 +13,7 @@ from . import common_utils as comm
 from . import integral_utils as int_utils
 from . import symmetry_utils as symm_utils
 from ..pesto import ft
-
-
+from ..pesto import mb
 
 class pyscf_init:
     '''Initialization class for Green project
@@ -47,8 +47,191 @@ class pyscf_init:
         if self.args.max_iter is None:
             self.args.max_iter = 100
         self.cell = self.cell_object()
+
+    def init_core(self):
+        '''
+        This method computes the number of core orbitals for this system.
+        It also returns a reordering list that allows to go from the pyscf AO ordering to a core + valence ordering.
+        The number of core orbitals for different types of atoms can be given as an argument (see add_common_params).
+        '''
+
+        increasing_ordering = ['1s', '2s',  '2px', '2py', '2pz', '3s', '3px', '3py', '3pz', '4s', '3dxy', '3dyz', '3dz^2', '3dxz', '3dx2-y2', '4px', '4py', '4pz', '5s', '4dxy', '4dyz', '4dz^2', '4dxz', '4dx2-y2', '5px', '5py', '5pz', '6s', '4f-3', '4f-2', '4f-1', '4f+0', '4f+1', '4f+2', '4f+3', '5dxy', '5dyz', '5dz^2', '5dxz', '5dx2-y2', '6px', '6py', '6pz', '7s', '5f-3', '5f-2', '5f-1', '5f+0', '5f+1', '5f+2', '5f+3', '6dxy', '6dyz', '6dz^2', '6dxz', '6dx2-y2',  '7px', '7py', '7pz']
+        default_nb_core_elec = {
+            # Period 1
+            "H": 0, "He": 0,
+            # Period 2 (core = He 2)
+            "Li": 2, "Be": 2, "B": 2, "C": 2, "N": 2, "O": 2, "F": 2, "Ne": 2,
+            # Period 3 (core = Ne 10)
+            "Na": 10, "Mg": 10, "Al": 10, "Si": 10, "P": 10, "S": 10, "Cl": 10, "Ar": 10,
+            # Period 4 (core = Ar 18)
+            "K": 18, "Ca": 18, "Sc": 18, "Ti": 18, "V": 18, "Cr": 18, "Mn": 18,"Fe": 18, "Co": 18, "Ni": 18, "Cu": 18, "Zn": 18,"Ga": 18, "Ge": 18, "As": 18, "Se": 18, "Br": 18, "Kr": 18,
+            # Period 5 (core = Kr 36)
+            "Rb": 36, "Sr": 36, "Y": 36, "Zr": 36, "Nb": 36, "Mo": 36, "Tc": 36,"Ru": 36, "Rh": 36, "Pd": 36, "Ag": 36, "Cd": 36,"In": 36, "Sn": 36, "Sb": 36, "Te": 36, "I": 36, "Xe": 36,
+            # Period 6 (core = Xe 54)
+            "Cs": 54, "Ba": 54,"La": 54, "Ce": 54, "Pr": 54, "Nd": 54, "Pm": 54, "Sm": 54, "Eu": 54,"Gd": 54, "Tb": 54, "Dy": 54, "Ho": 54, "Er": 54, "Tm": 54, "Yb": 54, "Lu": 54,"Hf": 54, "Ta": 54, "W": 54, "Re": 54, "Os": 54, "Ir": 54, "Pt": 54,"Au": 54, "Hg": 54,"Tl": 54, "Pb": 54, "Bi": 54, "Po": 54, "At": 54, "Rn": 54,
+            # Period 7 (core = Rn 86)
+            "Fr": 86, "Ra": 86,"Ac": 86, "Th": 86, "Pa": 86, "U": 86, "Np": 86, "Pu": 86, "Am": 86,"Cm": 86, "Bk": 86, "Cf": 86, "Es": 86, "Fm": 86, "Md": 86, "No": 86, "Lr": 86,"Rf": 86, "Db": 86, "Sg": 86, "Bh": 86, "Hs": 86, "Mt": 86, "Ds": 86,"Rg": 86, "Cn": 86,"Nh": 86, "Fl": 86, "Mc": 86, "Lv": 86, "Ts": 86, "Og": 86,
+}
+
+        # Read input to change the default size of core
+        if self.args.nb_core_elec is not None:
+            for atom, n_elec_core in self.args.nb_core_elec:
+                default_nb_core_elec[atom] = n_elec_core
+
+        # AO ranges per atom (valid for spherical and cartesian bases) and AO labels as
+        # (atom_id, symbol, "nl", "m") tuples, e.g. (0, "C", "2p", "x") -> "2px".
+        aoslices = self.cell.aoslice_by_atom()
+        ao_labels = ["".join(lab[2:]) for lab in self.cell.ao_labels(fmt=False)]
         
-    
+        list_core_idx = []
+        list_val_idx = []
+        for atm_idx in range(self.cell.natm):
+            symbol = self.cell.atom_symbol(atm_idx)
+            ao_start, ao_end = int(aoslices[atm_idx, 2]), int(aoslices[atm_idx, 3])
+            atom_labels = ao_labels[ao_start:ao_end]
+
+            if symbol not in default_nb_core_elec:
+                raise ValueError(
+                    f"init_core: no default number of core electrons for atom '{symbol}' (atom {atm_idx}). "
+                    f"Set it explicitly with --nb_core_elec {symbol},<n> (use 0 for ghost atoms)."
+                )
+            size_core = default_nb_core_elec[symbol]
+            if size_core % 2 != 0 or size_core // 2 > len(increasing_ordering):
+                raise ValueError(
+                    f"init_core: invalid number of core electrons {size_core} for atom '{symbol}'; "
+                    f"it must be even and at most {2 * len(increasing_ordering)}."
+                )
+
+            # Electrons already removed by an ECP / pseudopotential. pyscf labels the remaining
+            # shells past that core (e.g. Si with a Ne-core pseudo starts at 3s), so the shells
+            # it removed must be skipped here too.
+            n_ecp = self.cell.atom_nelec_core(atm_idx)
+            if size_core <= n_ecp:
+                core_orbs = []
+            else:
+                removed_shells = set()
+                if n_ecp > 0:
+                    ecp_conf = core_configuration(n_ecp, atom_symbol=self.cell.atom_pure_symbol(atm_idx))
+                    for l, nshell in enumerate(ecp_conf):
+                        removed_shells |= {f"{n}{'spdf'[l]}" for n in range(l + 1, l + 1 + nshell)}
+                core_orbs = [o for o in increasing_ordering[:size_core // 2] if o[:2] not in removed_shells]
+                if 2 * len(core_orbs) != size_core - n_ecp:
+                    raise ValueError(
+                        f"init_core: the {n_ecp}-electron ECP of atom '{symbol}' is not compatible with a "
+                        f"{size_core}-electron core. Set the core explicitly with --nb_core_elec {symbol},<n>."
+                    )
+
+            # Positions of the core orbitals inside the AO list
+            core_positions = []
+            for orb in core_orbs:
+                if orb not in atom_labels:
+                    raise ValueError(
+                        f"init_core: core orbital '{orb}' of atom '{symbol}' (atom {atm_idx}) is not in its basis "
+                        f"(the basis may be cartesian). Reduce its core with --nb_core_elec {symbol},<n>."
+                    )
+                core_positions.append(ao_start + atom_labels.index(orb))
+            # Positions of the valence orbitals inside the AO list
+            val_positions = [i for i in range(ao_start, ao_end) if i not in core_positions]
+
+            list_core_idx += core_positions
+            list_val_idx += val_positions
+
+        self.ncore = len(list_core_idx)
+        nao = self.cell.nao_nr()
+
+        if self.args.x2c == 2:
+            # Spinor (2-component) matrices have dimension 2*nao; the core reordering is only
+            # defined for nao-dimensional (spin-free) matrices so far.
+            if self.ncore > 0:
+                raise NotImplementedError(
+                    "init_core: frozen core is not implemented for --x2c 2 yet. "
+                    "Use --nb_core_elec <element>,0 for every element to disable it."
+                )
+            self.orb_reordering = list(range(2 * nao))
+        elif self.args.orth in ("mo", "natural", "fno"):
+            # Orbital bases sorted by energy/occupation: the core orbitals already come first,
+            # so no reordering is needed.
+            self.orb_reordering = list(range(nao))
+        else:
+            self.orb_reordering = list_core_idx + list_val_idx
+
+        logging.info(f"Number of core orbitals: {self.ncore}")
+        logging.info(f"Core + valence AO reordering: {self.orb_reordering}")
+
+    def read_fno_density(self, nso, sym_kstruct):
+        '''
+        Read the correlated density matrix used to build the FNO basis (``--orth fno``).
+
+        The density is taken from a previous GW/GF2 run (``--input_fno`` / ``--sim_fno``)
+        as rho(k) = -2 G(k, tau=beta) (restricted), unfolded to the full Brillouin zone,
+        and brought back to the AO basis if that run was orthogonalized.
+
+        Parameters
+        ----------
+        nso : int
+            Number of AO (or spin-orbital) basis functions of the current calculation.
+        sym_kstruct : pyscf.pbc.lib.kpts.KPoints
+            k-point structure used to build X; defines which k-points are self-time-reversal.
+
+        Returns
+        -------
+        corr_dm : numpy.ndarray
+            Correlated density matrix in the AO basis, shape (1, nk, nso, nso), Hermitian and
+            exactly real at self-time-reversal k-points (k = -k).
+        '''
+        if self.args.input_fno is None or self.args.sim_fno is None:
+            raise ValueError("--orth fno requires --input_fno and --sim_fno to read the correlated density matrix.")
+
+        with h5py.File(self.args.input_fno, "r") as f:
+            ibz2bz = f["symmetry/k/ibz2bz"][()]
+            bz2ibz = f["symmetry/k/bz2ibz"][()]
+            tr_conj = f["symmetry/k/tr_conj"][()]
+            k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
+            # Absent when the previous run was done in the AO basis (--orth none)
+            X_prev = f["orthogonalization/X_k"][()] if "orthogonalization/X_k" in f else None
+
+        with h5py.File(self.args.sim_fno, "r") as f:
+            it = self.args.iter_fno
+            if it == -1:
+                it = f["iter"][()]
+            G_tau = f[f"iter{it}/G_tau/data"]  # (ntau, ns, nk_ibz, n, n)
+            G_beta = G_tau[G_tau.shape[0] - 1]  # only tau = beta is needed
+
+        if G_beta.shape[0] > 1:
+            raise NotImplementedError("--orth fno is not implemented for unrestricted (UHF) references.")
+
+        # Unfold to the full BZ in the basis of the previous run (k_sym_transform_ao is stored in that basis)
+        G_beta = mb.to_full_bz(G_beta, tr_conj, ibz2bz, bz2ibz, 1, k_sym_trans)   # (1, nk, n, n)
+        nk = sym_kstruct.nkpts
+        if G_beta.shape[1] != nk:
+            raise ValueError(
+                f"--orth fno: the previous run has {G_beta.shape[1]} k-points but the current k-mesh has {nk}."
+            )
+
+        # G(tau=beta) = -rho per spin; factor 2 for the restricted (spin-summed) density
+        corr_dm = -2.0 * G_beta.astype(np.complex128)
+
+        # Back to the AO basis. The density is contravariant: orthogonalize() stores
+        # dm_orth = X_inv^dag dm_AO X_inv, hence dm_AO = X^dag dm_orth X.
+        if X_prev is not None:
+            corr_dm = np.einsum("kai,skab,kbj->skij", X_prev.conj(), corr_dm, X_prev, optimize=True)
+
+        if corr_dm.shape[-1] != nso:
+            raise ValueError(
+                f"--orth fno: the density read from {self.args.sim_fno} has dimension {corr_dm.shape[-1]} "
+                f"but the current basis has {nso} functions; the previous run must use the same basis set."
+            )
+
+        # Make the density exactly Hermitian, and exactly real at self-time-reversal
+        # k-points (k = -k), where X must be real so that X(-k) = X(k)* holds for the
+        # conjugate integral pairs.
+        corr_dm = 0.5 * (corr_dm + corr_dm.conj().transpose(0, 1, 3, 2))
+        self_tr = np.zeros(nk, dtype=bool)
+        self_tr[sym_kstruct.ibz2bz[np.isclose(sym_kstruct.weights_ibz * nk, 1)]] = True
+        corr_dm[:, self_tr] = corr_dm[:, self_tr].real
+
+        return corr_dm
+
     def compute_df_int(self, nao, X_k):
         raise NotImplementedError("Please Implement this method")
     def mf_object(self, mydf=None):
@@ -69,6 +252,7 @@ class pyscf_pbc_init (pyscf_init):
         super().__init__(comm.init_pbc_params() if args is None else args)
         self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik, self.kstruct = \
             comm.init_k_mesh(self.args, self.cell)
+        self.init_core()
 
     def mean_field_input(self, mydf=None):
         """Solve a given mean-field problem and store the solution in the Green/WeakCoupling format
@@ -167,20 +351,35 @@ class pyscf_pbc_init (pyscf_init):
             self.cell, self.kmesh,
             space_group_symmetry=False,
             time_reversal_symmetry=True)
+        
+        # Correlated density for FNO: only used to build X, hf_dm stays the mean-field density
+        corr_dm = None
+        if self.args.orth == 'fno':
+            corr_dm = self.read_fno_density(nso, ortho_sym_kstruct)
+
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(
             mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S,
-            sym_kstruct=ortho_sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2)
+            sym_kstruct=ortho_sym_kstruct, mycell=self.cell, spinor=self.args.x2c==2,
+            dm_fno=corr_dm)
+        
+        Y, Y_inv = None, None
+        if self.args.aux_orth == "naf":
+            auxcell.build()
+            Y, Y_inv = int_utils.build_naf_transform(mydf, self.args, auxcell)
+
         # Save data into Green Software package input format.
         comm.save_data(
             self.args, self.cell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list, self.conj_list,
-            Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao
+            Nk, nk, NQ, F, S, T, hf_dm, tools.pbc.madelung(self.cell, self.kmesh), Zs, last_ao, self.ncore, self.orb_reordering
         )
         # Save symmetry operations info for main and auxiliary unit cells
         comm.store_kstruct_ops_info(self.args, self.cell, self.kmesh, self.kstruct, X_k=X_k, X_inv_k=X_inv_k,)
-        comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh)
+        comm.store_auxcell_kstruct_ops_info(self.args, auxcell, self.kmesh, Y=Y, Y_inv=Y_inv)
         # Save the AO->orthogonal basis transformation so tooling can move the
         # stored (orthogonalized) quantities back to the AO basis.
         comm.store_orth_transform(self.args, X_k, X_inv_k)
+        if self.args.aux_orth == "naf":
+            int_utils.store_naf_transform(self.args, Y, Y_inv)
 
         # Diagnose whether self-consistent quantities obey k-space symmetry.
         if self.args.space_symm or self.args.tr_symm:
@@ -188,9 +387,9 @@ class pyscf_pbc_init (pyscf_init):
 
         # Store density-fitted integrals
         if bool(self.args.df_int) :
-            self.compute_df_int(nao, X_k)
-
-    def compute_df_int(self, nao, X_k):
+            self.compute_df_int(nao, X_k, Y=Y, Y_inv=Y_inv)
+            
+    def compute_df_int(self, nao, X_k, Y=None, Y_inv=None):
         '''
         Generate density-fitting (DF) three-center Coulomb integrals for correlated methods.
 
@@ -242,10 +441,16 @@ class pyscf_pbc_init (pyscf_init):
             When orthogonalisation is disabled (``args.orth == "none"``),
             ``X_k`` contains identity transforms for each k-point rather
             than an empty list.
+        Y : ndarray, optional
+            NAF rotation. When provided, three-
+            center integrals are rotated into the NAF basis consistently across every k-pair.
+        Y_inv : ndarray, optional
+            Inverse NAF rotation. Forwarded to compute_integrals.
         '''
+        
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
-        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, True)
+        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, True, Y=Y, Y_inv=Y_inv)
         mydf = None
 
         # --- Step 2: correlated integrals with finite-size correction --------
@@ -285,7 +490,7 @@ class pyscf_pbc_init (pyscf_init):
         gdf.GDF.weighted_coulG = weighted_coulG_old  # always restore
 
         # Build correlated integrals; diagonal pairs come from cderi_ewald.h5.
-        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5")
+        int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5", Y=Y, Y_inv=Y_inv)
 
     def evaluate_high_symmetry_path(self):
         if self.args.print_high_symmetry_points:
@@ -402,6 +607,8 @@ class pyscf_mol_init (pyscf_init):
         self.kcell.ecp = self.cell.ecp
         self.kcell.build()
         self.kstruct = libkpts.make_kpts(self.kcell, self.kmesh, space_group_symmetry=False, time_reversal_symmetry=False)
+        self.init_core()
+
 
     def mean_field_input(self, mydf=None):
         '''
@@ -478,13 +685,19 @@ class pyscf_mol_init (pyscf_init):
                 "with mode={!r}; allowed modes are 'none', 'lowdin', "
                 "'symmetric_lowdin'.".format(self.args.orth)
             )
+        # Correlated density for FNO: only used to build X, hf_dm stays the mean-field density
+        corr_dm = None
+        if self.args.orth == 'fno':
+            corr_dm = self.read_fno_density(nso, self.kstruct)
+
         X_k, X_inv_k, S, F, T, hf_dm = comm.orthogonalize(mydf, self.args.orth, X_k, X_inv_k, F, T, hf_dm, S,
                                                           sym_kstruct=self.kstruct, mycell=self.kcell,
-                                                          spinor=self.args.x2c==2)
+                                                          spinor=self.args.x2c==2, dm_fno=corr_dm)
+        
         # Save data into Green Software package input format. Here we set Madelung constant to 0 as there is
         # no long range divergence for molecule
         comm.save_data(self.args, self.kcell, mf, self.kmesh, self.ind, self.weight, self.num_ik, self.ir_list,
-                       self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao)
+                       self.conj_list, Nk, nk, NQ, F, S, T, hf_dm, 0.0, Zs, last_ao, self.ncore, self.orb_reordering)
         comm.store_mol_symmetry_info(self.args, self.kcell, auxcell, self.kmesh)
         # Save the AO->orthogonal basis transformation so tooling can move the
         # stored (orthogonalized) quantities back to the AO basis.
