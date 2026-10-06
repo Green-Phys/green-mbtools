@@ -5,6 +5,7 @@ spglib
 numba
 scipy
 h5py
+packaging
 irbasis
 baryrat
 cvxpy

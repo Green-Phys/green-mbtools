@@ -277,7 +277,7 @@ def test_from_ao_reps_matches_kstruct_path(h2_setup):
     tr_conj = np.asarray(kstruct.time_reversal_symm_bz, dtype=bool)
 
     X_alt, X_inv_alt = build_X_kspace_from_ao_reps(
-        "lowdin", S_ibz, kstruct.ibz2bz, kstruct.bz2ibz, k_sym,
+        "lowdin", S_ibz, kstruct.ibz2bz, kstruct.ibz2bz[kstruct.bz2ibz], k_sym,
         tr_conj=tr_conj,
     )
 
@@ -304,7 +304,7 @@ def test_from_ao_reps_orthogonalizes_S(h2_setup):
     tr_conj = np.asarray(kstruct.time_reversal_symm_bz, dtype=bool)
 
     X_k, _ = build_X_kspace_from_ao_reps(
-        "lowdin", S_ibz, kstruct.ibz2bz, kstruct.bz2ibz, k_sym,
+        "lowdin", S_ibz, kstruct.ibz2bz, kstruct.ibz2bz[kstruct.bz2ibz], k_sym,
         tr_conj=tr_conj,
     )
 
@@ -401,7 +401,7 @@ def test_itransform_tr_identity_with_new_X(h2_tr_only_setup):
             ik, kstruct.stars_ops_bz[ik], cell, kstruct
         )
     X_k_new, X_inv_k_new = build_X_kspace_from_ao_reps(
-        "lowdin", S_ibz, kstruct.ibz2bz, kstruct.bz2ibz, k_sym_ao,
+        "lowdin", S_ibz, kstruct.ibz2bz, kstruct.ibz2bz[kstruct.bz2ibz], k_sym_ao,
         tr_conj=tr_conj_bz,
     )
 
@@ -489,3 +489,39 @@ def test_ar_x2c_spinor_orthogonality():
         "Spinor end-to-end test needs the original Ar cell parameters; "
         "covered by the AO-rep test in symmetry_test.py for now."
     )
+
+
+def test_from_ao_reps_consumes_stored_symmetry_k():
+    """Regression: feed the stored ``/symmetry/k`` arrays straight from
+    input.h5 (the init_seet.py path) to build_X_kspace_from_ao_reps.
+
+    ``/symmetry/k/bz2ibz`` holds full-BZ representative indices, not compact
+    IBZ positions; the function must accept that convention and still
+    orthogonalize S(k) at every BZ point. Earlier tests only exercised the
+    compact ``kstruct.bz2ibz``, so this convention was unguarded.
+    """
+    data_file = Path(__file__).parent / "test_data" / "H2_GW" / "input.h5"
+    assert data_file.exists()
+
+    with h5py.File(data_file, "r") as f:
+        S_bz = f["HF/S-k"][()].view(complex)
+        S_bz = S_bz.reshape(S_bz.shape[:-1])[0]  # (nk, nao, nao), spin 0
+        ibz2bz = f["symmetry/k/ibz2bz"][()]
+        bz2ibz = f["symmetry/k/bz2ibz"][()]
+        k_sym_ao = f["symmetry/k/k_sym_transform_ao"][()].astype(np.complex128)
+        tr_conj = f["symmetry/k/tr_conj"][()].astype(bool)
+
+    # Sanity: stored bz2ibz is in the full-BZ convention (not compact).
+    assert bz2ibz.max() >= len(ibz2bz)
+
+    S_ibz = S_bz[ibz2bz]
+    X_k, _ = build_X_kspace_from_ao_reps(
+        "lowdin", S_ibz, ibz2bz, bz2ibz, k_sym_ao, tr_conj=tr_conj,
+    )
+
+    for ik in range(S_bz.shape[0]):
+        np.testing.assert_allclose(
+            X_k[ik] @ S_bz[ik] @ X_k[ik].conj().T,
+            np.eye(S_bz.shape[-1]), atol=_TOL, rtol=0,
+            err_msg=f"X S X† != I at BZ k={ik} (stored /symmetry/k path)",
+        )
