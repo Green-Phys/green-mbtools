@@ -465,7 +465,9 @@ def build_X_kspace_from_ao_reps(
     ``input.h5`` under ``/symmetry/k`` —
 
       - ``ibz2bz``            (n_ibz,)        BZ indices of IBZ reps
-      - ``bz2ibz``            (nk,)           IBZ index for each BZ point
+      - ``bz2ibz``            (nk,)           Full-BZ index of the IBZ representative for each
+                                              BZ point, matching `/symmetry/k/bz2ibz`.
+                                              Compact IBZ positions are not accepted
       - ``k_sym_transform_ao`` (nk, n, n)     stored AO rotation U(k)
       - ``tr_conj``           (nk,)  bool     TR partner flags
 
@@ -497,6 +499,14 @@ def build_X_kspace_from_ao_reps(
         raise ValueError(
             "build_X_kspace_from_ao_reps: mode='mo' requires "
             "mo_coeff_ibz or F_ibz."
+        )
+
+    # Check bz2ibz contains full-bz indices, not the compact ibz ones
+    invalid = np.unique(bz2ibz_arr[~np.isin(bz2ibz_arr, ibz2bz_arr)])
+    if invalid.size:
+        raise ValueError(
+            "bz2ibz must contain representative BZ indices from ibz2bz; "
+            f"found invalid values: {invalid.tolist()}"
         )
 
     ibz2bz_arr = np.asarray(ibz2bz)
