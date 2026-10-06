@@ -501,14 +501,6 @@ def build_X_kspace_from_ao_reps(
             "mo_coeff_ibz or F_ibz."
         )
 
-    # Check bz2ibz contains full-bz indices, not the compact ibz ones
-    invalid = np.unique(bz2ibz_arr[~np.isin(bz2ibz_arr, ibz2bz_arr)])
-    if invalid.size:
-        raise ValueError(
-            "bz2ibz must contain representative BZ indices from ibz2bz; "
-            f"found invalid values: {invalid.tolist()}"
-        )
-
     ibz2bz_arr = np.asarray(ibz2bz)
     n_ibz = ibz2bz_arr.shape[0]
     S_ibz = np.asarray(S_ibz)
@@ -531,6 +523,15 @@ def build_X_kspace_from_ao_reps(
     #           the bz2ib_compact defined below.
     bz2ibz_arr = np.asarray(bz2ibz)
     pos_in_ibz = {int(b): i for i, b in enumerate(ibz2bz_arr)}
+
+    # Check bz2ibz contains full-bz indices, not the compact ibz ones
+    invalid = np.unique(bz2ibz_arr[~np.isin(bz2ibz_arr, ibz2bz_arr)])
+    if invalid.size:
+        raise ValueError(
+            "bz2ibz must contain representative BZ indices from ibz2bz; "
+            f"found invalid values: {invalid.tolist()}"
+        )
+
     bz2ibz_compact = np.array(
         [pos_in_ibz[int(b)] for b in bz2ibz_arr], dtype=int
     )
