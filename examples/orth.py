@@ -21,10 +21,8 @@ Sigma1r = f["iter" + str(it) + "/Sigma1"][()].view(complex)
 f.close()
 
 f = h5py.File(data_dir + '/H2_GW/input.h5', 'r')
-Sk = f["HF/S-k"][()].view(complex)
-Sk = Sk.reshape(Sk.shape[:-1])
-Hk = f["HF/H-k"][()].view(complex)
-Hk = Hk.reshape(Hk.shape[:-1])
+Sk = f["HF/S-k"][()]
+Hk = f["HF/H-k"][()]
 ibz2bz = f["/symmetry/k/ibz2bz"][()]
 bz2ibz = f["/symmetry/k/bz2ibz"][()]
 weight_ibz = f["/symmetry/k/weight_ibz"][()]

@@ -47,10 +47,8 @@ if __name__ == "__main__":
     # Read data about grids
     print("Reading mean-field data")
     f = h5py.File(input_path, 'r')
-    Hk = f['HF/H-k'][()].view(complex)
-    Hk = Hk.reshape(Hk.shape[:-1])
-    Sk = f['HF/S-k'][()].view(complex)
-    Sk = Sk.reshape(Sk.shape[:-1])
+    Hk = f['HF/H-k'][()]
+    Sk = f['HF/S-k'][()]
     mo_coeff = f["/HF/mo_coeff"][()]
     ibz2bz = f["/symmetry/k/ibz2bz"][()]
     bz2ibz = f["/symmetry/k/bz2ibz"][()]
