@@ -2,10 +2,10 @@ from packaging.version import InvalidVersion, Version
 
 
 # Version for Green-MBTools Package
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
-def require_input_version(input_version, minimum_version="1.0.0"):
+def require_input_version(input_version, minimum_version="1.1.0"):
     """Raise ValueError if the input version is missing, invalid, or too old.
 
     Versions equal to minimum_version are accepted.

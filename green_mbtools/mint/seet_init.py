@@ -4,7 +4,7 @@ from green_mbtools.version import require_input_version
 
 
 # Reference input-file version for SEET
-REF_INPUT_VERSION = "1.0.0"
+REF_INPUT_VERSION = "1.1.0"
 
 class seet_init:
     '''
@@ -36,14 +36,12 @@ class seet_init:
         from green_mbtools.pesto import mb
 
         with h5py.File(self.args.input_file, "r") as inp_data:
-            input_version   = inp_data.attrs["__green_version__"]
+            input_version   = inp_data.attrs.get("__green_version__")
             require_input_version(input_version, REF_INPUT_VERSION)
             kmesh           = inp_data["symmetry/k/mesh"][()]
             kmesh_sc        = inp_data["symmetry/k/mesh_scaled"][()]
-            S     = inp_data["HF/S-k"][()].view(np.complex128)
-            S     = S.reshape(S.shape[:-1])
-            T     = inp_data["HF/H-k"][()].view(np.complex128)
-            T     = T.reshape(T.shape[:-1])
+            S     = inp_data["HF/S-k"][()]
+            T     = inp_data["HF/H-k"][()]
 
             # Sigma1 / G_tau are stored on the space-group irreducible wedge.
             # Expand them onto the full BZ using the AO symmetry transforms

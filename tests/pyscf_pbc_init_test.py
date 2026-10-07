@@ -86,6 +86,15 @@ def test_meanfield_variants(data_path, extra_flags, subdir) -> None:
             "HF/mo_energy",
         ]
         compare_datasets(output_h5, expected_h5, datasets)
+
+        with h5py.File(output_h5, "r") as gen:
+            assert gen.attrs["__green_version__"] == "1.1.0"
+            for name in ("HF/Fock-k", "HF/S-k", "HF/H-k"):
+                assert gen[name].dtype == np.complex128
+                assert "__complex__" not in gen[name].attrs
+        with h5py.File(tmp_dir / "dm.h5", "r") as gdm:
+            assert gdm["HF/dm-k"].dtype == np.complex128
+            assert "__complex__" not in gdm["HF/dm-k"].attrs
     finally:
         # clean up immediately
         os.chdir(old_cwd)

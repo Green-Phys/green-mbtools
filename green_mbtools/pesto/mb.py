@@ -517,10 +517,8 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     f.close()
 
     f = h5py.File(input_path, 'r')
-    S = f['HF/S-k'][()].view(complex)
-    S = S.reshape(S.shape[:-1])
-    H0 = f['HF/H-k'][()].view(complex)
-    H0 = H0.reshape(H0.shape[:-1])
+    S = f['HF/S-k'][()]
+    H0 = f['HF/H-k'][()]
 
     ibz2bz = f["symmetry/k/ibz2bz"][()]
     index = f["symmetry/k/bz2ibz"][()]

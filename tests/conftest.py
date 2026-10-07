@@ -35,10 +35,8 @@ def mbo(data_path):
 
     # input file (input.h5)
     f = h5py.File(data_dir + '/H2_GW/input.h5', 'r')
-    S = f['HF/S-k'][()].view(complex)
-    S = S.reshape(S.shape[:-1])
-    H0 = f['HF/H-k'][()].view(complex)
-    H0 = H0.reshape(H0.shape[:-1])
+    S = f['HF/S-k'][()]
+    H0 = f['HF/H-k'][()]
     ir_list = f["symmetry/k/ibz2bz"][()]
     index = f["symmetry/k/bz2ibz"][()]
     conj_list = f["symmetry/k/tr_conj"][()]

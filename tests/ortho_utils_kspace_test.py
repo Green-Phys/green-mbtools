@@ -473,10 +473,9 @@ def test_ar_x2c_spinor_orthogonality():
         pytest.skip("Ar X2C reference data not available")
 
     with h5py.File(data_file, "r") as f:
-        S_raw = f["HF/S-k"][()]
+        S_bz = f["HF/S-k"][()]
         bz2ibz = f["symmetry/k/bz2ibz"][()]
         nk = int(f["symmetry/k/nk"][()])
-    S_bz = S_raw.view(complex).reshape(S_raw.shape[:-1])
     # (ns, nk, nso, nso) -> use spin 0
     if S_bz.ndim == 4:
         S_bz = S_bz[0]
@@ -504,8 +503,7 @@ def test_from_ao_reps_consumes_stored_symmetry_k():
     assert data_file.exists()
 
     with h5py.File(data_file, "r") as f:
-        S_bz = f["HF/S-k"][()].view(complex)
-        S_bz = S_bz.reshape(S_bz.shape[:-1])[0]  # (nk, nao, nao), spin 0
+        S_bz = f["HF/S-k"][()][0]  # (nk, nao, nao), spin 0
         ibz2bz = f["symmetry/k/ibz2bz"][()]
         bz2ibz = f["symmetry/k/bz2ibz"][()]
         k_sym_ao = f["symmetry/k/k_sym_transform_ao"][()].astype(np.complex128)
