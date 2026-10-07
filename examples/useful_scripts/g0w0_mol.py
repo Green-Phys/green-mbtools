@@ -82,10 +82,8 @@ bz2ibz = f["/symmetry/k/bz2ibz"][()]
 tr_conj = f["/symmetry/k/tr_conj"][()]
 k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
 
-mf_H0 = f["HF/H-k"][()].view(complex)
-mf_H0 = mf_H0.reshape(mf_H0.shape[:-1])
-mf_Sk = f["HF/S-k"][()].view(complex)
-mf_Sk = mf_Sk.reshape(mf_Sk.shape[:-1])
+mf_H0 = f["HF/H-k"][()]
+mf_Sk = f["HF/S-k"][()]
 
 params_nao = int(f["/params/nao"][()])
 params_nso = int(f["/params/nso"][()])
@@ -175,8 +173,7 @@ mol.build()
 if args.dm is not None:
     print("Loading density matrix from", args.dm)
     f_dm = h5py.File(args.dm, 'r')
-    dm = f_dm["HF/dm-k"][()].view(complex)
-    dm = dm.reshape(dm.shape[:-1])
+    dm = f_dm["HF/dm-k"][()]
     f_dm.close()
 else:
     print("Reconstructing density matrix from HF/mo_coeff")

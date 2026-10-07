@@ -45,6 +45,7 @@ def test_convert_file_is_idempotent(tmp_path):
     with h5py.File(path, "r") as f:
         assert f["HF/H-k"].dtype == np.complex128
         np.testing.assert_array_equal(f["HF/H-k"][()], arr)
+        assert f.attrs["__green_version__"] == "1.1.0"
 
 
 def test_convert_file_handles_dm(tmp_path):
@@ -59,6 +60,7 @@ def test_convert_file_handles_dm(tmp_path):
     with h5py.File(path, "r") as f:
         assert f["HF/dm-k"].dtype == np.complex128
         np.testing.assert_array_equal(f["HF/dm-k"][()], arr)
+        assert f.attrs["__green_version__"] == "1.1.0"
 
 
 def test_convert_file_skips_absent_datasets(tmp_path):

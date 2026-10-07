@@ -72,10 +72,8 @@ def main():
     bz2ibz = f["/symmetry/k/bz2ibz"][()]
     tr_conj = f["/symmetry/k/tr_conj"][()]
     k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
-    Sk = f['HF/S-k'][()].view(complex)
-    Sk = Sk.reshape(Sk.shape[:-1])
-    Hk = f['HF/H-k'][()].view(complex)
-    Hk = Hk.reshape(Hk.shape[:-1])
+    Sk = f['HF/S-k'][()]
+    Hk = f['HF/H-k'][()]
     f.close()
     
     # Pyscf object to generate k points

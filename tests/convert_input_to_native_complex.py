@@ -29,7 +29,7 @@ def _is_legacy(ds) -> bool:
     )
 
 
-def convert_file(path: str, datasets: Sequence[str], version: str = "1.1.0") -> list:
+def convert_file(path: str, datasets: Sequence[str], version: str = "1.1.0") -> list[str]:
     converted = []
     with h5py.File(path, "a") as f:
         for name in datasets:

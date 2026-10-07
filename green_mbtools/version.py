@@ -17,12 +17,16 @@ def require_input_version(input_version, minimum_version="1.1.0"):
         raise ValueError(
             f"Missing or invalid input version: {input_version!r}. "
             f"green-mbtools {minimum} or newer is required. "
-            "Regenerate input.h5 and rerun the weak-coupling calculation."
+            "To proceed: regenerate input.h5 with the current green-mbtools, "
+            "or convert an existing file with tests/convert_input_to_native_complex.py. "
+            "To read the old file as-is, use green-mbtools 1.0 or earlier."
         ) from exc
 
     if current < minimum:
         raise ValueError(
             f"Input version {current} is unsupported; "
             f"green-mbtools {minimum} or newer is required. "
-            "Regenerate input.h5 and rerun the weak-coupling calculation."
+            "To proceed: regenerate input.h5 with the current green-mbtools, "
+            "or convert an existing file with tests/convert_input_to_native_complex.py. "
+            "To read the old file as-is, use green-mbtools 1.0 or earlier."
         )
