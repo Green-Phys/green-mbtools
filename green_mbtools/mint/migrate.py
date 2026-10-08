@@ -188,6 +188,14 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
 
     current = detect_version(path)
     order = ["grid-legacy", "1.0.0", "1.1.0"]
+    if current not in order:
+        raise ValueError(
+            f"Detected version {current!r} is not in known versions: {order}"
+        )
+    if target not in order:
+        raise ValueError(
+            f"Unknown target version {target!r}; known versions: {order}"
+        )
     if order.index(current) > order.index(target):
         raise ValueError(f"Cannot downgrade from {current} to {target}")
     while current != target:

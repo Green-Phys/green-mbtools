@@ -156,10 +156,13 @@ def test_migrate_grid_legacy_end_to_end(tmp_path):
     from green_mbtools.mint.migrate import migrate, detect_version
     from green_mbtools.mint.seet_init import seet_init
     legacy = os.path.join(DATA, "H2_GW_legacy")
+    # Use the dedicated fixture that includes iter14/Sigma1; the shared
+    # H2_GW_legacy/sim.h5 is kept pristine for ir_test.py and others.
+    migrate_data = os.path.join(DATA, "migrate")
     work = tmp_path / "work"
     work.mkdir()
     shutil.copy(os.path.join(legacy, "input.h5"), work / "input.h5")
-    shutil.copy(os.path.join(legacy, "sim.h5"), work / "sim.h5")
+    shutil.copy(os.path.join(migrate_data, "legacy_sim.h5"), work / "sim.h5")
     out = str(work / "input_migrated.h5")
 
     returned = migrate(str(work / "input.h5"), output=out)
