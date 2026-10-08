@@ -13,37 +13,14 @@ import os
 import sys
 from typing import Sequence
 
-import numpy as np
 import h5py
 
-INPUT_DATASETS = ("HF/Fock-k", "HF/S-k", "HF/H-k")
-DM_DATASETS = ("HF/dm-k",)
-
-
-def _is_legacy(ds) -> bool:
-    """True if ds is stored the legacy float+2 way."""
-    if np.iscomplexobj(np.empty(0, dtype=ds.dtype)):
-        return False
-    return bool(ds.attrs.get("__complex__", 0)) or (
-        ds.ndim >= 1 and ds.shape[-1] == 2
-    )
+from green_mbtools.mint.migrate import _to_native_complex, INPUT_DATASETS, DM_DATASETS
 
 
 def convert_file(path: str, datasets: Sequence[str], version: str = "1.1.0") -> list[str]:
-    converted = []
     with h5py.File(path, "a") as f:
-        for name in datasets:
-            if name not in f:
-                continue
-            ds = f[name]
-            if not _is_legacy(ds):
-                continue
-            arr = ds[()].view(np.complex128).reshape(ds.shape[:-1])
-            del f[name]
-            f[name] = arr
-            if "__complex__" in f[name].attrs:
-                del f[name].attrs["__complex__"]
-            converted.append(name)
+        converted = _to_native_complex(f, datasets)
         f.attrs["__green_version__"] = version
     return converted
 
