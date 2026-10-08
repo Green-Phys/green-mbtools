@@ -45,16 +45,9 @@ def test_to_native_complex_core(tmp_path):
         np.testing.assert_array_equal(f["HF/S-k"][()], arr)
 
 
-def test_detect_100_from_git_fixture(tmp_path):
+def test_detect_100():
     # A real 1.0.0 file: symmetry/ datagroup + float+2 matrices.
-    import subprocess
-    p = str(tmp_path / "v100.h5")
-    with open(p, "wb") as fh:
-        subprocess.run(
-            ["git", "show", "3492197~1:tests/test_data/H2_GW/input.h5"],
-            stdout=fh, check=True, cwd=os.path.dirname(DATA),
-        )
-    assert detect_version(p) == "1.0.0"
+    assert detect_version(os.path.join(DATA, "migrate", "v100_input.h5")) == "1.0.0"
 
 
 def test_v100_to_110(tmp_path):
