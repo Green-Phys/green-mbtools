@@ -136,6 +136,8 @@ def test_grid_to_100(tmp_path):
         kptij_idx, kij_conj, kij_trans, kpair_irre, num_kpair, _, _ = integrals_grid(cell, g_kmesh)
         np.testing.assert_array_equal(f["symmetry/pairs/num_kpair_stored"][()], num_kpair)
         np.testing.assert_array_equal(f["symmetry/pairs/kpair_irre_list"][()], kpair_irre)
+        # HF/nk must be the full-BZ count after migration, not the per-axis dim
+        assert f["HF/nk"][()] == nk_full
 
 
 def test_grid_to_100_missing_cell_raises(tmp_path):
@@ -209,3 +211,69 @@ def test_cli_smoke(tmp_path):
                     "--input", work, "--output", out], check=True)
     from green_mbtools.mint.migrate import detect_version
     assert detect_version(out) == "1.1.0"
+
+
+def _write_v100_dm(path, shape=(2, 2, 2, 2, 2)):
+    """Write a minimal float+2 dm.h5 that looks like a 1.0.0 density matrix."""
+    arr = np.ones(shape, dtype=np.complex128)
+    with h5py.File(path, "w") as f:
+        f["HF/dm-k"] = arr.view(np.float64).reshape(arr.shape + (2,))
+        f["HF/dm-k"].attrs["__complex__"] = np.int8(1)
+        f.attrs["__green_version__"] = "1.0.0"
+
+
+def test_newfile_migrate_dm_nondestructive(tmp_path):
+    """new-file mode must not mutate the source dm.h5."""
+    import shutil
+    from green_mbtools.mint.migrate import migrate
+
+    src_dir = tmp_path / "src"
+    src_dir.mkdir()
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+
+    src_input = str(src_dir / "input.h5")
+    shutil.copy(os.path.join(DATA, "migrate", "v100_input.h5"), src_input)
+
+    src_dm = str(src_dir / "dm.h5")
+    _write_v100_dm(src_dm)
+
+    # record the raw bytes of the source dm before migration
+    src_dm_bytes_before = open(src_dm, "rb").read()
+
+    out_input = str(out_dir / "input.h5")
+    migrate(src_input, output=out_input, dm_file=src_dm)
+
+    # source dm must be byte-for-byte unchanged
+    assert open(src_dm, "rb").read() == src_dm_bytes_before, (
+        "source dm.h5 was mutated by new-file migration"
+    )
+    # migrated dm must be beside the output
+    out_dm = str(out_dir / "dm.h5")
+    assert os.path.exists(out_dm), "migrated dm.h5 not created beside output"
+    with h5py.File(out_dm, "r") as f:
+        assert f["HF/dm-k"].dtype == np.complex128
+        assert "__complex__" not in f["HF/dm-k"].attrs
+        assert f.attrs["__green_version__"] == "1.1.0"
+    # the source dm still has the float+2 layout and 1.0.0 version
+    with h5py.File(src_dm, "r") as f:
+        assert f["HF/dm-k"].dtype == np.float64
+        assert "__complex__" in f["HF/dm-k"].attrs
+        assert f.attrs["__green_version__"] == "1.0.0"
+
+
+def test_newfile_migrate_dm_same_dir_raises(tmp_path):
+    """new-file mode with output in same dir as source dm must raise ValueError."""
+    import shutil
+    from green_mbtools.mint.migrate import migrate
+
+    src_input = str(tmp_path / "input.h5")
+    shutil.copy(os.path.join(DATA, "migrate", "v100_input.h5"), src_input)
+
+    src_dm = str(tmp_path / "dm.h5")
+    _write_v100_dm(src_dm)
+
+    # output lives in the same directory as the source dm -> should raise
+    out_input = str(tmp_path / "input_migrated.h5")
+    with pytest.raises(ValueError, match="same as the source dm directory"):
+        migrate(src_input, output=out_input, dm_file=src_dm)

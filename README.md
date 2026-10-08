@@ -64,7 +64,7 @@ The `mbtools` package comes with two sub-packages: `mint` and `pesto`.
 
 > **Deprecation:** `pesto` was formerly known as `mbanalysis`. Importing `mbanalysis` still works but is deprecated (it now emits a `FutureWarning`) and will be removed in **v1.1**. Use `from green_mbtools import pesto` instead.
 
-> **Version 1.1.0 note on input.h5 and dm.h5 format:** green-mbtools 1.1 writes complex matrices (HF/Fock-k, HF/S-k, HF/H-k in input.h5 and HF/dm-k in dm.h5) as native HDF5 complex128. Older input.h5 and dm.h5 files with the legacy float+2 layout are rejected with guidance on upgrading. To convert existing files, use the provided `tests/convert_input_to_native_complex.py` script or continue using green-mbtools 1.0 for legacy files.
+> **Version 1.1.0 note on input.h5 and dm.h5 format:** green-mbtools 1.1 writes complex matrices (HF/Fock-k, HF/S-k, HF/H-k in input.h5 and HF/dm-k in dm.h5) as native HDF5 complex128. Older input.h5 and dm.h5 files with the legacy float+2 layout are rejected with guidance on upgrading. To convert existing files, run `python -m green_mbtools.mint.migrate --input <old.h5> --output <new.h5>` (optionally pass `--dm dm.h5` to also migrate the density matrix). Alternatively, continue using green-mbtools 1.0 or earlier for legacy files.
 
 Contirbutions to the code
 -----------

@@ -121,10 +121,10 @@ def _grid_to_100(input_file, int_paths=()):
         conj = grid["conj_list"][()]
         kmesh = grid["k_mesh"][()]
         nso = f["HF/S-k"].shape[2]
-        # HF/nk is the per-axis Monkhorst-Pack dimension (e.g. 3 for 3x3x3),
-        # NOT the full-BZ count. Derive nk from grid/index which has one entry
-        # per full-BZ k-point.
+        # In a genuine 1.0.0 file HF/nk holds the full-BZ count (e.g. 27 for
+        # a 3x3x3 mesh), not the per-axis dimension.  Set it to len(index).
         nk = len(index)
+        f["HF/nk"][()] = nk
 
         k = f.require_group("symmetry/k")
         k["mesh"] = grid["k_mesh"][()]
@@ -173,6 +173,11 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
     If in_place is False, output must be provided; the input file is copied to
     output first and only the copy is modified. Pass force=True to overwrite an
     existing output file. If in_place is True, the file is modified in place.
+
+    In new-file mode (not in_place), if dm_file is provided the source dm.h5 is
+    never mutated: a copy is placed beside the output file and that copy is
+    migrated. The output directory must differ from the directory containing
+    dm_file; if they are the same a ValueError is raised (use --in-place instead).
     """
     if not in_place:
         if output is None:
@@ -183,8 +188,26 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
             )
         shutil.copy(input_file, output)
         path = output
+        # Derive an output-side dm path so the source dm is never modified.
+        effective_dm = None
+        if dm_file is not None:
+            dm_out = os.path.join(
+                os.path.dirname(os.path.abspath(output)),
+                os.path.basename(dm_file),
+            )
+            if os.path.abspath(dm_out) == os.path.abspath(dm_file):
+                raise ValueError(
+                    f"Cannot migrate dm.h5 non-destructively: the output "
+                    f"directory is the same as the source dm directory "
+                    f"({os.path.dirname(os.path.abspath(dm_file))!r}). "
+                    "Choose an output path in a different directory, or use "
+                    "--in-place to migrate in place."
+                )
+            shutil.copy(dm_file, dm_out)
+            effective_dm = dm_out
     else:
         path = input_file
+        effective_dm = dm_file
 
     current = detect_version(path)
     order = ["grid-legacy", "1.0.0", "1.1.0"]
@@ -203,7 +226,7 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
         if step is None:
             raise ValueError(f"No migration step from {current} toward {target}")
         _, to_v, fn = step
-        _apply_step(fn, path, int_paths, dm_file)
+        _apply_step(fn, path, int_paths, effective_dm)
         current = to_v
     return path
 
