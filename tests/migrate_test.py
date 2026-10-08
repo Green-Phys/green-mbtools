@@ -149,3 +149,60 @@ def test_grid_to_100_missing_cell_raises(tmp_path):
             del f["Cell"]
     with pytest.raises(ValueError, match="Cell"):
         _grid_to_100(work)
+
+
+def test_migrate_grid_legacy_end_to_end(tmp_path):
+    import shutil, types
+    from green_mbtools.mint.migrate import migrate, detect_version
+    from green_mbtools.mint.seet_init import seet_init
+    legacy = os.path.join(DATA, "H2_GW_legacy")
+    work = tmp_path / "work"
+    work.mkdir()
+    shutil.copy(os.path.join(legacy, "input.h5"), work / "input.h5")
+    shutil.copy(os.path.join(legacy, "sim.h5"), work / "sim.h5")
+    out = str(work / "input_migrated.h5")
+
+    returned = migrate(str(work / "input.h5"), output=out)
+
+    assert returned == out
+    assert detect_version(out) == "1.1.0"
+    # the migrated file is accepted by the 1.1.0 reader and expands to full BZ
+    args = types.SimpleNamespace(input_file=out, gf2_input_file=str(work / "sim.h5"))
+    F, S, T, dm, dm_s, kmesh, kmesh_sc = seet_init(args).get_input_data()
+    assert S.shape[1] == 27
+
+
+def test_migrate_already_111_is_noop(tmp_path):
+    import shutil
+    from green_mbtools.mint.migrate import migrate
+    src = os.path.join(DATA, "H2_GW", "input.h5")  # already 1.1.0
+    work = str(tmp_path / "input.h5")
+    shutil.copy(src, work)
+    before = open(work, "rb").read()
+    migrate(work, in_place=True)
+    assert open(work, "rb").read() == before
+
+
+def test_migrate_newfile_refuses_clobber(tmp_path):
+    import shutil
+    from green_mbtools.mint.migrate import migrate
+    src = os.path.join(DATA, "migrate", "v100_input.h5")
+    work = str(tmp_path / "input.h5"); shutil.copy(src, work)
+    existing = str(tmp_path / "out.h5")
+    open(existing, "w").close()
+    with pytest.raises(FileExistsError):
+        migrate(work, output=existing)
+    # original untouched
+    with h5py.File(work, "r") as f:
+        assert f.attrs["__green_version__"] == "1.0.0"
+
+
+def test_cli_smoke(tmp_path):
+    import shutil, subprocess, sys
+    src = os.path.join(DATA, "H2_GW_legacy", "input.h5")
+    work = str(tmp_path / "input.h5"); shutil.copy(src, work)
+    out = str(tmp_path / "out.h5")
+    subprocess.run([sys.executable, "-m", "green_mbtools.mint.migrate",
+                    "--input", work, "--output", out], check=True)
+    from green_mbtools.mint.migrate import detect_version
+    assert detect_version(out) == "1.1.0"

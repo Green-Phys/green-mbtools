@@ -150,3 +150,76 @@ def _grid_to_100(input_file, int_paths=()):
         del f["grid"]
         f.attrs["__green_version__"] = "1.0.0"
     _bump_meta_version(int_paths, "1.0.0")
+
+
+STEPS = [
+    ("grid-legacy", "1.0.0", _grid_to_100),
+    ("1.0.0", "1.1.0", _v100_to_110),
+]
+
+
+def _apply_step(fn, path, int_paths, dm_file):
+    # _grid_to_100 takes no dm_file; _v100_to_110 does. Dispatch by identity.
+    if fn is _v100_to_110:
+        fn(path, dm_file=dm_file, int_paths=int_paths)
+    else:
+        fn(path, int_paths=int_paths)
+
+
+def migrate(input_file, output=None, int_paths=(), target="1.1.0",
+            in_place=False, force=False, dm_file=None):
+    """Migrate input_file to target version, returning the path of the result.
+
+    If in_place is False, output must be provided; the input file is copied to
+    output first and only the copy is modified. Pass force=True to overwrite an
+    existing output file. If in_place is True, the file is modified in place.
+    """
+    if not in_place:
+        if output is None:
+            raise ValueError("Provide output=... or set in_place=True")
+        if os.path.exists(output) and not force:
+            raise FileExistsError(
+                f"Output {output!r} exists; pass force=True to overwrite"
+            )
+        shutil.copy(input_file, output)
+        path = output
+    else:
+        path = input_file
+
+    current = detect_version(path)
+    order = ["grid-legacy", "1.0.0", "1.1.0"]
+    if order.index(current) > order.index(target):
+        raise ValueError(f"Cannot downgrade from {current} to {target}")
+    while current != target:
+        step = next((s for s in STEPS if s[0] == current), None)
+        if step is None:
+            raise ValueError(f"No migration step from {current} toward {target}")
+        _, to_v, fn = step
+        _apply_step(fn, path, int_paths, dm_file)
+        current = to_v
+    return path
+
+
+def _main(argv=None):
+    p = argparse.ArgumentParser(prog="python -m green_mbtools.mint.migrate",
+                                description="Migrate green-mbtools input files to 1.1.0.")
+    p.add_argument("--input", required=True)
+    grp = p.add_mutually_exclusive_group(required=True)
+    grp.add_argument("--output")
+    grp.add_argument("--in-place", action="store_true")
+    p.add_argument("--int-path", action="append", default=[], dest="int_paths")
+    p.add_argument("--dm", dest="dm_file", default=None)
+    p.add_argument("--target", default="1.1.0")
+    p.add_argument("--force", action="store_true")
+    a = p.parse_args(argv)
+    dm = a.dm_file
+    if dm is None and not a.in_place and a.output:
+        cand = os.path.join(os.path.dirname(os.path.abspath(a.input)), "dm.h5")
+        dm = cand if os.path.exists(cand) else None
+    out = migrate(a.input, output=a.output, int_paths=tuple(a.int_paths),
+                  target=a.target, in_place=a.in_place, force=a.force, dm_file=dm)
+    print(f"Migrated to {a.target}: {out}")
+
+
+if __name__ == "__main__":
+    _main(sys.argv[1:])
