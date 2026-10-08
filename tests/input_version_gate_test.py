@@ -37,3 +37,9 @@ def test_seet_init_rejects_legacy_input():
     from green_mbtools.mint.seet_init import seet_init
     with pytest.raises(ValueError):
         seet_init(_legacy_args()).get_input_data()
+
+
+def test_rejection_message_points_to_migrate():
+    with pytest.raises(ValueError) as exc:
+        require_input_version("1.0.0")
+    assert "green_mbtools.mint.migrate" in str(exc.value)
