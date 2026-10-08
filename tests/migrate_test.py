@@ -100,7 +100,9 @@ def test_grid_to_100(tmp_path):
         g_conj = f["grid/conj_list"][()]
         g_kmesh = f["grid/k_mesh"][()]
         nso = f["HF/S-k"].shape[2]
-        nk = f["HF/nk"][()]
+        # full-BZ k-count derived from grid/index (shape = (nk_full,)),
+        # NOT from HF/nk which is the per-axis mesh dimension.
+        nk_full = len(g_index)
 
     _grid_to_100(work)
 
@@ -113,10 +115,13 @@ def test_grid_to_100(tmp_path):
         np.testing.assert_array_equal(k["ibz2bz"][()], g_irlist)
         np.testing.assert_array_equal(k["tr_conj"][()], g_conj.astype(k["tr_conj"].dtype))
         assert int(k["n_stars"][()]) == len(g_irlist)
-        # identity AO transforms, shape (nk, nso, nso)
+        # identity AO transforms, full shape (nk_full, nso, nso)
         ao = k["k_sym_transform_ao"][()]
-        assert ao.shape == (nk, nso, nso) and ao.dtype == np.complex128
-        np.testing.assert_array_equal(ao, np.broadcast_to(np.eye(nso), (nk, nso, nso)))
+        assert ao.shape == (nk_full, nso, nso) and ao.dtype == np.complex128
+        np.testing.assert_array_equal(ao, np.broadcast_to(np.eye(nso), (nk_full, nso, nso)))
+        # symmetry/k/nk must equal the full-BZ count, not the per-axis dim
+        assert int(k["nk"][()]) == nk_full
+        assert ao.shape[0] == len(k["bz2ibz"][()])
         # a sample star: full-BZ indices whose rep is ibz2bz[1]
         exp_star1 = np.sort(np.where(g_index == g_irlist[1])[0])
         np.testing.assert_array_equal(np.sort(k["stars"]["1"][()]), exp_star1)

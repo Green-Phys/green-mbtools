@@ -80,25 +80,24 @@ def _synthesize_pairs(input_file, kmesh):
     """Return the five symmetry/pairs arrays, recomputed from the stored Cell."""
     from pyscf.pbc.lib.chkfile import load_cell
     cell = None
-    try:
-        with h5py.File(input_file, "r") as f:
-            has_cell = "Cell" in f
-        if has_cell:
-            cell = load_cell(input_file)
-    except Exception:
-        cell = None
-    # Fall back to legacy 'Cell' key (pre-1.0.0 files store cell under 'Cell',
-    # not 'mol' as pyscf's load_cell expects).
-    if cell is None:
+    with h5py.File(input_file, "r") as f:
+        has_cell = "Cell" in f
+    if has_cell:
+        # Try pyscf's load_cell first (expects 'mol' key); fall back to the
+        # legacy 'Cell' key (pre-1.0.0 files store the cell JSON under 'Cell').
         try:
-            import pyscf.pbc.gto
-            with h5py.File(input_file, "r") as f:
-                if "Cell" in f:
-                    cell_bytes = f["Cell"][()]
-            cell_str = cell_bytes.decode() if isinstance(cell_bytes, bytes) else cell_bytes
-            cell = pyscf.pbc.gto.loads(cell_str)
+            cell = load_cell(input_file)
         except Exception:
             cell = None
+        if cell is None:
+            try:
+                import pyscf.pbc.gto
+                with h5py.File(input_file, "r") as f:
+                    cell_bytes = f["Cell"][()]
+                cell_str = cell_bytes.decode() if isinstance(cell_bytes, bytes) else cell_bytes
+                cell = pyscf.pbc.gto.loads(cell_str)
+            except Exception:
+                cell = None
     if cell is None:
         raise ValueError(
             f"Cannot synthesize symmetry/pairs for {input_file!r}: no 'Cell' "
@@ -117,12 +116,15 @@ def _synthesize_pairs(input_file, kmesh):
 def _grid_to_100(input_file, int_paths=()):
     with h5py.File(input_file, "a") as f:
         grid = f["grid"]
-        index = grid["index"][()]          # bz2ibz
+        index = grid["index"][()]          # bz2ibz; shape (nk_full,)
         irlist = grid["ir_list"][()]       # ibz2bz
         conj = grid["conj_list"][()]
         kmesh = grid["k_mesh"][()]
         nso = f["HF/S-k"].shape[2]
-        nk = int(f["HF/nk"][()])
+        # HF/nk is the per-axis Monkhorst-Pack dimension (e.g. 3 for 3x3x3),
+        # NOT the full-BZ count. Derive nk from grid/index which has one entry
+        # per full-BZ k-point.
+        nk = len(index)
 
         k = f.require_group("symmetry/k")
         k["mesh"] = grid["k_mesh"][()]
