@@ -55,3 +55,31 @@ def test_detect_100_from_git_fixture(tmp_path):
             stdout=fh, check=True, cwd=os.path.dirname(DATA),
         )
     assert detect_version(p) == "1.0.0"
+
+
+def test_v100_to_110(tmp_path):
+    import shutil
+    from green_mbtools.mint.migrate import _v100_to_110, _bump_meta_version
+    src = os.path.join(DATA, "migrate", "v100_input.h5")
+    work = str(tmp_path / "input.h5")
+    shutil.copy(src, work)
+    # a stand-in integral meta.h5
+    intdir = tmp_path / "df_int"
+    intdir.mkdir()
+    with h5py.File(intdir / "meta.h5", "w") as m:
+        m.attrs["__green_version__"] = "1.0.0"
+
+    # expected values via the float+2 decode of the source
+    with h5py.File(src, "r") as f:
+        exp_S = f["HF/S-k"][()].view(np.complex128).reshape(f["HF/S-k"].shape[:-1])
+
+    _v100_to_110(work, dm_file=None, int_paths=(str(intdir),))
+
+    with h5py.File(work, "r") as f:
+        assert f.attrs["__green_version__"] == "1.1.0"
+        for name in ("HF/Fock-k", "HF/S-k", "HF/H-k"):
+            assert f[name].dtype == np.complex128
+            assert "__complex__" not in f[name].attrs
+        np.testing.assert_array_equal(f["HF/S-k"][()], exp_S)
+    with h5py.File(intdir / "meta.h5", "r") as m:
+        assert m.attrs["__green_version__"] == "1.1.0"

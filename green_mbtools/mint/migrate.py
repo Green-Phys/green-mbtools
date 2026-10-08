@@ -52,3 +52,23 @@ def detect_version(input_file):
         f"Unrecognized input.h5 structure in {input_file!r}: "
         "no 'symmetry' or 'grid' datagroup found."
     )
+
+
+def _bump_meta_version(int_paths, version):
+    for d in int_paths:
+        meta = os.path.join(d, "meta.h5")
+        if not os.path.exists(meta):
+            raise ValueError(f"Integral meta.h5 not found in {d!r}")
+        with h5py.File(meta, "a") as m:
+            m.attrs["__green_version__"] = version
+
+
+def _v100_to_110(input_file, dm_file=None, int_paths=()):
+    with h5py.File(input_file, "a") as f:
+        _to_native_complex(f, INPUT_DATASETS)
+        f.attrs["__green_version__"] = "1.1.0"
+    if dm_file is not None and os.path.exists(dm_file):
+        with h5py.File(dm_file, "a") as f:
+            _to_native_complex(f, DM_DATASETS)
+            f.attrs["__green_version__"] = "1.1.0"
+    _bump_meta_version(int_paths, "1.1.0")
