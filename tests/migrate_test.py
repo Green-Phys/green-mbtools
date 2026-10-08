@@ -83,3 +83,64 @@ def test_v100_to_110(tmp_path):
         np.testing.assert_array_equal(f["HF/S-k"][()], exp_S)
     with h5py.File(intdir / "meta.h5", "r") as m:
         assert m.attrs["__green_version__"] == "1.1.0"
+
+
+def test_grid_to_100(tmp_path):
+    import shutil
+    from green_mbtools.mint.migrate import _grid_to_100, detect_version
+    from green_mbtools.mint.integral_utils import integrals_grid
+
+    src = os.path.join(DATA, "H2_GW_legacy", "input.h5")
+    work = str(tmp_path / "input.h5")
+    shutil.copy(src, work)
+
+    with h5py.File(src, "r") as f:
+        g_index = f["grid/index"][()]
+        g_irlist = f["grid/ir_list"][()]
+        g_conj = f["grid/conj_list"][()]
+        g_kmesh = f["grid/k_mesh"][()]
+        nso = f["HF/S-k"].shape[2]
+        nk = f["HF/nk"][()]
+
+    _grid_to_100(work)
+
+    assert detect_version(work) == "1.0.0"
+    with h5py.File(work, "r") as f:
+        assert f.attrs["__green_version__"] == "1.0.0"
+        assert "grid" not in f
+        k = f["symmetry/k"]
+        np.testing.assert_array_equal(k["bz2ibz"][()], g_index)
+        np.testing.assert_array_equal(k["ibz2bz"][()], g_irlist)
+        np.testing.assert_array_equal(k["tr_conj"][()], g_conj.astype(k["tr_conj"].dtype))
+        assert int(k["n_stars"][()]) == len(g_irlist)
+        # identity AO transforms, shape (nk, nso, nso)
+        ao = k["k_sym_transform_ao"][()]
+        assert ao.shape == (nk, nso, nso) and ao.dtype == np.complex128
+        np.testing.assert_array_equal(ao, np.broadcast_to(np.eye(nso), (nk, nso, nso)))
+        # a sample star: full-BZ indices whose rep is ibz2bz[1]
+        exp_star1 = np.sort(np.where(g_index == g_irlist[1])[0])
+        np.testing.assert_array_equal(np.sort(k["stars"]["1"][()]), exp_star1)
+        # Fock/S/H still float+2 at the 1.0.0 stage
+        assert f["HF/S-k"].dtype == np.float64 and f["HF/S-k"].shape[-1] == 2
+        # pairs match a fresh integrals_grid computation
+        # legacy file stores cell under 'Cell' key, not 'mol' (pyscf load_cell expects 'mol')
+        import pyscf.pbc.gto
+        with h5py.File(src, "r") as fc:
+            cell_str = fc["Cell"][()]
+        cell = pyscf.pbc.gto.loads(cell_str)
+        kptij_idx, kij_conj, kij_trans, kpair_irre, num_kpair, _, _ = integrals_grid(cell, g_kmesh)
+        np.testing.assert_array_equal(f["symmetry/pairs/num_kpair_stored"][()], num_kpair)
+        np.testing.assert_array_equal(f["symmetry/pairs/kpair_irre_list"][()], kpair_irre)
+
+
+def test_grid_to_100_missing_cell_raises(tmp_path):
+    import shutil
+    from green_mbtools.mint.migrate import _grid_to_100
+    src = os.path.join(DATA, "H2_GW_legacy", "input.h5")
+    work = str(tmp_path / "input.h5")
+    shutil.copy(src, work)
+    with h5py.File(work, "a") as f:
+        if "Cell" in f:
+            del f["Cell"]
+    with pytest.raises(ValueError, match="Cell"):
+        _grid_to_100(work)
