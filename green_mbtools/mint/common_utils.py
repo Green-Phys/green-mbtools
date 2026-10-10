@@ -332,12 +332,9 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data["HF/nk"] = nk
     inp_data["HF/Energy"] = mf.e_tot
     inp_data["HF/Energy_nuc"] = mf.energy_nuc()
-    inp_data["HF/Fock-k"] = F.view(np.float64).reshape(F.shape[0], F.shape[1], F.shape[2], F.shape[3], 2)
-    inp_data["HF/Fock-k"].attrs["__complex__"] = np.int8(1)
-    inp_data["HF/S-k"] = S.view(np.float64).reshape(S.shape[0], S.shape[1], S.shape[2], S.shape[3], 2)
-    inp_data["HF/S-k"].attrs["__complex__"] = np.int8(1)
-    inp_data["HF/H-k"] = T.view(np.float64).reshape(T.shape[0], T.shape[1], T.shape[2], T.shape[3], 2)
-    inp_data["HF/H-k"].attrs["__complex__"] = np.int8(1)
+    inp_data["HF/Fock-k"] = F
+    inp_data["HF/S-k"] = S
+    inp_data["HF/H-k"] = T
     inp_data["HF/madelung"] = madelung
     inp_data["HF/mo_energy"] = mf.mo_energy
     inp_data["HF/mo_coeff"] = mf.mo_coeff
@@ -355,8 +352,7 @@ def save_data(args, mycell, mf, kmesh, ind, weight, num_ik, ir_list, conj_list, 
     inp_data.close()
     chk.save(args.output_path, "Cell", mycell.dumps())
     inp_data = h5py.File(os.path.join(os.path.dirname(args.output_path),"dm.h5"), "w")
-    inp_data["HF/dm-k"] = hf_dm.view(np.float64).reshape(hf_dm.shape[0], hf_dm.shape[1], hf_dm.shape[2], hf_dm.shape[3], 2)
-    inp_data["HF/dm-k"].attrs["__complex__"] = np.int8(1)
+    inp_data["HF/dm-k"] = hf_dm
     inp_data["dm_gamma"] = hf_dm[:, 0, :, :]
     inp_data.close()
 

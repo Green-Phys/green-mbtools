@@ -54,10 +54,8 @@ output = "test.h5"  # "666Si_GW_WGXWLF.h5"
 ##################
 
 f = h5py.File(input_path, 'r')
-Sk = f["HF/S-k"][()].view(complex)
-Sk = Sk.reshape(Sk.shape[:-1])
-Hk = f["HF/H-k"][()].view(complex)
-Hk = Hk.reshape(Hk.shape[:-1])
+Sk = f["HF/S-k"][()]
+Hk = f["HF/H-k"][()]
 kmesh_scaled = f["/symmetry/k/mesh_scaled"][()]
 ibz2bz = f["/symmetry/k/ibz2bz"][()]
 bz2ibz = f["/symmetry/k/bz2ibz"][()]

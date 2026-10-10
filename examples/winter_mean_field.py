@@ -60,10 +60,8 @@ output = "H2_LDA_GXMGR.h5"
 f = h5py.File(input_path, 'r')
 kmesh_scaled = f["/symmetry/k/mesh_scaled"][()]
 nk = f["HF/nk"][()]
-Fk = f["HF/Fock-k"][()].view(complex)
-Sk = f["HF/S-k"][()].view(complex)
-Fk = Fk.reshape(Fk.shape[:-1])
-Sk = Sk.reshape(Sk.shape[:-1])
+Fk = f["HF/Fock-k"][()]
+Sk = f["HF/S-k"][()]
 nao = Fk.shape[-1]
 f.close()
 
