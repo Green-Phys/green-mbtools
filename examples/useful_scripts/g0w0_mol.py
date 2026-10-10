@@ -172,9 +172,18 @@ mol.build()
 # ---------------------------------------------------------------------------
 if args.dm is not None:
     print("Loading density matrix from", args.dm)
-    f_dm = h5py.File(args.dm, 'r')
-    dm = f_dm["HF/dm-k"][()]
-    f_dm.close()
+    with h5py.File(args.dm, 'r') as f_dm:
+        dm_dataset = f_dm["HF/dm-k"]
+        if not np.issubdtype(dm_dataset.dtype, np.complexfloating):
+            raise ValueError(
+                f"HF/dm-k in {args.dm!r} must use native complex storage; "
+                "legacy float+2 density matrices are unsupported. "
+                "Migrate the input and density matrix together with: "
+                "python -m green_mbtools.mint.migrate --input <input.h5> "
+                "--dm <dm.h5> --output <new-directory>/input.h5 "
+                "(use an existing, separate output directory)."
+            )
+        dm = dm_dataset[()]
 else:
     print("Reconstructing density matrix from HF/mo_coeff")
     dm = np.zeros((ns, nk, nao, nao), dtype=complex)

@@ -10,7 +10,7 @@ DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
 
 
 def test_detect_grid_legacy():
-    assert detect_version(os.path.join(DATA, "H2_GW_legacy", "input.h5")) == "grid-legacy"
+    assert detect_version(os.path.join(DATA, "H2_GW_legacy", "input.h5")) is None
 
 
 def test_detect_111():
@@ -18,12 +18,11 @@ def test_detect_111():
     assert detect_version(os.path.join(DATA, "H2_GW", "input.h5")) == "1.1.0"
 
 
-def test_detect_unrecognized_raises(tmp_path):
+def test_detect_unversioned_returns_none(tmp_path):
     p = str(tmp_path / "junk.h5")
     with h5py.File(p, "w") as f:
         f["foo"] = np.zeros(3)
-    with pytest.raises(ValueError):
-        detect_version(p)
+    assert detect_version(p) is None
 
 
 def _write_legacy(path, name, arr):
@@ -52,6 +51,87 @@ def test_to_native_complex_core(tmp_path):
 def test_detect_100():
     # A real 1.0.0 file: symmetry/ datagroup + float+2 matrices.
     assert detect_version(os.path.join(DATA, "migrate", "v100_input.h5")) == "1.0.0"
+
+
+@pytest.mark.parametrize("dtype,shape,marker", [
+    (np.float32, (2, 2, 2), 1),
+    (np.int64, (2, 2, 2), 1),
+    (np.float64, (2, 2, 3), 1),
+    (np.float64, (), 1),
+    (np.float64, (2, 2, 2), None),
+])
+def test_invalid_legacy_storage_is_not_modified(tmp_path, dtype, shape, marker):
+    from green_mbtools.mint.migrate import migrate
+
+    src = tmp_path / "input.h5"
+    valid = np.ones((1, 1, 2, 2), dtype=np.complex128)
+    _write_legacy(src, "HF/Fock-k", valid)
+    with h5py.File(src, "a") as f:
+        f.attrs["__green_version__"] = "1.0.0"
+        f["HF/S-k"] = np.zeros(shape, dtype=dtype)
+        if marker is not None:
+            f["HF/S-k"].attrs["__complex__"] = marker
+        with pytest.raises(ValueError, match="HF/S-k.*expected float64"):
+            _to_native_complex(f, INPUT_DATASETS)
+        # A valid earlier dataset must not be converted before rejection.
+        assert f["HF/Fock-k"].dtype == np.float64
+        assert f["HF/Fock-k"].attrs["__complex__"] == 1
+        assert f["HF/S-k"].dtype == np.dtype(dtype)
+        assert f["HF/S-k"].shape == shape
+
+    before = src.read_bytes()
+    out = tmp_path / "output.h5"
+    for in_place in (False, True):
+        with pytest.raises(ValueError, match="HF/S-k"):
+            migrate(src, output=out, in_place=in_place)
+        assert src.read_bytes() == before
+        assert not out.exists()
+
+
+@pytest.mark.parametrize("version", ["0.2.4", "0.2.5", "0.3.0", "1.0.0", "1.1.0", "2.0.0"])
+def test_detect_returns_stored_version(tmp_path, version):
+    src = tmp_path / "input.h5"
+    with h5py.File(src, "w") as f:
+        f.attrs["__green_version__"] = version
+    assert detect_version(src) == version
+
+
+def test_migrate_rejects_unknown_version(tmp_path):
+    from green_mbtools.mint.migrate import migrate
+
+    src = tmp_path / "input.h5"
+    with h5py.File(src, "w") as f:
+        f.attrs["__green_version__"] = "2.0.0"
+    out = tmp_path / "output.h5"
+    with pytest.raises(ValueError, match="Detected version '2.0.0'"):
+        migrate(src, output=out)
+    assert not out.exists()
+
+
+def test_migrate_rejects_unversioned_input(tmp_path):
+    import shutil
+    from green_mbtools.mint.migrate import migrate
+
+    src = tmp_path / "input.h5"
+    shutil.copy(os.path.join(DATA, "H2_GW_legacy", "input.h5"), src)
+    before = src.read_bytes()
+    out = tmp_path / "output.h5"
+    for in_place in (False, True):
+        with pytest.raises(ValueError, match="Unversioned.*green-mbpt/python/migrate.py"):
+            migrate(src, output=out, in_place=in_place)
+        assert src.read_bytes() == before
+        assert not out.exists()
+
+
+@pytest.mark.parametrize("target", ["0.2.4", "0.3.0", "grid-legacy", "2.0.0"])
+def test_migrate_rejects_unsupported_target(tmp_path, target):
+    from green_mbtools.mint.migrate import migrate
+
+    src = os.path.join(DATA, "migrate", "v100_input.h5")
+    out = tmp_path / "output.h5"
+    with pytest.raises(ValueError, match="Unknown target version"):
+        migrate(src, output=out, target=target)
+    assert not out.exists()
 
 
 def test_v100_to_110(tmp_path):
@@ -150,7 +230,9 @@ def test_grid_to_100_missing_cell_raises(tmp_path):
         _grid_to_100(work)
 
 
-def test_migrate_grid_legacy_end_to_end(tmp_path):
+@pytest.mark.parametrize("version", ["0.2.4", "0.2.5", "0.3.0"])
+@pytest.mark.parametrize("target", ["1.0.0", "1.1.0"])
+def test_migrate_grid_end_to_end(tmp_path, version, target):
     import shutil, types
     from green_mbtools.mint.migrate import migrate, detect_version
     from green_mbtools.mint.seet_init import seet_init
@@ -164,10 +246,20 @@ def test_migrate_grid_legacy_end_to_end(tmp_path):
     shutil.copy(os.path.join(migrate_data, "legacy_sim.h5"), work / "sim.h5")
     out = str(work / "input_migrated.h5")
 
-    returned = migrate(str(work / "input.h5"), output=out)
+    with h5py.File(work / "input.h5", "a") as f:
+        f.attrs["__green_version__"] = version
+
+    returned = migrate(str(work / "input.h5"), output=out, target=target)
 
     assert returned == out
-    assert detect_version(out) == "1.1.0"
+    assert detect_version(out) == target
+    assert detect_version(work / "input.h5") == version
+    with h5py.File(out, "r") as f:
+        assert "grid" not in f
+        assert "symmetry" in f
+        assert f["HF/S-k"].dtype == (np.float64 if target == "1.0.0" else np.complex128)
+    if target == "1.0.0":
+        return
     # the migrated file is accepted by the 1.1.0 reader and expands to full BZ
     args = types.SimpleNamespace(input_file=out, gf2_input_file=str(work / "sim.h5"))
     F, S, T, dm, dm_s, kmesh, kmesh_sc = seet_init(args).get_input_data()
@@ -203,6 +295,8 @@ def test_cli_smoke(tmp_path):
     import shutil, subprocess, sys
     src = os.path.join(DATA, "H2_GW_legacy", "input.h5")
     work = str(tmp_path / "input.h5"); shutil.copy(src, work)
+    with h5py.File(work, "a") as f:
+        f.attrs["__green_version__"] = "0.2.4"
     out = str(tmp_path / "out.h5")
     subprocess.run([sys.executable, "-m", "green_mbtools.mint.migrate",
                     "--input", work, "--output", out], check=True)
@@ -210,13 +304,44 @@ def test_cli_smoke(tmp_path):
     assert detect_version(out) == "1.1.0"
 
 
-def _write_v100_dm(path, shape=(2, 2, 2, 2, 2)):
-    """Write a minimal float+2 dm.h5 that looks like a 1.0.0 density matrix."""
+def _write_v100_dm(path, shape=(2, 2, 2, 2)):
+    """Write legacy (ns, nk, nao, nao, 2) storage for a 4D density matrix."""
     arr = np.ones(shape, dtype=np.complex128)
     with h5py.File(path, "w") as f:
         f["HF/dm-k"] = arr.view(np.float64).reshape(arr.shape + (2,))
         f["HF/dm-k"].attrs["__complex__"] = np.int8(1)
         f.attrs["__green_version__"] = "1.0.0"
+
+
+def test_migrate_already_111_upgrades_companions(tmp_path):
+    import shutil
+    from green_mbtools.mint.migrate import migrate
+
+    input_file = tmp_path / "input.h5"
+    shutil.copy(os.path.join(DATA, "H2_GW", "input.h5"), input_file)
+    with h5py.File(input_file, "r") as f:
+        matrices = {name: f[name][()] for name in INPUT_DATASETS}
+    dm_file = tmp_path / "dm.h5"
+    _write_v100_dm(dm_file)
+    int_dir = tmp_path / "df_int"
+    int_dir.mkdir()
+    with h5py.File(int_dir / "meta.h5", "w") as f:
+        f.attrs["__green_version__"] = "1.0.0"
+
+    migrate(input_file, in_place=True, dm_file=dm_file, int_paths=(int_dir,))
+
+    with h5py.File(input_file, "r") as f:
+        assert f.attrs["__green_version__"] == "1.1.0"
+        for name, expected in matrices.items():
+            np.testing.assert_array_equal(f[name][()], expected)
+    with h5py.File(dm_file, "r") as f:
+        assert f.attrs["__green_version__"] == "1.1.0"
+        assert f["HF/dm-k"].dtype == np.complex128
+        assert f["HF/dm-k"].shape == (2, 2, 2, 2)
+        assert "__complex__" not in f["HF/dm-k"].attrs
+        np.testing.assert_array_equal(f["HF/dm-k"][()], np.ones((2, 2, 2, 2)))
+    with h5py.File(int_dir / "meta.h5", "r") as f:
+        assert f.attrs["__green_version__"] == "1.1.0"
 
 
 def test_newfile_migrate_dm_nondestructive(tmp_path):
@@ -250,13 +375,75 @@ def test_newfile_migrate_dm_nondestructive(tmp_path):
     assert os.path.exists(out_dm), "migrated dm.h5 not created beside output"
     with h5py.File(out_dm, "r") as f:
         assert f["HF/dm-k"].dtype == np.complex128
+        assert f["HF/dm-k"].shape == (2, 2, 2, 2)
         assert "__complex__" not in f["HF/dm-k"].attrs
         assert f.attrs["__green_version__"] == "1.1.0"
     # the source dm still has the float+2 layout and 1.0.0 version
     with h5py.File(src_dm, "r") as f:
         assert f["HF/dm-k"].dtype == np.float64
+        assert f["HF/dm-k"].shape == (2, 2, 2, 2, 2)
         assert "__complex__" in f["HF/dm-k"].attrs
         assert f.attrs["__green_version__"] == "1.0.0"
+
+
+@pytest.mark.parametrize("in_place", [False, True])
+def test_migrate_invalid_companion_preserves_files(tmp_path, in_place):
+    import shutil
+    from green_mbtools.mint.migrate import migrate
+
+    src_input = tmp_path / "input.h5"
+    shutil.copy(os.path.join(DATA, "migrate", "v100_input.h5"), src_input)
+    src_dm = tmp_path / "dm.h5"
+    _write_v100_dm(src_dm)
+    with h5py.File(src_dm, "a") as f:
+        del f["HF/dm-k"].attrs["__complex__"]
+    input_before = src_input.read_bytes()
+    dm_before = src_dm.read_bytes()
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+
+    with pytest.raises(ValueError, match="HF/dm-k.*expected float64"):
+        migrate(src_input, output=out_dir / "input.h5", dm_file=src_dm,
+                in_place=in_place)
+
+    assert src_input.read_bytes() == input_before
+    assert src_dm.read_bytes() == dm_before
+    assert list(out_dir.iterdir()) == []
+
+
+def test_newfile_migrate_dm_refuses_clobber_unless_forced(tmp_path):
+    from pathlib import Path
+    from green_mbtools.mint.migrate import migrate
+
+    src_input = Path(DATA) / "migrate" / "v100_input.h5"
+    src_dm = tmp_path / "dm.h5"
+    _write_v100_dm(src_dm)
+    input_before = src_input.read_bytes()
+    dm_before = src_dm.read_bytes()
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    out_input = out_dir / "input.h5"
+    out_dm = out_dir / "dm.h5"
+    existing_dm = b"Existing destination must be preserved"
+    out_dm.write_bytes(existing_dm)
+
+    with pytest.raises(FileExistsError, match=r"dm\.h5.*force=True"):
+        migrate(src_input, output=out_input, dm_file=src_dm)
+    assert out_dm.read_bytes() == existing_dm
+    assert not out_input.exists()
+    assert src_input.read_bytes() == input_before
+    assert src_dm.read_bytes() == dm_before
+
+    migrate(src_input, output=out_input, dm_file=src_dm, force=True)
+    assert detect_version(out_input) == "1.1.0"
+    with h5py.File(out_dm, "r") as f:
+        assert f.attrs["__green_version__"] == "1.1.0"
+        assert f["HF/dm-k"].dtype == np.complex128
+        assert f["HF/dm-k"].shape == (2, 2, 2, 2)
+        assert "__complex__" not in f["HF/dm-k"].attrs
+        np.testing.assert_array_equal(f["HF/dm-k"][()], np.ones((2, 2, 2, 2)))
+    assert src_input.read_bytes() == input_before
+    assert src_dm.read_bytes() == dm_before
 
 
 def test_newfile_migrate_dm_same_dir_raises(tmp_path):

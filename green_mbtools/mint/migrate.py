@@ -1,10 +1,11 @@
 """Migrate legacy green-mbtools input files to the current native-complex format.
 
-Source families: grid-legacy (pre-1.0.0, grid/ datagroup, float+2 matrices) and
+Source families: versioned 0.x (grid/ datagroup, float+2 matrices) and
 1.0.0 (symmetry/ datagroup, float+2). Target: 1.1.0 (native complex128).
-Migration is stepwise: grid-legacy -> 1.0.0 -> 1.1.0. VQ integral chunk data is
-never rewritten; only meta.h5 version strings and, for grid-legacy, the
-synthesized symmetry schema change.
+Migration is stepwise: 0.x -> 1.0.0 -> 1.1.0. VQ integral chunk data is
+never rewritten; only meta.h5 version strings and, for 0.x, the synthesized
+symmetry schema change. Unversioned input must first be upgraded using
+green-mbpt/python/migrate.py.
 
 Usage:
     python -m green_mbtools.mint.migrate --input in.h5 --output out.h5 \
@@ -24,41 +25,44 @@ INPUT_DATASETS = ("HF/Fock-k", "HF/S-k", "HF/H-k")
 DM_DATASETS = ("HF/dm-k",)
 
 
-def _to_native_complex(h5file, datasets):
-    converted = []
+def _legacy_complex_datasets(h5file, datasets):
+    """Validate legacy storage and return datasets that need conversion."""
+    legacy = []
     for name in datasets:
         if name not in h5file:
             continue
         ds = h5file[name]
-        if np.iscomplexobj(np.empty(0, dtype=ds.dtype)):
+        if isinstance(ds, h5py.Dataset) and np.issubdtype(ds.dtype, np.complexfloating):
             continue
+        if (not isinstance(ds, h5py.Dataset)
+                or ds.dtype != np.dtype(np.float64)
+                or not ds.shape or ds.shape[-1] != 2
+                or "__complex__" not in ds.attrs):
+            raise ValueError(
+                f"Unsupported legacy complex storage for {name!r} in "
+                f"{h5file.filename!r}: expected float64[..., 2] with "
+                "a __complex__ attribute, or a native complex dataset."
+            )
+        legacy.append(name)
+    return legacy
+
+
+def _to_native_complex(h5file, datasets):
+    # Validate all candidates before replacing any dataset.
+    converted = _legacy_complex_datasets(h5file, datasets)
+    for name in converted:
+        ds = h5file[name]
         arr = ds[()].view(np.complex128).reshape(ds.shape[:-1])
         del h5file[name]
         h5file[name] = arr
         if "__complex__" in h5file[name].attrs:
             del h5file[name].attrs["__complex__"]
-        converted.append(name)
     return converted
 
 
 def detect_version(input_file):
     with h5py.File(input_file, "r") as f:
-        version = f.attrs.get("__green_version__")
-        if version is None:
-            # No version stamp means a pre-1.0.0 file (the 0.2.4-era "grid"
-            # datagroup format). Treat it as the oldest known format and
-            # migrate from the grid-legacy baseline.
-            if "grid" in f:
-                return "grid-legacy"
-            raise ValueError(
-                f"Unrecognized input file {input_file!r}: no __green_version__ "
-                "attribute and no 'grid' datagroup."
-            )
-        # Versioned file: tell 1.0.0 (legacy float+2) from 1.1.0 (native
-        # complex) by how the k-resolved matrices are stored on disk.
-        if np.iscomplexobj(np.empty(0, dtype=f["HF/S-k"].dtype)):
-            return "1.1.0"
-        return "1.0.0"
+        return f.attrs.get("__green_version__")
 
 
 def _bump_meta_version(int_paths, version):
@@ -73,7 +77,8 @@ def _bump_meta_version(int_paths, version):
 def _v100_to_110(input_file, dm_file=None, int_paths=()):
     with h5py.File(input_file, "a") as f:
         _to_native_complex(f, INPUT_DATASETS)
-        f.attrs["__green_version__"] = "1.1.0"
+        if f.attrs.get("__green_version__") != "1.1.0":
+            f.attrs["__green_version__"] = "1.1.0"
     if dm_file is not None and os.path.exists(dm_file):
         with h5py.File(dm_file, "a") as f:
             _to_native_complex(f, DM_DATASETS)
@@ -148,17 +153,16 @@ def _grid_to_100(input_file, int_paths=()):
 
 
 STEPS = [
-    ("grid-legacy", "1.0.0", _grid_to_100),
+    ("0.x", "1.0.0", _grid_to_100),
     ("1.0.0", "1.1.0", _v100_to_110),
 ]
 
 
 def _apply_step(fn, path, int_paths, dm_file):
-    # _grid_to_100 takes no dm_file; _v100_to_110 does. Dispatch by identity.
-    if fn is _v100_to_110:
-        fn(path, dm_file=dm_file, int_paths=int_paths)
-    else:
+    if fn is _grid_to_100:
         fn(path, int_paths=int_paths)
+    else:
+        fn(path, dm_file=dm_file, int_paths=int_paths)
 
 
 def migrate(input_file, output=None, int_paths=(), target="1.1.0",
@@ -167,13 +171,39 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
 
     If in_place is False, output must be provided; the input file is copied to
     output first and only the copy is modified. Pass force=True to overwrite an
-    existing output file. If in_place is True, the file is modified in place.
+    existing output or companion dm file. If in_place is True, the file is
+    modified in place.
 
     In new-file mode (not in_place), if dm_file is provided the source dm.h5 is
     never mutated: a copy is placed beside the output file and that copy is
     migrated. The output directory must differ from the directory containing
     dm_file; if they are the same a ValueError is raised (use --in-place instead).
     """
+    # Reject unsupported storage before copying outputs or modifying any files.
+    current = detect_version(input_file)
+    if current is None:
+        raise ValueError(
+            "Unversioned input is unsupported. First upgrade it to 0.2.4 "
+            "using green-mbpt/python/migrate.py."
+        )
+    stage = "0.x" if isinstance(current, str) and current.startswith("0.") else current
+    targets = [step[1] for step in STEPS]
+    order = [STEPS[0][0]] + targets
+    if stage not in order:
+        raise ValueError(
+            f"Detected version {current!r} is unsupported; expected one of {order}."
+        )
+    if target not in targets:
+        raise ValueError(f"Unknown target version {target!r}; supported targets: {targets}")
+    if order.index(stage) > order.index(target):
+        raise ValueError(f"Cannot downgrade from {current} to {target}")
+
+    with h5py.File(input_file, "r") as f:
+        _legacy_complex_datasets(f, INPUT_DATASETS)
+    if dm_file is not None and os.path.exists(dm_file):
+        with h5py.File(dm_file, "r") as f:
+            _legacy_complex_datasets(f, DM_DATASETS)
+
     if not in_place:
         if output is None:
             raise ValueError("Provide output=... or set in_place=True")
@@ -181,7 +211,6 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
             raise FileExistsError(
                 f"Output {output!r} exists; pass force=True to overwrite"
             )
-        shutil.copy(input_file, output)
         path = output
         # Derive an output-side dm path so the source dm is never modified.
         effective_dm = None
@@ -198,31 +227,26 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
                     "Choose an output path in a different directory, or use "
                     "--in-place to migrate in place."
                 )
-            shutil.copy(dm_file, dm_out)
+            if os.path.exists(dm_out) and not force:
+                raise FileExistsError(
+                    f"Output {dm_out!r} exists; pass force=True to overwrite"
+                )
             effective_dm = dm_out
+        # Check both destinations before copying either file.
+        shutil.copy(input_file, output)
+        if effective_dm is not None:
+            shutil.copy(dm_file, effective_dm)
     else:
         path = input_file
         effective_dm = dm_file
 
-    current = detect_version(path)
-    order = ["grid-legacy", "1.0.0", "1.1.0"]
-    if current not in order:
-        raise ValueError(
-            f"Detected version {current!r} is not in known versions: {order}"
-        )
-    if target not in order:
-        raise ValueError(
-            f"Unknown target version {target!r}; known versions: {order}"
-        )
-    if order.index(current) > order.index(target):
-        raise ValueError(f"Cannot downgrade from {current} to {target}")
-    while current != target:
-        step = next((s for s in STEPS if s[0] == current), None)
-        if step is None:
-            raise ValueError(f"No migration step from {current} toward {target}")
-        _, to_v, fn = step
+    # An already-current input can still have legacy companions.
+    if stage == target == "1.1.0":
+        _v100_to_110(path, dm_file=effective_dm, int_paths=int_paths)
+    while stage != target:
+        _, to_version, fn = next(step for step in STEPS if step[0] == stage)
         _apply_step(fn, path, int_paths, effective_dm)
-        current = to_v
+        stage = to_version
     return path
 
 
@@ -235,7 +259,7 @@ def _main(argv=None):
     grp.add_argument("--in-place", action="store_true")
     p.add_argument("--int-path", action="append", default=[], dest="int_paths")
     p.add_argument("--dm", dest="dm_file", default=None)
-    p.add_argument("--target", default="1.1.0")
+    p.add_argument("--target", choices=[step[1] for step in STEPS], default="1.1.0")
     p.add_argument("--force", action="store_true")
     a = p.parse_args(argv)
     dm = a.dm_file

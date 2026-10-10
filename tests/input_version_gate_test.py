@@ -43,3 +43,19 @@ def test_rejection_message_points_to_migrate():
     with pytest.raises(ValueError) as exc:
         require_input_version("1.0.0")
     assert "green_mbtools.mint.migrate" in str(exc.value)
+
+
+@pytest.mark.parametrize("version", [None, "1.0.0"])
+def test_initialize_mb_post_rejects_old_input_before_reading_datasets(tmp_path, version):
+    import h5py
+    from green_mbtools.pesto.mb import initialize_MB_post
+
+    input_path = tmp_path / "input.h5"
+    with h5py.File(input_path, "w") as f:
+        if version is not None:
+            f.attrs["__green_version__"] = version
+    data = os.path.join(os.path.dirname(__file__), "test_data")
+    with pytest.raises(ValueError, match="green_mbtools.mint.migrate"):
+        initialize_MB_post(
+            os.path.join(data, "H2_GW", "sim.h5"), input_path, ir_file=None
+        )
