@@ -5,7 +5,7 @@ Source families: versioned 0.x (grid/ datagroup, float+2 matrices) and
 Migration is stepwise: 0.x -> 1.0.0 -> 1.1.0. VQ integral chunk data is
 never rewritten; only meta.h5 version strings and, for 0.x, the synthesized
 symmetry schema change. Unversioned input must first be upgraded using
-green-mbpt/python/migrate.py.
+green-mbpt/python/migrate_legacy_to_green.py.
 
 Usage:
     python -m green_mbtools.mint.migrate --input in.h5 --output out.h5 \
@@ -184,7 +184,7 @@ def migrate(input_file, output=None, int_paths=(), target="1.1.0",
     if current is None:
         raise ValueError(
             "Unversioned input is unsupported. First upgrade it to 0.2.4 "
-            "using green-mbpt/python/migrate.py."
+            "using green-mbpt/python/migrate_legacy_to_green.py."
         )
     stage = "0.x" if isinstance(current, str) and current.startswith("0.") else current
     targets = [step[1] for step in STEPS]

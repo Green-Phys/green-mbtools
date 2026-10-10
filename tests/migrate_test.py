@@ -117,7 +117,7 @@ def test_migrate_rejects_unversioned_input(tmp_path):
     before = src.read_bytes()
     out = tmp_path / "output.h5"
     for in_place in (False, True):
-        with pytest.raises(ValueError, match="Unversioned.*green-mbpt/python/migrate.py"):
+        with pytest.raises(ValueError, match="Unversioned.*migrate_legacy_to_green.py"):
             migrate(src, output=out, in_place=in_place)
         assert src.read_bytes() == before
         assert not out.exists()
