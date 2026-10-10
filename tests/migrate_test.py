@@ -38,7 +38,11 @@ def test_to_native_complex_core(tmp_path):
     _write_legacy(p, "HF/S-k", arr)
     with h5py.File(p, "a") as f:
         out = _to_native_complex(f, ("HF/S-k",))
+        # idempotent: a second pass finds it already complex and skips it;
+        # an absent name is skipped too.
+        again = _to_native_complex(f, ("HF/S-k", "HF/Fock-k"))
     assert out == ["HF/S-k"]
+    assert again == []
     with h5py.File(p, "r") as f:
         assert f["HF/S-k"].dtype == np.complex128
         assert "__complex__" not in f["HF/S-k"].attrs

@@ -43,17 +43,22 @@ def _to_native_complex(h5file, datasets):
 
 def detect_version(input_file):
     with h5py.File(input_file, "r") as f:
-        if "symmetry" in f:
-            s = f["HF/S-k"]
-            if np.iscomplexobj(np.empty(0, dtype=s.dtype)):
-                return "1.1.0"
-            return "1.0.0"
-        if "grid" in f:
-            return "grid-legacy"
-    raise ValueError(
-        f"Unrecognized input.h5 structure in {input_file!r}: "
-        "no 'symmetry' or 'grid' datagroup found."
-    )
+        version = f.attrs.get("__green_version__")
+        if version is None:
+            # No version stamp means a pre-1.0.0 file (the 0.2.4-era "grid"
+            # datagroup format). Treat it as the oldest known format and
+            # migrate from the grid-legacy baseline.
+            if "grid" in f:
+                return "grid-legacy"
+            raise ValueError(
+                f"Unrecognized input file {input_file!r}: no __green_version__ "
+                "attribute and no 'grid' datagroup."
+            )
+        # Versioned file: tell 1.0.0 (legacy float+2) from 1.1.0 (native
+        # complex) by how the k-resolved matrices are stored on disk.
+        if np.iscomplexobj(np.empty(0, dtype=f["HF/S-k"].dtype)):
+            return "1.1.0"
+        return "1.0.0"
 
 
 def _bump_meta_version(int_paths, version):
@@ -77,32 +82,22 @@ def _v100_to_110(input_file, dm_file=None, int_paths=()):
 
 
 def _synthesize_pairs(input_file, kmesh):
-    """Return the five symmetry/pairs arrays, recomputed from the stored Cell."""
-    from pyscf.pbc.lib.chkfile import load_cell
-    cell = None
+    """Return the five symmetry/pairs arrays, recomputed from the stored Cell.
+
+    The cell is stored under the HDF5 key ``Cell`` as the JSON produced by
+    ``pyscf``'s ``cell.dumps()`` (see ``common_utils.save_data``), so it is
+    reconstructed directly with ``pyscf.pbc.gto.loads``.
+    """
+    import pyscf.pbc.gto
     with h5py.File(input_file, "r") as f:
-        has_cell = "Cell" in f
-    if has_cell:
-        # Try pyscf's load_cell first (expects 'mol' key); fall back to the
-        # legacy 'Cell' key (pre-1.0.0 files store the cell JSON under 'Cell').
-        try:
-            cell = load_cell(input_file)
-        except Exception:
-            cell = None
-        if cell is None:
-            try:
-                import pyscf.pbc.gto
-                with h5py.File(input_file, "r") as f:
-                    cell_bytes = f["Cell"][()]
-                cell_str = cell_bytes.decode() if isinstance(cell_bytes, bytes) else cell_bytes
-                cell = pyscf.pbc.gto.loads(cell_str)
-            except Exception:
-                cell = None
-    if cell is None:
-        raise ValueError(
-            f"Cannot synthesize symmetry/pairs for {input_file!r}: no 'Cell' "
-            "found and no meta.h5 fallback available. Regenerate the input file."
-        )
+        if "Cell" not in f:
+            raise ValueError(
+                f"Cannot synthesize symmetry/pairs for {input_file!r}: no 'Cell' "
+                "dataset found. Regenerate the input file with green-mbtools."
+            )
+        cell_dump = f["Cell"][()]
+    cell_str = cell_dump.decode() if isinstance(cell_dump, bytes) else cell_dump
+    cell = pyscf.pbc.gto.loads(cell_str)
     kptij_idx, kij_conj, kij_trans, kpair_irre, num_kpair, _, _ = integrals_grid(cell, kmesh)
     return {
         "conj_pairs_list": kij_conj,
