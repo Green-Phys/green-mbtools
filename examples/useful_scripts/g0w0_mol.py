@@ -82,10 +82,8 @@ bz2ibz = f["/symmetry/k/bz2ibz"][()]
 tr_conj = f["/symmetry/k/tr_conj"][()]
 k_sym_trans = f["/symmetry/k/k_sym_transform_ao"][()]
 
-mf_H0 = f["HF/H-k"][()].view(complex)
-mf_H0 = mf_H0.reshape(mf_H0.shape[:-1])
-mf_Sk = f["HF/S-k"][()].view(complex)
-mf_Sk = mf_Sk.reshape(mf_Sk.shape[:-1])
+mf_H0 = f["HF/H-k"][()]
+mf_Sk = f["HF/S-k"][()]
 
 params_nao = int(f["/params/nao"][()])
 params_nso = int(f["/params/nso"][()])
@@ -174,10 +172,18 @@ mol.build()
 # ---------------------------------------------------------------------------
 if args.dm is not None:
     print("Loading density matrix from", args.dm)
-    f_dm = h5py.File(args.dm, 'r')
-    dm = f_dm["HF/dm-k"][()].view(complex)
-    dm = dm.reshape(dm.shape[:-1])
-    f_dm.close()
+    with h5py.File(args.dm, 'r') as f_dm:
+        dm_dataset = f_dm["HF/dm-k"]
+        if not np.issubdtype(dm_dataset.dtype, np.complexfloating):
+            raise ValueError(
+                f"HF/dm-k in {args.dm!r} must use native complex storage; "
+                "legacy float+2 density matrices are unsupported. "
+                "Migrate the input and density matrix together with: "
+                "python -m green_mbtools.mint.migrate --input <input.h5> "
+                "--dm <dm.h5> --output <new-directory>/input.h5 "
+                "(use an existing, separate output directory)."
+            )
+        dm = dm_dataset[()]
 else:
     print("Reconstructing density matrix from HF/mo_coeff")
     dm = np.zeros((ns, nk, nao, nao), dtype=complex)

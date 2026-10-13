@@ -28,13 +28,13 @@ def _load_reference_hf_data():
     """Load reference HF matrices for the H2 periodic test case."""
     ref_file = Path(__file__).parent / "test_data" / "H2_pbc" / "UHF" / "input.h5"
     with h5py.File(ref_file, "r") as fref:
-        fock = fref["HF/Fock-k"][()].view(complex)
-        overlap = fref["HF/S-k"][()].view(complex)
-        hcore = fref["HF/H-k"][()].view(complex)
+        fock = fref["HF/Fock-k"][()]
+        overlap = fref["HF/S-k"][()]
+        hcore = fref["HF/H-k"][()]
     return (
-        fock.reshape(fock.shape[:-1]),
-        overlap.reshape(overlap.shape[:-1]),
-        hcore.reshape(hcore.shape[:-1]),
+        fock,
+        overlap,
+        hcore,
     )
 
 
@@ -294,14 +294,11 @@ def test_x2c_fock_ibz_to_full_bz():
     data_file = Path(__file__).parent / "test_data" / "Ar_x2c" / "input_full_symm.h5"
 
     with h5py.File(data_file, "r") as f:
-        fock_raw = f["HF/Fock-k"][()]
+        fock     = f["HF/Fock-k"][()]
         bz2ibz   = f["symmetry/k/bz2ibz"][()]
         k_sym_op = f["symmetry/k/k_sym_transform_ao"][()]
         tr_conj  = f["symmetry/k/tr_conj"][()]
         nk       = int(f["symmetry/k/nk"][()])
-
-    # (ns, nk, nao, nao, 2) float64 → (ns, nk, nao, nao) complex128
-    fock = fock_raw.view(complex).reshape(fock_raw.shape[:-1])
 
     assert fock.shape[1] == nk
     assert len(bz2ibz) == nk

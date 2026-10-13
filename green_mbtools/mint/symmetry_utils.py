@@ -388,8 +388,7 @@ def check_kspace_symmetry_breaking(inp_file, datasets):
     k_sym_trans = finp['symmetry/k/k_sym_transform_ao'][()]
 
     for dset in datasets:
-        X = finp[dset][()].view(complex)
-        X = X.reshape(X.shape[:-1])
+        X = finp[dset][()]
         ns = X.shape[0]
 
         max_abs = 0.0

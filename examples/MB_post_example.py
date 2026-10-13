@@ -19,10 +19,8 @@ from green_mbtools.pesto import orth
 # Input data
 fname_inp = '../tests/test_data/H2_GW/input.h5'
 f = h5py.File(fname_inp, 'r')
-S = f['HF/S-k'][()].view(complex)
-S = S.reshape(S.shape[:-1])
-H0 = f['HF/H-k'][()].view(complex)
-H0 = H0.reshape(H0.shape[:-1])
+S = f['HF/S-k'][()]
+H0 = f['HF/H-k'][()]
 ibz2bz = f["/symmetry/k/ibz2bz"][()]
 weight_ibz = f["/symmetry/k/weight_ibz"][()]
 bz2ibz = f["/symmetry/k/bz2ibz"][()]

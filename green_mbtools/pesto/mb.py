@@ -1,6 +1,7 @@
 from functools import reduce
 import numpy as np
 import scipy.linalg as LA
+from green_mbtools.version import require_input_version
 
 from . import spectral as spec
 from . import orth as orth
@@ -516,21 +517,19 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
     mu = f["iter"+str(it)+"/mu"][()]
     f.close()
 
-    f = h5py.File(input_path, 'r')
-    S = f['HF/S-k'][()].view(complex)
-    S = S.reshape(S.shape[:-1])
-    H0 = f['HF/H-k'][()].view(complex)
-    H0 = H0.reshape(H0.shape[:-1])
+    with h5py.File(input_path, 'r') as f:
+        require_input_version(f.attrs.get("__green_version__"))
+        S = f['HF/S-k'][()]
+        H0 = f['HF/H-k'][()]
 
-    ibz2bz = f["symmetry/k/ibz2bz"][()]
-    index = f["symmetry/k/bz2ibz"][()]
-    conj_list = f["symmetry/k/tr_conj"][()]
-    k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
-    nao = f["params/nao"][()]
-    nso = f["params/nso"][()]
-    ns = f['params/ns'][()]
-    nk_list = f["symmetry/k/nk_list"][()] if "symmetry/k/nk_list" in f else None
-    f.close()
+        ibz2bz = f["symmetry/k/ibz2bz"][()]
+        index = f["symmetry/k/bz2ibz"][()]
+        conj_list = f["symmetry/k/tr_conj"][()]
+        k_sym_trans = f["symmetry/k/k_sym_transform_ao"][()]
+        nao = f["params/nao"][()]
+        nso = f["params/nso"][()]
+        ns = f['params/ns'][()]
+        nk_list = f["symmetry/k/nk_list"][()] if "symmetry/k/nk_list" in f else None
 
     """
     All k-dependent matrices should lie on a full Monkhorst-Pack grid.

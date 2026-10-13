@@ -68,8 +68,7 @@ nk_list = f["/symmetry/k/nk_list"][()]
 index = f["/symmetry/k/bz2ibz"][()]
 ir_list = f["/symmetry/k/ibz2bz"][()]
 conj_list = f["/symmetry/k/tr_conj"][()]
-Fk = f["HF/Fock-k"][()].view(complex)
-Fk = Fk.reshape(Fk.shape[:-1])
+Fk = f["HF/Fock-k"][()]
 nk = index.shape[0]
 ink = ir_list.shape[0]
 f.close()

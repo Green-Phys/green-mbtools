@@ -27,10 +27,8 @@ def parse_arguments():
 
 def read_h5_data(file_path):
     with h5py.File(file_path, 'r') as f:
-        rSk = f["/HF/S-k"][()].view(complex)
-        rSk = rSk.reshape(rSk.shape[:-1])
-        rH0k = f["/HF/H-k"][()].view(complex)
-        rH0k = rH0k.reshape(rH0k.shape[:-1])
+        rSk = f["/HF/S-k"][()]
+        rH0k = f["/HF/H-k"][()]
 
         print(rH0k.shape)
         print(rSk.shape)
