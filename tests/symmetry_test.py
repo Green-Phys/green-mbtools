@@ -15,6 +15,82 @@ _LATTICE = "4.0655, 0.0,    0.0\n0.0,    4.0655, 0.0\n0.0,    0.0,    4.0655\n"
 _BASIS = "gth-dzvp-molopt-sr"
 _PSEUDO = "gth-pbe"
 
+# AFM pinned H2 dimer geometry (all-electron sto-3g, no pseudo)
+_AFM_ATOM = "H -1 -1 -1\nH 1 1 1"
+_AFM_LATTICE = "10.0,0.0,0.0\n0.0,10.0,0.0\n0.0,0.0,10.0"
+_AFM_BASIS = "sto-3g"
+
+
+def _write_afm_dm0(run_dir: Path) -> Path:
+    """Write an AFM initial-guess density matrix to run_dir/dm0.h5 and return the path.
+
+    For a 2-atom sto-3g cell (nao=2), the AFM guess puts alpha density on H0
+    and beta density on H1:
+      dm_gamma[0, 0, 0] = 1.0   # alpha on H0
+      dm_gamma[1, 1, 1] = 1.0   # beta  on H1
+    """
+    dm_gamma = np.zeros((2, 2, 2), dtype=complex)
+    dm_gamma[0, 0, 0] = 1.0  # alpha density on H0
+    dm_gamma[1, 1, 1] = 1.0  # beta  density on H1
+    dm0_path = run_dir / "dm0.h5"
+    with h5py.File(dm0_path, "w") as f:
+        f.create_dataset("dm_gamma", data=dm_gamma)
+    return dm0_path
+
+
+def _run_afm_case(run_dir: Path, *, symm_ops=None, space_symm: bool = True, nk: int = 3) -> Path:
+    """Run a full KUHF mean-field for the pinned AFM H2 dimer and return the output input.h5 path.
+
+    Runs a complete (not grid_only) mean-field initialization with an AFM initial
+    guess (up on H0, down on H1) so the SCF converges to a spin-polarized solution.
+    TR symmetry is disabled because collinear AFM breaks pure time reversal.
+
+    Parameters
+    ----------
+    run_dir:
+        Directory to create and run the calculation in.
+    symm_ops:
+        If not None, passed as --symm_ops (comma-separated index string, e.g. "0,7,8,9,10,11").
+    space_symm:
+        Whether to use space-group symmetry (default True).
+    nk:
+        k-mesh size along each dimension (default 3 -> 3x3x3).
+
+    Returns
+    -------
+    Path
+        Path to the produced input.h5 file.
+    """
+    run_dir = run_dir.resolve()
+    run_dir.mkdir(parents=True, exist_ok=True)
+    dm0_path = _write_afm_dm0(run_dir)
+    old_cwd = Path.cwd()
+    output_h5 = run_dir / "input.h5"
+    os.chdir(run_dir)
+    try:
+        params = [
+            "--atom", _AFM_ATOM,
+            "--a", _AFM_LATTICE,
+            "--basis", _AFM_BASIS,
+            "--output_path", str(output_h5),
+            "--df_int", "0",
+            "--nk", str(nk),
+            "--grid_only", "false",
+            "--keep_cderi", "true",
+            "--space_symm", "true" if space_symm else "false",
+            "--tr_symm", "false",
+            "--x2c", "0",
+            "--dm0", str(dm0_path),
+        ]
+        if symm_ops is not None:
+            params += ["--symm_ops", str(symm_ops)]
+        args = comm.init_pbc_params(params=params)
+        pyscf_init = pyscf_pbc_init(args)
+        pyscf_init.mean_field_input()
+    finally:
+        os.chdir(old_cwd)
+    return output_h5
+
 
 class _DummyCell:
     """Minimal cell-like object required by decomposition helpers."""
@@ -383,6 +459,81 @@ def test_ao_rep_bloch_phase_on_supercell():
         )
 
 
+def _afm_cell():
+    """Pinned AFM H2 dimer cell for detect_space_group tests.
+
+    10 A cubic box, H at (-1,-1,-1) and (1,1,1) Angstrom, sto-3g all-electron
+    basis (no pseudopotential), spin=0, space_group_symmetry=True.
+    """
+    from pyscf.pbc import gto
+    cell = gto.Cell()
+    cell.a = np.eye(3) * 10.0
+    cell.atom = "H -1 -1 -1\nH 1 1 1"
+    cell.basis = "sto-3g"
+    cell.spin = 0
+    cell.space_group_symmetry = True
+    cell.verbose = 0
+    cell.build()
+    return cell
+
+
+def _afm_cell_symmorphic():
+    """Same geometry as _afm_cell() but built with symmorphic=True.
+
+    Used to obtain PySCF's own symmorphic-only operator list via
+    cell.lattice_symmetry.ops for comparison against select_ops "symmorphic" mode.
+    """
+    from pyscf.pbc import gto
+    cell = gto.Cell()
+    cell.a = np.eye(3) * 10.0
+    cell.atom = "H -1 -1 -1\nH 1 1 1"
+    cell.basis = "sto-3g"
+    cell.spin = 0
+    cell.space_group_symmetry = True
+    cell.symmorphic = True
+    cell.verbose = 0
+    cell.build()
+    return cell
+
+
+def _native_symmorphic_ops(cell):
+    """Return PySCF's own symmorphic-only ops from a cell built with symmorphic=True."""
+    return cell.lattice_symmetry.ops
+
+
+def _sublattice_preserving_indices(cell, ops):
+    """Return indices of ops whose atom permutation is the identity (sublattice-preserving).
+
+    Uses generate_permutation_info(cell, op)[0] to determine the partner-index
+    array; an op is sublattice-preserving if partner[i] == i for every atom i.
+    """
+    from green_mbtools.mint.symmetry_utils import generate_permutation_info
+    indices = []
+    for i, op in enumerate(ops):
+        partner, _ = generate_permutation_info(cell, op)
+        if all(partner[j] == j for j in range(len(partner))):
+            indices.append(i)
+    return indices
+
+
+def test_detect_space_group_h2_dimer():
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    info = su.detect_space_group(cell)
+    assert len(info.ops) == 12                     # D3d
+    assert info.point_group_symbol == "-3m"
+    assert info.ops[0].is_eye                       # identity sorts first
+    assert any(op.is_inversion for op in info.ops)  # inversion present (swaps sublattices)
+
+
+def test_detect_space_group_spglib_backend_labels():
+    import pytest
+    pytest.importorskip("spglib")
+    from green_mbtools.mint import symmetry_utils as su
+    info = su.detect_space_group(_afm_cell(), backend="spglib")
+    assert info.international_number is not None   # spglib populates international labels
+
+
 def test_ao_rep_time_reversal_phase():
     """AO symmetry operators must obey S(k)=U_k S(k_ir) U_k† at time-reversal-
     paired k-points that carry a *complex* Bloch phase.
@@ -438,3 +589,326 @@ def test_ao_rep_time_reversal_phase():
                     f"(IBZ rep={ibz_of[ik]}); get_representation must evaluate the "
                     f"Bloch phase at -k for time-reversal-paired points",
         )
+
+
+# ---------------------------------------------------------------------------
+# select_ops tests
+# ---------------------------------------------------------------------------
+
+def test_select_ops_none_is_identity_passthrough():
+    """mode='none' returns the original ops list unchanged."""
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    assert su.select_ops(ops, "none", None, cell) == ops
+
+
+def test_select_ops_symmorphic_matches_native():
+    """symmorphic subset equals PySCF's own cell.symmorphic=True ops (rotation lists match)."""
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    got = su.select_ops(ops, "symmorphic", None, cell)
+    assert all(op.trans_is_zero for op in got)
+    native = _native_symmorphic_ops(_afm_cell_symmorphic())
+    assert sorted(repr(o.rot.tolist()) for o in got) == sorted(repr(o.rot.tolist()) for o in native)
+
+
+def test_select_ops_indices_returns_requested_and_adds_identity():
+    """mode='indices' returns a subgroup containing identity even when not requested."""
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    sub = su.select_ops(ops, "indices", _sublattice_preserving_indices(cell, ops), cell)
+    assert any(op.is_eye for op in sub)
+
+
+def test_select_ops_rejects_non_closed_set():
+    """mode='indices' raises ValueError for a non-closed set.
+
+    ops[8] is an order-3 rotation; {E, ops[8]} is not closed because
+    ops[8]*ops[8] = ops[9] which is absent.  select_ops must detect this
+    and raise with a message containing 'closed' or 'closure'.
+    """
+    import pytest
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    # [0, 8] = E + one order-3 rotation: not closed, closure needs its square (ops[9])
+    with pytest.raises(ValueError, match="closed|closure"):
+        su.select_ops(ops, "indices", [0, 8], cell)
+
+
+def test_select_ops_rejects_out_of_range():
+    """mode='indices' raises ValueError when an index is out of range."""
+    import pytest
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    with pytest.raises(ValueError, match="range|print_symmetry_ops"):
+        su.select_ops(ops, "indices", [999], cell)
+
+
+def test_select_ops_indices_none_raises_valueerror():
+    """mode='indices' with spec=None raises ValueError mentioning 'indices'."""
+    import pytest
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    with pytest.raises(ValueError, match="indices"):
+        su.select_ops(ops, "indices", None, cell)
+
+
+# ---------------------------------------------------------------------------
+# build_symmetry tests
+# ---------------------------------------------------------------------------
+
+def test_build_symmetry_injection_changes_ibz():
+    """build_symmetry with identity-only ops gives a larger IBZ than the full group.
+
+    Injects a {E}-only Symmetry into cell.lattice_symmetry; make_kpts must use
+    the injected ops without re-detecting (so nkpts_ibz grows to 27 == 3^3).
+    Also verifies the .cell back-reference is deleted so KPoints.cell is intact.
+    """
+    from green_mbtools.mint import symmetry_utils as su
+    full = _afm_cell()
+    n_full = full.make_kpts([3, 3, 3], space_group_symmetry=True,
+                            time_reversal_symmetry=False).nkpts_ibz
+    low = _afm_cell()
+    ops = su.detect_space_group(low).ops
+    low.lattice_symmetry = su.build_symmetry(low, su.select_ops(ops, "indices", [0], low))  # {E}
+    n_low = low.make_kpts([3, 3, 3], space_group_symmetry=True,
+                          time_reversal_symmetry=False).nkpts_ibz
+    assert n_low > n_full                        # fewer ops -> larger IBZ, no re-detection
+    assert not hasattr(low.lattice_symmetry, "cell")
+
+
+def test_build_symmetry_spacegroup_and_symmorphic_attrs():
+    """build_symmetry sets spacegroup and symmorphic on the returned Symmetry.
+
+    Uses the identity-only subgroup ({E}), which is trivially symmorphic.
+    Checks:
+    - spacegroup is not None and its ops match the injected ops.
+    - symmorphic reflects whether all injected ops have zero fractional translation.
+    - neither result nor result.spacegroup carries a live .cell reference.
+    """
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    identity_ops = su.select_ops(ops, "indices", [0], cell)  # {E}
+    result = su.build_symmetry(cell, identity_ops)
+
+    # spacegroup is attached and its op list matches the injected ops.
+    assert result.spacegroup is not None
+    assert len(result.spacegroup.ops) == len(result.ops)
+
+    # symmorphic: all identity ops have zero translation, so must be True.
+    expected_symmorphic = all(op.trans_is_zero for op in result.ops)
+    assert result.symmorphic == expected_symmorphic
+
+    # No live .cell back-references on result or its spacegroup.
+    assert not hasattr(result, "cell")
+    assert not hasattr(result.spacegroup, "cell")
+
+
+# ---------------------------------------------------------------------------
+# apply_symmetry_restriction / mode_from_args tests (Task 4)
+# ---------------------------------------------------------------------------
+
+def test_apply_restriction_noop_when_space_symm_false():
+    from argparse import Namespace
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    before = cell.lattice_symmetry
+    su.apply_symmetry_restriction(cell, Namespace(space_symm=False, symmorphic_only=False,
+                                                  symm_ops=None, symm_backend="pyscf"))
+    assert cell.lattice_symmetry is before
+
+
+def test_mode_from_args_mutual_exclusivity():
+    import pytest
+    from argparse import Namespace
+    from green_mbtools.mint import symmetry_utils as su
+    with pytest.raises(ValueError, match="mutual|both"):
+        su.mode_from_args(Namespace(symmorphic_only=True, symm_ops="0,1"))
+
+
+def test_apply_restriction_indices_shrinks_group():
+    from argparse import Namespace
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    args = Namespace(space_symm=True, symmorphic_only=False, symm_ops="0",
+                     symm_backend="pyscf")
+    su.apply_symmetry_restriction(cell, args)
+    assert cell.lattice_symmetry.nop == 1
+
+
+def test_apply_restriction_noop_in_none_mode():
+    """mode='none' must leave cell.lattice_symmetry untouched (identity check).
+
+    When no reduction flag is set, apply_symmetry_restriction should return
+    early without calling build_symmetry, so PySCF's own lattice_symmetry
+    object is retained by identity (``is`` check).
+    """
+    from argparse import Namespace
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell()
+    before = cell.lattice_symmetry
+    su.apply_symmetry_restriction(
+        cell,
+        Namespace(space_symm=True, symmorphic_only=False, symm_ops=None, symm_backend="pyscf"),
+    )
+    assert cell.lattice_symmetry is before
+    assert cell.lattice_symmetry.nop == 12
+
+
+def test_apply_restriction_indices_emits_qspace_warning():
+    """mode='indices' must emit a UserWarning mentioning q-space/auxcell.
+
+    Uses the sublattice-preserving C3v subgroup [0,7,8,9,10,11] for _afm_cell()
+    (verified closed). The warning should alert users that auxcell q-space
+    datasets are still derived from the full group.
+    """
+    import warnings
+    from argparse import Namespace
+    from green_mbtools.mint import symmetry_utils as su
+
+    cell = _afm_cell()
+    args = Namespace(
+        space_symm=True,
+        symmorphic_only=False,
+        symm_ops="0,7,8,9,10,11",
+        symm_backend="pyscf",
+    )
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        su.apply_symmetry_restriction(cell, args)
+
+    qspace_warnings = [x for x in w if issubclass(x.category, UserWarning)
+                       and ("q-space" in str(x.message) or "auxcell" in str(x.message))]
+    assert qspace_warnings, (
+        f"Expected a UserWarning mentioning 'q-space' or 'auxcell' but got: "
+        f"{[str(x.message) for x in w]}"
+    )
+
+
+def test_apply_restriction_no_qspace_warning_for_none_and_symmorphic():
+    """mode='none' and mode='symmorphic' must NOT emit the q-space warning.
+
+    The auxcell/q-space warning is specific to the 'indices' mode (--symm_ops).
+    Other modes should be silent.
+    """
+    import warnings
+    from argparse import Namespace
+    from green_mbtools.mint import symmetry_utils as su
+
+    # mode='none': no reduction flags
+    cell_none = _afm_cell()
+    args_none = Namespace(
+        space_symm=True,
+        symmorphic_only=False,
+        symm_ops=None,
+        symm_backend="pyscf",
+    )
+    with warnings.catch_warnings(record=True) as w_none:
+        warnings.simplefilter("always")
+        su.apply_symmetry_restriction(cell_none, args_none)
+
+    qspace_none = [x for x in w_none if issubclass(x.category, UserWarning)
+                   and ("q-space" in str(x.message) or "auxcell" in str(x.message))]
+    assert not qspace_none, (
+        f"Unexpected q-space warning for mode='none': {[str(x.message) for x in qspace_none]}"
+    )
+
+    # mode='symmorphic': symmorphic_only=True
+    cell_symm = _afm_cell()
+    args_symm = Namespace(
+        space_symm=True,
+        symmorphic_only=True,
+        symm_ops=None,
+        symm_backend="pyscf",
+    )
+    with warnings.catch_warnings(record=True) as w_symm:
+        warnings.simplefilter("always")
+        su.apply_symmetry_restriction(cell_symm, args_symm)
+
+    qspace_symm = [x for x in w_symm if issubclass(x.category, UserWarning)
+                   and ("q-space" in str(x.message) or "auxcell" in str(x.message))]
+    assert not qspace_symm, (
+        f"Unexpected q-space warning for mode='symmorphic': {[str(x.message) for x in qspace_symm]}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# format_symmetry_ops tests (Task 5)
+# ---------------------------------------------------------------------------
+
+def test_format_symmetry_ops_lists_all_and_flags_sublattice_swap():
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _afm_cell(); info = su.detect_space_group(cell)
+    text = su.format_symmetry_ops(cell, info)
+    assert text.count("\n") >= len(info.ops)          # one line per op (plus header)
+    assert "-3m" in text                               # group label present
+    assert "perm" in text.lower()                      # atom-permutation column present
+
+
+# ---------------------------------------------------------------------------
+# AFM round-trip validation tests (Task 7)
+# ---------------------------------------------------------------------------
+
+_TRIPWIRE_SUBSTR = "stored k-point symmetry"
+
+
+def test_afm_full_symmetry_trips_tripwire(tmp_path):
+    """Full D3d group breaks collinear AFM -> check_kspace_symmetry_breaking warns.
+
+    The AFM solution has unequal spin blocks; the stored full-group operators
+    map H0<->H1 (sublattice swap), so reconstruction fails with residual ~0.774.
+    The tripwire warning must fire.
+    """
+    import warnings
+    from green_mbtools.mint import symmetry_utils as su
+
+    out = _run_afm_case(tmp_path / "full", symm_ops=None)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        su.check_kspace_symmetry_breaking(str(out), ["HF/Fock-k"])
+    assert any(_TRIPWIRE_SUBSTR in str(x.message) for x in w), (
+        f"Expected a warning containing {_TRIPWIRE_SUBSTR!r} but got: {[str(x.message) for x in w]}"
+    )
+
+
+def test_afm_subgroup_roundtrips(tmp_path):
+    """Sublattice-preserving subgroup keeps AFM intact and passes the tripwire silently.
+
+    Derives the subgroup indices dynamically via _sublattice_preserving_indices
+    (for this cell these are [0, 7, 8, 9, 10, 11], 6 ops of the C3v stabiliser
+    of both H0 and H1 simultaneously).  After running with that restricted
+    symmetry the check must be silent, and the two spin blocks of HF/Fock-k must
+    differ by more than 1e-4 (AFM survived).
+    """
+    import warnings
+    import h5py
+    from green_mbtools.mint import symmetry_utils as su
+
+    cell = _afm_cell()
+    ops = su.detect_space_group(cell).ops
+    # [0, 7, 8, 9, 10, 11] for this cell — derived dynamically so the test
+    # stays correct if operator ordering changes.
+    keep = ",".join(str(i) for i in _sublattice_preserving_indices(cell, ops))
+
+    out = _run_afm_case(tmp_path / "low", symm_ops=keep)
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        su.check_kspace_symmetry_breaking(str(out), ["HF/Fock-k"])
+    assert not any(_TRIPWIRE_SUBSTR in str(x.message) for x in w), (
+        f"Unexpected tripwire warning(s): {[str(x.message) for x in w if _TRIPWIRE_SUBSTR in str(x.message)]}"
+    )
+
+    with h5py.File(out, "r") as f:
+        fock = f["HF/Fock-k"][()]
+    assert np.max(np.abs(fock[0] - fock[1])) > 1e-4, (
+        f"Spin blocks are nearly identical (diff={np.max(np.abs(fock[0]-fock[1])):.3e}); "
+        "AFM did not survive the subgroup run."
+    )
