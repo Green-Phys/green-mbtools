@@ -4,9 +4,407 @@
 # https://github.com/CQMP/MBSymmetry
 # ------------------------------------------
 
+import logging
 import numpy as np
 import h5py
 import warnings
+from dataclasses import dataclass
+from typing import List, Optional
+
+
+@dataclass
+class SpaceGroupInfo:
+    """Container for detected space-group data.
+
+    Parameters
+    ----------
+    ops : list
+        Sorted list of ``SPGElement`` symmetry operation objects as returned by
+        ``pyscf.pbc.symm.space_group.SpaceGroup.build()``.
+    point_group_symbol : str
+        Schoenflies-style point-group symbol (e.g. ``"-3m"`` for D3d), always
+        populated regardless of backend.
+    international_symbol : str or None
+        Hermann-Mauguin space-group symbol; populated only by the ``spglib``
+        backend, ``None`` for the ``pyscf`` backend.
+    international_number : int or None
+        ITA space-group number; populated only by the ``spglib`` backend,
+        ``None`` for the ``pyscf`` backend.
+    """
+
+    ops: List
+    point_group_symbol: str
+    international_symbol: Optional[str]
+    international_number: Optional[int]
+
+
+def detect_space_group(cell, backend: str = "pyscf", symprec: float = 1e-5) -> SpaceGroupInfo:
+    """Detect the space group of a PySCF periodic cell.
+
+    Parameters
+    ----------
+    cell : pyscf.pbc.gto.Cell
+        Built PySCF periodic cell.
+    backend : {"pyscf", "spglib"}, optional
+        Symmetry detection backend. ``"pyscf"`` uses the built-in PySCF
+        implementation (no external dependencies, but ``international_symbol``
+        and ``international_number`` are not populated). ``"spglib"`` delegates
+        to the ``spglib`` library and fills all three label fields.
+    symprec : float, optional
+        Symmetry tolerance passed to the backend. Default ``1e-5``.
+
+    Returns
+    -------
+    SpaceGroupInfo
+        Detected space-group data including the sorted ``SPGElement`` list and
+        the three label fields.
+    """
+    from pyscf.pbc.symm.space_group import SpaceGroup
+
+    sg = SpaceGroup(cell)
+    sg.symprec = symprec
+    sg.backend = backend
+    sg.build()
+
+    gn = sg.groupname
+    return SpaceGroupInfo(
+        ops=sg.ops,
+        point_group_symbol=gn["point_group_symbol"],
+        international_symbol=gn.get("international_symbol"),
+        international_number=gn.get("international_number"),
+    )
+
+
+def _ops_closed(ops, tol=1e-6):
+    """Check whether a list of SPGElement operators is closed under multiplication.
+
+    For every ordered pair (a, b) the product a.dot(b) is computed and checked
+    against the kept set.  Rotations are compared exactly (integer matrices) and
+    translations are compared modulo 1 (fractional coords) within ``tol``.
+
+    Parameters
+    ----------
+    ops : list of SPGElement
+        Candidate subgroup operators.
+    tol : float, optional
+        Tolerance for the fractional-translation modular comparison.
+
+    Returns
+    -------
+    is_closed : bool
+        ``True`` iff every pairwise product is already in *ops*.
+    missing : list of SPGElement
+        Products (modulo lattice translation) that are absent from *ops*.
+        Empty when *is_closed* is ``True``.
+    """
+    missing = []
+    for a in ops:
+        for b in ops:
+            prod = a.dot(b)
+            found = False
+            for op in ops:
+                if np.array_equal(prod.rot, op.rot):
+                    trans_diff = np.mod(prod.trans - op.trans + 0.5, 1.0) - 0.5
+                    if np.all(np.abs(trans_diff) < tol):
+                        found = True
+                        break
+            if not found:
+                # Avoid duplicate entries in the missing list
+                already_listed = False
+                for m in missing:
+                    if np.array_equal(prod.rot, m.rot):
+                        td = np.mod(prod.trans - m.trans + 0.5, 1.0) - 0.5
+                        if np.all(np.abs(td) < tol):
+                            already_listed = True
+                            break
+                if not already_listed:
+                    missing.append(prod)
+    return len(missing) == 0, missing
+
+
+def select_ops(full_ops, mode, spec, cell):
+    """Select a subset of space-group operators according to *mode*.
+
+    Parameters
+    ----------
+    full_ops : list of SPGElement
+        The full list of operators returned by :func:`detect_space_group`.
+    mode : {"none", "symmorphic", "indices"}
+        Selection strategy.
+
+        * ``"none"``         -- return *full_ops* unchanged.
+        * ``"symmorphic"``   -- retain only operators with zero fractional
+          translation (``op.trans_is_zero``), guaranteeing identity is present.
+        * ``"indices"``      -- retain the operators at the given integer indices
+          (0-based), prepend identity if absent, and validate closure.
+
+    spec : list of int or None
+        Operator indices used by ``"indices"`` mode; ignored otherwise.
+    cell : pyscf.pbc.gto.Cell
+        The unit cell (currently unused but required for forward compatibility).
+
+    Returns
+    -------
+    list of SPGElement
+        Selected (and possibly augmented) operator list.
+
+    Raises
+    ------
+    ValueError
+        If an index in *spec* is out of the valid range ``0..len(full_ops)-1``
+        (message names the range and points to ``--print_symmetry_ops``), or if
+        the requested set is not closed under multiplication (message names the
+        missing operators and mentions ``closure``).
+    """
+    if mode == "none":
+        return full_ops
+
+    if mode == "symmorphic":
+        kept = [op for op in full_ops if op.trans_is_zero]
+        # Identity must be in the symmorphic subset (the full set contains it)
+        if not any(op.is_eye for op in kept):
+            from pyscf.pbc.symm.space_group import SPGElement
+            kept = [SPGElement()] + kept
+        return kept
+
+    if mode == "indices":
+        if not spec:
+            raise ValueError(
+                "mode='indices' requires a non-empty list of operator indices. "
+                "Run with --print_symmetry_ops to list available operators."
+            )
+        n = len(full_ops)
+        # Range-check all indices before selecting
+        bad = [idx for idx in spec if not (0 <= idx < n)]
+        if bad:
+            raise ValueError(
+                f"Operator index/indices {bad} are out of range. "
+                f"Valid range is 0..{n - 1}. "
+                f"Run with --print_symmetry_ops to list available operators."
+            )
+
+        kept = [full_ops[i] for i in spec]
+
+        # Prepend identity if not already present
+        if not any(op.is_eye for op in kept):
+            identity_ops = [op for op in full_ops if op.is_eye]
+            if identity_ops:
+                kept = [identity_ops[0]] + kept
+            else:
+                from pyscf.pbc.symm.space_group import SPGElement
+                kept = [SPGElement()] + kept
+
+        # Validate closure
+        is_closed, missing = _ops_closed(kept)
+        if not is_closed:
+            rot_strs = [str(m.rot.tolist()) for m in missing]
+            raise ValueError(
+                f"The requested operator set is not closed under multiplication. "
+                f"Missing products (closure failure): {rot_strs}. "
+                f"Add the missing operators or choose a valid subgroup."
+            )
+
+        return kept
+
+    raise ValueError(f"Unknown mode {mode!r}. Expected one of 'none', 'symmorphic', 'indices'.")
+
+
+def build_symmetry(cell, ops):
+    """Construct a :class:`pyscf.pbc.symm.symmetry.Symmetry` carrying a reduced op set.
+
+    Mirrors the attribute assignments performed by ``Symmetry.build`` but skips
+    space-group re-detection: the caller supplies *ops* directly.  The resulting
+    object is suitable for injection into ``cell.lattice_symmetry`` so that a
+    subsequent ``cell.make_kpts(space_group_symmetry=True)`` uses the reduced set
+    without re-running detection.
+
+    The ``.cell`` back-reference is deleted before returning so that
+    ``KPoints.build``'s ``__dict__.update(lattice_symmetry.__dict__)`` does not
+    overwrite ``KPoints.cell`` with the cell used to build this object.
+
+    Parameters
+    ----------
+    cell : pyscf.pbc.gto.Cell
+        Built PySCF periodic cell used to compute Wigner D-matrices.
+    ops : list of SPGElement
+        Symmetry operators to inject (e.g. the output of :func:`select_ops`).
+        Must include the identity; :func:`select_ops` guarantees this.
+
+    Returns
+    -------
+    symm : pyscf.pbc.symm.symmetry.Symmetry
+        A fully-built ``Symmetry`` object whose ``.ops`` is the supplied list,
+        ``.nop`` matches, ``.has_inversion`` reflects the given ops, and
+        ``.Dmats`` / ``.l_max`` are computed via ``make_Dmats``.  ``.cell`` is
+        absent (deleted).
+    """
+    from pyscf.pbc.symm.symmetry import Symmetry, make_Dmats
+    from pyscf.pbc.symm.space_group import SpaceGroup
+
+    symm = Symmetry(cell)
+    symm.ops = list(ops)
+    symm.nop = len(symm.ops)
+    symm.has_inversion = any(op.rot_is_inversion for op in symm.ops)
+    op_rot = [op.a2r(cell).rot for op in symm.ops]
+    symm.Dmats, symm.l_max = make_Dmats(cell, op_rot)
+    symm._built = True
+
+    # symmorphic: all ops have zero fractional translation (mirrors PySCF semantics).
+    symm.symmorphic = all(op.trans_is_zero for op in symm.ops)
+
+    # Build a SpaceGroup for this cell, then override its op list with the injected
+    # ops so that symm.spacegroup.ops mirrors symm.ops.  Use the function-argument
+    # `cell` (still in scope) rather than symm.cell which we are about to delete.
+    sg = SpaceGroup(cell).build(dump_info=False)
+    sg.ops = list(symm.ops)
+    sg.nop = len(symm.ops)
+    # Remove any live cell back-reference from the SpaceGroup.
+    if hasattr(sg, "cell"):
+        del sg.cell
+    symm.spacegroup = sg
+
+    # Remove the .cell back-reference so that KPoints.build's
+    # __dict__.update(lattice_symmetry.__dict__) does not clobber KPoints.cell.
+    del symm.cell
+    return symm
+
+
+def mode_from_args(args) -> str:
+    """Translate CLI namespace flags to a :func:`select_ops` mode string.
+
+    Parameters
+    ----------
+    args : argparse.Namespace or similar
+        Parsed CLI arguments. Relevant attributes (accessed via ``getattr`` with
+        safe defaults):
+
+        * ``symmorphic_only`` (bool) -- keep only zero-translation operators.
+        * ``symm_ops`` (str or None) -- comma-separated operator indices.
+
+    Returns
+    -------
+    str
+        One of ``"none"``, ``"symmorphic"``, or ``"indices"``.
+
+    Raises
+    ------
+    ValueError
+        If both ``symmorphic_only`` is truthy and ``symm_ops`` is set (not None).
+    """
+    symmorphic_only = getattr(args, "symmorphic_only", False)
+    symm_ops = getattr(args, "symm_ops", None)
+
+    if symmorphic_only and symm_ops is not None:
+        raise ValueError(
+            "--symmorphic_only and --symm_ops are mutually exclusive; "
+            "pass only one of both flags."
+        )
+
+    if symmorphic_only:
+        return "symmorphic"
+    if symm_ops is not None:
+        return "indices"
+    return "none"
+
+
+def spec_from_args(args):
+    """Parse the ``--symm_ops`` CLI string into a list of integers.
+
+    Parameters
+    ----------
+    args : argparse.Namespace or similar
+        Parsed CLI arguments.  ``symm_ops`` attribute should be a
+        comma-separated string of integers (e.g. ``"0,3,4,7"``), or ``None``.
+
+    Returns
+    -------
+    list of int or None
+        Parsed indices, or ``None`` when ``symm_ops`` is not set.
+    """
+    symm_ops = getattr(args, "symm_ops", None)
+    if symm_ops is None:
+        return None
+    return [int(x.strip()) for x in symm_ops.split(",") if x.strip()]
+
+
+def apply_symmetry_restriction(cell, args) -> None:
+    """Detect the space group, select a subset of operators, and inject them.
+
+    This is the top-level orchestrator called from :func:`pbc_cell` after the
+    cell is fully built.  It is a no-op when ``args.space_symm`` is ``False``.
+
+    Parameters
+    ----------
+    cell : pyscf.pbc.gto.Cell
+        Fully built PySCF periodic cell.
+    args : argparse.Namespace or similar
+        Parsed CLI arguments.  Relevant attributes:
+
+        * ``space_symm`` (bool) -- master switch; if ``False``, returns immediately.
+        * ``symmorphic_only`` (bool, default ``False``) -- symmorphic filter.
+        * ``symm_ops`` (str or None, default ``None``) -- comma-separated indices.
+        * ``symm_backend`` (str, default ``"pyscf"``) -- detection backend.
+
+    Side effects
+    ------------
+    Sets ``cell.lattice_symmetry`` to a :class:`pyscf.pbc.symm.symmetry.Symmetry`
+    carrying the selected operator subset.  Logs before/after op counts and the
+    group label.
+    """
+    space_symm = getattr(args, "space_symm", False)
+    symmorphic_only = getattr(args, "symmorphic_only", False)
+    symm_ops = getattr(args, "symm_ops", None)
+
+    if not space_symm:
+        if symmorphic_only or symm_ops is not None:
+            warnings.warn(
+                "--symmorphic_only / --symm_ops are ignored because "
+                "--space_symm is False.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return
+
+    # Call mode_from_args first so mutual-exclusivity is always validated.
+    mode = mode_from_args(args)
+
+    if mode == "none":
+        return   # no reduction requested; PySCF's own lattice_symmetry is already correct
+
+    backend = getattr(args, "symm_backend", "pyscf")
+    full = detect_space_group(cell, backend=backend)
+    n_before = len(full.ops)
+    logging.info(
+        "apply_symmetry_restriction: detected %d ops, group=%s",
+        n_before,
+        full.point_group_symbol,
+    )
+
+    spec = spec_from_args(args)
+    ops = select_ops(full.ops, mode, spec, cell)
+    n_after = len(ops)
+
+    logging.info(
+        "apply_symmetry_restriction: keeping %d/%d ops (mode=%r)",
+        n_after,
+        n_before,
+        mode,
+    )
+
+    cell.lattice_symmetry = build_symmetry(cell, ops)
+
+    if mode == "indices":
+        warnings.warn(
+            "An explicit operator subgroup was selected via --symm_ops. "
+            "k-space datasets (HF/Fock-k, symmetry/k/*) will be built "
+            "from the reduced group, but auxcell q-space datasets "
+            "(symmetry/q/*, e.g. k_sym_transform_j2c / k_sym_transform_p0) "
+            "are still derived from the full detected symmetry in this phase. "
+            "q-space and aux-derived quantities may be inconsistent for a "
+            "point-group reduction. Validate carefully before consuming them.",
+            UserWarning,
+            stacklevel=2,
+        )
 
 
 def fold_to_unit_cell(r_cart_scaled):
@@ -368,6 +766,58 @@ def get_spinor_representation(bz_idx, symm_op_idx, mycell, kstruct, tol=1e-5, ve
     # D†= D^{1/2}(R^{-1}): matches PySCF's passive Dmats convention
     su2 = rotation_matrix_to_su2(rot_cart).conj().T
     return np.kron(su2, u_orbital)
+
+
+def format_symmetry_ops(cell, info) -> str:
+    """Format a human-readable table of space-group operators.
+
+    Parameters
+    ----------
+    cell : pyscf.pbc.gto.Cell
+        Built PySCF periodic cell (used to compute atom permutations via
+        :func:`generate_permutation_info`).
+    info : SpaceGroupInfo
+        Detected space-group data as returned by :func:`detect_space_group`.
+
+    Returns
+    -------
+    str
+        A multi-line string with:
+
+        * A header line containing the group label(s) (point-group symbol, and
+          international symbol / number when available).
+        * A column-header line including the word ``perm``.
+        * One line per operator showing: index, flattened 3×3 rotation (9
+          integers), fractional translation (3 floats), atom permutation, and a
+          ``symmorphic`` flag (``True`` when ``op.trans_is_zero``).
+
+        The text satisfies ``text.count("\\n") >= len(info.ops)`` (one line per
+        operator plus the header lines).
+    """
+    parts = [info.point_group_symbol]
+    if info.international_symbol is not None:
+        parts.append(info.international_symbol)
+    if info.international_number is not None:
+        parts.append(f"#{info.international_number}")
+    header = "Space-group operators: " + "  ".join(parts)
+
+    col_header = (
+        f"{'idx':>4}  {'rot (3x3 flattened)':^29}  {'trans (frac)':^28}  "
+        f"{'perm':^20}  symmorphic"
+    )
+
+    lines = [header, col_header]
+    for i, op in enumerate(info.ops):
+        rot_str = " ".join(f"{v:2d}" for v in op.rot.flatten())
+        trans_str = " ".join(f"{v:8.5f}" for v in op.trans)
+        partner_idx, _ = generate_permutation_info(cell, op)
+        perm_str = str(partner_idx.tolist())
+        symmorphic = op.trans_is_zero
+        lines.append(
+            f"{i:4d}  [{rot_str}]  [{trans_str}]  {perm_str:^20}  {symmorphic}"
+        )
+
+    return "\n".join(lines)
 
 
 def check_kspace_symmetry_breaking(inp_file, datasets):
