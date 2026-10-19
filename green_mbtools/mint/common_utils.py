@@ -601,7 +601,7 @@ def add_pbc_params(parser):
     parser.add_argument("--shift", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh shift")
     parser.add_argument("--center", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh center")
     parser.add_argument("--space_symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use space group symmetry")
-    parser.add_argument("--symmorphic_only", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default=False, help="Keep only zero-translation (symmorphic) operators.")
+    parser.add_argument("--symmorphic_only", type=lambda x: (str(x).lower() in ['true','1', 'yes']), nargs='?', const=True, default=False, help="Keep only zero-translation (symmorphic) operators. Bare flag means true; an explicit true/false value is also accepted.")
     parser.add_argument("--symm_ops", type=str, default=None, help="Comma-separated operator indices to keep (e.g. '0,3,4,7').")
     parser.add_argument("--symm_backend", choices=["pyscf", "spglib"], default="pyscf", help="Symmetry detection backend.")
     parser.add_argument("--print_symmetry_ops", default=False, action='store_true', help="Print available symmetry operators and their indices, then exit.")

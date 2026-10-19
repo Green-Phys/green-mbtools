@@ -79,6 +79,14 @@ class pyscf_pbc_init (pyscf_init):
             pyscf density-fitting object, will be generated if None
         """
 
+        # Print-and-exit diagnostic: list the detected symmetry operators and
+        # their indices, then stop before any integral/SCF work. Handled here
+        # (the shared init entry point) so it fires in the normal workflow, not
+        # only on the high-symmetry-path job.
+        if getattr(self.args, "print_symmetry_ops", False):
+            comm.print_symmetry_ops(self.args)
+            return
+
         # Generate integrals for DFT and MBPT calculations
         if mydf is None:
             mydf = self.df_object()

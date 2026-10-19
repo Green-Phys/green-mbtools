@@ -912,3 +912,77 @@ def test_afm_subgroup_roundtrips(tmp_path):
         f"Spin blocks are nearly identical (diff={np.max(np.abs(fock[0]-fock[1])):.3e}); "
         "AFM did not survive the subgroup run."
     )
+
+
+def _screw_cell():
+    """Non-symmorphic 2-atom cell (2_1 screw along z): symmorphic filtering
+    removes a genuine rotation here, unlike the plain translational-doubling
+    case."""
+    from pyscf.pbc import gto
+    cell = gto.M(a=np.diag([6.0, 6.0, 4.0]).tolist(),
+                 atom="H 1.0 0 0\nH -1.0 0 2.0", basis="sto-3g", spin=0,
+                 space_group_symmetry=True, verbose=0)
+    cell.build()
+    return cell
+
+
+def test_symmorphic_only_cli_bare_and_explicit():
+    """Bare --symmorphic_only means True; an explicit true/false is honoured;
+    omission defaults to False."""
+    base = ["--a", _AFM_LATTICE, "--nk", "1", "--atom", _AFM_ATOM,
+            "--basis", _AFM_BASIS]
+    assert comm.init_pbc_params(params=base).symmorphic_only is False
+    assert comm.init_pbc_params(params=base + ["--symmorphic_only"]).symmorphic_only is True
+    assert comm.init_pbc_params(params=base + ["--symmorphic_only", "false"]).symmorphic_only is False
+    assert comm.init_pbc_params(params=base + ["--symmorphic_only", "true"]).symmorphic_only is True
+
+
+def test_apply_restriction_symmorphic_removes_rotation_warns():
+    """--symmorphic_only that drops a rotation (screw of a non-symmorphic
+    group) must emit the auxcell q-space warning, not only --symm_ops."""
+    import warnings
+    from argparse import Namespace
+    from green_mbtools.mint import symmetry_utils as su
+
+    cell = _screw_cell()
+    ops = su.detect_space_group(cell).ops
+    # Precondition: symmorphic filtering really removes a rotation on this cell.
+    kept = su.select_ops(ops, "symmorphic", None, cell)
+    assert len({op.rot.tobytes() for op in kept}) < len({op.rot.tobytes() for op in ops})
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        su.apply_symmetry_restriction(cell, Namespace(
+            space_symm=True, symmorphic_only=True, symm_ops=None,
+            symm_backend="pyscf"))
+    assert any("q-space" in str(x.message) for x in w), \
+        [str(x.message) for x in w]
+
+
+def test_format_symmetry_ops_on_nonsymmorphic_cell():
+    """format_symmetry_ops must build the table on a non-symmorphic cell
+    without a permutation-matching failure (tol=1e-5)."""
+    from green_mbtools.mint import symmetry_utils as su
+    cell = _screw_cell()
+    info = su.detect_space_group(cell)
+    text = su.format_symmetry_ops(cell, info)
+    assert text.count("\n") >= len(info.ops)
+
+
+def test_print_symmetry_ops_dispatched_in_mean_field_input(tmp_path, capsys):
+    """--print_symmetry_ops must print and exit from the normal
+    mean_field_input workflow, before any integral/SCF work."""
+    base = ["--a", _AFM_LATTICE, "--nk", "1", "--atom", _AFM_ATOM,
+            "--basis", _AFM_BASIS, "--df_int", "0", "--print_symmetry_ops"]
+    args = comm.init_pbc_params(params=base)
+    old = Path.cwd()
+    os.chdir(tmp_path)
+    try:
+        init = pyscf_pbc_init(args)
+        ret = init.mean_field_input()
+    finally:
+        os.chdir(old)
+    captured = capsys.readouterr()
+    assert ret is None
+    assert "-3m" in captured.out              # operator table was printed
+    assert not (tmp_path / "cderi.h5").exists()  # returned before integral build

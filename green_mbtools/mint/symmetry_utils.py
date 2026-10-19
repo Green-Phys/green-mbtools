@@ -393,15 +393,23 @@ def apply_symmetry_restriction(cell, args) -> None:
 
     cell.lattice_symmetry = build_symmetry(cell, ops)
 
-    if mode == "indices":
+    # Warn whenever the stored point group (set of distinct rotations) is
+    # smaller than the full detected one. This covers both --symm_ops index
+    # selection and --symmorphic_only filtering that drops a rotation carried
+    # only on a non-symmorphic operator (e.g. the screw of a P2_1 group). It
+    # does NOT fire when only pure (sublattice-swapping) translations are
+    # dropped, since those leave the point group and the q-IBZ unchanged.
+    full_rots = {op.rot.tobytes() for op in full.ops}
+    kept_rots = {op.rot.tobytes() for op in ops}
+    if kept_rots < full_rots:
         warnings.warn(
-            "An explicit operator subgroup was selected via --symm_ops. "
-            "k-space datasets (HF/Fock-k, symmetry/k/*) will be built "
-            "from the reduced group, but auxcell q-space datasets "
-            "(symmetry/q/*, e.g. k_sym_transform_j2c / k_sym_transform_p0) "
-            "are still derived from the full detected symmetry in this phase. "
-            "q-space and aux-derived quantities may be inconsistent for a "
-            "point-group reduction. Validate carefully before consuming them.",
+            "The stored point group was reduced below the full detected "
+            "symmetry (via --symm_ops or --symmorphic_only). k-space datasets "
+            "(HF/Fock-k, symmetry/k/*) are built from the reduced group, but "
+            "auxcell q-space datasets (symmetry/q/*, e.g. k_sym_transform_j2c "
+            "/ k_sym_transform_p0) are still derived from the full detected "
+            "symmetry in this phase, so q-space and aux-derived quantities may "
+            "be inconsistent. Validate carefully before consuming them.",
             UserWarning,
             stacklevel=2,
         )
@@ -810,7 +818,10 @@ def format_symmetry_ops(cell, info) -> str:
     for i, op in enumerate(info.ops):
         rot_str = " ".join(f"{v:2d}" for v in op.rot.flatten())
         trans_str = " ".join(f"{v:8.5f}" for v in op.trans)
-        partner_idx, _ = generate_permutation_info(cell, op)
+        # tol=1e-5 matches get_representation: PySCF rounds fractional
+        # translations to 6 decimals, leaving ~3e-7 residuals for thirds, so
+        # the default 1e-8 would fail to find partners for valid operators.
+        partner_idx, _ = generate_permutation_info(cell, op, tol=1e-5)
         perm_str = str(partner_idx.tolist())
         symmorphic = op.trans_is_zero
         lines.append(
