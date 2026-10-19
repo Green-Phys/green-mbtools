@@ -19,6 +19,7 @@ from pyscf.pbc.lib import kpts as libkpts
 from . import integral_utils as int_utils
 from . import kpt_utils
 from . import ortho_utils
+from . import symmetry_utils
 from .symmetry_utils import get_representation, get_spinor_representation
 from ..version import __version__
 
@@ -83,6 +84,39 @@ def print_high_symmetry_points(args):
     lat = cc.cell.get_bravais_lattice()
     special_points = lat.get_special_points()
     print("List of special points: {}".format(special_points))
+
+
+def print_symmetry_ops(args) -> None:
+    """Detect and print the full space-group operator table for the given system.
+
+    Builds a plain PySCF periodic cell (no symmetry restriction applied) from
+    the simulation parameters in *args*, detects its full space group via
+    :func:`symmetry_utils.detect_space_group`, formats the operator table with
+    :func:`symmetry_utils.format_symmetry_ops`, and prints it to stdout.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Parsed CLI arguments. Must supply at least ``a``, ``atom``, ``basis``,
+        ``ecp``, ``pseudo``, ``spin``, and ``diffuse_cutoff``.  The
+        ``symm_backend`` attribute (default ``"pyscf"``) selects the detection
+        backend.
+    """
+    c = gto.M(
+        a=args.a,
+        atom=args.atom,
+        unit="A",
+        basis=args.basis,
+        ecp=args.ecp,
+        pseudo=args.pseudo,
+        verbose=0,
+        spin=args.spin,
+    )
+    c.exp_to_discard = args.diffuse_cutoff
+    c.build()
+    backend = getattr(args, "symm_backend", "pyscf")
+    info = symmetry_utils.detect_space_group(c, backend=backend)
+    print(symmetry_utils.format_symmetry_ops(c, info))
 
 
 def check_high_symmetry_path(args):
@@ -567,6 +601,10 @@ def add_pbc_params(parser):
     parser.add_argument("--shift", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh shift")
     parser.add_argument("--center", type=float, nargs=3, default=[0.0, 0.0, 0.0], help="mesh center")
     parser.add_argument("--space_symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use space group symmetry")
+    parser.add_argument("--symmorphic_only", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default=False, help="Keep only zero-translation (symmorphic) operators.")
+    parser.add_argument("--symm_ops", type=str, default=None, help="Comma-separated operator indices to keep (e.g. '0,3,4,7').")
+    parser.add_argument("--symm_backend", choices=["pyscf", "spglib"], default="pyscf", help="Symmetry detection backend.")
+    parser.add_argument("--print_symmetry_ops", default=False, action='store_true', help="Print available symmetry operators and their indices, then exit.")
     parser.add_argument("--tr_symm", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default='true', help="Use time-reversal symmetry")
     parser.add_argument("--print_high_symmetry_points", default=False, action='store_true', help="Print available high symmetry points for current system and exit.")
     parser.add_argument("--high_symmetry_path", type=str, default=None, help="High symmetry path")
@@ -683,6 +721,7 @@ def pbc_cell(args):
     c.build()
     if np.linalg.det(_a) < 0:
         raise "Lattice are not in right-handed coordinate system. Please correct your lattice vectors"
+    symmetry_utils.apply_symmetry_restriction(c, args)
     return c
 
 

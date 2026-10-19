@@ -288,6 +288,9 @@ class pyscf_pbc_init (pyscf_init):
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5")
 
     def evaluate_high_symmetry_path(self):
+        if self.args.print_symmetry_ops:
+            comm.print_symmetry_ops(self.args)
+            return
         if self.args.print_high_symmetry_points:
             comm.print_high_symmetry_points(self.args)
             return
