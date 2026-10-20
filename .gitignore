@@ -178,3 +178,7 @@ docs/_versions.rst
 *.chk
 tmp*
 *.npy
+
+# Superpowers skill artifacts (specs, plans, SDD workspace) - local only
+.superpowers/
+docs/superpowers/
