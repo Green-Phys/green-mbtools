@@ -17,6 +17,7 @@ from pyscf.pbc.df.rsdf_builder import _RSGDFBuilder
 from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
 import scipy.linalg as LA
 
+from . import ortho_utils
 from . import kpt_utils
 
 # Linear dep threshold for J2C metric eigenvalues
@@ -314,7 +315,136 @@ def integrals_grid(mycell, kmesh):
     return kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs
 
 
-def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_int", cderi_name="cderi.h5", keep=True, keep_after=False, cderi_name2="cderi_ewald.h5"):
+def build_naf_transform(mydf, args, auxcell):
+    """
+    Build the auxiliary-basis -> NAF transformation (Y, Y_inv) for use with store_auxcell_kstruct_ops_info and the
+    NAF rotation applied to the stored 3-center integrals.
+
+    The aux metric is M = sum_{kq} <L(k, k-q) L(k, k-q)^dagger>. So M is built by
+    summing/averaging over every k-pair in the full k-mesh.
+
+    Parameters
+    ----------
+    mydf : pyscf.pbc.df density-fitting object
+        Must have ``mydf.kpts`` set and ``mydf._cderi`` pointing at a
+        built cderi file (i.e. called after ``mydf.build()`` /
+        ``solve_mean_field``).
+    args : map
+        simulation parameters. Uses ``args.use_j2c_eig_decomposition`` (NAF requires the Cholesky path).
+    auxcell : pyscf.pbc.gto.Cell
+        auxiliary cell.
+
+    Returns
+    -------
+    Y, Y_inv : ndarray
+        Forward/inverse aux-AO -> NAF transforms.
+    """
+
+    # NAF currently assumes the Cholesky factorization of j2c (j2c = L L^dagger):
+    # the conjugation relation L(k2,k1) = conj(L(k1,k2)) used to build M, and the
+    # q-space symmetry operators in store_auxcell_kstruct_ops_info, both rely on it.
+    if getattr(args, "use_j2c_eig_decomposition", False):
+        raise NotImplementedError(
+            "aux_orth='naf' is only supported with the Cholesky j2c factorization; "
+            "rerun with --use_j2c_eig_decomposition false."
+        )
+    
+    mycell = mydf.cell
+    kmesh = np.asarray(mydf.kpts)
+    nk = kmesh.shape[0]
+    nao = mycell.nao_nr()
+    NQ = auxcell.nao_nr()
+
+    # Matrix diagonalized to obtain the NAFs:
+    #   M = (1/N) * sum_{k1,k2} L(k1,k2) L(k1,k2)^dagger
+    # where L(k1,k2) is the (NQ, nao*nao) three-center tensor of the pair.
+    M = np.zeros((NQ, NQ), dtype=np.complex128)
+
+    kptij_idx, _, _, _, _, kptis, kptjs = integrals_grid(mycell, kmesh)
+
+    # Only pairs with k2 <= k1 are stored. Their partner (k2, k1) is added
+    # implicitly: for a real auxiliary basis, the aux functions at -q are the
+    # complex conjugates of those at q, so
+    #     L_Q(k2,k1)_{qp} = conj(L_Q(k1,k2)_{pq})
+    # and therefore
+    #     A(k2,k1) = L(k2,k1) L(k2,k1)^dagger = conj(A(k1,k2)).
+    for i in range(len(kptij_idx)):              # all k2 <= k1 pairs
+        k1 = kptis[i]
+        k2 = kptjs[i]
+        Lpq_full = np.zeros((NQ, nao, nao), dtype=np.complex128)
+        s1 = 0
+        for XXX in mydf.sr_loop((k1, k2), max_memory=4000, compact=False):
+            LpqR, LpqI = XXX[0], XXX[1]
+            Lpq = (LpqR + LpqI * 1j).reshape(LpqR.shape[0], nao, nao)
+            Lpq_full[s1:s1 + Lpq.shape[0], :, :] = Lpq
+            s1 += Lpq.shape[0]
+
+        Lpq_flat = Lpq_full.reshape(NQ, nao * nao)
+        A = Lpq_flat @ Lpq_flat.conj().T
+        # Off-diagonal pair (k1 != k2): A(k1,k2) + A(k2,k1) = A + conj(A) = 2 Re(A),
+        #   so adding 2 * Re(A) accounts exactly for both pairs.
+        # Diagonal pair (k1 == k2, q = 0): the pair is its own partner, so
+        #   A = conj(A) is already real and the factor is 1.
+        # As a result M is real symmetric and Y can be chosen real.
+        c = 1.0 if kptij_idx[i][0] == kptij_idx[i][1] else 2.0
+        M += c * A.real
+
+    M = M / nk**2
+
+    return ortho_utils._build_naf(M)
+
+
+def store_naf_transform(args, Y, Y_inv):
+    """Store the aux-AO->NAF transformation Y (and its inverse) in the input file.
+
+    When ``args.aux_orth == "naf"`` the stored three-center integrals and the
+    exported q-space P0 symmetry operators live in the natural-auxiliary-function
+    (NAF) basis rather than the aux-AO (Cholesky L) basis.
+
+    The datasets are written under a top-level ``/aux_orthogonalization`` group as
+    native complex array:
+
+    - ``Y``: forward transform, shape ``(NQ, NQ)``, rows sorted by decreasing
+      NAF eigenvalue. A single matrix is used for every q-point.
+    - ``Y_inv``: inverse transform, shape ``(NQ, NQ)``; equal to ``Y^dagger``.
+
+    The auxiliary orthogonalization mode (``args.aux_orth``) is recorded as the
+    ``mode`` attribute on the group.
+
+    Parameters
+    ----------
+    args : map
+        simulation parameters
+    Y : numpy.ndarray
+        Forward aux-AO -> NAF rotation.
+    Y_inv : numpy.ndarray
+        Inverse rotation.
+
+    Returns
+    -------
+    None
+        Data is written directly to the HDF5 file. No-op when
+        ``args.aux_orth == "none"`` or ``Y`` is None.
+    """
+    if args.aux_orth == "none" or Y is None:
+        return
+
+    inp_data = h5py.File(args.output_path, "a")
+    if "aux_orthogonalization" in inp_data:
+        naf_grp = inp_data["aux_orthogonalization"]
+    else:
+        naf_grp = inp_data.create_group("aux_orthogonalization")
+    naf_grp.attrs["mode"] = args.aux_orth
+    Y = np.asarray(Y, dtype=np.complex128)
+    Y_inv = np.asarray(Y_inv, dtype=np.complex128)
+    for name, data in (("Y", Y), ("Y_inv", Y_inv)):
+        if name in naf_grp:
+            del naf_grp[name]
+        naf_grp[name] = data
+    inp_data.close()
+
+
+def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_int", cderi_name="cderi.h5", keep=True, keep_after=False, cderi_name2="cderi_ewald.h5", Y=None, Y_inv=None):
 
     kptij_idx, kij_conj, kij_trans, kpair_irre_list, num_kpair_stored, kptis, kptjs = integrals_grid(mycell, kmesh)
 
@@ -383,6 +513,12 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
     rotate = (X_k is not None and len(X_k) == kmesh.shape[0]
               and args.orth != "none")
 
+    naf_rotate = (args.aux_orth == "naf")
+    if naf_rotate and Y is None:
+        Y, Y_inv = build_naf_transform(mydf, args, auxcell)
+        # Y is only built here on the molecule path; PBC stores it in mean_field_input.
+        store_naf_transform(args, Y, Y_inv)
+
     for i in kpair_irre_list:
         k1 = kptis[i]
         k2 = kptjs[i]
@@ -401,6 +537,7 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
             buffer[cnt% chunk_size, s1:s1+Lpq.shape[0], :, :] = Lpq[0:Lpq.shape[0],:,:]
             # s1 = NQ at maximum.
             s1 += Lpq.shape[0]
+
         if apply_correction and np.allclose(k1, k2) :
             s1 = 0
             for XXX in correction_df.sr_loop((k1,k1), max_memory=4000, compact=False):
@@ -412,6 +549,13 @@ def compute_integrals(args, mycell, mydf, kmesh, nao, X_k=None, basename = "df_i
                 buffer[cnt% chunk_size, s1:s1+Lpq.shape[0], :, :] = Lpq[0:Lpq.shape[0],:,:]
                 # s1 = NQ at maximum.
                 s1 += Lpq.shape[0]
+
+        # Rotate the fully-assembled auxiliary index into the NAF basis
+        if naf_rotate:
+            buffer[cnt % chunk_size] = np.einsum(
+                "QP,Pab->Qab", Y, buffer[cnt % chunk_size], optimize=True
+            )
+
         cnt += 1
 
         # if reach chunk size: (cnt-chunk_size) equals to chunk id.
