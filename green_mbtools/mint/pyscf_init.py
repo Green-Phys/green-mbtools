@@ -3,6 +3,7 @@ import os
 import h5py
 import logging
 import numpy as np
+from pyscf import scf as mscf
 from pyscf.df import addons
 from pyscf.pbc import tools, gto
 from pyscf.pbc.lib import kpts as libkpts
@@ -414,7 +415,22 @@ class pyscf_mol_init (pyscf_init):
         '''
         if mydf is None:
             mydf = self.df_object()
-#comm.construct_gdf(self.args, self.cell, self.kmesh)
+        if not os.path.exists("cderi_mol.h5"):
+            if self.args.x2c == 2:
+                df_mf = (
+                    mscf.RHF(self.cell).density_fit()
+                    if self.args.restricted
+                    else mscf.UHF(self.cell).density_fit()
+                )
+            elif self.args.x2c == 1:
+                df_mf = self.args.mean_field(self.cell).density_fit().sfx2c1e()
+            else:
+                df_mf = self.args.mean_field(self.cell).density_fit()
+            df_mf.with_df.auxbasis = mydf.auxbasis
+            if self.args.Nk > 0:
+                df_mf.with_df.mesh = mydf.mesh
+            df_mf.with_df._cderi_to_save = "cderi_mol.h5"
+            df_mf.with_df.build()
 
         # number of k-points in each direction for Coulomb integrals
         nk       = np.prod(self.args.nk)
