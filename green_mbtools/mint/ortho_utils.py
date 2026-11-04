@@ -256,30 +256,46 @@ def _build_X_ibz(mode, S_ibz, F_ibz, dm_ibz, mo_coeff_ibz,
 
 
 def _propagate_with_reps(X_per_irrep, Xinv_per_irrep, ibz2bz, bz2ibz,
-                         k_sym_transform_ao, tr_conj):
+                         k_sym_transform_ao, tr_conj, mode=None):
     '''
     Propagate per-IBZ ``(X, X_inv)`` to every BZ point given precomputed
     AO-space rotations ``k_sym_transform_ao`` and TR flags ``tr_conj``.
 
-    Convention (matching ``common_utils.store_kstruct_ops_info``):
+    Two covariance rules are applied, selected by ``mode``, according to how
+    the orthogonalizer transforms under the AO rotation ``U(k)``:
 
-    - Non-TR (``tr_conj[k] == False``): the AO rotation ``U(k)`` is
-      ``get_representation(k, stars_ops[k], ...)`` (or the spinor analog),
-      and ``M(k) = U M(k_ir) U†``. Then
+    - Column-covariant modes (``lowdin``, ``mo``, ``natural`` — the default
+      for ``mode=None``) are built from orbital/eigenvector *columns* that
+      ride along one-sided, ``C(k) = U C(k_ir)``. Their orthogonalizer
+      therefore propagates **one-sided**:
 
           X(k)     = X(k_ir) @ U†
           X_inv(k) = U @ X_inv(k_ir)
 
-    - TR (``tr_conj[k] == True``): the stored rotation already
-      incorporates the conjugation factor (e.g. for X2C double group it
-      is ``(U_spinor @ Θ).conj()``), and the reconstruction is
-      ``M(k) = (U M(k_ir) U†).conj()``. Then
+    - ``symmetric_lowdin`` is the Hermitian AO-labelled matrix function
+      ``S(k)^{-1/2}``. A matrix function of ``S(k) = U S(k_ir) U†``
+      conjugates **two-sided**, so both X and X_inv propagate two-sided:
 
-          X(k)     = (X(k_ir) @ U†).conj()
-          X_inv(k) = (U @ X_inv(k_ir)).conj()
+          X(k)     = U @ X(k_ir)     @ U†
+          X_inv(k) = U @ X_inv(k_ir) @ U†
 
-    so that ``X(k) S(k) X(k)† = I`` at every BZ point.
+      This keeps the AO gauge Hermitian and conjugate-k consistent
+      (``X(-k) = X(k)*``), which the SEET real-local-density workflow
+      relies on. The one-sided frame would still orthogonalize but lands
+      a k-dependent unitary ``U(k)†`` away from ``S(k)^{-1/2}``, leaking a
+      spurious imaginary local density. The two-sided rule is gated to
+      this mode only: applying it to the column-covariant (and possibly
+      rectangular) modes would be wrong — and ill-typed for rank-reduced X.
+
+    Convention matches ``common_utils.store_kstruct_ops_info``: for TR
+    points (``tr_conj[k] == True``) the stored rotation already carries the
+    conjugation factor (e.g. for X2C double group it is
+    ``(U_spinor @ Θ).conj()``), the reconstruction is
+    ``M(k) = (U M(k_ir) U†).conj()``, and both X and X_inv are conjugated
+    after the (one- or two-sided) propagation, so that
+    ``X(k) S(k) X(k)† = I`` at every BZ point.
     '''
+    two_sided = mode == "symmetric_lowdin"
     ibz2bz_arr = np.asarray(ibz2bz)
     bz2ibz_arr = np.asarray(bz2ibz)
     nk = bz2ibz_arr.shape[0]
@@ -299,8 +315,12 @@ def _propagate_with_reps(X_per_irrep, Xinv_per_irrep, ibz2bz, bz2ibz,
         Xinv_ir = Xinv_per_irrep[i_ir]
         u = k_sym_transform_ao[ik]
 
-        Xk = X_ir @ u.conj().T
-        Xinvk = u @ Xinv_ir
+        if two_sided:
+            Xk = u @ X_ir @ u.conj().T
+            Xinvk = u @ Xinv_ir @ u.conj().T
+        else:
+            Xk = X_ir @ u.conj().T
+            Xinvk = u @ Xinv_ir
         if tr_conj[ik]:
             Xk = Xk.conj()
             Xinvk = Xinvk.conj()
@@ -316,10 +336,12 @@ def _propagate_X_to_star(
     kstruct,
     mycell,
     spinor=False,
+    mode=None,
 ):
     '''
     Build precomputed AO-rotation arrays from ``kstruct`` + ``mycell`` and
-    delegate to ``_propagate_with_reps``.
+    delegate to ``_propagate_with_reps``. ``mode`` selects the covariance
+    rule (see ``_propagate_with_reps``).
     '''
     nk = kstruct.nkpts
     stars_ops = kstruct.stars_ops_bz
@@ -348,7 +370,7 @@ def _propagate_X_to_star(
     return _propagate_with_reps(
         X_per_irrep, Xinv_per_irrep,
         kstruct.ibz2bz, kstruct.bz2ibz,
-        k_sym_transform_ao, tr_conj_bz,
+        k_sym_transform_ao, tr_conj_bz, mode=mode,
     )
 
 
@@ -439,7 +461,7 @@ def build_X_kspace(
     )
 
     return _propagate_X_to_star(
-        X_per_irrep, Xinv_per_irrep, kstruct, mycell, spinor=spinor
+        X_per_irrep, Xinv_per_irrep, kstruct, mycell, spinor=spinor, mode=mode
     )
 
 
@@ -541,6 +563,7 @@ def build_X_kspace_from_ao_reps(
         ibz2bz_arr, bz2ibz_compact,
         np.asarray(k_sym_transform_ao, dtype=np.complex128),
         np.asarray(tr_conj, dtype=bool) if tr_conj is not None else None,
+        mode=mode,
     )
 
 
