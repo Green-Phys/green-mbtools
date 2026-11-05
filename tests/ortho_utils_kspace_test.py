@@ -490,6 +490,89 @@ def test_ar_x2c_spinor_orthogonality():
     )
 
 
+def _adj(a):
+    return a.conj().swapaxes(-1, -2)
+
+
+def test_symmetric_lowdin_star_gauge_local_density_cancels():
+    """Symmetric Löwdin must propagate as the Hermitian AO-labelled matrix
+    function ``S(k)^{-1/2}`` (two-sided ``U X U†``), not the one-sided star
+    frame ``X U†``.
+
+    Two equally weighted BZ points ``(+k, -k)`` share one IBZ rep, both
+    non-TR, related by the real AO rotation ``U = diag(1, -1)``. The AO
+    density obeys ``D(-k) = D(k)*`` and its BZ average is real. In the
+    correct symmetric gauge the transformed local density stays real
+    (the ±k imaginary parts cancel); the one-sided star frame rotates
+    both points to the same ``D_ir`` so the imaginary parts add instead.
+    """
+    I = np.eye(2, dtype=np.complex128)
+    U = np.array([I, np.diag([1.0, -1.0]).astype(np.complex128)])
+    D_ir = np.array([[0.5, 0.2j], [-0.2j, 0.5]], dtype=np.complex128)
+    S_ibz = np.array([I])
+    D_ao = U @ D_ir @ _adj(U)
+
+    A, B = build_X_kspace_from_ao_reps(
+        "symmetric_lowdin",
+        S_ibz,
+        np.array([0]),       # IBZ representative's full-BZ index
+        np.array([0, 0]),    # representative BZ index for each BZ point
+        U,
+        tr_conj=np.array([False, False]),
+    )
+
+    # For S = I the AO-labelled symmetric Löwdin matrix is I at every BZ
+    # point regardless of the star rotation (I^{-1/2} = I, and U I U† = I).
+    np.testing.assert_allclose(
+        A, np.array([I, I]), atol=1e-12, rtol=0,
+        err_msg="symmetric Löwdin X(k) is not the AO-labelled S(k)^{-1/2}",
+    )
+
+    # X must be Hermitian (symmetric-matrix semantics) at every point.
+    np.testing.assert_allclose(A, _adj(A), atol=1e-12, rtol=0)
+
+    # Core SEET property: the k-averaged transformed local density is real.
+    D_orth = _adj(B) @ D_ao @ B
+    assert np.max(np.abs(D_orth.mean(axis=0).imag)) < 1e-12, (
+        "transformed local density picked up a spurious imaginary part — "
+        "one-sided star gauge broke conjugate-k cancellation"
+    )
+
+    # Sanity: orthogonality, inverse relation, Hermiticity, electron count.
+    np.testing.assert_allclose(A @ S_ibz[[0, 0]] @ _adj(A), [I, I], atol=1e-12)
+    np.testing.assert_allclose(A @ B, [I, I], atol=1e-12)
+    np.testing.assert_allclose(D_orth, _adj(D_orth), atol=1e-12)
+    np.testing.assert_allclose(np.trace(D_orth.mean(axis=0)).real, 1.0, atol=1e-12)
+
+
+def test_lowdin_star_gauge_stays_one_sided():
+    """Guard: the symmetric-Löwdin two-sided propagation must NOT leak into
+    canonical Löwdin. Canonical Löwdin is column-covariant — its correct star
+    propagation is the one-sided ``X(k) = X(ir) U†`` — so for S = I and
+    U = diag(1, -1) the propagated X(k) must equal U† = diag(1, -1), not
+    the two-sided ``U I U† = I``.
+    """
+    I = np.eye(2, dtype=np.complex128)
+    U = np.array([I, np.diag([1.0, -1.0]).astype(np.complex128)])
+    S_ibz = np.array([I])
+
+    X_k, _ = build_X_kspace_from_ao_reps(
+        "lowdin",
+        S_ibz,
+        np.array([0]),
+        np.array([0, 0]),
+        U,
+        tr_conj=np.array([False, False]),
+    )
+
+    # X(ir) = I (canonical Löwdin of I), so one-sided gives X(k1) = U(k1)†.
+    np.testing.assert_allclose(X_k[0], I, atol=1e-12, rtol=0)
+    np.testing.assert_allclose(
+        X_k[1], _adj(U[1]), atol=1e-12, rtol=0,
+        err_msg="canonical Löwdin star propagation must stay one-sided",
+    )
+
+
 def test_from_ao_reps_consumes_stored_symmetry_k():
     """Regression: feed the stored ``/symmetry/k`` arrays straight from
     input.h5 (the init_seet.py path) to build_X_kspace_from_ao_reps.
