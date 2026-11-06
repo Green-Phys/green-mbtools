@@ -1,5 +1,5 @@
 numpy
-pyscf >=2.0.0
+pyscf >=2.0.0,<2.15
 ase
 spglib
 numba
