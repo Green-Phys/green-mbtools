@@ -81,7 +81,20 @@ def auxiliary_transform(
         raise ValueError(
             f"Auxiliary metric covariance failed: {residual(mapped_metric, expected_metric)}"
         )
-    return solve_triangular(c_target, mapped, lower=True)
+    transform = solve_triangular(c_target, mapped, lower=True)
+    # A small absolute error in the raw metric can be amplified by whitening.
+    # The whitened auxiliary leg must preserve V^dagger V itself, including
+    # near-null metric directions. Orbital stored-basis maps have a different
+    # covariance contract and need not be Euclidean unitary.
+    gram = transform.conj().T @ transform
+    identity = np.eye(len(c_source), dtype=complex)
+    if not np.all(np.isfinite(transform)) or not np.allclose(
+        gram, identity, atol=atol, rtol=rtol
+    ):
+        raise ValueError(
+            f"Whitened auxiliary isometry failed: {residual(gram, identity)}"
+        )
+    return transform
 
 
 def reconstruct_factor(
