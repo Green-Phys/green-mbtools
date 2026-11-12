@@ -595,6 +595,10 @@ def add_pbc_params(parser):
     '''
     Define PBC-specific command line arguments for Green python module
     '''
+    parser.add_argument("--integral_symmetry", choices=("legacy","space_group"), default="legacy",
+                        help="Independent integral storage mode; space_group requires fresh output paths")
+    parser.add_argument("--integral_symmetry_work", default="symmetry-integral-work",
+                        help="Fresh directory for representative builder scratch and captured gauges")
     parser.add_argument("--a", type=parse_geometry, help="lattice geometry", required=True)
     parser.add_argument("--nk", type=int, nargs='+', help="number of k-points in each direction. Provide 1 value for symmetric mesh or 3 values for anisotropic mesh.", required=True)
     parser.add_argument("--pseudo", type=str, nargs="*", default=[None], help="pseudopotential")
