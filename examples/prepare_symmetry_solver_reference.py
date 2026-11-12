@@ -160,6 +160,11 @@ def main():
             fingerprint=fingerprint,
             chunk_size=5,
         )
+        if name == "correlation":
+            with h5py.File(output / "input.h5", "a") as file:
+                file["integral_symmetry/correlation_gauge_id"] = results[name][
+                    "auxiliary_gauge_id"
+                ]
         expand_archive(
             output / f"{name}_sg",
             output / "input.h5",

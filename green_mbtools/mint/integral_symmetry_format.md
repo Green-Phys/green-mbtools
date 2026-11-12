@@ -111,15 +111,19 @@ Offline `examples/compress_df_integrals.py` streams a complete captured-frame
 reference, retaining only bounded factor buffers and a metric LRU; a legacy
 chunk set without its actual whitening factors cannot safely be compressed.
 
-An automated physical q=0 regression is available in
+The representative-producer integration supplies an automated physical q=0 regression in
 `tests/test_integral_default_ewald_physics.py`. It calls the original
 `green_igen.df._make_j3c` directly for every reference diagonal, independently
 of the SG capture wrapper, and checks all logical factors and all fixed-q
-cross-pair ERIs in a small full-rank case. It also requires a nonzero change
+cross-pair ERIs in small full-rank diamond and triclinic identity cases. It also requires a nonzero change
 from the ordinary q=0 interaction. This is an opt-in compute test:
 `GREEN_RUN_PHYSICAL_SG_TESTS=1 python -m pytest -q
-tests/test_integral_default_ewald_physics.py --basetemp /data/.../fresh-pytest`.
+tests/test_integral_default_ewald_physics.py --basetemp /path/to/scratch/fresh-pytest`.
 An optional fresh `GREEN_SG_PHYSICS_FIXTURE_DIR` retains native input/reference
-fixtures for the coordinated C++ reader tests. Run integral builds on the
+fixtures under `diamond/` and `identity/`, each with `hf/` and `correlation/`
+subdirectories for the coordinated C++ reader tests. The identity case must
+have no extra spatial reduction beyond the legacy TR/exchange pair count.
+The complete-reference exports also support frozen solver comparisons.
+Run integral builds on the
 workstation, not on a laptop. Successful execution, rather than merely adding
 the test, is required before treating its physical coverage as closed.
