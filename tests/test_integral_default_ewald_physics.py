@@ -1,6 +1,6 @@
 """Opt-in physical regression, intended for a provisioned compute workstation.
 
-Run with GREEN_RUN_PHYSICAL_SG_TESTS=1 and a /data pytest --basetemp.
+Run with GREEN_RUN_PHYSICAL_SG_TESTS=1 and a compute-node pytest --basetemp.
 The complete corrected reference calls the original GREEN routine directly,
 without the symmetry producer's capture wrapper or its representative subset.
 """
@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 
 import h5py
@@ -19,8 +20,12 @@ from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
 import green_igen.df as legacy
 
 from green_mbtools.mint.integral_symmetry_builder import build_representative_archive
-from green_mbtools.mint.integral_symmetry_io import ArchiveReader, pack
-from green_mbtools.mint.integral_utils import weighted_coulG_ewald
+from green_mbtools.mint.integral_symmetry import (
+    integral_kstruct,
+    validated_cell_operations,
+)
+from green_mbtools.mint.integral_symmetry_io import ArchiveReader, pack, unpack
+from green_mbtools.mint.integral_utils import integrals_grid, weighted_coulG_ewald
 
 
 def _factor(provider, left, right, naux, nao):
@@ -35,18 +40,26 @@ def _factor(provider, left, right, naux, nao):
     os.environ.get("GREEN_RUN_PHYSICAL_SG_TESTS") != "1",
     reason="Explicit workstation opt-in required for physical integral builds",
 )
+@pytest.mark.parametrize("model", ["diamond", "identity"])
 def test_default_ewald_against_independent_complete_green_reference(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, model
 ):
     root = Path(
         os.environ.get("GREEN_SG_PHYSICS_FIXTURE_DIR", str(tmp_path / "physics"))
     )
+    root = root / model
     root.mkdir(parents=True, exist_ok=False)
     cell = gto.Cell()
-    cell.a = [[0, 1.75, 1.75], [1.75, 0, 1.75], [1.75, 1.75, 0]]
-    cell.atom = [["C", [0, 0, 0]], ["C", [0.875, 0.875, 0.875]]]
+    if model == "diamond":
+        cell.a = [[0, 1.75, 1.75], [1.75, 0, 1.75], [1.75, 1.75, 0]]
+        cell.atom = [["C", [0, 0, 0]], ["C", [0.875, 0.875, 0.875]]]
+    else:
+        cell.a = [[4.1, 0.2, 0.1], [0.4, 4.4, 0.3], [0.2, 0.5, 4.7]]
+        cell.atom = [["C", [0, 0, 0]], ["He", [0.83, 1.17, 1.43]]]
     cell.unit = "Angstrom"
     cell.basis = {"C": [[0, [1.0, 1.0]], [1, [0.6, 1.0]]]}
+    if model == "identity":
+        cell.basis["He"] = [[0, [1.2, 1.0]]]
     cell.precision = 1e-12
     cell.mesh = [31] * 3
     cell.max_memory = 4000
@@ -54,8 +67,16 @@ def test_default_ewald_against_independent_complete_green_reference(
     cell.build()
     kpts = cell.make_kpts([3, 1, 1])
     auxbasis = {"C": [[0, [0.8, 1.0]], [0, [0.25, 1.0]], [1, [0.6, 1.0]]]}
+    if model == "identity":
+        auxbasis["He"] = [[0, [0.9, 1.0]], [0, [0.35, 1.0]]]
     aux = df.df.make_modrho_basis(cell, auxbasis)
     nk, nao, naux = len(kpts), cell.nao_nr(), aux.nao_nr()
+    operations = validated_cell_operations(cell, integral_kstruct(cell, kpts))
+    legacy_representatives = int(integrals_grid(cell, kpts)[4])
+    if model == "identity":
+        assert len(operations) == 1, (
+            "The physical low-symmetry model must have only identity spatial symmetry"
+        )
 
     # Complete ordinary reference from the upstream builder, not the selected
     # representative builder. Supplying every ordered pair fixes the q frames.
@@ -113,6 +134,9 @@ def test_default_ewald_against_independent_complete_green_reference(
     ).strip()
     report = {
         "status": "PASS",
+        "model": model,
+        "detected_spatial_operations": len(operations),
+        "legacy_representatives": legacy_representatives,
         "full_pairs": nk * nk,
         "precision": cell.precision,
         "mesh": list(map(int, cell.mesh)),
@@ -140,6 +164,10 @@ def test_default_ewald_against_independent_complete_green_reference(
             mesh=cell.mesh,
             chunk_size=2,
         )
+        if model == "identity":
+            assert manifest["representatives"] == legacy_representatives, (
+                "Identity spatial symmetry must add no reduction beyond TR/exchange"
+            )
         rebuilt = {}
         maximum = 0.0
         with ArchiveReader(folder / "sg", expected_set_kind=kind) as reader:
@@ -177,6 +205,24 @@ def test_default_ewald_against_independent_complete_green_reference(
         )
         with h5py.File(folder / "native-reference.h5", "w") as file:
             file["factors"] = pack(packed)
+        # Complete factors are from the independent reference. Captured frame
+        # metadata is exported only after their entrywise agreement is checked.
+        with h5py.File(folder / "sg/meta.h5") as meta:
+            qpts = cell.get_abs_kpts(
+                meta["sg/q_mesh"][()] / int(meta["sg/q_denominator"][()])
+            )
+            frames = unpack(meta["sg/captured_C"][()], (len(qpts), naux, naux))
+        with h5py.File(folder / "complete-reference.h5", "w") as file:
+            file.attrs.update(set_kind=kind, kernel_id=attributes["kernel_id"])
+            file["Cell"], file["AuxCell"] = cell.dumps(), aux.dumps()
+            file["kpts"], file["qpts"] = kpts, qpts
+            for iq, frame in enumerate(frames):
+                file[f"captured_C/{iq}"] = frame
+            for (i, j), value in references[kind].items():
+                file[f"factors/{i}_{j}"] = value
+                file[f"pair_q/{i}_{j}"] = pair_q[i, j]
+        if kind == "hf":
+            shutil.copyfile(ordinary_path, folder / "cderi.h5")
         with h5py.File(folder / "native-input.h5", "w") as file:
             file["integral_symmetry/input_fingerprint"] = manifest["input_fingerprint"]
             file["integral_symmetry/correlation_gauge_id"] = attributes[
