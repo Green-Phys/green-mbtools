@@ -114,3 +114,20 @@ def test_fail_closed_for_wrong_gauge_kernel_rank_and_slice():
         reconstruct_factor(
             np.ones((3, 2, 2)), np.eye(3), np.eye(2), np.eye(2), output_slice=(2, 2)
         )
+
+
+def test_whitening_must_not_amplify_allowed_raw_metric_error_into_eri_change():
+    source = np.diag([1.0, 1e-8]).astype(complex)
+    target = np.diag([1.0, 2e-8]).astype(complex)
+    # The old absolute raw-metric gate accepts this 3e-16 discrepancy, yet the
+    # resulting map diag(1, 1/2) would reduce the second auxiliary contribution
+    # to an ERI by 75%. Both captured factors pass the retained-rank checks.
+    np.testing.assert_allclose(
+        source @ source.conj().T, target @ target.conj().T, atol=1e-10, rtol=1e-10
+    )
+    with pytest.raises(ValueError, match="Whitened auxiliary isometry"):
+        auxiliary_transform(
+            CholeskyGauge(source, "source", "hf"),
+            CholeskyGauge(target, "target", "hf"),
+            np.eye(2),
+        )
