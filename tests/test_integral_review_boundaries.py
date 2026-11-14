@@ -96,6 +96,34 @@ def test_enabled_symmetries_are_explicit_in_diagnostic_summary():
     assert plain["space_group_representatives"] > reduced["space_group_representatives"]
 
 
+def test_mesh_coordinates_cannot_be_unfrozen_through_orbits():
+    orbits = build_pair_orbits(IntegerMesh.from_scaled([[0, 0, 0]]), [IDENTITY])
+    with pytest.raises(ValueError):
+        orbits.mesh.coordinates.setflags(write=True)
+
+
+def test_discovered_group_at_a_nonstandard_coordinate_origin():
+    from green_mbtools.mint.integral_symmetry import (
+        integral_kstruct,
+        matching_operation_id,
+    )
+
+    cell = gto.Cell(
+        a=np.eye(3) * 4,
+        atom="He .004 .008 .012",
+        unit="Bohr",
+        basis={"He": [[0, [1.0, 1.0]]]},
+        verbose=0,
+    ).build()
+    structure = integral_kstruct(cell, cell.make_kpts([1, 1, 1]))
+    discovered = validated_cell_operations(cell, structure)
+    operations, table, _, _ = validate_group(discovered)
+    assert len(operations) == 48
+    assert table.shape == (48, 48)
+    for operation in operations:
+        matching_operation_id(operation, structure.ops)
+
+
 @pytest.mark.parametrize("error", ["values", "ordering"])
 def test_input_kmesh_checks_both_values_and_order(error):
     cell = gto.Cell(
