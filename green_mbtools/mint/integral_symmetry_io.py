@@ -17,6 +17,7 @@ from .integral_symmetry_transform import CholeskyGauge, auxiliary_transform
 
 FORMAT = "green.df.space_group.v1"
 PACKING = "complex128_interleaved_f64"
+MAX_FACTOR_BUFFER_BYTES = 128 * 1024**2
 REQUIRED_ATTRIBUTES = (
     "integral_format",
     "format_version",
@@ -153,9 +154,9 @@ def write_archive(
     nk, nao, nq = len(geometry.kpts), geometry.cell.nao_nr(), len(geometry.qpts)
     naux = geometry.auxcell.nao_nr()
     factor_bytes = naux * nao * nao * 16
-    if factor_bytes > 128 * 1024**2:
+    if factor_bytes > MAX_FACTOR_BUFFER_BYTES:
         raise ValueError("One factor exceeds the initial 128 MiB source-buffer bound")
-    chunk_size = min(chunk_size, max(1, 128 * 1024**2 // factor_bytes))
+    chunk_size = min(chunk_size, max(1, MAX_FACTOR_BUFFER_BYTES // factor_bytes))
     fingerprint = fingerprint or input_fingerprint(
         geometry.cell, geometry.kpts, stored_x
     )
@@ -174,10 +175,10 @@ def write_archive(
             if source.shape != (naux, nao, nao) or not np.all(np.isfinite(source)):
                 raise ValueError("Malformed representative source")
             for operation_id, operation in enumerate(o.operations):
-                for tr in (False, True):
+                for tr in (False, True) if o.time_reversal_enabled else (False,):
                     points, _ = o.mesh.action(operation, tr)
                     target = tuple(map(int, points[list(pair)]))
-                    for exchange in (False, True):
+                    for exchange in (False, True) if o.exchange_enabled else (False,):
                         if (target[::-1] if exchange else target) != pair:
                             continue
                         _, maps = geometry.spatial(
@@ -260,6 +261,8 @@ def write_archive(
             transform_direction="representative_to_requested",
             operation_order="spatial,time_reversal,exchange",
             source_mode=source_mode,
+            time_reversal_enabled=o.time_reversal_enabled,
+            exchange_enabled=o.exchange_enabled,
             validation_kind="complete_reference"
             if reference_get_factor
             else "metrics_and_stabilizers",
@@ -429,6 +432,11 @@ class ArchiveReader:
             int, dimensions
         )
         nk, nao, naux, nrep, nq, nops = map(int, dimensions)
+        self.factor_bytes = naux * nao * nao * 16
+        if self.factor_bytes > MAX_FACTOR_BUFFER_BYTES:
+            raise ValueError(
+                "One factor exceeds the initial 128 MiB source-buffer bound"
+            )
         self.mesh = IntegerMesh(
             integer("mesh", (nk, 3)), int(integer("mesh_denominator", ()))
         )
@@ -479,13 +487,15 @@ class ArchiveReader:
             self.pair_rep.flat
         ) != set(range(nrep)):
             raise ValueError("Invalid representative coverage")
-        self.spatial_points = np.array([self.mesh.action(op)[0] for op in operations])
+        actions = {(i, False): self.mesh.action(op) for i, op in enumerate(operations)}
+        self.spatial_points = np.array([actions[i, False][0] for i in range(nops)])
         for i in range(nk):
             for j in range(nk):
                 rep = self.representatives[self.pair_rep[i, j]]
-                points, reciprocal = self.mesh.action(
-                    operations[self.pair_op[i, j]], bool(self.tr[i, j])
-                )
+                key = (int(self.pair_op[i, j]), bool(self.tr[i, j]))
+                if key not in actions:
+                    actions[key] = self.mesh.action(operations[key[0]], key[1])
+                points, reciprocal = actions[key]
                 legs = rep[::-1] if self.ex[i, j] else rep
                 if tuple(points[legs]) != (i, j) or not np.array_equal(
                     reciprocal[legs], wraps[i, j]
@@ -503,6 +513,8 @@ class ArchiveReader:
         self.chunk_size = int(integer("chunk_size", ()))
         if self.chunk_size <= 0:
             raise ValueError("Invalid representative chunk capacity")
+        if self.chunk_size * self.factor_bytes > MAX_FACTOR_BUFFER_BYTES:
+            raise ValueError("Representative chunk capacity exceeds the 128 MiB bound")
         self.starts = integer("chunk_start")
         self.counts = integer("chunk_valid_count")
         if not np.array_equal(
@@ -609,9 +621,19 @@ class ArchiveReader:
         if self.current_chunk != start:
             count = int(self.counts[start // self.chunk_size])
             with h5py.File(self.path / f"SGVQ_{start}.h5") as f:
-                self.chunk = unpack(
-                    f["factors"][()], (count, self.naux, self.nao, self.nao)
-                )
+                data = f["factors"]
+                expected = (count, self.naux, self.nao, 2 * self.nao)
+                if (
+                    not isinstance(data, h5py.Dataset)
+                    or data.shape != expected
+                    or data.dtype != np.dtype("float64")
+                ):
+                    raise ValueError("Invalid factor chunk shape/precision layout")
+                if data.size * data.dtype.itemsize > MAX_FACTOR_BUFFER_BYTES:
+                    raise ValueError(
+                        "Factor chunk exceeds the 128 MiB source-buffer bound"
+                    )
+                self.chunk = unpack(data[()], (count, self.naux, self.nao, self.nao))
             self.current_chunk = start
         return self.chunk[position - start]
 
@@ -707,11 +729,19 @@ def expand_archive(archive, input_path, output, *, chunk_size=32):
     from importlib.metadata import version
 
     output = Path(output)
-    if output.exists() or chunk_size <= 0:
+    if output.exists() or not isinstance(chunk_size, int) or chunk_size <= 0:
         raise ValueError(
             "Expansion requires a fresh directory and positive chunk capacity"
         )
     with h5py.File(input_path) as f:
+        dimensions = tuple(int(f[f"params/{name}"][()]) for name in ("nk", "nso", "NQ"))
+        gauge_id = (
+            f["integral_symmetry/correlation_gauge_id"][()]
+            if "integral_symmetry/correlation_gauge_id" in f
+            else None
+        )
+        if isinstance(gauge_id, bytes):
+            gauge_id = gauge_id.decode()
         pairs = f["symmetry/pairs/kpair_idx"][()][
             f["symmetry/pairs/kpair_irre_list"][()]
         ]
@@ -725,8 +755,21 @@ def expand_archive(archive, input_path, output, *, chunk_size=32):
                 "Input lacks the SG archive identity; create an identified input copy first"
             )
     with ArchiveReader(archive, expected_fingerprint=fingerprint) as reader:
+        if dimensions != (reader.nk, reader.nao, reader.naux):
+            raise ValueError("Legacy input/archive dimensions disagree (nk, nso, NQ)")
+        if (
+            reader.attributes["set_kind"] == "correlation"
+            and gauge_id is not None
+            and gauge_id != reader.attributes["auxiliary_gauge_id"]
+        ):
+            raise ValueError(
+                "Correlation auxiliary gauge differs from identified input"
+            )
         if np.any(pairs < 0) or np.any(pairs >= reader.nk):
             raise ValueError("Legacy input pair order is incompatible with archive")
+        chunk_size = min(
+            chunk_size, max(1, MAX_FACTOR_BUFFER_BYTES // reader.factor_bytes)
+        )
         output.mkdir(parents=True)
         starts = np.arange(0, len(pairs), chunk_size, dtype=np.int64)
         for start in starts:
