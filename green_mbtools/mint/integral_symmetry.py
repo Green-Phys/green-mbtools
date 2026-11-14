@@ -1,7 +1,8 @@
 """Exact mesh actions for ordered periodic integral pairs.
 
 This module does not change legacy pair maps or integral production.  Momentum
-actions use integer arithmetic.  A pair action is spatial, then time reversal,
+actions use integer arithmetic after finite input floats have been validated
+and rationalized within the requested tolerance. A pair action is spatial, then time reversal,
 then exchange; its direction is always representative -> requested pair.
 Translations are retained even when two operations induce the same k map.
 Tensor/gauge validity must be established separately before omitting factors.
@@ -16,6 +17,8 @@ import numpy as np
 
 
 def _fraction(value, max_denominator=4096, tolerance=1e-10):
+    if not np.isfinite(float(value)):
+        raise ValueError("Coordinate must be finite")
     result = Fraction(str(value)).limit_denominator(max_denominator)
     if abs(float(result) - float(value)) > tolerance:
         raise ValueError("Coordinate has no validated rational mesh representation")
@@ -49,7 +52,12 @@ class CrystalOperation:
             raise ValueError("A fractional rotation must be unimodular")
         if len(self.translation) != 3:
             raise ValueError("A translation must have three components")
-        translation = tuple(_fraction(x, 96, 1e-6) % 1 for x in self.translation)
+        # An arbitrary coordinate origin need not have crystallographic
+        # denominator 2/3/4/6. Group-wide affine consistency is checked below.
+        translation = tuple(
+            (x if isinstance(x, Fraction) else _fraction(x, 10**9, 1e-12)) % 1
+            for x in self.translation
+        )
         object.__setattr__(
             self, "rotation", tuple(tuple(int(x) for x in row) for row in rotation)
         )
@@ -169,6 +177,29 @@ class PairOrbits:
     exchange: np.ndarray
     reciprocal_wraps: np.ndarray
     orbit_sizes: np.ndarray
+    time_reversal_enabled: bool = False
+    exchange_enabled: bool = False
+
+    def __post_init__(self):
+        for name in (
+            "multiplication",
+            "composition_translations",
+            "inverses",
+            "representatives",
+            "pair_to_representative",
+            "pair_operation",
+            "time_reversal",
+            "exchange",
+            "reciprocal_wraps",
+            "orbit_sizes",
+        ):
+            value = np.ascontiguousarray(getattr(self, name))
+            # Immutable bytes also prevent re-enabling writeability or
+            # mutating a descriptor through an alias retained by the caller.
+            frozen = np.frombuffer(value.tobytes(), dtype=value.dtype).reshape(
+                value.shape
+            )
+            object.__setattr__(self, name, frozen)
 
     def summary(self):
         arrays = (
@@ -197,7 +228,67 @@ class PairOrbits:
             "transform_direction": "representative_to_requested",
             "operation_order": "spatial,time_reversal,exchange",
             "tensor_reconstruction_validated": False,
+            "time_reversal_enabled": self.time_reversal_enabled,
+            "exchange_enabled": self.exchange_enabled,
         }
+
+
+def matching_operation_id(operation, candidates, tolerance=1e-8):
+    """Match an affine operation modulo lattice translations, without changing origin."""
+    matches = []
+    for index, candidate in enumerate(candidates):
+        candidate = (
+            CrystalOperation(candidate.rot, candidate.trans)
+            if hasattr(candidate, "rot")
+            else candidate
+        )
+        if operation.rotation != candidate.rotation:
+            continue
+        delta = np.array(operation.translation, float) - np.array(
+            candidate.translation, float
+        )
+        if np.all(np.abs(delta - np.rint(delta)) <= tolerance):
+            matches.append(index)
+    if len(matches) != 1:
+        raise ValueError(
+            "Retained affine operations are not a closed unambiguous group"
+        )
+    return matches[0]
+
+
+def _consistent_affine_translations(operations):
+    """Project only floating discovery noise onto the group's exact affine cocycle.
+
+    For integer carries a(g,h), group averaging gives
+    t(g) = (I-R(g)) mean_h(t(h)) + mean_h(a(g,h)). This preserves the
+    common origin, including arbitrary shifted origins, rather than rounding
+    every translation independently to a crystallographic denominator.
+    """
+    nops = len(operations)
+    origin = tuple(sum(op.translation[c] for op in operations) / nops for c in range(3))
+    corrected = []
+    for left in operations:
+        total = np.zeros(3, dtype=np.int64)
+        for right in operations:
+            product, carry = left.compose(right)
+            target = operations[matching_operation_id(product, operations)]
+            delta = np.array(product.translation, float) - np.array(
+                target.translation, float
+            )
+            total += np.array(carry) + np.rint(delta).astype(np.int64)
+        translation = tuple(
+            origin[c]
+            - sum(left.rotation[c][d] * origin[d] for d in range(3))
+            + Fraction(int(total[c]), nops)
+            for c in range(3)
+        )
+        exact = CrystalOperation(left.rotation, translation)
+        # Keep the exact rational result of the common-origin construction;
+        # a second independent denominator approximation would break closure.
+        object.__setattr__(exact, "translation", tuple(x % 1 for x in translation))
+        matching_operation_id(exact, [left])
+        corrected.append(exact)
+    return tuple(sorted(corrected, key=lambda op: (op != IDENTITY, op.key)))
 
 
 def validate_group(operations):
@@ -206,6 +297,13 @@ def validate_group(operations):
     if not operations or operations[0] != IDENTITY:
         raise ValueError("The retained group must contain the affine identity")
     lookup = {op.key: i for i, op in enumerate(operations)}
+    if any(
+        left.compose(right)[0].key not in lookup
+        for left in operations
+        for right in operations
+    ):
+        operations = _consistent_affine_translations(operations)
+        lookup = {op.key: i for i, op in enumerate(operations)}
     nops = len(operations)
     multiplication = np.empty((nops, nops), dtype=np.int64)
     carries = np.empty((nops, nops, 3), dtype=np.int64)
@@ -295,6 +393,8 @@ def build_pair_orbits(mesh, operations, *, time_reversal=False, exchange=False):
         ex_map,
         pair_wraps,
         np.array(sizes, dtype=np.int64),
+        bool(time_reversal),
+        bool(exchange),
     )
 
 
@@ -307,6 +407,9 @@ def integral_kstruct(cell, kpts):
     The supplied cell and its one-body symmetry objects are never modified.
     """
     from pyscf.pbc.lib import kpts as libkpts
+    from .integral_symmetry_compat import require_pyscf_compatibility
+
+    require_pyscf_compatibility()
 
     analysis_cell = cell.copy()
     analysis_cell.lattice_symmetry = None
@@ -339,6 +442,17 @@ def validated_cell_operations(cell, kstruct, tolerance=1e-6):
         if len(set(map(int, partners))) != cell.natm:
             raise ValueError("Atom map is not a permutation")
         for i, j in enumerate(partners):
+            shells_i, shells_j = cell.atom_shell_ids(i), cell.atom_shell_ids(int(j))
+            if len(shells_i) != len(shells_j):
+                raise ValueError("Operation changes built per-atom Gaussian shells")
+            for a, b in zip(shells_i, shells_j):
+                if (
+                    cell.bas_angular(a) != cell.bas_angular(b)
+                    or cell.bas_kappa(a) != cell.bas_kappa(b)
+                    or not np.array_equal(cell.bas_exp(a), cell.bas_exp(b))
+                    or not np.array_equal(cell.bas_ctr_coeff(a), cell.bas_ctr_coeff(b))
+                ):
+                    raise ValueError("Operation changes built per-atom Gaussian shells")
             si, sj = cell.atom_symbol(i), cell.atom_symbol(int(j))
             for assignment in (cell._basis, cell._pseudo, cell._ecp):
                 if repr(assignment.get(si)) != repr(assignment.get(sj)):
@@ -347,3 +461,20 @@ def validated_cell_operations(cell, kstruct, tolerance=1e-6):
                     )
         result.append(CrystalOperation(op.rot, op.trans))
     return result
+
+
+def validate_input_kmesh(cell, actual_k, scaled_k, tolerance=1e-10):
+    """Require the two stored k lists to describe the same ordered points."""
+    actual_k, scaled_k = np.asarray(actual_k), np.asarray(scaled_k)
+    if (
+        actual_k.shape != scaled_k.shape
+        or actual_k.ndim != 2
+        or actual_k.shape[1] != 3
+        or not np.all(np.isfinite(actual_k))
+        or not np.all(np.isfinite(scaled_k))
+        or not np.allclose(
+            cell.get_scaled_kpts(actual_k), scaled_k, atol=tolerance, rtol=0
+        )
+    ):
+        raise ValueError("Cartesian and scaled k meshes disagree in values or ordering")
+    return IntegerMesh.from_scaled(scaled_k, tolerance=tolerance)
