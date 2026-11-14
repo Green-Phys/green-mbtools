@@ -14,7 +14,6 @@ import time
 import h5py
 import numpy as np
 from pyscf.pbc import df
-from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
 from pyscf.pbc.lib.kpts_helper import kk_adapted_iter
 
 from .integral_symmetry import (
@@ -24,12 +23,13 @@ from .integral_symmetry import (
     validated_cell_operations,
 )
 from .integral_symmetry_geometry import PhysicalPairMap
-from .integral_symmetry_transform import CholeskyGauge
+from .integral_symmetry_transform import CholeskyGauge, stored_basis_operation
+from .integral_symmetry_compat import require_ccgdf_compatibility
 from .integral_symmetry_gauge import CapturedGauges, build_captured_legacy_ewald
 from .integral_symmetry_io import write_archive
 
 
-class RepresentativeCCGDFBuilder(_CCGDFBuilder):
+class RepresentativeCCGDFBuilder(require_ccgdf_compatibility()):
     def weighted_coulG(self, kpt, exx, mesh, omega=None):
         return super().weighted_coulG(
             kpt, "ewald" if self.corrected else exx, mesh, omega
@@ -117,6 +117,9 @@ def build_representative_archive(
         cell.nao_nr(),
     ):
         raise ValueError("Initial SG producer requires a square retained orbital basis")
+    if stored_x is not None:
+        for matrix in stored_x:
+            stored_basis_operation(np.eye(cell.nao_nr()), matrix, np.eye(cell.nao_nr()))
     kstruct = integral_kstruct(cell, kpts)
     orbits = build_pair_orbits(
         IntegerMesh.from_scaled(cell.get_scaled_kpts(kpts)),

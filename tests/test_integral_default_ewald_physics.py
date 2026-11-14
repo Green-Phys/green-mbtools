@@ -129,7 +129,7 @@ def test_default_ewald_against_independent_complete_green_reference(
     assert q0_change > 1e-5, "The default corrected q=0 interaction was not exercised"
 
     repository = Path(__file__).resolve().parents[1]
-    revision = subprocess.check_output(
+    revision = os.environ.get("GREEN_SG_SOURCE_REVISION") or subprocess.check_output(
         ["git", "-C", str(repository), "rev-parse", "HEAD"], text=True
     ).strip()
     report = {
