@@ -30,6 +30,35 @@ def test_default_remains_legacy(tmp_path):
     assert comm.init_pbc_params(parameters(tmp_path)).integral_symmetry == "legacy"
 
 
+def test_singular_stored_basis_rejected_before_build(tmp_path, monkeypatch):
+    import numpy as np
+    from pyscf.pbc import gto
+    from green_mbtools.mint.integral_symmetry_builder import (
+        build_representative_archive,
+        RepresentativeCCGDFBuilder,
+    )
+
+    cell = gto.Cell(
+        a=np.eye(3) * 4, atom="He 0 0 0", basis={"He": [[0, [1.0, 1.0]]]}, verbose=0
+    ).build()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Expensive producer was reached before basis validation")
+
+    monkeypatch.setattr(RepresentativeCCGDFBuilder, "__init__", forbidden)
+    with pytest.raises(ValueError, match="Singular stored-basis"):
+        build_representative_archive(
+            cell,
+            cell.make_kpts([1, 1, 1]),
+            cell.basis,
+            tmp_path / "sg",
+            tmp_path / "work",
+            stored_x=np.zeros((1, 1, 1)),
+            producer_revision="test",
+        )
+    assert not (tmp_path / "sg").exists() and not (tmp_path / "work").exists()
+
+
 @pytest.mark.parametrize(
     "option,value",
     [

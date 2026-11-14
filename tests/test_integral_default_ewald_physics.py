@@ -104,6 +104,9 @@ def test_default_ewald_against_independent_complete_green_reference(
     corrected_path = root / "complete-green-ewald-cderi.h5"
     with monkeypatch.context() as context:
         context.setattr(df.GDF, "weighted_coulG", weighted_coulG_ewald)
+        # The independent original routine assigns this class hook internally.
+        # Track its original value too so the reference fixture leaves no state.
+        context.setattr(legacy.GDF, "weighted_coulG", legacy.GDF.weighted_coulG)
         legacy._make_j3c(
             corrected,
             cell,
