@@ -10,11 +10,11 @@ from collections import OrderedDict
 import numpy as np
 
 from .integral_symmetry import (
-    CrystalOperation,
     IntegerMesh,
     build_pair_orbits,
     validated_cell_operations,
     integral_kstruct,
+    matching_operation_id,
 )
 from .integral_symmetry_transform import (
     auxiliary_transform,
@@ -85,17 +85,13 @@ class PhysicalPairMap:
             exchange=exchange,
         )
         self.orbital_ids = {
-            CrystalOperation(op.rot, op.trans): i
-            for i, op in enumerate(self.kstruct.ops)
+            op: matching_operation_id(op, self.kstruct.ops)
+            for op in self.orbits.operations
         }
         self.auxiliary_ids = {
-            CrystalOperation(op.rot, op.trans): i
-            for i, op in enumerate(self.qstruct.ops)
+            op: matching_operation_id(op, self.qstruct.ops)
+            for op in self.orbits.operations
         }
-        if not all(op in self.auxiliary_ids for op in self.orbits.operations):
-            raise ValueError(
-                "Auxiliary basis does not preserve the retained crystal group"
-            )
         self.q_ids = {
             tuple(row % self.qmesh.denominator): i
             for i, row in enumerate(self.qmesh.coordinates)

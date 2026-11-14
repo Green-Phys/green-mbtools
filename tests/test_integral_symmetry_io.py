@@ -182,6 +182,7 @@ def test_expand_preserves_original_pair_order_and_final_padding(
         f["symmetry/pairs/kpair_idx"] = pairs
         f["symmetry/pairs/kpair_irre_list"] = [0, 1, 2, 3]
         f["integral_symmetry/input_fingerprint"] = summary["input_fingerprint"]
+        f["params/nk"], f["params/nso"], f["params/NQ"] = 3, 1, 1
     output = tmp_path / "expanded"
     expand_archive(path, inp, output, chunk_size=3)
     for start in (0, 3):

@@ -151,6 +151,14 @@ def stored_basis_operation(
             raise ValueError(
                 "Rectangular stored-basis maps require retained-subspace support"
             )
+        values = np.linalg.svd(matrix, compute_uv=False)
+        if (
+            not len(values)
+            or values[-1] <= np.finfo(float).eps * len(matrix) * values[0]
+        ):
+            raise ValueError(
+                "Singular stored-basis maps require retained-subspace support"
+            )
     source_inverse = source_x_inverse.conj() if conjugate else source_x_inverse
     return target_x @ ao_operation @ source_inverse
 

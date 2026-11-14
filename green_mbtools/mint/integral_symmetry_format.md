@@ -1,5 +1,13 @@
 # GREEN density-fitting space-group format v1
 
+Optional `time_reversal_enabled` and `exchange_enabled` attributes record the
+writer's allowed actions; representative stabilizers use only those actions.
+Older archives' explicit per-pair actions still define reconstruction.
+Python readers check factor shape, float64 packing and the 128 MiB source
+buffer limit before loading a chunk. Expansion applies the same capacity
+bound and checks input `nk`, `nso`, `NQ` and any existing correlation gauge ID
+before creating output. Cache budgets do not replace the source-buffer bound.
+
 This opt-in format is `green.df.space_group.v1`. Legacy mode remains the default.
 An SG directory has `meta.h5` and `SGVQ_<representative_start>.h5`; it has no
 legacy `chunk_size` dataset, `VQ_*` files, or legacy version alias. Both old
