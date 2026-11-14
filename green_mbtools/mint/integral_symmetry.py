@@ -108,7 +108,9 @@ class IntegerMesh:
             raise ValueError("Mesh denominator must be a bounded positive integer")
         if np.max(np.abs(coords)) > 2**31:
             raise ValueError("Mesh coordinates exceed the supported integer bound")
-        coords = np.array(coords, dtype=np.int64, copy=True)
+        coords = np.frombuffer(
+            np.asarray(coords, dtype=np.int64).tobytes(), dtype=np.int64
+        ).reshape(coords.shape)
         keys = {tuple(row % self.denominator) for row in coords}
         if len(keys) != len(coords):
             raise ValueError(
