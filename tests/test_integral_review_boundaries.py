@@ -3,7 +3,12 @@
 from dataclasses import replace
 from fractions import Fraction
 from types import SimpleNamespace
+from pathlib import Path
+import json
+import runpy
+import sys
 
+import h5py
 import numpy as np
 import pytest
 from pyscf import gto as molecular_gto
@@ -137,3 +142,58 @@ def test_explicit_pyscf_feature_compatibility(monkeypatch):
         monkeypatch.setattr(pyscf, "__version__", version)
         with pytest.raises(RuntimeError, match="PySCF 2.14.x"):
             require_pyscf_compatibility()
+
+
+def diagnostic_input(path, inconsistent=None):
+    cell = gto.Cell(
+        a=np.eye(3) * 4, atom="He 0 0 0", basis={"He": [[0, [1.0, 1.0]]]}, verbose=0
+    ).build()
+    actual = cell.make_kpts([3, 1, 1])
+    scaled = cell.get_scaled_kpts(actual)
+    if inconsistent == "ordering":
+        scaled = scaled[::-1]
+    elif inconsistent == "values":
+        scaled = scaled + 0.01
+    with h5py.File(path, "w") as f:
+        f["Cell"] = cell.dumps()
+        f["symmetry/k/mesh"] = actual
+        f["symmetry/k/mesh_scaled"] = scaled
+        f["symmetry/pairs/kpair_irre_list"] = [0, 1, 2, 3]
+        f["params/nao"] = f["params/nso"] = 1
+
+
+@pytest.mark.parametrize("inconsistent", ["values", "ordering"])
+def test_diagnostic_cli_rejects_inconsistent_hdf5_kmeshes(
+    tmp_path, monkeypatch, inconsistent
+):
+    path = tmp_path / "input.h5"
+    diagnostic_input(path, inconsistent)
+    monkeypatch.setattr(sys, "argv", ["diagnostic", "--input", str(path)])
+    with pytest.raises(ValueError, match="values or ordering"):
+        runpy.run_path(
+            str(
+                Path(__file__).resolve().parents[1]
+                / "examples/diagnose_integral_pair_orbits.py"
+            ),
+            run_name="__main__",
+        )
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_diagnostic_cli_reports_actual_flags(tmp_path, monkeypatch, capsys, enabled):
+    path = tmp_path / "input.h5"
+    diagnostic_input(path)
+    args = ["diagnostic", "--input", str(path)]
+    if enabled:
+        args += ["--time-reversal", "--exchange"]
+    monkeypatch.setattr(sys, "argv", args)
+    runpy.run_path(
+        str(
+            Path(__file__).resolve().parents[1]
+            / "examples/diagnose_integral_pair_orbits.py"
+        ),
+        run_name="__main__",
+    )
+    data = json.loads(capsys.readouterr().out)
+    assert data["time_reversal_enabled"] is data["exchange_enabled"] is enabled
+    assert data["matched_baseline_representatives"] == (4 if enabled else 9)
