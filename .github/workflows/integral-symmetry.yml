@@ -1,0 +1,30 @@
+name: Integral symmetry
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  symmetry:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.8', '3.12', '3.13']
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install reproducible feature-test dependencies
+        run: python -m pip install 'pyscf==2.14.0' 'green-igen==0.2.8' numpy scipy h5py numba ase spglib packaging pytest green-ac irbasis baryrat
+      - name: Run symmetry regressions including physical integration
+        run: python -m pytest -q tests/test_integral*.py

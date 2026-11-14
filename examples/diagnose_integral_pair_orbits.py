@@ -12,10 +12,11 @@ import h5py
 from pyscf.pbc import gto
 
 from green_mbtools.mint.integral_symmetry import (
-    IntegerMesh,
+    IDENTITY,
     build_pair_orbits,
     validated_cell_operations,
     integral_kstruct,
+    validate_input_kmesh,
 )
 
 
@@ -35,16 +36,24 @@ def main():
         legacy_representatives = len(source["symmetry/pairs/kpair_irre_list"])
         if int(source["params/nao"][()]) != int(source["params/nso"][()]):
             raise ValueError("SG diagnostics initially require scalar orbitals")
+    mesh = validate_input_kmesh(cell, actual_k, scaled)
     kstruct = integral_kstruct(cell, actual_k)
     operations = validated_cell_operations(cell, kstruct)
     orbits = build_pair_orbits(
-        IntegerMesh.from_scaled(scaled),
+        mesh,
         operations,
         time_reversal=args.time_reversal,
         exchange=args.exchange,
     )
     summary = orbits.summary()
     summary["legacy_representatives"] = legacy_representatives
+    baseline = build_pair_orbits(
+        mesh, [IDENTITY], time_reversal=args.time_reversal, exchange=args.exchange
+    )
+    summary["matched_baseline_representatives"] = len(baseline.representatives)
+    summary["legacy_count_comparison"] = (
+        "Stored legacy flags are not inferred; use matched_baseline_representatives for like-for-like reduction"
+    )
     summary["candidate_crystal_operations"] = len(operations)
     summary["scope"] = "momentum orbit diagnostics; no omitted tensors"
     print(json.dumps(summary, indent=2))
