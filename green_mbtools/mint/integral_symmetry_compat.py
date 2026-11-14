@@ -24,7 +24,7 @@ def require_ccgdf_compatibility():
         "gen_uniq_kpts_groups": ("self", "j_only", "h5swap", "kk_idx"),
         "decompose_j2c": ("self",),
         "get_2c2e": ("self",),
-        "weighted_coulG": ("self",),
+        "weighted_coulG": ("kpt", "exx", "mesh", "omega"),
     }
     for name, required in expected.items():
         method = getattr(_CCGDFBuilder, name, None)

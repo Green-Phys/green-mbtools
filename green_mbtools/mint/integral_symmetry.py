@@ -265,7 +265,17 @@ def _consistent_affine_translations(operations):
     every translation independently to a crystallographic denominator.
     """
     nops = len(operations)
-    origin = tuple(sum(op.translation[c] for op in operations) / nops for c in range(3))
+    # Bound the serialized integers with one common origin denominator.
+    scale = 10**12
+    origin = tuple(
+        Fraction(
+            int(
+                round(sum(float(op.translation[c]) for op in operations) / nops * scale)
+            ),
+            scale,
+        )
+        for c in range(3)
+    )
     corrected = []
     for left in operations:
         total = np.zeros(3, dtype=np.int64)
