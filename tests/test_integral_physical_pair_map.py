@@ -16,7 +16,9 @@ from green_mbtools.mint.integral_symmetry_transform import CholeskyGauge
 def physical_pair_reference(tmp_path_factory):
     cell = gto.Cell(
         a=[[0, 1.75, 1.75], [1.75, 0, 1.75], [1.75, 1.75, 0]],
-        atom="C 0 0 0; C .875 .875 .875",
+        # Shift the second basis center by one lattice vector. This is the
+        # same crystal but forces nontrivial complex Bloch phases on a tiny mesh.
+        atom="C 0 0 0; C .875 2.625 2.625",
         unit="Angstrom",
         basis={"C": [[0, [1.0, 1.0]], [1, [0.6, 1.0]]]},
         mesh=[31] * 3,
