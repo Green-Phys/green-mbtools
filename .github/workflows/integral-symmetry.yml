@@ -19,6 +19,7 @@ jobs:
       OPENBLAS_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
       PYTHONPATH: .
+      GREEN_RUN_PHYSICAL_SG_TESTS: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
