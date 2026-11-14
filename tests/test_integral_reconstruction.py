@@ -131,3 +131,20 @@ def test_whitening_must_not_amplify_allowed_raw_metric_error_into_eri_change():
             CholeskyGauge(target, "target", "hf"),
             np.eye(2),
         )
+
+
+@pytest.mark.parametrize("which", [0, 1, 2])
+def test_reject_square_rank_deficient_stored_basis_maps(which):
+    values = [np.eye(3, dtype=complex) for _ in range(3)]
+    values[which][2, 2] = 0
+    with pytest.raises(ValueError, match="Singular stored-basis"):
+        stored_basis_operation(*values)
+
+
+def test_reject_projector_from_truncated_symmetric_lowdin():
+    from green_mbtools.mint.ortho_utils import symmetric_lowdin_per_k
+
+    x, inverse = symmetric_lowdin_per_k(np.diag([1.0, 0.5, 1e-14]))
+    assert x.shape == inverse.shape == (3, 3)
+    with pytest.raises(ValueError, match="Singular stored-basis"):
+        stored_basis_operation(np.eye(3), x, inverse)
