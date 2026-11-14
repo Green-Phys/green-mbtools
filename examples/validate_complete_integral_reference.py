@@ -175,7 +175,14 @@ def main():
             cross = factors[pairs[0]].reshape(auxcell.nao_nr(), -1).conj().T @ factors[
                 pairs[1]
             ].reshape(auxcell.nao_nr(), -1)
-            wrong = np.exp(0.3j) * cross
+            # Inject the wrong pair-dependent auxiliary frame into the actual
+            # reconstruction, before taking any Coulomb cross-products.
+            rep, maps = geometry.pair(*pairs[1])
+            bad_maps = (np.exp(0.3j) * maps[0],) + maps[1:]
+            bad_factor = geometry.reconstruct(factors[rep], bad_maps)
+            wrong = factors[pairs[0]].reshape(
+                auxcell.nao_nr(), -1
+            ).conj().T @ bad_factor.reshape(auxcell.nao_nr(), -1)
             wrong_map_detected |= not np.allclose(
                 wrong, cross, atol=args.atol, rtol=args.rtol
             )

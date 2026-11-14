@@ -14,7 +14,7 @@ import h5py
 import numpy as np
 from pyscf.pbc import df, gto
 from pyscf.pbc.df import df as gdf
-from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
+from green_mbtools.mint.integral_symmetry_compat import require_ccgdf_compatibility
 
 from green_mbtools.mint.integral_symmetry import (
     CrystalOperation,
@@ -34,7 +34,7 @@ from green_mbtools.mint.symmetry_utils import get_representation
 from green_mbtools.mint.integral_symmetry_gauge import build_captured_legacy_ewald
 
 
-class CapturingCCGDFBuilder(_CCGDFBuilder):
+class CapturingCCGDFBuilder(require_ccgdf_compatibility()):
     """Capture actual factors, including the builder's imposed q/-q relation."""
 
     def gen_uniq_kpts_groups(self, *args, **kwargs):
