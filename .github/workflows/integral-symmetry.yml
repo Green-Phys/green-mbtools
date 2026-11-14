@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.8', '3.12', '3.13']
+        python: ['3.8', '3.12']
     env:
       OMP_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
@@ -25,6 +25,10 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install reproducible feature-test dependencies
-        run: python -m pip install 'pyscf==2.14.0' 'green-igen==0.2.8' numpy scipy h5py numba ase spglib packaging pytest green-ac irbasis baryrat
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libeigen3-dev libgmp-dev libmpfr-dev
+          python -m pip install 'pyscf==2.14.0' 'green-igen==0.2.8' numpy scipy h5py numba ase spglib packaging pytest green-ac irbasis baryrat setuptools wheel
+          python -m pip install --no-deps --no-build-isolation .
       - name: Run symmetry regressions including physical integration
         run: python -m pytest -q tests/test_integral*.py

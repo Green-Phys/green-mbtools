@@ -2,7 +2,7 @@
 
 The opt-in integral-symmetry feature uses PySCF private periodic GDF interfaces.
 It requires PySCF **2.14.x**, with **2.14.0** pinned in the feature CI matrix
-(Python 3.8, 3.12 and 3.13). This feature boundary does not narrow the existing
+(Python 3.8 and 3.12; the existing general CI retains its own Python selection). This feature boundary does not narrow the existing
 legacy paths' package requirements. Other PySCF versions fail explicitly before
 constructing physical symmetry geometry. Captured CCGDF builders additionally
 check the private method signatures and metric decomposition shapes.

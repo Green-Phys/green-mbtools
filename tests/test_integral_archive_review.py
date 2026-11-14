@@ -11,7 +11,7 @@ from green_mbtools.mint.integral_symmetry import IntegerMesh
 from green_mbtools.mint.integral_symmetry_geometry import PhysicalPairMap
 from green_mbtools.mint.integral_symmetry_transform import CholeskyGauge
 from green_mbtools.mint import integral_symmetry_io as io
-from test_integral_symmetry_io import synthetic_archive  # noqa: F401
+from test_integral_symmetry_io import synthetic_archive as synthetic_archive
 
 
 def identified_input(path, summary):
