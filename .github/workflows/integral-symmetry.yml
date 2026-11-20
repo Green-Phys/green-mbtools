@@ -9,7 +9,8 @@ permissions:
   contents: read
 jobs:
   symmetry:
-    runs-on: ubuntu-latest
+    # Keep Python 3.8 on an image with a published interpreter build.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
