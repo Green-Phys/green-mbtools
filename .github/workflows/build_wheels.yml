@@ -21,13 +21,11 @@ jobs:
         #     nothing queues behind the limit (and re-pays brew setup).
         #   - Linux (x86_64): cheap 1x runners, one interpreter each.
         include:
-          # The ARM runner changes; the wheel deployment target stays at 14.0.
-          - { os: macos-15, arch: arm64, target: "14.0", build: "cp38-* cp39-*" }
-          - { os: macos-15, arch: arm64, target: "14.0", build: "cp310-* cp311-*" }
-          - { os: macos-15, arch: arm64, target: "14.0", build: "cp312-*" }
-          - { os: macos-15, arch: arm64, target: "14.0", build: "cp313-*" }
-          - { os: macos-15, arch: arm64, target: "14.0", build: "cp314-*" }
-          - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp38-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp39-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp310-* cp311-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp312-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp313-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp314-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp39-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp310-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp311-*" }
@@ -38,10 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build macOS 14 compatible wheel dependencies
-        if: runner.os == 'macOS'
-        run: bash .github/scripts/build_macos_wheel_deps.sh "${{ runner.temp }}/green-macos-wheel-deps"
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.1
         env:
@@ -49,16 +43,6 @@ jobs:
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_ENVIRONMENT: >
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-            OPENBLAS_NUM_THREADS=1
-            OMP_NUM_THREADS=1
-            MKL_NUM_THREADS=1
-            VECLIB_MAXIMUM_THREADS=1
-            NUMEXPR_NUM_THREADS=1
-          CIBW_BEFORE_ALL_MACOS: brew install eigen fftw
-          CIBW_ENVIRONMENT_MACOS: >
-            MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-            CPPFLAGS="-I${{ runner.temp }}/green-macos-wheel-deps/include"
-            LDFLAGS="-L${{ runner.temp }}/green-macos-wheel-deps/lib -Wl,-rpath,${{ runner.temp }}/green-macos-wheel-deps/lib"
             OPENBLAS_NUM_THREADS=1
             OMP_NUM_THREADS=1
             MKL_NUM_THREADS=1

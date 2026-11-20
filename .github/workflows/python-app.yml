@@ -1,6 +1,3 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Python application
 
 on:
@@ -15,33 +12,36 @@ permissions:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.13']
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      SLURM_JOB_CPUS_PER_NODE: '1'
+      GREEN_RUN_PHYSICAL_SG_TESTS: '1'
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: "3.13"
-    - name: Install dependencies
+        python-version: ${{ matrix.python }}
+    - name: Install package and test dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        sudo apt install libeigen3-dev libgmp-dev libmpfr-dev libfftw3-dev liblapack-dev libblas-dev
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        sudo apt-get update
+        sudo apt-get install -y libeigen3-dev libgmp-dev libmpfr-dev libfftw3-dev liblapack-dev libblas-dev
+        python -m pip install . flake8 pytest 'pyscf==2.14.0' 'green-igen==0.2.8'
+        python -I -c 'from importlib.metadata import version; print("green-mbtools", version("green-mbtools"))'
     - name: Lint with flake8
+      if: matrix.python == '3.13'
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Install package
-      run: |
-        python setup.py install
-    - name: Test with pytest
-      run: |
-        cd tests
-        # run test on single process 
-        export SLURM_JOB_CPUS_PER_NODE=1
-        pytest
+        python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest including physical integral regressions
+      working-directory: tests
+      run: python -m pytest
