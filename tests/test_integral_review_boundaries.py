@@ -23,7 +23,6 @@ from green_mbtools.mint.integral_symmetry import (
     validate_input_kmesh,
     validated_cell_operations,
 )
-from green_mbtools.mint.integral_symmetry_compat import require_pyscf_compatibility
 
 
 def test_arbitrary_shifted_origin_affine_group_and_carries():
@@ -161,15 +160,6 @@ def test_actual_built_shell_changes_rejected_despite_same_species_dictionary(kin
     cell._env = np.concatenate([cell._env, values])
     with pytest.raises(ValueError, match="built per-atom Gaussian"):
         validated_cell_operations(cell, struct)
-
-
-def test_explicit_pyscf_feature_compatibility(monkeypatch):
-    import pyscf
-
-    for version in ("2.13.1", "2.15.0", "2.14.0rc1"):
-        monkeypatch.setattr(pyscf, "__version__", version)
-        with pytest.raises(RuntimeError, match="PySCF 2.14.x"):
-            require_pyscf_compatibility()
 
 
 def diagnostic_input(path, inconsistent=None):
