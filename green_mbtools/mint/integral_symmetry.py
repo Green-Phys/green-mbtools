@@ -419,9 +419,6 @@ def integral_kstruct(cell, kpts):
     The supplied cell and its one-body symmetry objects are never modified.
     """
     from pyscf.pbc.lib import kpts as libkpts
-    from .integral_symmetry_compat import require_pyscf_compatibility
-
-    require_pyscf_compatibility()
 
     analysis_cell = cell.copy()
     analysis_cell.lattice_symmetry = None

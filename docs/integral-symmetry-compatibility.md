@@ -1,11 +1,8 @@
 # Integral-symmetry compatibility
 
-The opt-in integral-symmetry feature uses PySCF private periodic GDF interfaces.
-It requires PySCF **2.14.x**, with **2.14.0** pinned in the feature CI matrix
-(Python 3.8 and 3.12; the existing general CI retains its own Python selection). This feature boundary does not narrow the existing
-legacy paths' package requirements. Other PySCF versions fail explicitly before
-constructing physical symmetry geometry. Captured CCGDF builders additionally
-check the private method signatures and metric decomposition shapes.
+GREEN MBTools requires PySCF 2.14.x. The application CI runs the integral suite
+with PySCF 2.14.0 on Python 3.9 and 3.13. Captured CCGDF builders check the
+private method signatures and metric decomposition shapes.
 
 The floating input k coordinates are checked for finite values and consistent
 Cartesian/scaled ordering, then rationalized within a stated tolerance and

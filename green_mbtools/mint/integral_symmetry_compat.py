@@ -1,22 +1,9 @@
-"""Explicit compatibility boundary for opt-in integral-symmetry private APIs."""
+"""Check the private PySCF interface used by the integral builders."""
 
 import inspect
 
-import pyscf
-from packaging.version import Version
-
-
-def require_pyscf_compatibility():
-    version = Version(pyscf.__version__)
-    if version.is_prerelease or not Version("2.14") <= version < Version("2.15"):
-        raise RuntimeError(
-            f"Integral symmetry requires PySCF 2.14.x (tested 2.14.0); found {version}. "
-            "Legacy integral paths keep their existing package compatibility."
-        )
-
 
 def require_ccgdf_compatibility():
-    require_pyscf_compatibility()
     from pyscf.pbc.df.gdf_builder import _CCGDFBuilder
 
     expected = {
