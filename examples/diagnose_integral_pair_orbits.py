@@ -1,8 +1,10 @@
-"""Diagnose the actual input mesh/crystal without building integral factors.
+"""Report how crystal symmetry reduces momentum pairs in a GREEN input.
 
-Run on GREEN_workstation:
-  python examples/diagnose_integral_pair_orbits.py --input INPUT.h5
-No input data or legacy symmetry maps are modified.
+Read the cell and k mesh from a saved GREEN input file. Compare the spatial
+orbit count with the baseline for the same time-reversal and pair exchange
+flags. This diagnostic reads metadata and leaves the input file intact.
+
+    python examples/diagnose_integral_pair_orbits.py --input input.h5 --time-reversal --exchange
 """
 
 import argparse
@@ -21,7 +23,9 @@ from green_mbtools.mint.integral_symmetry import (
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--input", required=True)
     parser.add_argument("--time-reversal", action="store_true")
     parser.add_argument("--exchange", action="store_true")
