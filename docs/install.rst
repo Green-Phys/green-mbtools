@@ -1,6 +1,9 @@
 Installation
 ============
 
+GREEN MBTools requires Python 3.9 or newer and PySCF 2.14.x. The macOS arm64
+wheels target macOS 15 and newer.
+
 To install the `green-mbtools` binary package simply execute
 
 .. code-block:: bash
