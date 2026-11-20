@@ -38,6 +38,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build macOS 14 compatible wheel dependencies
+        if: runner.os == 'macOS'
+        run: bash .github/scripts/build_macos_wheel_deps.sh "${{ runner.temp }}/green-macos-wheel-deps"
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.1
         env:
@@ -50,8 +54,19 @@ jobs:
             MKL_NUM_THREADS=1
             VECLIB_MAXIMUM_THREADS=1
             NUMEXPR_NUM_THREADS=1
+          CIBW_BEFORE_ALL_MACOS: brew install eigen fftw
+          CIBW_ENVIRONMENT_MACOS: >
+            MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
+            CPPFLAGS="-I${{ runner.temp }}/green-macos-wheel-deps/include"
+            LDFLAGS="-L${{ runner.temp }}/green-macos-wheel-deps/lib -Wl,-rpath,${{ runner.temp }}/green-macos-wheel-deps/lib"
+            OPENBLAS_NUM_THREADS=1
+            OMP_NUM_THREADS=1
+            MKL_NUM_THREADS=1
+            VECLIB_MAXIMUM_THREADS=1
+            NUMEXPR_NUM_THREADS=1
           CIBW_BEFORE_BUILD: |
-            if [[ "$CIBW_PLATFORM" == "macos" ]]; then
+            set -e
+            if [ "$(uname -s)" = Darwin ]; then
               # Install openblas via brew on macOS
               brew update
               brew install openblas hdf5
