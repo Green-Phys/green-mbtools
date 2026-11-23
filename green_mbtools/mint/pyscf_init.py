@@ -525,7 +525,7 @@ class pyscf_mol_init (pyscf_init):
         h_in.close()
         h_out.close()
         mydf = comm.construct_gdf(self.args, self.kcell, self.kmesh)
-        int_utils.compute_integrals(self.args, self.kcell, mydf, self.kmesh, nao, X_k, "df_hf_int", "cderi.h5", True, self.args.keep_cderi)
+        int_utils.compute_integrals(self.args, self.kcell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, self.args.keep_cderi)
         mydf = None
 
     def df_object(self, mydf=None):
