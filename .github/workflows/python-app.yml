@@ -27,9 +27,9 @@ jobs:
         run: |
           brew install eigen gmp mpfr fftw
           python -m pip install --upgrade pip
-          # PySCF 2.15.1 has no macOS arm64 wheel and its sdist does not build
-          # (pyscf/pyscf#3659, #3656); remove once a fixed release is out.
-          pip install "pyscf!=2.15.1"
+          # Match green-mbtools' cap (f003770): PySCF 2.15 removed GDF._make_j3c.
+          # 2.15.1 also lacks a macOS arm64 wheel (pyscf/pyscf#3659).
+          pip install "pyscf<2.15"
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Install package
