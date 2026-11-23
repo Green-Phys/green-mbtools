@@ -17,10 +17,10 @@ jobs:
       matrix:
         plat:
         - { os: ubuntu-latest, target: "", arch: x86_64}
-        - { os: macos-14, target: "14.0" , arch: arm64}
+        - { os: macos-latest, target: "26.0" , arch: arm64}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install BLAS Dependencies
         if: runner.os == 'Linux'
@@ -29,7 +29,7 @@ jobs:
           sudo apt-get install -y libopenblas-dev liblapack-dev
 
       - name: Periodic build wheels
-        uses: pypa/cibuildwheel@v2.21.3
+        uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* 
           CIBW_ARCHS: ${{ matrix.plat.arch }}

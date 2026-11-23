@@ -21,11 +21,11 @@ jobs:
         #     nothing queues behind the limit (and re-pays brew setup).
         #   - Linux (x86_64): cheap 1x runners, one interpreter each.
         include:
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp38-* cp39-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp310-* cp311-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp312-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp313-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp314-*" }
+          - { os: macos-latest, arch: arm64, target: "26.0", build: "cp38-* cp39-*" }
+          - { os: macos-latest, arch: arm64, target: "26.0", build: "cp310-* cp311-*" }
+          - { os: macos-latest, arch: arm64, target: "26.0", build: "cp312-*" }
+          - { os: macos-latest, arch: arm64, target: "26.0", build: "cp313-*" }
+          - { os: macos-latest, arch: arm64, target: "26.0", build: "cp314-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp38-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp39-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp310-*" }
@@ -35,7 +35,7 @@ jobs:
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp314-*" }
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.1
@@ -67,7 +67,7 @@ jobs:
         #   output-dir: wheelhouse
         #   config-file: "{package}/pyproject.toml"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -77,12 +77,12 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build sdist
         run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -96,7 +96,7 @@ jobs:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           # unpacks all CIBW artifacts into dist/
           pattern: cibw-*
