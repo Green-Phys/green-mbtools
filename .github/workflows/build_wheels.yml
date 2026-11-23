@@ -21,12 +21,11 @@ jobs:
         #     nothing queues behind the limit (and re-pays brew setup).
         #   - Linux (x86_64): cheap 1x runners, one interpreter each.
         include:
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp38-* cp39-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp310-* cp311-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp312-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp313-*" }
-          - { os: macos-14, arch: arm64, target: "14.0", build: "cp314-*" }
-          - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp38-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp39-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp310-* cp311-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp312-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp313-*" }
+          - { os: macos-15, arch: arm64, target: "15.0", build: "cp314-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp39-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp310-*" }
           - { os: ubuntu-22.04, arch: x86_64, target: "", build: "cp311-*" }
@@ -50,7 +49,8 @@ jobs:
             VECLIB_MAXIMUM_THREADS=1
             NUMEXPR_NUM_THREADS=1
           CIBW_BEFORE_BUILD: |
-            if [[ "$CIBW_PLATFORM" == "macos" ]]; then
+            set -e
+            if [ "$(uname -s)" = Darwin ]; then
               # Install openblas via brew on macOS
               brew update
               brew install openblas hdf5
