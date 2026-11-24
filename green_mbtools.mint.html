@@ -6,10 +6,11 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="green_mbtools.pesto" href="green_mbtools.pesto.html"><link rel="prev" title="Source code documentation" href="source_code_doc.html">
         <link rel="prefetch" href="_static/rosetta.png" as="image">
 
-    <link rel="shortcut icon" href="_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <link rel="shortcut icon" href="_static/rosetta.png"><!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
         <title>green_mbtools.mint - Green MBTools</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=25e12dd6" />
     
@@ -563,6 +564,27 @@ identity in the retained orthogonal subspace.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.common_utils.print_symmetry_ops">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">print_symmetry_ops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#print_symmetry_ops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.print_symmetry_ops" title="Link to this definition">¶</a></dt>
+<dd><p>Detect and print the full space-group operator table for the given system.</p>
+<p>Builds a plain PySCF periodic cell (no symmetry restriction applied) from
+the simulation parameters in <em>args</em>, detects its full space group via
+<code class="xref py py-func docutils literal notranslate"><span class="pre">symmetry_utils.detect_space_group()</span></code>, formats the operator table with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">symmetry_utils.format_symmetry_ops()</span></code>, and prints it to stdout.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>argparse.Namespace</em>) – Parsed CLI arguments. Must supply at least <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">atom</span></code>, <code class="docutils literal notranslate"><span class="pre">basis</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ecp</span></code>, <code class="docutils literal notranslate"><span class="pre">pseudo</span></code>, <code class="docutils literal notranslate"><span class="pre">spin</span></code>, and <code class="docutils literal notranslate"><span class="pre">diffuse_cutoff</span></code>.  The
+<code class="docutils literal notranslate"><span class="pre">symm_backend</span></code> attribute (default <code class="docutils literal notranslate"><span class="pre">&quot;pyscf&quot;</span></code>) selects the detection
+backend.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></span></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="green_mbtools.mint.common_utils.read_dm">
 <span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.common_utils.</span></span><span class="sig-name descname"><span class="pre">read_dm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dm0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dm_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/common_utils.html#read_dm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.common_utils.read_dm" title="Link to this definition">¶</a></dt>
 <dd><p>Read density matrix from smaller kmesh</p>
@@ -967,7 +989,12 @@ that <code class="docutils literal notranslate"><span class="pre">common_utils.s
 <blockquote>
 <div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ibz2bz</span></code>            (n_ibz,)        BZ indices of IBZ reps</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">bz2ibz</span></code>            (nk,)           IBZ index for each BZ point</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">bz2ibz</span></code>            (nk,)           Full-BZ index of the IBZ representative for each</dt><dd><p>BZ point, matching <cite>/symmetry/k/bz2ibz</cite>.
+Compact IBZ positions are not accepted</p>
+</dd>
+</dl>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">k_sym_transform_ao</span></code> (nk, n, n)     stored AO rotation U(k)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tr_conj</span></code>           (nk,)  bool     TR partner flags</p></li>
 </ul>
@@ -1293,17 +1320,115 @@ Computes proper orthogonal transformation and projection matricies</p>
 <dd><p>Read weak-coupling solution</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="green_mbtools.mint.seet_init.seet_init.to_full_bz">
-<span class="sig-name descname"><span class="pre">to_full_bz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conj_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bz_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/seet_init.html#seet_init.to_full_bz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.seet_init.seet_init.to_full_bz" title="Link to this definition">¶</a></dt>
-<dd><p>Project moment-dependent quantity onto full Brillouin zone</p>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-green_mbtools.mint.symmetry_utils">
 <span id="green-mbtools-mint-symmetry-utils"></span><h2>green_mbtools.mint.symmetry_utils<a class="headerlink" href="#module-green_mbtools.mint.symmetry_utils" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.SpaceGroupInfo">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">SpaceGroupInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ops</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_group_symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">international_symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">international_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#SpaceGroupInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container for detected space-group data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ops</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></span>) – Sorted list of <code class="docutils literal notranslate"><span class="pre">SPGElement</span></code> symmetry operation objects as returned by
+<code class="docutils literal notranslate"><span class="pre">pyscf.pbc.symm.space_group.SpaceGroup.build()</span></code>.</p></li>
+<li><p><strong>point_group_symbol</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Schoenflies-style point-group symbol (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;-3m&quot;</span></code> for D3d), always
+populated regardless of backend.</p></li>
+<li><p><strong>international_symbol</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Hermann-Mauguin space-group symbol; populated only by the <code class="docutils literal notranslate"><span class="pre">spglib</span></code>
+backend, <code class="docutils literal notranslate"><span class="pre">None</span></code> for the <code class="docutils literal notranslate"><span class="pre">pyscf</span></code> backend.</p></li>
+<li><p><strong>international_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – ITA space-group number; populated only by the <code class="docutils literal notranslate"><span class="pre">spglib</span></code> backend,
+<code class="docutils literal notranslate"><span class="pre">None</span></code> for the <code class="docutils literal notranslate"><span class="pre">pyscf</span></code> backend.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_number">
+<span class="sig-name descname"><span class="pre">international_number</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_number" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_symbol">
+<span class="sig-name descname"><span class="pre">international_symbol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_symbol" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.SpaceGroupInfo.ops">
+<span class="sig-name descname"><span class="pre">ops</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span></span><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.ops" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.SpaceGroupInfo.point_group_symbol">
+<span class="sig-name descname"><span class="pre">point_group_symbol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.point_group_symbol" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.apply_symmetry_restriction">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">apply_symmetry_restriction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#apply_symmetry_restriction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.apply_symmetry_restriction" title="Link to this definition">¶</a></dt>
+<dd><p>Detect the space group, select a subset of operators, and inject them.</p>
+<p>This is the top-level orchestrator called from <code class="xref py py-func docutils literal notranslate"><span class="pre">pbc_cell()</span></code> after the
+cell is fully built.  It is a no-op when <code class="docutils literal notranslate"><span class="pre">args.space_symm</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell</strong> (<em>pyscf.pbc.gto.Cell</em>) – Fully built PySCF periodic cell.</p></li>
+<li><p><strong>args</strong> (<em>argparse.Namespace</em><em> or </em><em>similar</em>) – <p>Parsed CLI arguments.  Relevant attributes:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">space_symm</span></code> (bool) – master switch; if <code class="docutils literal notranslate"><span class="pre">False</span></code>, returns immediately.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">symmorphic_only</span></code> (bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code>) – symmorphic filter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">symm_ops</span></code> (str or None, default <code class="docutils literal notranslate"><span class="pre">None</span></code>) – comma-separated indices.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">symm_backend</span></code> (str, default <code class="docutils literal notranslate"><span class="pre">&quot;pyscf&quot;</span></code>) – detection backend.</p></li>
+</ul>
+</p></li>
+<li><p><strong>effects</strong> (<em>Side</em>)</p></li>
+<li><p><strong>------------</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></span></span></p>
+</dd>
+</dl>
+<p>:param Sets <code class="docutils literal notranslate"><span class="pre">cell.lattice_symmetry</span></code> to a <code class="xref py py-class docutils literal notranslate"><span class="pre">pyscf.pbc.symm.symmetry.Symmetry</span></code>:
+:param carrying the selected operator subset.  Logs before/after op counts and the:
+:param group label.:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.build_symmetry">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">build_symmetry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ops</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#build_symmetry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.build_symmetry" title="Link to this definition">¶</a></dt>
+<dd><p>Construct a <code class="xref py py-class docutils literal notranslate"><span class="pre">pyscf.pbc.symm.symmetry.Symmetry</span></code> carrying a reduced op set.</p>
+<p>Mirrors the attribute assignments performed by <code class="docutils literal notranslate"><span class="pre">Symmetry.build</span></code> but skips
+space-group re-detection: the caller supplies <em>ops</em> directly.  The resulting
+object is suitable for injection into <code class="docutils literal notranslate"><span class="pre">cell.lattice_symmetry</span></code> so that a
+subsequent <code class="docutils literal notranslate"><span class="pre">cell.make_kpts(space_group_symmetry=True)</span></code> uses the reduced set
+without re-running detection.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">.cell</span></code> back-reference is deleted before returning so that
+<code class="docutils literal notranslate"><span class="pre">KPoints.build</span></code>’s <code class="docutils literal notranslate"><span class="pre">__dict__.update(lattice_symmetry.__dict__)</span></code> does not
+overwrite <code class="docutils literal notranslate"><span class="pre">KPoints.cell</span></code> with the cell used to build this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell</strong> (<em>pyscf.pbc.gto.Cell</em>) – Built PySCF periodic cell used to compute Wigner D-matrices.</p></li>
+<li><p><strong>ops</strong> (<em>list</em><em> of </em><em>SPGElement</em>) – Symmetry operators to inject (e.g. the output of <a class="reference internal" href="#green_mbtools.mint.symmetry_utils.select_ops" title="green_mbtools.mint.symmetry_utils.select_ops"><code class="xref py py-func docutils literal notranslate"><span class="pre">select_ops()</span></code></a>).
+Must include the identity; <a class="reference internal" href="#green_mbtools.mint.symmetry_utils.select_ops" title="green_mbtools.mint.symmetry_utils.select_ops"><code class="xref py py-func docutils literal notranslate"><span class="pre">select_ops()</span></code></a> guarantees this.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>symm</strong> – A fully-built <code class="docutils literal notranslate"><span class="pre">Symmetry</span></code> object whose <code class="docutils literal notranslate"><span class="pre">.ops</span></code> is the supplied list,
+<code class="docutils literal notranslate"><span class="pre">.nop</span></code> matches, <code class="docutils literal notranslate"><span class="pre">.has_inversion</span></code> reflects the given ops, and
+<code class="docutils literal notranslate"><span class="pre">.Dmats</span></code> / <code class="docutils literal notranslate"><span class="pre">.l_max</span></code> are computed via <code class="docutils literal notranslate"><span class="pre">make_Dmats</span></code>.  <code class="docutils literal notranslate"><span class="pre">.cell</span></code> is
+absent (deleted).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyscf.pbc.symm.symmetry.Symmetry</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking">
 <span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">check_kspace_symmetry_breaking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datasets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#check_kspace_symmetry_breaking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking" title="Link to this definition">¶</a></dt>
@@ -1314,6 +1439,31 @@ Computes proper orthogonal transformation and projection matricies</p>
 <li><p><strong>inp_file</strong> (<em>string</em>) – Path to input.h5 file that contains all the output from initialization</p></li>
 <li><p><strong>datasets</strong> (<em>list</em>) – List of datasets in the input file, for which symmetry checks need to be performed</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.detect_space_group">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">detect_space_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyscf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symprec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#detect_space_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.detect_space_group" title="Link to this definition">¶</a></dt>
+<dd><p>Detect the space group of a PySCF periodic cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell</strong> (<em>pyscf.pbc.gto.Cell</em>) – Built PySCF periodic cell.</p></li>
+<li><p><strong>backend</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Symmetry detection backend. <code class="docutils literal notranslate"><span class="pre">&quot;pyscf&quot;</span></code> uses the built-in PySCF
+implementation (no external dependencies, but <code class="docutils literal notranslate"><span class="pre">international_symbol</span></code>
+and <code class="docutils literal notranslate"><span class="pre">international_number</span></code> are not populated). <code class="docutils literal notranslate"><span class="pre">&quot;spglib&quot;</span></code> delegates
+to the <code class="docutils literal notranslate"><span class="pre">spglib</span></code> library and fills all three label fields.</p></li>
+<li><p><strong>symprec</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Symmetry tolerance passed to the backend. Default <code class="docutils literal notranslate"><span class="pre">1e-5</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Detected space-group data including the sorted <code class="docutils literal notranslate"><span class="pre">SPGElement</span></code> list and
+the three label fields.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo" title="green_mbtools.mint.symmetry_utils.SpaceGroupInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpaceGroupInfo</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1347,6 +1497,38 @@ coordinate convention used elsewhere in this module.</p></li>
 <li><p><strong>r_rel</strong> (<em>ndarray</em>) – The folded Cartesian coordinate within the unit cell (3,).</p></li>
 </ul>
 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.format_symmetry_ops">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">format_symmetry_ops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#format_symmetry_ops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.format_symmetry_ops" title="Link to this definition">¶</a></dt>
+<dd><p>Format a human-readable table of space-group operators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell</strong> (<em>pyscf.pbc.gto.Cell</em>) – Built PySCF periodic cell (used to compute atom permutations via
+<a class="reference internal" href="#green_mbtools.mint.symmetry_utils.generate_permutation_info" title="green_mbtools.mint.symmetry_utils.generate_permutation_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_permutation_info()</span></code></a>).</p></li>
+<li><p><strong>info</strong> (<a class="reference internal" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo" title="green_mbtools.mint.symmetry_utils.SpaceGroupInfo"><em>SpaceGroupInfo</em></a>) – Detected space-group data as returned by <a class="reference internal" href="#green_mbtools.mint.symmetry_utils.detect_space_group" title="green_mbtools.mint.symmetry_utils.detect_space_group"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect_space_group()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A multi-line string with:</p>
+<ul class="simple">
+<li><p>A header line containing the group label(s) (point-group symbol, and
+international symbol / number when available).</p></li>
+<li><p>A column-header line including the word <code class="docutils literal notranslate"><span class="pre">perm</span></code>.</p></li>
+<li><p>One line per operator showing: index, flattened 3×3 rotation (9
+integers), fractional translation (3 floats), atom permutation, and a
+<code class="docutils literal notranslate"><span class="pre">symmorphic</span></code> flag (<code class="docutils literal notranslate"><span class="pre">True</span></code> when <code class="docutils literal notranslate"><span class="pre">op.trans_is_zero</span></code>).</p></li>
+</ul>
+<p>The text satisfies <code class="docutils literal notranslate"><span class="pre">text.count(&quot;\n&quot;)</span> <span class="pre">&gt;=</span> <span class="pre">len(info.ops)</span></code> (one line per
+operator plus the header lines).</p>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1388,8 +1570,8 @@ unfolded (as-input) coordinates that the Bloch phase in
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atom_idx</strong> (<em>int</em>) – Index of the atom in the unit cell.</p></li>
-<li><p><strong>n_</strong> – Principal quantum number.</p></li>
-<li><p><strong>L_</strong> – Angular momentum quantum number.</p></li>
+<li><p><strong>n_</strong> (<em>int</em>) – Principal quantum number.</p></li>
+<li><p><strong>L_</strong> (<em>int</em>) – Angular momentum quantum number.</p></li>
 <li><p><strong>mycell</strong> (<em>pyscf.pbc.gto.cell.Cell</em>) – The unit cell object from PySCF.</p></li>
 </ul>
 </dd>
@@ -1474,6 +1656,32 @@ residuals). See get_representation for full discussion.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.mode_from_args">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">mode_from_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#mode_from_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.mode_from_args" title="Link to this definition">¶</a></dt>
+<dd><p>Translate CLI namespace flags to a <a class="reference internal" href="#green_mbtools.mint.symmetry_utils.select_ops" title="green_mbtools.mint.symmetry_utils.select_ops"><code class="xref py py-func docutils literal notranslate"><span class="pre">select_ops()</span></code></a> mode string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>argparse.Namespace</em><em> or </em><em>similar</em>) – <p>Parsed CLI arguments. Relevant attributes (accessed via <code class="docutils literal notranslate"><span class="pre">getattr</span></code> with
+safe defaults):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">symmorphic_only</span></code> (bool) – keep only zero-translation operators.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">symm_ops</span></code> (str or None) – comma-separated operator indices.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>One of <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;symmorphic&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;indices&quot;</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If both <code class="docutils literal notranslate"><span class="pre">symmorphic_only</span></code> is truthy and <code class="docutils literal notranslate"><span class="pre">symm_ops</span></code> is set (not None).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2">
 <span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">rotation_matrix_to_su2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R_cart</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#rotation_matrix_to_su2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2" title="Link to this definition">¶</a></dt>
 <dd><p>Return the SU(2) representative of a proper 3D Cartesian rotation matrix.</p>
@@ -1492,6 +1700,60 @@ residuals). See get_representation for full discussion.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(2, 2) complex ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.select_ops">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">select_ops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_ops</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#select_ops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.select_ops" title="Link to this definition">¶</a></dt>
+<dd><p>Select a subset of space-group operators according to <em>mode</em>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>full_ops</strong> (<em>list</em><em> of </em><em>SPGElement</em>) – The full list of operators returned by <a class="reference internal" href="#green_mbtools.mint.symmetry_utils.detect_space_group" title="green_mbtools.mint.symmetry_utils.detect_space_group"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect_space_group()</span></code></a>.</p></li>
+<li><p><strong>mode</strong> (<em>{&quot;none&quot;</em><em>, </em><em>&quot;symmorphic&quot;</em><em>, </em><em>&quot;indices&quot;}</em>) – <p>Selection strategy.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>         – return <em>full_ops</em> unchanged.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;symmorphic&quot;</span></code>   – retain only operators with zero fractional
+translation (<code class="docutils literal notranslate"><span class="pre">op.trans_is_zero</span></code>), guaranteeing identity is present.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;indices&quot;</span></code>      – retain the operators at the given integer indices
+(0-based), prepend identity if absent, and validate closure.</p></li>
+</ul>
+</p></li>
+<li><p><strong>spec</strong> (<em>list</em><em> of </em><em>int</em><em> or </em><em>None</em>) – Operator indices used by <code class="docutils literal notranslate"><span class="pre">&quot;indices&quot;</span></code> mode; ignored otherwise.</p></li>
+<li><p><strong>cell</strong> (<em>pyscf.pbc.gto.Cell</em>) – The unit cell (currently unused but required for forward compatibility).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Selected (and possibly augmented) operator list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of SPGElement</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an index in <em>spec</em> is out of the valid range <code class="docutils literal notranslate"><span class="pre">0..len(full_ops)-1</span></code>
+    (message names the range and points to <code class="docutils literal notranslate"><span class="pre">--print_symmetry_ops</span></code>), or if
+    the requested set is not closed under multiplication (message names the
+    missing operators and mentions <code class="docutils literal notranslate"><span class="pre">closure</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="green_mbtools.mint.symmetry_utils.spec_from_args">
+<span class="sig-prename descclassname"><span class="pre">green_mbtools.mint.symmetry_utils.</span></span><span class="sig-name descname"><span class="pre">spec_from_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/green_mbtools/mint/symmetry_utils.html#spec_from_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#green_mbtools.mint.symmetry_utils.spec_from_args" title="Link to this definition">¶</a></dt>
+<dd><p>Parse the <code class="docutils literal notranslate"><span class="pre">--symm_ops</span></code> CLI string into a list of integers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>argparse.Namespace</em><em> or </em><em>similar</em>) – Parsed CLI arguments.  <code class="docutils literal notranslate"><span class="pre">symm_ops</span></code> attribute should be a
+comma-separated string of integers (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;0,3,4,7&quot;</span></code>), or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed indices, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when <code class="docutils literal notranslate"><span class="pre">symm_ops</span></code> is not set.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int or None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1577,6 +1839,7 @@ residuals). See get_representation for full discussion.</p></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.parse_geometry"><code class="docutils literal notranslate"><span class="pre">parse_geometry()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.pbc_cell"><code class="docutils literal notranslate"><span class="pre">pbc_cell()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.print_high_symmetry_points"><code class="docutils literal notranslate"><span class="pre">print_high_symmetry_points()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.common_utils.print_symmetry_ops"><code class="docutils literal notranslate"><span class="pre">print_symmetry_ops()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.read_dm"><code class="docutils literal notranslate"><span class="pre">read_dm()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.save_data"><code class="docutils literal notranslate"><span class="pre">save_data()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.common_utils.solve_mean_field"><code class="docutils literal notranslate"><span class="pre">solve_mean_field()</span></code></a></li>
@@ -1672,19 +1935,32 @@ residuals). See get_representation for full discussion.</p></li>
 <li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init"><code class="docutils literal notranslate"><span class="pre">seet_init</span></code></a><ul>
 <li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init.args"><code class="docutils literal notranslate"><span class="pre">seet_init.args</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init.get_input_data"><code class="docutils literal notranslate"><span class="pre">seet_init.get_input_data()</span></code></a></li>
-<li><a class="reference internal" href="#green_mbtools.mint.seet_init.seet_init.to_full_bz"><code class="docutils literal notranslate"><span class="pre">seet_init.to_full_bz()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-green_mbtools.mint.symmetry_utils">green_mbtools.mint.symmetry_utils</a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo</span></code></a><ul>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_number"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.international_number</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_symbol"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.international_symbol</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.ops"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.ops</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.point_group_symbol"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.point_group_symbol</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.apply_symmetry_restriction"><code class="docutils literal notranslate"><span class="pre">apply_symmetry_restriction()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.build_symmetry"><code class="docutils literal notranslate"><span class="pre">build_symmetry()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking"><code class="docutils literal notranslate"><span class="pre">check_kspace_symmetry_breaking()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.detect_space_group"><code class="docutils literal notranslate"><span class="pre">detect_space_group()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.fold_to_unit_cell"><code class="docutils literal notranslate"><span class="pre">fold_to_unit_cell()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.format_symmetry_ops"><code class="docutils literal notranslate"><span class="pre">format_symmetry_ops()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.generate_permutation_info"><code class="docutils literal notranslate"><span class="pre">generate_permutation_info()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_orbital_index"><code class="docutils literal notranslate"><span class="pre">get_orbital_index()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_representation"><code class="docutils literal notranslate"><span class="pre">get_representation()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.get_spinor_representation"><code class="docutils literal notranslate"><span class="pre">get_spinor_representation()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.mode_from_args"><code class="docutils literal notranslate"><span class="pre">mode_from_args()</span></code></a></li>
 <li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2"><code class="docutils literal notranslate"><span class="pre">rotation_matrix_to_su2()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.select_ops"><code class="docutils literal notranslate"><span class="pre">select_ops()</span></code></a></li>
+<li><a class="reference internal" href="#green_mbtools.mint.symmetry_utils.spec_from_args"><code class="docutils literal notranslate"><span class="pre">spec_from_args()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1698,7 +1974,7 @@ residuals). See get_representation for full discussion.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=8d563738"></script>
+</div><script src="_static/documentation_options.js?v=fc837d61"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

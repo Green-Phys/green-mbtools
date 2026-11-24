@@ -5,10 +5,11 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
         <link rel="prefetch" href="../../../_static/rosetta.png" as="image">
 
-    <link rel="shortcut icon" href="../../../_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <link rel="shortcut icon" href="../../../_static/rosetta.png"><!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
         <title>green_mbtools.mint.ortho_utils - Green MBTools</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=25e12dd6" />
     
@@ -507,30 +508,46 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_propagate_with_reps</span><span class="p">(</span><span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span> <span class="n">ibz2bz</span><span class="p">,</span> <span class="n">bz2ibz</span><span class="p">,</span>
-                         <span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">tr_conj</span><span class="p">):</span>
+                         <span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">tr_conj</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Propagate per-IBZ ``(X, X_inv)`` to every BZ point given precomputed</span>
 <span class="sd">    AO-space rotations ``k_sym_transform_ao`` and TR flags ``tr_conj``.</span>
 
-<span class="sd">    Convention (matching ``common_utils.store_kstruct_ops_info``):</span>
+<span class="sd">    Two covariance rules are applied, selected by ``mode``, according to how</span>
+<span class="sd">    the orthogonalizer transforms under the AO rotation ``U(k)``:</span>
 
-<span class="sd">    - Non-TR (``tr_conj[k] == False``): the AO rotation ``U(k)`` is</span>
-<span class="sd">      ``get_representation(k, stars_ops[k], ...)`` (or the spinor analog),</span>
-<span class="sd">      and ``M(k) = U M(k_ir) U†``. Then</span>
+<span class="sd">    - Column-covariant modes (``lowdin``, ``mo``, ``natural`` — the default</span>
+<span class="sd">      for ``mode=None``) are built from orbital/eigenvector *columns* that</span>
+<span class="sd">      ride along one-sided, ``C(k) = U C(k_ir)``. Their orthogonalizer</span>
+<span class="sd">      therefore propagates **one-sided**:</span>
 
 <span class="sd">          X(k)     = X(k_ir) @ U†</span>
 <span class="sd">          X_inv(k) = U @ X_inv(k_ir)</span>
 
-<span class="sd">    - TR (``tr_conj[k] == True``): the stored rotation already</span>
-<span class="sd">      incorporates the conjugation factor (e.g. for X2C double group it</span>
-<span class="sd">      is ``(U_spinor @ Θ).conj()``), and the reconstruction is</span>
-<span class="sd">      ``M(k) = (U M(k_ir) U†).conj()``. Then</span>
+<span class="sd">    - ``symmetric_lowdin`` is the Hermitian AO-labelled matrix function</span>
+<span class="sd">      ``S(k)^{-1/2}``. A matrix function of ``S(k) = U S(k_ir) U†``</span>
+<span class="sd">      conjugates **two-sided**, so both X and X_inv propagate two-sided:</span>
 
-<span class="sd">          X(k)     = (X(k_ir) @ U†).conj()</span>
-<span class="sd">          X_inv(k) = (U @ X_inv(k_ir)).conj()</span>
+<span class="sd">          X(k)     = U @ X(k_ir)     @ U†</span>
+<span class="sd">          X_inv(k) = U @ X_inv(k_ir) @ U†</span>
 
-<span class="sd">    so that ``X(k) S(k) X(k)† = I`` at every BZ point.</span>
+<span class="sd">      This keeps the AO gauge Hermitian and conjugate-k consistent</span>
+<span class="sd">      (``X(-k) = X(k)*``), which the SEET real-local-density workflow</span>
+<span class="sd">      relies on. The one-sided frame would still orthogonalize but lands</span>
+<span class="sd">      a k-dependent unitary ``U(k)†`` away from ``S(k)^{-1/2}``, leaking a</span>
+<span class="sd">      spurious imaginary local density. The two-sided rule is gated to</span>
+<span class="sd">      this mode only: applying it to the column-covariant (and possibly</span>
+<span class="sd">      rectangular) modes would be wrong — and ill-typed for rank-reduced X.</span>
+
+<span class="sd">    Convention matches ``common_utils.store_kstruct_ops_info``: for TR</span>
+<span class="sd">    points (``tr_conj[k] == True``) the stored rotation already carries the</span>
+<span class="sd">    conjugation factor (e.g. for X2C double group it is</span>
+<span class="sd">    ``(U_spinor @ Θ).conj()``), the reconstruction is</span>
+<span class="sd">    ``M(k) = (U M(k_ir) U†).conj()``, and both X and X_inv are conjugated</span>
+<span class="sd">    after the (one- or two-sided) propagation, so that</span>
+<span class="sd">    ``X(k) S(k) X(k)† = I`` at every BZ point.</span>
 <span class="sd">    '''</span>
+    <span class="n">two_sided</span> <span class="o">=</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"symmetric_lowdin"</span>
     <span class="n">ibz2bz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ibz2bz</span><span class="p">)</span>
     <span class="n">bz2ibz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bz2ibz</span><span class="p">)</span>
     <span class="n">nk</span> <span class="o">=</span> <span class="n">bz2ibz_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -550,8 +567,12 @@
         <span class="n">Xinv_ir</span> <span class="o">=</span> <span class="n">Xinv_per_irrep</span><span class="p">[</span><span class="n">i_ir</span><span class="p">]</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">k_sym_transform_ao</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span>
 
-        <span class="n">Xk</span> <span class="o">=</span> <span class="n">X_ir</span> <span class="o">@</span> <span class="n">u</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">Xinvk</span> <span class="o">=</span> <span class="n">u</span> <span class="o">@</span> <span class="n">Xinv_ir</span>
+        <span class="k">if</span> <span class="n">two_sided</span><span class="p">:</span>
+            <span class="n">Xk</span> <span class="o">=</span> <span class="n">u</span> <span class="o">@</span> <span class="n">X_ir</span> <span class="o">@</span> <span class="n">u</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">Xinvk</span> <span class="o">=</span> <span class="n">u</span> <span class="o">@</span> <span class="n">Xinv_ir</span> <span class="o">@</span> <span class="n">u</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Xk</span> <span class="o">=</span> <span class="n">X_ir</span> <span class="o">@</span> <span class="n">u</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">Xinvk</span> <span class="o">=</span> <span class="n">u</span> <span class="o">@</span> <span class="n">Xinv_ir</span>
         <span class="k">if</span> <span class="n">tr_conj</span><span class="p">[</span><span class="n">ik</span><span class="p">]:</span>
             <span class="n">Xk</span> <span class="o">=</span> <span class="n">Xk</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
             <span class="n">Xinvk</span> <span class="o">=</span> <span class="n">Xinvk</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
@@ -567,10 +588,12 @@
     <span class="n">kstruct</span><span class="p">,</span>
     <span class="n">mycell</span><span class="p">,</span>
     <span class="n">spinor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Build precomputed AO-rotation arrays from ``kstruct`` + ``mycell`` and</span>
-<span class="sd">    delegate to ``_propagate_with_reps``.</span>
+<span class="sd">    delegate to ``_propagate_with_reps``. ``mode`` selects the covariance</span>
+<span class="sd">    rule (see ``_propagate_with_reps``).</span>
 <span class="sd">    '''</span>
     <span class="n">nk</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">nkpts</span>
     <span class="n">stars_ops</span> <span class="o">=</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">stars_ops_bz</span>
@@ -599,7 +622,7 @@
     <span class="k">return</span> <span class="n">_propagate_with_reps</span><span class="p">(</span>
         <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span>
         <span class="n">kstruct</span><span class="o">.</span><span class="n">ibz2bz</span><span class="p">,</span> <span class="n">kstruct</span><span class="o">.</span><span class="n">bz2ibz</span><span class="p">,</span>
-        <span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">tr_conj_bz</span><span class="p">,</span>
+        <span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">tr_conj_bz</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
     <span class="p">)</span>
 
 
@@ -692,7 +715,7 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_propagate_X_to_star</span><span class="p">(</span>
-        <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span> <span class="n">kstruct</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">spinor</span><span class="o">=</span><span class="n">spinor</span>
+        <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span> <span class="n">kstruct</span><span class="p">,</span> <span class="n">mycell</span><span class="p">,</span> <span class="n">spinor</span><span class="o">=</span><span class="n">spinor</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span>
     <span class="p">)</span></div>
 
 
@@ -721,7 +744,9 @@
 <span class="sd">    ``input.h5`` under ``/symmetry/k`` —</span>
 
 <span class="sd">      - ``ibz2bz``            (n_ibz,)        BZ indices of IBZ reps</span>
-<span class="sd">      - ``bz2ibz``            (nk,)           IBZ index for each BZ point</span>
+<span class="sd">      - ``bz2ibz``            (nk,)           Full-BZ index of the IBZ representative for each</span>
+<span class="sd">                                              BZ point, matching `/symmetry/k/bz2ibz`.</span>
+<span class="sd">                                              Compact IBZ positions are not accepted</span>
 <span class="sd">      - ``k_sym_transform_ao`` (nk, n, n)     stored AO rotation U(k)</span>
 <span class="sd">      - ``tr_conj``           (nk,)  bool     TR partner flags</span>
 
@@ -768,11 +793,34 @@
         <span class="n">mode</span><span class="p">,</span> <span class="n">S_ibz</span><span class="p">,</span> <span class="n">F_ibz</span><span class="p">,</span> <span class="n">dm_ibz</span><span class="p">,</span> <span class="n">mo_coeff_ibz</span><span class="p">,</span> <span class="n">tol_sing</span><span class="p">,</span> <span class="n">tol_degen</span>
     <span class="p">)</span>
 
+    <span class="c1"># ``/symmetry/k/bz2ibz`` stores, for each BZ point, the *full-BZ index*</span>
+    <span class="c1"># of its IBZ representative (common_utils.save_data does</span>
+    <span class="c1"># ``ind = ir_list[ind]``), matching pesto.mb.to_full_bz. _propagate_with_reps</span>
+    <span class="c1"># indexes the per-IBZ arrays directly, so convert those representative</span>
+    <span class="c1"># BZ indices into compact IBZ positions [0, n_ibz) via ibz2bz.</span>
+    <span class="c1"># NOTE -    in the function _propagate_X_to_star, we use kstruct.bz2ibz which is same as</span>
+    <span class="c1">#           the bz2ib_compact defined below.</span>
+    <span class="n">bz2ibz_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bz2ibz</span><span class="p">)</span>
+    <span class="n">pos_in_ibz</span> <span class="o">=</span> <span class="p">{</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">):</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ibz2bz_arr</span><span class="p">)}</span>
+
+    <span class="c1"># Check bz2ibz contains full-bz indices, not the compact ibz ones</span>
+    <span class="n">invalid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">bz2ibz_arr</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">bz2ibz_arr</span><span class="p">,</span> <span class="n">ibz2bz_arr</span><span class="p">)])</span>
+    <span class="k">if</span> <span class="n">invalid</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"bz2ibz must contain representative BZ indices from ibz2bz; "</span>
+            <span class="sa">f</span><span class="s2">"found invalid values: </span><span class="si">{</span><span class="n">invalid</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+
+    <span class="n">bz2ibz_compact</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">pos_in_ibz</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bz2ibz_arr</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span>
+    <span class="p">)</span>
+
     <span class="k">return</span> <span class="n">_propagate_with_reps</span><span class="p">(</span>
         <span class="n">X_per_irrep</span><span class="p">,</span> <span class="n">Xinv_per_irrep</span><span class="p">,</span>
-        <span class="n">ibz2bz_arr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bz2ibz</span><span class="p">),</span>
+        <span class="n">ibz2bz_arr</span><span class="p">,</span> <span class="n">bz2ibz_compact</span><span class="p">,</span>
         <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">k_sym_transform_ao</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">),</span>
         <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tr_conj</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span> <span class="k">if</span> <span class="n">tr_conj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -809,7 +857,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=8d563738"></script>
+</div><script src="../../../_static/documentation_options.js?v=fc837d61"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

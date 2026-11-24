@@ -6,10 +6,11 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="green_mbtools.mint" href="green_mbtools.mint.html"><link rel="prev" title="Examples" href="examples.html">
         <link rel="prefetch" href="_static/rosetta.png" as="image">
 
-    <link rel="shortcut icon" href="_static/rosetta.png"><!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <link rel="shortcut icon" href="_static/rosetta.png"><!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
         <title>Source code documentation - Green MBTools</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=25e12dd6" />
     
@@ -270,6 +271,7 @@
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.common_utils.parse_geometry"><code class="docutils literal notranslate"><span class="pre">parse_geometry()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.common_utils.pbc_cell"><code class="docutils literal notranslate"><span class="pre">pbc_cell()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.common_utils.print_high_symmetry_points"><code class="docutils literal notranslate"><span class="pre">print_high_symmetry_points()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.common_utils.print_symmetry_ops"><code class="docutils literal notranslate"><span class="pre">print_symmetry_ops()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.common_utils.read_dm"><code class="docutils literal notranslate"><span class="pre">read_dm()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.common_utils.save_data"><code class="docutils literal notranslate"><span class="pre">save_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.common_utils.solve_mean_field"><code class="docutils literal notranslate"><span class="pre">solve_mean_field()</span></code></a></li>
@@ -365,19 +367,32 @@
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init"><code class="docutils literal notranslate"><span class="pre">seet_init</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.args"><code class="docutils literal notranslate"><span class="pre">seet_init.args</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.get_input_data"><code class="docutils literal notranslate"><span class="pre">seet_init.get_input_data()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.seet_init.seet_init.to_full_bz"><code class="docutils literal notranslate"><span class="pre">seet_init.to_full_bz()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="green_mbtools.mint.html#module-green_mbtools.mint.symmetry_utils">green_mbtools.mint.symmetry_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.SpaceGroupInfo"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_number"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.international_number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.international_symbol"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.international_symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.ops"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.SpaceGroupInfo.point_group_symbol"><code class="docutils literal notranslate"><span class="pre">SpaceGroupInfo.point_group_symbol</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.apply_symmetry_restriction"><code class="docutils literal notranslate"><span class="pre">apply_symmetry_restriction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.build_symmetry"><code class="docutils literal notranslate"><span class="pre">build_symmetry()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.check_kspace_symmetry_breaking"><code class="docutils literal notranslate"><span class="pre">check_kspace_symmetry_breaking()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.detect_space_group"><code class="docutils literal notranslate"><span class="pre">detect_space_group()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.fold_to_unit_cell"><code class="docutils literal notranslate"><span class="pre">fold_to_unit_cell()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.format_symmetry_ops"><code class="docutils literal notranslate"><span class="pre">format_symmetry_ops()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.generate_permutation_info"><code class="docutils literal notranslate"><span class="pre">generate_permutation_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_orbital_index"><code class="docutils literal notranslate"><span class="pre">get_orbital_index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_representation"><code class="docutils literal notranslate"><span class="pre">get_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.get_spinor_representation"><code class="docutils literal notranslate"><span class="pre">get_spinor_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.mode_from_args"><code class="docutils literal notranslate"><span class="pre">mode_from_args()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.rotation_matrix_to_su2"><code class="docutils literal notranslate"><span class="pre">rotation_matrix_to_su2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.select_ops"><code class="docutils literal notranslate"><span class="pre">select_ops()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="green_mbtools.mint.html#green_mbtools.mint.symmetry_utils.spec_from_args"><code class="docutils literal notranslate"><span class="pre">spec_from_args()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -509,7 +524,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=8d563738"></script>
+</div><script src="_static/documentation_options.js?v=fc837d61"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
