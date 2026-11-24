@@ -720,7 +720,11 @@ def pbc_cell(args):
     c.exp_to_discard = args.diffuse_cutoff
     c.build()
     if np.linalg.det(_a) < 0:
-        raise "Lattice are not in right-handed coordinate system. Please correct your lattice vectors"
+        raise ValueError(
+            "Lattice vectors are not in a right-handed coordinate system "
+            "(det = {:.6g} < 0). Please correct your lattice vectors, "
+            "e.g. by swapping two of them.".format(np.linalg.det(_a))
+        )
     symmetry_utils.apply_symmetry_restriction(c, args)
     return c
 
