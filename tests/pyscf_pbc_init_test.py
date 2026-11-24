@@ -157,3 +157,17 @@ def test_invalid_nk_count_raises(bad_nk) -> None:
     ]
     with pytest.raises(ValueError, match="--nk must be given 1 or 3 integers"):
         comm.init_pbc_params(params=params)
+
+
+def test_left_handed_lattice_raises() -> None:
+    """A left-handed set of lattice vectors must raise a ValueError, not a TypeError."""
+    params = [
+        "--atom", "H 0 0 0",
+        # a1 and a2 of a right-handed cubic cell swapped: det < 0
+        "--a", "0 5 0, 5 0 0, 0 0 5",
+        "--basis", "sto-3g",
+        "--nk", "1",
+    ]
+    args = comm.init_pbc_params(params=params)
+    with pytest.raises(ValueError, match="right-handed"):
+        comm.pbc_cell(args)
