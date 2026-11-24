@@ -30,7 +30,7 @@ dependencies = ["numpy", "ase", "spglib", "numba", "pyscf<2.15", "scipy", "h5py"
 
 description = "Collection of Python tools for quantum many-body simulation using Green Software Package"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
