@@ -67,6 +67,15 @@ class pyscf_pbc_init (pyscf_init):
     """
     def __init__(self, args=None):
         super().__init__(comm.init_pbc_params() if args is None else args)
+        if getattr(self.args,"integral_symmetry","legacy") == "space_group":
+            from pathlib import Path
+            kinds=self.args.finite_size_kind
+            kinds=[kinds] if isinstance(kinds,str) else list(kinds)
+            if self.args.x2c != 0 or self.args.use_j2c_eig_decomposition or kinds != ["ewald"]:
+                raise ValueError("Initial SG producer supports scalar full-rank Cholesky and the ordinary/Ewald sets; special finite-size branches are unsupported")
+            paths=[self.args.hf_int_path,self.args.int_path,self.args.output_path,self.args.integral_symmetry_work]
+            if len(set(map(lambda path:str(Path(path).resolve()),paths))) != len(paths) or any(Path(path).exists() for path in paths):
+                raise ValueError("SG integral, input and work paths must be distinct and fresh")
         self.kmesh, self.k_ibz, self.ir_list, self.conj_list, self.weight, self.ind, self.num_ik, self.kstruct = \
             comm.init_k_mesh(self.args, self.cell)
 
@@ -251,6 +260,9 @@ class pyscf_pbc_init (pyscf_init):
             ``X_k`` contains identity transforms for each k-point rather
             than an empty list.
         '''
+        if getattr(self.args,"integral_symmetry","legacy") == "space_group":
+            self.compute_space_group_integrals(X_k)
+            return
         # --- Step 1: mean-field integrals (bare Coulomb kernel) --------------
         mydf = comm.construct_gdf(self.args, self.cell, self.kmesh)
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.hf_int_path, "cderi.h5", True, True)
@@ -294,6 +306,34 @@ class pyscf_pbc_init (pyscf_init):
 
         # Build correlated integrals; diagonal pairs come from cderi_ewald.h5.
         int_utils.compute_integrals(self.args, self.cell, mydf, self.kmesh, nao, X_k, self.args.int_path, "cderi.h5", True, self.args.keep_cderi, cderi_name2="cderi_ewald.h5")
+
+    def compute_space_group_integrals(self, X_k):
+        from pathlib import Path
+        import subprocess
+        from .integral_symmetry_builder import build_representative_archive, store_captured_q_transforms
+        provider=comm.construct_gdf(self.args,self.cell,self.kmesh)
+        stored_x=None if self.args.orth == "none" else np.asarray(X_k)
+        repository=Path(__file__).resolve().parents[2]
+        revision=subprocess.run(["git","-C",str(repository),"rev-parse","HEAD"],capture_output=True,text=True)
+        if revision.returncode:
+            raise ValueError("SG production requires source revision metadata from a Git checkout")
+        work=Path(self.args.integral_symmetry_work).resolve()
+        work.mkdir(parents=True,exist_ok=False)
+        results={}
+        for name,path,corrected in (("hf",self.args.hf_int_path,False),("correlation",self.args.int_path,True)):
+            results[name]=build_representative_archive(self.cell,self.kmesh,provider.auxbasis,path,work/name,
+                corrected=corrected,stored_x=stored_x,producer_revision=revision.stdout.strip(),mesh=provider.mesh)
+        if results["hf"]["input_fingerprint"] != results["correlation"]["input_fingerprint"]:
+            raise ValueError("Produced HF/correlation input identities differ")
+        with h5py.File(self.args.output_path,"a") as file:
+            file["integral_symmetry/input_fingerprint"]=results["hf"]["input_fingerprint"]
+            file["integral_symmetry/correlation_gauge_id"]=results["correlation"]["auxiliary_gauge_id"]
+        # One-body/q weights and stars are preserved; only the auxiliary frame
+        # is tied to the actual correlation factors consumed by GW.
+        store_captured_q_transforms(self.args,self.cell,self.kmesh,provider.auxbasis,
+                                   work/"correlation/captured-gauges.h5",self.args.int_path)
+        # The complete cderi.h5 used by SCF remains intact, even when a legacy
+        # invocation would have removed it after export.
 
     def evaluate_high_symmetry_path(self):
         if self.args.print_symmetry_ops:
