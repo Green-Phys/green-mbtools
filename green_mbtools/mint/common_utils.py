@@ -938,22 +938,17 @@ def solve_mol_mean_field(args, mydf, mycell):
 
     if args.x2c == 0:
         mf = args.mean_field(mycell).density_fit()
+        mf.with_df.auxbasis = mydf.auxbasis
+        mf.with_df._cderi = "cderi_mol.h5"
     elif args.x2c == 1:
         mf = args.mean_field(mycell).density_fit().sfx2c1e()
+        mf.with_df.auxbasis = mydf.auxbasis
+        mf.with_df._cderi = "cderi_mol.h5"
     elif args.x2c == 2:
+        # cderi_mol.h5 is built in pyscf_mol_init.mean_field_input; X2C MF has no with_df.
         mf = args.mean_field(mycell).x2c1e()
     if args.xc is not None:
         mf.xc = args.xc
-    # mf.max_memory = 10000
-    # mydf._cderi = "cderi.h5"
-    if args.x2c == 2:
-        tmp_mf = mscf.RHF(mycell).density_fit() if args.restricted else mscf.UHF(mycell).density_fit()
-        tmp_mf.with_df._cderi_to_save = "cderi_mol.h5"
-        tmp_mf.with_df.build()
-        tmp_mf = None
-    else:
-        mf.with_df._cderi_to_save = "cderi_mol.h5"
-        mf.with_df.build()
     mf.diis_space = 16
     mf.damp = args.damping
     mf.max_cycle = args.max_iter
@@ -967,7 +962,7 @@ def solve_mol_mean_field(args, mydf, mycell):
         mf.kernel(init_dm)
     else:
         mf.kernel()
-    if args.x2c < 2:
+    if args.x2c in (0, 1):
         mf.analyze()
     return mf
 
