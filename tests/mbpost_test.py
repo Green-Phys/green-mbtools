@@ -8,6 +8,26 @@ import h5py
 #
 
 
+def test_initMBpost_wannier_interpolation(data_path):
+    """initialize_MB_post must set the k-mesh so that Wannier interpolation works."""
+    data_dir = pytest.test_data_dir
+    sim_path = data_dir + '/H2_GW/sim.h5'
+    input_path = data_dir + '/H2_GW/input.h5'
+    ir_path = data_dir + '/ir_grid/1e4.h5'
+    mbo_new = mb.initialize_MB_post(sim_path, input_path, ir_path)
+
+    with h5py.File(input_path, 'r') as f:
+        kmesh = f['symmetry/k/mesh_scaled'][()]
+    assert mbo_new.kmesh is not None
+    assert np.allclose(mbo_new.kmesh, kmesh)
+
+    # interpolating back onto the original mesh reproduces the input Fock matrix
+    G_int, Sigma_int, tau_mesh, Fk_int, Sk_int = mbo_new.wannier_interpolation(kmesh, hermi=True)
+    assert Fk_int.shape == mbo_new.fock.shape
+    assert np.allclose(Fk_int, mbo_new.fock, atol=1e-8)
+    assert np.allclose(Sk_int, mbo_new.S, atol=1e-8)
+
+
 def test_initMBpost(mbo, data_path):
     """Test shortcut way to initialize the pesto::MB_post instance.
     """

@@ -530,6 +530,8 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
         nso = f["params/nso"][()]
         ns = f['params/ns'][()]
         nk_list = f["symmetry/k/nk_list"][()] if "symmetry/k/nk_list" in f else None
+        # fractional full-BZ k-mesh, needed for Wannier interpolation
+        kmesh = f["symmetry/k/mesh_scaled"][()] if "symmetry/k/mesh_scaled" in f else None
 
     """
     All k-dependent matrices should lie on a full Monkhorst-Pack grid.
@@ -547,8 +549,8 @@ def initialize_MB_post(sim_path, input_path, ir_file, legacy_ir=False):
 
     # Standard way to initialize
     mb = MB_post(
-        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, beta=beta, ir_file=ir_file,
-        legacy_ir=legacy_ir
+        fock=F, sigma=Sigma, mu=mu, gtau=G, S=S, kmesh=kmesh, beta=beta,
+        ir_file=ir_file, legacy_ir=legacy_ir
     )
     mb.nk_list = nk_list
     return mb
