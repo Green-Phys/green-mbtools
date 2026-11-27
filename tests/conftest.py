@@ -1,7 +1,6 @@
 import h5py
 import pytest
 import os
-from green_mbtools.pesto import mb
 
 
 #
@@ -19,6 +18,9 @@ def data_path():
 
 @pytest.fixture
 def mbo(data_path):
+    # Only post-processing tests need the optional compiled continuation module.
+    from green_mbtools.pesto import mb
+
     data_dir = pytest.test_data_dir
 
     # data file (sim.h5)
