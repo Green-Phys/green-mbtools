@@ -11,6 +11,7 @@ from importlib.metadata import version
 
 import h5py
 import numpy as np
+from packaging.specifiers import SpecifierSet
 from pyscf.pbc import df
 
 from .integral_symmetry_geometry import MatrixCache
@@ -29,11 +30,13 @@ def build_captured_legacy_ewald(cell, kpts, auxbasis, pairs, path, mesh=None):
     from .integral_symmetry_compat import require_ccgdf_compatibility
 
     require_ccgdf_compatibility()
-    if version("green-igen") != "0.2.8" or not isinstance(
-        legacy._make_j3c, FunctionType
+    supported = SpecifierSet(">=0.2.8,<0.3")
+    if version("green-igen") not in supported or not isinstance(
+        getattr(legacy, "_make_j3c", None), FunctionType
     ):
         raise RuntimeError(
-            "Integral symmetry legacy capture requires green-igen 0.2.8 Python _make_j3c"
+            "Integral symmetry legacy capture requires green-igen >=0.2.8,<0.3 "
+            "with a Python _make_j3c"
         )
     try:
         inspect.signature(legacy._make_j3c).bind(None, None, None, None, None)
@@ -43,6 +46,14 @@ def build_captured_legacy_ewald(cell, kpts, auxbasis, pairs, path, mesh=None):
         ) from error
     scipy_original = legacy.scipy
     captured = []
+    if mesh is not None:
+        mesh = np.asarray(mesh)
+        if (
+            mesh.shape != (3,)
+            or not np.issubdtype(mesh.dtype, np.integer)
+            or np.any(mesh <= 0)
+        ):
+            raise ValueError("mesh must contain three positive integers")
 
     class LinalgProxy:
         def __getattr__(self, name):
@@ -56,13 +67,15 @@ def build_captured_legacy_ewald(cell, kpts, auxbasis, pairs, path, mesh=None):
     class CapturedGDF(legacy.GDF):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            # _make_j3c uses this inner GDF's grid for the reciprocal-space sum.
+            if mesh is not None:
+                self.mesh = mesh.copy()
+            provider.mesh = np.array(self.mesh, copy=True)
             self.weighted_coulG = weighted_coulG_ewald.__get__(self, type(self))
 
     provider = df.GDF(cell, kpts)
     provider.auxbasis = auxbasis
     provider.exxdiv = "ewald"
-    if mesh is not None:
-        provider.mesh = np.asarray(mesh)
     auxcell = legacy.make_modrho_basis(cell, auxbasis, provider.exp_to_discard)
     scope = dict(
         legacy._make_j3c.__globals__,

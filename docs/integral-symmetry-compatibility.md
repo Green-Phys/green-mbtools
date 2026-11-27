@@ -4,12 +4,10 @@ GREEN MBTools requires PySCF 2.14.x. The application CI runs the integral suite
 with PySCF 2.14.0 on Python 3.9 and 3.13. Captured CCGDF builders check the
 private method signatures and metric decomposition shapes.
 
-The corrected legacy capture requires **green-igen 0.2.8**. It runs the original
-routine's Python code with a per-call globals dictionary, private GDF subclass,
-and private Cholesky capture proxy. Shared PySCF/green-igen classes and module
-references are never patched. Calls with separate output files can coexist;
-the tests exercise overlapping captures and failure exits. External files and
-provider instances are owned by the caller, not shared between captures.
+Corrected legacy capture supports `green-igen>=0.2.8,<0.3` and checks the
+Python routine's signature and captured Cholesky factor. Each call uses a
+private GDF subclass and SciPy proxy. The returned provider reports the FFT
+mesh used in the Ewald calculation. Omitting `mesh` uses green-igen's default.
 
 `test_integral_physical_pair_map.py` always constructs a small complete PySCF
 reference, then checks real spatial phases, all four TR/exchange combinations,

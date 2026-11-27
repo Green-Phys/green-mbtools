@@ -41,6 +41,7 @@ def test_concurrent_capture_uses_private_classes_and_modules(monkeypatch, tmp_pa
         scipy.linalg.cholesky(np.eye(auxcell.nao_nr()), lower=True)
 
     monkeypatch.setattr(legacy, "_make_j3c", injected)
+    monkeypatch.setattr(capture, "version", lambda package: "0.2.9")
 
     def run(index):
         return capture.build_captured_legacy_ewald(
@@ -68,9 +69,10 @@ def test_private_api_shape_is_checked_before_use(monkeypatch):
         require_ccgdf_compatibility()
 
 
-def test_untested_legacy_version_has_clear_failure(monkeypatch, tmp_path):
-    monkeypatch.setattr(capture, "version", lambda package: "0.2.9")
-    with pytest.raises(RuntimeError, match="green-igen 0.2.8"):
+@pytest.mark.parametrize("release", ["0.2.7", "0.3.0"])
+def test_unsupported_legacy_version_has_clear_failure(monkeypatch, tmp_path, release):
+    monkeypatch.setattr(capture, "version", lambda package: release)
+    with pytest.raises(RuntimeError, match=r"green-igen >=0\.2\.8,<0\.3"):
         capture.build_captured_legacy_ewald(
             None, None, None, None, tmp_path / "unused.h5"
         )
